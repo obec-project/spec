@@ -9,12 +9,12 @@ suite output.
 
 ## What goes here
 
-| File | Purpose |
-|---|---|
-| `ADAPTER.md` | The contract an implementation exposes so the suite can drive it. The specification leaves storage formats and operation sets implementation-defined, so the suite cannot inspect internals — it drives an adapter that speaks OBEC vocabulary. |
-| `TESTS.md` | The ten tests formalized into assertable steps. |
-| `runner/` | The harness that drives an adapter and emits a claim. |
-| `CLAIMS.md` | Registry of who claims what, at which specification and suite version. |
+| File | Status | Purpose |
+|---|---|---|
+| [`ADAPTER.md`](ADAPTER.md) | **done** | The contract an implementation exposes so the suite can drive it. The specification leaves storage formats and operation sets implementation-defined, so the suite cannot inspect internals — it drives an adapter that speaks OBEC vocabulary. |
+| `TESTS.md` | to write | The ten tests formalized into assertable steps against adapter commands. |
+| `runner/` | to write | The harness that drives an adapter and emits a claim. |
+| `CLAIMS.md` | to write | Registry of who claims what, at which specification and suite version. |
 
 ## Two kinds of test
 
@@ -28,6 +28,15 @@ the implementation is built, not behaviors it exhibits at runtime.
 
 A claim states which tests were executed and which were attested. Conflating the
 two would make the suite look stronger than it is.
+
+## What the suite cannot establish
+
+The adapter is written by the implementer being tested, so **a dishonest adapter
+passes**. The suite detects error, not fraud — the same posture the specification
+takes toward the Semi-Trusted host. The mitigations are procedural: the adapter
+source is published with the claim, and the claim is reproducible by a third
+party. [ADAPTER.md §6](ADAPTER.md#6-what-the-suite-cannot-establish) states the
+limits in full.
 
 ## Suite versioning
 
