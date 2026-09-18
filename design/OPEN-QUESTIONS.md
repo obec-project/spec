@@ -27,25 +27,48 @@ Disagreement on any of them is a welcome issue; see
 
 ---
 
-## 1. What does an entity cost, and for how long does it hold?
+## 1. What does a long-lived entity cost, and does its record stay legible?
 
-This is the question the whole proposal turns on, and it is the one with the
-least evidence behind it.
+This is the question the whole proposal turns on, and the one with the least
+evidence behind it.
 
-The architecture runs. What nobody has measured is what it costs to keep
-running: the per-session price of consolidation and drift detection, the growth
-of the chain and the log over months, whether start cost really stays flat as
-an entity ages (the Profile requires it at OP-019, and requiring is not
-measuring), and whether an entity that has accumulated a year of memory still
-behaves like the entity the Genesis Anchor describes.
+First, what it is **not**. An entity that has run for a year *should* behave
+differently from the one its Genesis Anchor describes — that is accumulation
+working, not decay. Identity here is not behavioral sameness: HC-004 computes
+it from the store and never infers it from behavior. What the chain establishes
+over that year is that **every structural change in it was authorized, and the
+sequence from first activation to now is unbroken**. An entity is not supposed
+to stay the same; it is supposed to be able to account for how it changed.
 
-An architecture that is correct and unaffordable is not useful, and the
-specification currently has opinions about correctness and none about price.
+That leaves three real questions, and the architecture has run without anyone
+answering them.
+
+**Cost.** The per-session price of consolidation and drift detection, the
+growth of the chain and the log over months, and whether start cost really
+stays flat as an entity ages. The Profile requires that at OP-019, and
+requiring is not measuring. An architecture that is correct and unaffordable is
+not useful, and the specification currently has opinions about correctness and
+none about price.
+
+**Legibility.** The value proposition is that *"show me every structural change
+this entity underwent and who authorized each"* has a short answer.
+Mechanically that holds at any length — verification is a walk. But a chain of
+several thousand authorized entries is **verifiable without being auditable**,
+and a record no human can read is a weaker guarantee than the specification
+implies. At what length does it stop being readable, and is the answer
+tooling or a different record?
+
+**Anchor staleness.** Semantic probes are assembled at first activation and
+change only through an authorized commit. An entity that legitimately grows for
+a year drifts away from anchors nobody thought to update. The drift gate then
+either blocks learning that should happen, or gets relaxed until it gates
+nothing. Which of the two occurs in practice is unknown, and the specification
+offers no guidance on maintaining probes over a long life.
 
 **What would settle it:** an entity operated continuously for months, with
 numbers — start latency against chain length, consolidation time per session,
-store growth per session, and how often drift detection fired and whether it
-was right.
+store growth per session — plus the chain itself, so that someone can try to
+read it; and a record of how often drift fired and whether it was right.
 
 ---
 
