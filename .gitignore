@@ -43,3 +43,7 @@ PENDENCIAS.md
 # Test runs create disposable Entity Stores; claims are committed, runs are not.
 conformance/runs/
 tmp/
+# The runner's default output (--out claim), wherever it was run from.
+# Submitted claims are named claims/<implementation>-<version>.md.
+claim.md
+claim.json
