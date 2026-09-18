@@ -382,9 +382,9 @@ Transient session input is operational context, not consolidated knowledge.
 persisted that informs cognition without having passed through recall is a
 failure.
 
-*Note (non-normative).* Peer-sourced content under the CMI extension enters as a
-stimulus, never as knowledge: what an entity retains from a shared space is its
-own decision, executed through its own write paths.
+*Note (non-normative).* Peer-sourced content under the Cognitive Mesh Interface
+(CMI) extension enters as a stimulus, never as knowledge: what an entity retains
+from a shared space is its own decision, executed through its own write paths.
 
 ---
 

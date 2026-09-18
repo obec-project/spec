@@ -304,7 +304,7 @@ its mechanics moved; it is counted once, under Merged.
 |---|---|---|
 | E1 | Removed | Informational |
 | E2 | Merged | §4 — extension contract |
-| E3 | Own document | CMI |
+| E3 | Own document | CMI (Cognitive Mesh Interface) |
 | E4 | Own document | Security |
 | K1 | Merged | §4 — closed set |
 | K2 | Merged | §4 — version boundary |
