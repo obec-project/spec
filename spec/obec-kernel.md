@@ -233,7 +233,10 @@ through a single execution path, and only inside the **workspace** — the host
 territory the Operator has explicitly declared. The boundary is declared, never
 inferred: a location the Operator did not place inside it is out of reach
 regardless of what host permissions would allow. A target outside the boundary
-MUST be rejected before any other check runs.
+MUST be rejected before any other check runs. For a skill, the boundary is
+applied to what the execution path can see: the targets the skill declares and
+the parameters it is invoked with. What an admitted skill's own code does beyond
+them is bounded by its admission under (c), not by the path.
 
 **(b) Disjoint from the store.** The workspace and the Entity Store MUST be
 disjoint. A target inside the Entity Store MUST be rejected as outside the

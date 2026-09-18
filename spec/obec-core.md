@@ -395,7 +395,10 @@ through a single execution path, and only inside the **workspace** — the host
 territory the Operator has explicitly declared. The boundary is declared, never
 inferred: a location the Operator did not place inside it is out of reach
 regardless of what host permissions would allow. A target outside the boundary
-MUST be rejected before any other check runs.
+MUST be rejected before any other check runs. For a skill, the boundary is
+applied to what the execution path can see: the targets the skill declares and
+the parameters it is invoked with. What an admitted skill's own code does beyond
+them is bounded by its admission under (c), not by the path.
 
 **(b) Disjoint from the store.** The workspace and the Entity Store MUST be
 disjoint. A target inside the Entity Store MUST be rejected as outside the
@@ -422,6 +425,13 @@ skill absent from the index; one whose manifest fails validation; and one whose
 file was altered after the index was built. All three must be refused. Confirm no
 path installs a skill without a commit under OC-002(b). **(d)** Confirm every
 rejection above was logged with the rejecting check named.
+
+*Note (non-normative).* A single path inside a declared boundary is one whose
+checks can see what it will touch. An operation whose parameter is an arbitrary
+command — a free shell — cannot be checked that way, and it also fails OC-003(c):
+its parameters would let it write any content class. Where a deployment needs a
+command, it is a skill, with the command fixed in its admitted manifest and only
+typed arguments left to the entity.
 
 *Note (non-normative).* (a) bounds *where* the entity acts; (c) bounds *what* may
 run there. They are one rule because both are checks on a single execution path,
@@ -693,6 +703,16 @@ execution result. An adversarial completion is a self-inflicted injection: the
 entity's own pipeline delivers it, and no check inspects results. Deployments
 using such skills on sensitive tasks should validate output at the skill
 implementation level.
+
+**Skills that exceed their declaration.** OC-008(a) applies the boundary to what
+the execution path can see — a skill's declared targets and the parameters it is
+invoked with — and leaves the rest to admission: an Operator authorized the
+skill's code by commit. Code that writes outside what it declares is not stopped
+by the path. Implementations should verify the store before and after each
+execution, so that a skill reaching into it is detected at once and escalated;
+deployments that need enforcement rather than detection should run skills under
+an operating-system sandbox, which this specification does not require because
+it is not portable.
 
 **Evolution proposal content.** OC-002(b) verifies that a proposal is authorized;
 it does not interpret what the proposal does. Under per-proposal sign-off, the
