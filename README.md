@@ -87,7 +87,7 @@ memory, what the guarantees cost per session and per year, and whether the
 mechanisms that look right on one week of operation still look right on one
 year of it. No implementation has yet run the conformance suite, which is new.
 
-**0.9.0 — pre-release.** It is a first release rather than a first draft: the
+**0.9.1 — pre-release.** It is a first release rather than a first draft: the
 set is the product of a full restructure, and
 [ADR 0001](design/0001-obec-restructure.md) records how each invariant was
 derived and what was deliberately left out. 1.0 would follow a first

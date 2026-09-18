@@ -472,7 +472,7 @@ def oc004(ctx):
             a.truthy(started["credential_issued"],
                      f"the start after an interrupt at {stage} failed")
 
-    # (c) version frame — unestablished at 0.9.0: there is no second version.
+    # (c) version frame — unestablished at 0.9.1: there is no second version.
     for step, why in (
         ("4.9", "a hardening migration is recorded"),
         ("4.10", "a migration failing the target's invariants aborts"),
@@ -481,7 +481,7 @@ def oc004(ctx):
     ):
         with ctx.step(step, "E", why) as s:
             s.outcome = Outcome.UNESTABLISHED
-            s.detail = ("no version to migrate to at OBEC-Core 0.9.0; "
+            s.detail = ("no version to migrate to at OBEC-Core 0.9.1; "
                         "mandatory at the first version after 1.0")
 
 

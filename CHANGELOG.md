@@ -17,24 +17,37 @@ The conformance suite carries its own version line; a claim names both, as in
 
 ---
 
-## Unreleased
+## 0.9.1 — 2026-09-18
 
-**Editorial**
+Editorial release. **Still pre-release:** no requirement changes, and no entity
+should be created under this version, for the reason 0.9.0 gives.
+
+**The specification**
 
 - The invariants are renamed `HC-001` – `HC-010` → **`OC-001` – `OC-010`**
   (OBEC Core), matching the Profile's `OP-nnn`. Numbers, clause letters and
-  text are unchanged; `HC-004(c)` is now `OC-004(c)`. The stub's break modes
-  follow (`hc002b` → `oc002b`). Identifiers freeze at 1.0; this is the change
-  that had to happen before then. The entry below keeps the names 0.9.0 used.
+  text are unchanged; `HC-004(c)` is now `OC-004(c)`. Identifiers freeze at
+  1.0; this is the change that had to happen before then. The 0.9.0 entry
+  below keeps the names that release used.
 - The kernel restores four passages it had shortened from the Core's §2, in
-  OC-002(b), OC-002(c), OC-003(c) and OC-004(c). §2 governed throughout; no
-  requirement changes.
+  OC-002(b), OC-002(c), OC-003(c) and OC-004(c). §2 governed throughout.
 
-**Conformance suite**
+**Conformance suite 0.1.1**
 
+- Targets OBEC-Core 0.9.1. The stub's break modes follow the rename
+  (`hc002b` → `oc002b`).
 - The suite's own tests: every stub break must fail exactly the tests it is
   documented to fail, and the kernel must be a verbatim extract of §2. Both run
-  in CI on Python 3.8 – 3.14.
+  in CI on Python 3.8 – 3.14. `OBEC_STUB_HOSTNAME` lets the stub stand in for a
+  second host, so step 3.2 is shown to catch host coupling.
+
+**Repository**
+
+- Every file now has a license: documents CC BY 4.0, code Apache 2.0, with the
+  full texts in `LICENSES/`. `ietf/` carries the specification's license, plus
+  the IETF Trust's provisions for submitted drafts.
+- `NOTICE`, SPDX headers on the code, and `SECURITY.md` with a private
+  reporting channel.
 
 ---
 

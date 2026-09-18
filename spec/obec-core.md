@@ -1,7 +1,7 @@
 ---
 title: "OBEC Core"
 short_title: "OBEC-Core"
-version: "0.9.0"
+version: "0.9.1"
 status: "Pre-release — normative, pending conformance validation"
 date: 2026-09-18
 companions:
@@ -21,7 +21,7 @@ was authorized by a human; that the proof travels with it; and that it cannot
 exceed its bounds. Ten invariants carry those four claims, and each one has a
 test.
 
-> **Version status.** This is 0.9.0: the normative content is complete and the
+> **Version status.** This is 0.9.1: the normative content is complete and the
 > conformance suite is not. **No entity should be created under this
 > specification before 1.0**, because OC-004(a) records the major version in the
 > Genesis Anchor and a pre-release version can still change beneath it. 1.0

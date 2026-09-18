@@ -3,7 +3,7 @@
 The register of implementations claiming conformance to OBEC, what each claims,
 and against which versions.
 
-> **No claims are registered.** OBEC-Core is Pre-release at 0.9.0 and the first
+> **No claims are registered.** OBEC-Core is Pre-release at 0.9.1 and the first
 > implementation has not yet run the suite.
 
 ---
@@ -124,7 +124,7 @@ but a claim against an old suite is weaker evidence, and re-running is cheap.
 While OBEC-Core is Pre-release, the normative kernel can still change and a
 weakening change would sever the chain of any entity created under the current
 version. **No entity should be created under a pre-release version**, so a claim
-against 0.9.0 attests that an implementation passes the suite, not that anything
+against 0.9.1 attests that an implementation passes the suite, not that anything
 built on it is durable.
 
 ---

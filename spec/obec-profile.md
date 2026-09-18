@@ -1,10 +1,10 @@
 ---
 title: "OBEC Implementation Profile"
 short_title: "OBEC-Profile"
-version: "0.9.0"
+version: "0.9.1"
 status: "Proposal — companion to OBEC-Core, non-normative for conformance"
 date: 2026-09-18
-companion_to: "OBEC-Core 0.9.0"
+companion_to: "OBEC-Core 0.9.1"
 ---
 
 # OBEC Implementation Profile

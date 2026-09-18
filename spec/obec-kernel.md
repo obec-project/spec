@@ -1,10 +1,10 @@
 ---
 title: "OBEC Core — Normative Kernel"
 short_title: "OBEC-Kernel"
-version: "0.9.0"
+version: "0.9.1"
 status: "Proposal — the version-bound layer of OBEC-Core"
 date: 2026-09-18
-companion_to: "OBEC-Core 0.9.0"
+companion_to: "OBEC-Core 0.9.1"
 ---
 
 # OBEC Core — Normative Kernel

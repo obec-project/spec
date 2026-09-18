@@ -1,10 +1,10 @@
 ---
 title: "OBEC Primer"
 short_title: "OBEC-Primer"
-version: "0.9.0"
+version: "0.9.1"
 status: "Non-normative — explanatory"
 date: 2026-09-18
-companion_to: "OBEC-Core 0.9.0"
+companion_to: "OBEC-Core 0.9.1"
 ---
 
 # OBEC Primer

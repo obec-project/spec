@@ -6,8 +6,8 @@ Use GitHub's **private vulnerability reporting**: the *Security* tab of this
 repository, then *Report a vulnerability*. The report is visible only to the
 maintainers until a fix or an advisory is published.
 
-OBEC has one maintainer. Every report is read by the Specification Owner, and
-acknowledged as soon as practicable.
+OBEC has one maintainer. Every report is read by the Specification Owner and
+acknowledged within 7 days.
 
 ## What belongs here, and what belongs in an issue
 

@@ -55,7 +55,7 @@ Each document declares a status:
 
 Status changes require explicit approval by the Specification Owner.
 
-OBEC-Core is currently **Pre-release at 0.9.0**, and no status above that has
+OBEC-Core is currently **Pre-release at 0.9.1**, and no status above that has
 been claimed. Promotion to Proposed Standard requires the version to advance to
 1.0.0 and the first implementation to pass the ten conformance tests. Rule
 identifiers freeze at 1.0.
