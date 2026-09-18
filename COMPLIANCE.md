@@ -81,7 +81,7 @@ A claim MUST provide:
 5. **Audit trail** — the integrity log of the run: the chain, the start gate
    results, and the authorization covering every commit.
 
-Claims are recorded in [`conformance/CLAIMS.md`](conformance/).
+Claims are recorded in [`conformance/CLAIMS.md`](conformance/CLAIMS.md), which also defines how a claim is reviewed, what a specification revision does to it, and how one is disputed or withdrawn.
 
 **Partial conformance is not conformance.** Passing nine of ten tests is not a
 claim; it is a report.
