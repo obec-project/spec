@@ -765,6 +765,10 @@ condition may weaken one, and the set is closed (§4).
 **Drift** *(Profile)* — unauthorized divergence from the entity's authorized
 state, in three categories: identity, semantic, and evolutionary (OP-004).
 
+**Entity** — an agent, in the broad sense, whose identity, authority and
+boundaries are verifiable from its own portable state: its identity is its
+Entity Store and the chain in it (OC-003, OC-004), not the model it runs on.
+
 **Entity Store** — the entity's complete persistent state: structural, mnemonic
 and integrity content. Portable and host-agnostic (OC-003).
 

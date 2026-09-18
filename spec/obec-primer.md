@@ -38,7 +38,11 @@ that a memory database exists. They cannot tell you whether anything changed the
 agent's instructions three weeks ago, who authorized it, or whether the agent
 changed them itself.
 
-OBEC is a specification for systems that can answer it.
+OBEC is a specification for systems that can answer it. It calls an agent built
+this way an **entity** — not a rival word for *agent*, but the kind of agent
+whose identity, authority and boundaries can be checked rather than believed.
+This page says *agent* for your system as it is and *entity* for what OBEC
+makes of it; the specification says *entity* throughout.
 
 ---
 
