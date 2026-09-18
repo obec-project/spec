@@ -35,37 +35,35 @@ consequence that most systems built on models never confront:
 
 Most systems cannot answer it. They can tell you the prompt is the same file, and
 that a memory database exists. They cannot tell you whether anything changed the
-agent's instructions three weeks ago, who authorized it, or whether the agent
-changed them itself.
+instructions three weeks ago, who authorized it, or whether the system changed
+them itself.
 
 OBEC is a specification for systems that can answer it. It calls an agent built
 this way an **entity** — not a rival word for *agent*, but the kind of agent
 whose identity, authority and boundaries can be checked rather than believed.
-This page says *agent* for your system as it is and *entity* for what OBEC
-makes of it; the specification says *entity* throughout.
 
 ---
 
 ## 2. Is this for you?
 
-OBEC costs something. It is worth knowing early whether you need it.
+OBEC costs something. It is worth knowing early whether what you are building
+needs it.
 
 **You probably want OBEC if:**
 
-- an agent of yours will run for months or years and accumulate state that
-  matters;
-- someone will eventually ask *who authorized this* about something the agent
-  did, and you want a better answer than log grep;
-- the agent can change its own configuration, skills or instructions, and the
+- it will run for months or years and accumulate state that matters;
+- someone will eventually ask *who authorized this* about something it did,
+  and you want a better answer than log grep;
+- it can change its own configuration, skills or instructions, and the
   boundary on that needs to be more than a code review;
-- you need the agent to survive a model swap, a host migration, or a vendor
-  change without becoming, in any sense that matters, a different agent;
+- it must survive a model swap, a host migration, or a vendor change without
+  becoming, in any sense that matters, something else;
 - a regulator, auditor or customer will ask you to demonstrate human oversight
   rather than describe it.
 
 **You probably do not want OBEC if:**
 
-- your agent is stateless between sessions by design;
+- it is stateless between sessions by design;
 - it is a single-task tool with no capacity to modify itself;
 - nobody will ever need to audit what it became and why.
 

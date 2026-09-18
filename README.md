@@ -1,12 +1,11 @@
 # OBEC — Operator-Bounded Entity Continuity
 
-**A specification for AI agents whose identity, authority and boundaries are
+**A specification for AI entities whose identity, authority and boundaries are
 verifiable from their own portable state.**
 
-OBEC calls such an agent an **entity**: not a rival word for *agent*, but the
-kind of agent whose claims about itself can be checked rather than believed. An
-entity is built on a stateless language model. It reasons, remembers, and acts
-on a host — and it can prove four things about itself:
+An entity is an agent whose claims about itself can be checked rather than
+believed. It is built on a stateless language model. It reasons, remembers, and
+acts on a host — and it can prove four things about itself:
 
 1. **It is the entity that was activated.** Its current structural state traces
    back to first activation through an unbroken chain of authorized changes.

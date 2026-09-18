@@ -36,7 +36,10 @@ The conformance suite carries its own version line; a claim names both, as in
 - COMPLIANCE §1.2 and Core §5 state what OBEC-Attest establishes and what it
   does not: identity and authority, not containment.
 - *Entity* is defined as a kind of agent — in the README, the Primer, and the
-  Core's glossary, which lacked the term.
+  Core's glossary, which lacked the term — and is used throughout. *Agent*
+  remains only in that definition, where the Primer speaks of agents before
+  OBEC, and for third-party products that behave as agents without being
+  entities.
 - The project's status is stated once, in the README, instead of in five places.
 
 ---

@@ -223,17 +223,16 @@ document rather than a section that looks normative.
 
 ## 11. "Entity" or "agent"?
 
-The specification says *entity* because it is more precise: an OBEC entity is
-something narrower than what the word "agent" covers in 2026. People search for
-*agent*, so the repository description and the Primer's opening use it.
+The repository says *entity* because it is more precise: an OBEC entity is
+something narrower than what the word "agent" covers in 2026. *Agent* appears
+only where it is needed — in the one sentence that defines an entity as a kind
+of agent (README, Primer, the Core's glossary), where the Primer talks about
+agents before OBEC, and for third-party products that behave as agents without
+being entities.
 
-The position taken is that the two are not rivals: an entity is a kind of
-agent — the kind whose identity, authority and boundaries can be checked rather
-than believed. The README, the Primer and the Core's glossary say so in those
-words; the Primer keeps *agent* for the reader's system as it is, and the
-specification says *entity* throughout. That turns two words for
-one thing into a class and its qualification, but it does not settle whether
-the narrower word earns its keep.
+That makes the two a class and its qualification rather than rivals, but it
+does not settle whether the narrower word earns its keep. People search for
+*agent*, and the word now carries almost none of the discovery.
 
 The risk runs one way: a reader who builds agent runtimes, meeting a document
 that seems to refuse their word, may conclude it is not for them.

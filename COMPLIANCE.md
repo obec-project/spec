@@ -51,7 +51,7 @@ inference channel may hold state or authority of its own. An Attest entity is
 one whose identity you can audit, acting in a world you have not bounded.
 
 That is still worth having. The questions an operator is first asked about a
-long-running agent — *is this the one we deployed*, *who changed its
+long-running entity — *is this the one we deployed*, *who changed its
 instructions*, *can we stop it* — are the ones Attest answers, and a runtime can
 answer them without being rebuilt. The questions it leaves open are the ones
 containment answers, and that is what the step to OBEC-Core adds.
