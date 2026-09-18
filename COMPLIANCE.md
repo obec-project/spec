@@ -17,7 +17,7 @@ is **OBEC-Core conformant if and only if it passes the ten conformance tests of
 
 ### 1.1 OBEC-Core
 
-All ten invariants: HC-001 through HC-010.
+All ten invariants: OC-001 through OC-010.
 
 The implementation need not use any particular component decomposition. The
 four-domain architecture in [Core §3](spec/obec-core.md) is RECOMMENDED, not
@@ -28,9 +28,9 @@ Following the [Implementation Profile](spec/obec-profile.md) is not required.
 
 ### 1.2 OBEC-Attest
 
-The subset covering identity and authority: **HC-001 – HC-005, HC-009, HC-010**.
-It omits the three operational containment invariants — HC-006 (stateless
-inference), HC-007 (Memory Store sole source) and HC-008 (host actuation).
+The subset covering identity and authority: **OC-001 – OC-005, OC-009, OC-010**.
+It omits the three operational containment invariants — OC-006 (stateless
+inference), OC-007 (Memory Store sole source) and OC-008 (host actuation).
 
 This form exists for a runtime adding auditable identity and authorization
 without changing how it reasons, remembers or acts. It covers the Operator, the
@@ -48,7 +48,7 @@ extension's own conformance requirements.
 
 ## 2. Two kinds of test
 
-Not every invariant can be proven by running a system. HC-006 and HC-009 are
+Not every invariant can be proven by running a system. OC-006 and OC-009 are
 properties of *how an implementation is built*, not behaviors it exhibits at
 runtime — no sequence of inputs demonstrates that nothing acts on a completion
 before it returns.
@@ -73,7 +73,7 @@ A claim MUST provide:
    `OBEC-Core 1.0, suite 1.3, Core form, no extensions`.
 2. **Suite output** — the result of every test, marked executed or attested, with
    evidence for each attested one.
-3. **Structural surface** — the structural content of HC-003(c) the
+3. **Structural surface** — the structural content of OC-003(c) the
    implementation maintains: persona, skills, configuration including every value
    the Profile leaves to configuration, and the Operator binding set.
 4. **Conformance adapter** — the adapter that makes the implementation drivable
@@ -94,11 +94,11 @@ Conformance can be verified independently, at three depths:
 
 **Static.** Recompute the integrity baseline against current structural content,
 and walk the chain back to the Genesis Anchor. Both checks are mechanical and
-require nothing running (HC-004).
+require nothing running (OC-004).
 
 **Portability.** Copy the Entity Store to a host sharing no state with the
 original and run the start-time verification on both. The outcomes and the
-computed digests must be identical (HC-003(b)). This is the cheapest check in the
+computed digests must be identical (OC-003(b)). This is the cheapest check in the
 specification and the one to run first.
 
 **Adversarial.** Drive the negative cases: commit without authorization, commit
@@ -141,6 +141,6 @@ While OBEC-Core is Pre-release, a conformance claim is provisional: the normativ
 kernel can still change, and a weakening change would sever the chain of any
 entity created under the current version.
 
-**No entity should be created under a pre-release version** — HC-004(a) records
+**No entity should be created under a pre-release version** — OC-004(a) records
 the major version in the Genesis Anchor. Run the suite against disposable stores
 until 1.0.

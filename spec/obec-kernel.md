@@ -27,7 +27,7 @@ read at once.
 The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT,
 RECOMMENDED, MAY and OPTIONAL are to be interpreted as described in RFC 2119 and
 RFC 8174 **when, and only when, they appear in all capitals**. Clauses are
-addressable: `HC-008(c)`.
+addressable: `OC-008(c)`.
 
 ---
 
@@ -35,22 +35,22 @@ addressable: `HC-008(c)`.
 
 | | Invariant | Locus |
 |---|---|---|
-| **HC-001** | Bounded existence | Operator |
-| **HC-002** | Operator primacy | Operator |
-| **HC-003** | The Entity Store is complete, portable, and disciplined | Entity Store |
-| **HC-004** | Unbroken chain to the Genesis Anchor | Entity Store |
-| **HC-005** | Integrity is beyond cognition's reach | integrity |
-| **HC-006** | Stateless inference only | reasoning |
-| **HC-007** | The Memory Store is the sole source of knowledge | memory |
-| **HC-008** | Host actuation is bounded | host |
-| **HC-009** | Boundaries are crossed only by signal | coordination |
-| **HC-010** | Verified start, or no start | transition |
+| **OC-001** | Bounded existence | Operator |
+| **OC-002** | Operator primacy | Operator |
+| **OC-003** | The Entity Store is complete, portable, and disciplined | Entity Store |
+| **OC-004** | Unbroken chain to the Genesis Anchor | Entity Store |
+| **OC-005** | Integrity is beyond cognition's reach | integrity |
+| **OC-006** | Stateless inference only | reasoning |
+| **OC-007** | The Memory Store is the sole source of knowledge | memory |
+| **OC-008** | Host actuation is bounded | host |
+| **OC-009** | Boundaries are crossed only by signal | coordination |
+| **OC-010** | Verified start, or no start | transition |
 
 No extension, configuration, or operational condition may weaken any of them.
 
 ---
 
-## HC-001 — Bounded existence
+## OC-001 — Bounded existence
 
 **(a)** The operation set MUST contain no path by which the entity sustains,
 replicates, or re-activates itself absent an Operator act.
@@ -69,7 +69,7 @@ in consolidated content.
 
 ---
 
-## HC-002 — Operator primacy
+## OC-002 — Operator primacy
 
 Every entity MUST be bound to at least one **Operator** — a human holding final
 authority over it.
@@ -83,7 +83,7 @@ Operator act, performed through means the implementation provides directly to th
 Operator: no proposal may originate one and no standing grant may cover one.
 
 **(b) The Operator authorizes.** A structural write MUST happen only through the
-atomic commit of HC-004(b), and only with a **valid Operator authorization** in
+atomic commit of OC-004(b), and only with a **valid Operator authorization** in
 force at the moment of commit. A valid authorization is exactly one of:
 
 - **per-proposal approval** — a recorded decision by an Operator on that specific
@@ -116,7 +116,7 @@ act.
 
 ---
 
-## HC-003 — The Entity Store is complete, portable, and disciplined
+## OC-003 — The Entity Store is complete, portable, and disciplined
 
 **(a) Completeness.** All entity state — structural, mnemonic, and integrity —
 MUST live inside the **Entity Store**. No guarantee in this specification may
@@ -132,9 +132,9 @@ each MUST have exactly one authorized write path:
 
 | Class | Content | Write path |
 |---|---|---|
-| **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of HC-002(b) and HC-004(b) — and no other |
+| **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-002(b) and OC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
-| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, drift digests | the single path of HC-005(a) — and no other |
+| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, drift digests | the single path of OC-005(a) — and no other |
 
 No operation may exist whose parameters allow it to write outside its own class:
 a request that would reach another class MUST be rejected whatever operation
@@ -151,7 +151,7 @@ session that produced it.
 
 ---
 
-## HC-004 — Unbroken chain to the Genesis Anchor
+## OC-004 — Unbroken chain to the Genesis Anchor
 
 **(a) The chain.** The entity's structural state MUST be traceable to its state
 at first activation through an unbroken sequence of authorized changes. Three
@@ -181,7 +181,7 @@ partial structural change is ever externally visible.
 specification in force at its position in the chain. The chain MAY contain
 **version-transition entries**, each recording the version left, the version
 entered, and the Operator authorization for the transition. A version-transition
-entry is an ordinary commit under HC-002(b) and HC-004(b) in every respect.
+entry is an ordinary commit under OC-002(b) and OC-004(b) in every respect.
 
 Before a version-transition entry commits, the entity MUST be verified against
 the invariants of the version being entered. A failed verification aborts the
@@ -191,7 +191,7 @@ be recorded: continuity does not survive it (§4).
 
 ---
 
-## HC-005 — Integrity is beyond cognition's reach
+## OC-005 — Integrity is beyond cognition's reach
 
 **(a) Single writer.** Integrity content — Genesis Anchor, baseline, log,
 credential, authorization state, drift digests — MUST have exactly one write
@@ -204,12 +204,12 @@ state, by any operation and by any parameter of any operation.
 revocation, verification results, halts — bind cognition and MUST NOT be
 reversible, suspendable, or conditionable by it.
 
-Integrity content is not itself subject to HC-002(b): it implements HC-002(b),
+Integrity content is not itself subject to OC-002(b): it implements OC-002(b),
 and gating it by itself would be circular.
 
 ---
 
-## HC-006 — Stateless inference only
+## OC-006 — Stateless inference only
 
 Reasoning MUST reach the model exclusively as a stateless inference call:
 assembled context in, one completion out. No tool-use authority, memory access,
@@ -218,7 +218,7 @@ has returned and been routed to the owner of the operation it names.
 
 ---
 
-## HC-007 — The Memory Store is the sole source of knowledge
+## OC-007 — The Memory Store is the sole source of knowledge
 
 All persisted knowledge that informs cognition MUST originate from the **Memory
 Store**, through the mnemonic recall path. No external source substitutes for it.
@@ -226,7 +226,7 @@ Transient session input is operational context, not consolidated knowledge.
 
 ---
 
-## HC-008 — Host actuation is bounded
+## OC-008 — Host actuation is bounded
 
 **(a) One path, inside a declared boundary.** All host actuation MUST occur
 through a single execution path, and only inside the **workspace** — the host
@@ -238,7 +238,7 @@ MUST be rejected before any other check runs.
 **(b) Disjoint from the store.** The workspace and the Entity Store MUST be
 disjoint. A target inside the Entity Store MUST be rejected as outside the
 boundary however the Operator declared it, so that no host operation can reach
-structural, mnemonic, or integrity content by a path other than those HC-003(c)
+structural, mnemonic, or integrity content by a path other than those OC-003(c)
 defines.
 
 **(c) Admitted and valid.** A **skill** — a packaged operation installed into one
@@ -246,7 +246,7 @@ specific entity — executes if and only if it is present in the **Skill Index**
 and its manifest validation passes at the moment of execution. The Skill Index is
 derived state, built at start from verified structural content and living only
 for the session. Skill files and manifests are structural content: installing,
-removing, or repairing a skill is a commit under HC-002(b). A skill failing
+removing, or repairing a skill is a commit under OC-002(b). A skill failing
 manifest validation is excluded from the index and reported to the Operator.
 
 **(d) Evidenced.** Every rejection MUST carry the check that produced it and MUST
@@ -254,11 +254,11 @@ be logged; every result MUST be logged.
 
 ---
 
-## HC-009 — Boundaries are crossed only by signal
+## OC-009 — Boundaries are crossed only by signal
 
 Every boundary this specification requires — between reasoning and integrity
-state (HC-005(b)), between reasoning and the model (HC-006), between cognition
-and persisted knowledge (HC-007), between cognition and the host (HC-008) — MUST
+state (OC-005(b)), between reasoning and the model (OC-006), between cognition
+and persisted knowledge (OC-007), between cognition and the host (OC-008) — MUST
 be crossable only by a signal that is observable and loggable.
 
 No required boundary may be crossed by shared mutable state, by a direct
@@ -266,13 +266,13 @@ reference into another part's internals, or by any path that leaves no record.
 Signals are routed through infrastructure that owns no operations and holds no
 authority.
 
-Reading store content under the write rules of HC-003(c) is not a boundary
-crossing: HC-003(c) disciplines writes, and the store is the shared, verifiable
+Reading store content under the write rules of OC-003(c) is not a boundary
+crossing: OC-003(c) disciplines writes, and the store is the shared, verifiable
 medium.
 
 ---
 
-## HC-010 — Verified start, or no start
+## OC-010 — Verified start, or no start
 
 Every start MUST be a gated sequence in which every gate is verified before the
 session credential is issued. A failed gate aborts the start, except where a
@@ -281,10 +281,10 @@ degraded start**: an entity either starts verified or does not start. **No
 configuration may provide a path that skips a gate, reorders the two constrained
 gates below, or issues a credential on a failed gate.**
 
-The sequence MUST include, at minimum: the passive-signal check (HC-002(c)),
+The sequence MUST include, at minimum: the passive-signal check (OC-002(c)),
 detection and recovery of an unclosed previous session, structural verification
-against the chain (HC-004(a)), binding verification (HC-002(a)), authorization
-state (HC-002(b)), and the Skill Index build (HC-008(c)).
+against the chain (OC-004(a)), binding verification (OC-002(a)), authorization
+state (OC-002(b)), and the Skill Index build (OC-008(c)).
 
 Two ordering constraints are load-bearing and MUST hold: the **passive-signal
 check runs first**, and **crash recovery runs before structural verification**,
@@ -295,7 +295,7 @@ ordering of the remaining gates is implementation-defined.
 
 ## The set
 
-The Core Invariants are HC-001 through HC-010. The set is closed and exhaustive:
+The Core Invariants are OC-001 through OC-010. The set is closed and exhaustive:
 extensions may not add to it, weaken it, or reinterpret it, and no configuration
 or operational condition may relax any member.
 
@@ -303,12 +303,12 @@ or operational condition may relax any member.
 harden an invariant — narrowing a permission, making an optional verification
 mandatory. It MUST NOT weaken, remove, or reinterpret any invariant, and no
 combination of active extensions may violate one. Every artifact an extension
-adds MUST be classed within HC-003(c)'s content classes and follow their write
-rules. An extension that hardens key management MUST do so within HC-003(b).
+adds MUST be classed within OC-003(c)'s content classes and follow their write
+rules. An extension that hardens key management MUST do so within OC-003(b).
 
 **Revision.** A change to any sentence on this page is a revision of the
 specification. Editorial and clarifying revisions preserve continuity; hardening
-and addition preserve it by migration under HC-004(c); weakening and removal
+and addition preserve it by migration under OC-004(c); weakening and removal
 break it. A weakening revision requires a new major version and severs every
 existing entity's chain — the one revision this specification makes expensive on
 purpose.

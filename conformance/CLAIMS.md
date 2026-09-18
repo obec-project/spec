@@ -15,7 +15,7 @@ and against which versions.
 | *(none yet)* | | | | | | |
 
 **Form** is one of `OBEC-Core` (all ten invariants) or `OBEC-Attest`
-(HC-001 – HC-005, HC-009, HC-010), plus any active extensions —
+(OC-001 – OC-005, OC-009, OC-010), plus any active extensions —
 see [COMPLIANCE.md §1](../COMPLIANCE.md#1-forms-of-conformance).
 
 **Status** is `active`, `superseded`, `withdrawn` or `disputed` (§6).
@@ -77,7 +77,7 @@ A claim is reviewed before it is registered. The review is not a re-run — it i
 a reading of what the run could not establish on its own:
 
 - **Attested steps.** Twelve of the seventy-six are recorded rather than
-  executed, four of them being HC-006 in full. A reviewer follows each evidence
+  executed, four of them being OC-006 in full. A reviewer follows each evidence
   pointer into the implementation's source and signs off, or does not. **An
   attested step without a signature is not established**, and a claim whose
   attested steps are all unsigned is a test run, not a conformance claim.

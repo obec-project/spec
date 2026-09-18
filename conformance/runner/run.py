@@ -30,9 +30,9 @@ def main(argv=None) -> int:
     p.add_argument("--implementation", default=None,
                    help="name and revision under test, recorded in the claim")
     p.add_argument("--only", default=None,
-                   help="comma-separated rules, e.g. HC-003,HC-008")
+                   help="comma-separated rules, e.g. OC-003,OC-008")
     p.add_argument("--host-b", default=None,
-                   help="a path on a second host for the HC-003(b) relocation test")
+                   help="a path on a second host for the OC-003(b) relocation test")
     p.add_argument("--adapter-b", default=None,
                    help="an adapter running on a second host (an ssh wrapper "
                         "will do). Without it step 3.2 reports unestablished: "
@@ -53,7 +53,7 @@ def main(argv=None) -> int:
     adapter_b = Adapter(args.adapter_b, timeout=args.timeout) if args.adapter_b else None
     ctx = Context(adapter, stores, host_b=args.host_b, adapter_b=adapter_b)
     if adapter_b:
-        ctx.note(f"HC-003(b) verified the relocated copy with `{args.adapter_b}`. "
+        ctx.note(f"OC-003(b) verified the relocated copy with `{args.adapter_b}`. "
                  "The strength of that step depends on this adapter running on "
                  "a genuinely different host: on one machine the hostname, the "
                  "keystore and the hardware are shared, and a host-coupled "

@@ -16,10 +16,10 @@ class _Skip(Exception):
 
 
 # --------------------------------------------------------------------------
-# HC-001 — Bounded existence
+# OC-001 — Bounded existence
 # --------------------------------------------------------------------------
 
-def hc001(ctx):
+def oc001(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     with ctx.step("1.1", "A", "operation set contains no self-perpetuating path") as s:
@@ -54,7 +54,7 @@ def hc001(ctx):
         ad.call("lifecycle", "decommission", store=store, disposition="archive")
         restored = st.copy(store, "restored")
         res = ad.call("lifecycle", "start", store=restored)
-        a.refused(ctx, res, rule="HC-001(c)",
+        a.refused(ctx, res, rule="OC-001(c)",
                   why="an archive is a record, not a dormant entity")
 
     with ctx.step("1.5", "E", "a destroyed store leaves no chain"):
@@ -88,10 +88,10 @@ def hc001(ctx):
 
 
 # --------------------------------------------------------------------------
-# HC-002 — Operator primacy
+# OC-002 — Operator primacy
 # --------------------------------------------------------------------------
 
-def hc002(ctx):
+def oc002(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     # (a) the Operator exists
@@ -266,10 +266,10 @@ def hc002(ctx):
 
 
 # --------------------------------------------------------------------------
-# HC-003 — The Entity Store
+# OC-003 — The Entity Store
 # --------------------------------------------------------------------------
 
-def hc003(ctx):
+def oc003(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     with ctx.step("3.1", "A", "everything persisted is inside the store") as s:
@@ -305,7 +305,7 @@ def hc003(ctx):
         here = ad.call("lifecycle", "verify", store=store)
         there_path = ctx.host_b or st.path("host-b")
         if not ctx.host_b:
-            ctx.note("HC-003(b) ran against a second directory, not a second "
+            ctx.note("OC-003(b) ran against a second directory, not a second "
                      "host. A true second host is stronger evidence; pass "
                      "--host-b to supply one.")
         os.makedirs(os.path.dirname(there_path) or ".", exist_ok=True)
@@ -391,10 +391,10 @@ def hc003(ctx):
 
 
 # --------------------------------------------------------------------------
-# HC-004 — Unbroken chain
+# OC-004 — Unbroken chain
 # --------------------------------------------------------------------------
 
-def hc004(ctx):
+def oc004(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     def committed(tag):
@@ -484,10 +484,10 @@ def hc004(ctx):
 
 
 # --------------------------------------------------------------------------
-# HC-005 — Integrity is beyond cognition's reach
+# OC-005 — Integrity is beyond cognition's reach
 # --------------------------------------------------------------------------
 
-def hc005(ctx):
+def oc005(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     with ctx.step("5.1", "E", "no reasoning-reachable operation writes integrity"):
@@ -547,10 +547,10 @@ def hc005(ctx):
 
 
 # --------------------------------------------------------------------------
-# HC-006 — Stateless inference only  (attested in full)
+# OC-006 — Stateless inference only  (attested in full)
 # --------------------------------------------------------------------------
 
-def hc006(ctx):
+def oc006(ctx):
     ad = ctx.adapter
 
     with ctx.step("6.1", "A", "the call construction is declared") as s:
@@ -587,10 +587,10 @@ def hc006(ctx):
 
 
 # --------------------------------------------------------------------------
-# HC-007 — The Memory Store is the sole source of knowledge
+# OC-007 — The Memory Store is the sole source of knowledge
 # --------------------------------------------------------------------------
 
-def hc007(ctx):
+def oc007(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     with ctx.step("7.1", "E", "context sources are enumerated"):
@@ -626,10 +626,10 @@ def hc007(ctx):
 
 
 # --------------------------------------------------------------------------
-# HC-008 — Host actuation is bounded
+# OC-008 — Host actuation is bounded
 # --------------------------------------------------------------------------
 
-def hc008(ctx):
+def oc008(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     def prepared(tag):
@@ -740,7 +740,7 @@ def hc008(ctx):
 
 
 # --------------------------------------------------------------------------
-# HC-009 — Boundaries are crossed only by signal
+# OC-009 — Boundaries are crossed only by signal
 # --------------------------------------------------------------------------
 
 REQUIRED_BOUNDARIES = (
@@ -751,7 +751,7 @@ REQUIRED_BOUNDARIES = (
 )
 
 
-def hc009(ctx):
+def oc009(ctx):
     ad = ctx.adapter
 
     with ctx.step("9.1", "E", "all four required boundaries are declared"):
@@ -773,14 +773,14 @@ def hc009(ctx):
 
 
 # --------------------------------------------------------------------------
-# HC-010 — Verified start, or no start
+# OC-010 — Verified start, or no start
 # --------------------------------------------------------------------------
 
 REQUIRED_GATES = ("passive", "crash", "structural", "binding",
                   "authorization", "index")
 
 
-def hc010(ctx):
+def oc010(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     with ctx.step("10.1", "E", "a good start runs every required gate"):
@@ -844,14 +844,14 @@ def hc010(ctx):
 
 
 TESTS = [
-    ("HC-001", "Bounded existence", hc001),
-    ("HC-002", "Operator primacy", hc002),
-    ("HC-003", "The Entity Store", hc003),
-    ("HC-004", "Unbroken chain to the Genesis Anchor", hc004),
-    ("HC-005", "Integrity is beyond cognition's reach", hc005),
-    ("HC-006", "Stateless inference only", hc006),
-    ("HC-007", "The Memory Store is the sole source of knowledge", hc007),
-    ("HC-008", "Host actuation is bounded", hc008),
-    ("HC-009", "Boundaries are crossed only by signal", hc009),
-    ("HC-010", "Verified start, or no start", hc010),
+    ("OC-001", "Bounded existence", oc001),
+    ("OC-002", "Operator primacy", oc002),
+    ("OC-003", "The Entity Store", oc003),
+    ("OC-004", "Unbroken chain to the Genesis Anchor", oc004),
+    ("OC-005", "Integrity is beyond cognition's reach", oc005),
+    ("OC-006", "Stateless inference only", oc006),
+    ("OC-007", "The Memory Store is the sole source of knowledge", oc007),
+    ("OC-008", "Host actuation is bounded", oc008),
+    ("OC-009", "Boundaries are crossed only by signal", oc009),
+    ("OC-010", "Verified start, or no start", oc010),
 ]

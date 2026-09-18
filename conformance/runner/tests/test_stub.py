@@ -21,11 +21,11 @@ STUB = os.path.join(HERE, "..", "stub", "obec-adapter-stub")
 
 # Break -> the tests it must fail, as documented in runner/README.md.
 BREAKS = {
-    "hc002b": {"HC-002"},
-    "hc003b": {"HC-003"},
-    "hc008a": {"HC-008"},
-    "hc008d": {"HC-001", "HC-002", "HC-003", "HC-005", "HC-008"},
-    "hc010": {"HC-002", "HC-004", "HC-010"},
+    "oc002b": {"OC-002"},
+    "oc003b": {"OC-003"},
+    "oc008a": {"OC-008"},
+    "oc008d": {"OC-001", "OC-002", "OC-003", "OC-005", "OC-008"},
+    "oc010": {"OC-002", "OC-004", "OC-010"},
 }
 
 # Without a real second host step 3.2 cannot fail; the suite says so rather
@@ -81,7 +81,7 @@ class SuiteAgainstStub(unittest.TestCase):
         for mode, expected in BREAKS.items():
             with self.subTest(mode=mode):
                 env = {"OBEC_STUB_BREAK": mode}
-                b = self.second_host() if mode == "hc003b" else None
+                b = self.second_host() if mode == "oc003b" else None
                 code, claim = self.run_suite(env, adapter_b=b)
                 self.assertEqual(self.failed(claim), expected)
                 self.assertEqual(self.steps(claim, "error"), set())
@@ -90,7 +90,7 @@ class SuiteAgainstStub(unittest.TestCase):
     def test_hc003b_invisible_on_one_host(self):
         """Without a second host the break must surface as unestablished,
         never as a pass: the suite does not claim what it cannot check."""
-        _, claim = self.run_suite({"OBEC_STUB_BREAK": "hc003b"})
+        _, claim = self.run_suite({"OBEC_STUB_BREAK": "oc003b"})
         self.assertEqual(self.failed(claim), set())
         self.assertIn("3.2", self.steps(claim, "unestablished"))
 

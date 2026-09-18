@@ -18,8 +18,8 @@ suite output.
 
 ## Two kinds of test
 
-Not every invariant can be proven by running a system. HC-006 (stateless
-inference only) and HC-009 (signal boundaries) are structural properties of how
+Not every invariant can be proven by running a system. OC-006 (stateless
+inference only) and OC-009 (signal boundaries) are structural properties of how
 the implementation is built, not behaviors it exhibits at runtime.
 
 - **Executable** — the suite drives the adapter and asserts the outcome.

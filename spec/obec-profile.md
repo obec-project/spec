@@ -59,7 +59,7 @@ Deviating costs nothing in conformance and something in expectation. Two
 implementations that both pass the ten tests but realize Sleep differently are
 both conformant, and neither can predict the other's behavior at session close.
 This matters for tooling, for the CMI extension, and for operators moving an
-Entity Store between implementations — which OBEC-Core HC-003(b) permits and this
+Entity Store between implementations — which OBEC-Core OC-003(b) permits and this
 document does not guarantee is uneventful.
 
 Where an implementation deviates, it SHOULD say so, naming the clauses it does
@@ -96,7 +96,7 @@ new external stimulus between them — each cycle's resolved results serving as 
 next cycle's internal stimulus — is a **cycle chain**. Every cycle in a chain
 remains individually atomic under (a).
 
-*Serves:* HC-006 (the inference is the atomic step), HC-009 (intents cross
+*Serves:* OC-006 (the inference is the atomic step), OC-009 (intents cross
 boundaries as signals).
 
 ---
@@ -125,7 +125,7 @@ results of a discarded chain are logged, never silently dropped.
 exists SHOULD be held in a buffer preserving arrival order, and processed among
 the session's first stimuli after the credential is issued.
 
-*Serves:* HC-002 (primacy is exercised, not merely declared), HC-010.
+*Serves:* OC-002 (primacy is exercised, not merely declared), OC-010.
 
 ---
 
@@ -167,7 +167,7 @@ Transient isolated faults are noise. A condition becomes an anomaly only when it
 persists after a corrective attempt, cannot be externally verified, or has no
 valid correction path.
 
-*Serves:* HC-004, HC-005 (integrity decisions bind cognition and are not
+*Serves:* OC-004, OC-005 (integrity decisions bind cognition and are not
 self-attested).
 
 ---
@@ -186,9 +186,9 @@ baseline; detected per Vital Check by hash comparison.
 **(c) Evolutionary Drift** — a chain discontinuity or authorization gap: a commit
 not referencing its predecessor, a state hash not matching its commit, a commit
 with no recorded authorization. **Always Critical; no threshold applies** — it is
-a direct violation of HC-004.
+a direct violation of OC-004.
 
-*Serves:* HC-004.
+*Serves:* OC-004.
 
 ---
 
@@ -209,9 +209,9 @@ similarity metrics — runs only when the deterministic layer is inconclusive.
 Probabilistic comparison **MUST** run isolated from reasoning: a comparison
 mechanism must not inherit the drift it detects.
 
-The deterministic layer MUST include the patterns HC-001(d) requires.
+The deterministic layer MUST include the patterns OC-001(d) requires.
 
-*Serves:* HC-001(d), HC-005(b), HC-007.
+*Serves:* OC-001(d), OC-005(b), OC-007.
 
 ---
 
@@ -230,7 +230,7 @@ mismatch remains Identity Drift and follows OP-003(b). Structural repair happens
 only through an authorized commit, and the next start rebuilds the index from the
 repaired state.
 
-*Serves:* HC-008(c).
+*Serves:* OC-008(c).
 
 ---
 
@@ -250,7 +250,7 @@ covers the chain since the last verified checkpoint rather than the whole chain.
 A checkpoint is an optimization of verification cost, never a truncation of the
 chain: (a) holds regardless.
 
-*Serves:* HC-004, HC-010 (start cost).
+*Serves:* OC-004, OC-010 (start cost).
 
 ---
 
@@ -262,7 +262,7 @@ and holds awaiting approval (OP-016) travel this way.
 
 **(b) Passive fallback.** Where live delivery fails `N_channel` consecutive
 attempts — `N_channel` declared in configuration — the passive signal of
-HC-002(c) is written instead.
+OC-002(c) is written instead.
 
 **(c) Corroborated escalation of a failed verifier.** Failure of the integrity
 path is escalatable like any other condition, and its detection needs no
@@ -278,9 +278,9 @@ it; the escalation then goes to the Operator.
 
 A cheap realization of the evidence is a liveness record refreshed at each Vital
 Check — a timestamp any part compares against the declared cadence with a single
-read. Reading store content is not a boundary crossing under HC-009.
+read. Reading store content is not a boundary crossing under OC-009.
 
-*Serves:* HC-002(c), HC-005.
+*Serves:* OC-002(c), OC-005.
 
 ---
 
@@ -327,7 +327,7 @@ loaded at start only if the integrity log holds the completion record of the
 Sleep that produced it; otherwise it is discarded and logged, and the session
 starts without resumption context.
 
-*Serves:* HC-007 (recall remains the only path), HC-003(c), HC-010.
+*Serves:* OC-007 (recall remains the only path), OC-003(c), OC-010.
 
 ---
 
@@ -351,9 +351,9 @@ start sequence runs immediately after, delivering the Resumption Record so
 reasoning continues from where it stopped.
 
 This restart continues the same Operator-initiated operation and is not
-self-activation (HC-001(a)).
+self-activation (OC-001(a)).
 
-*Serves:* HC-001(a), HC-007.
+*Serves:* OC-001(a), OC-007.
 
 ---
 
@@ -370,7 +370,7 @@ does not say what a proposal looks like or how a commit is staged.
 the proposed operations plus a human-readable description. Reasoning may
 originate one at any time, or one may be recorded on the Operator's direct
 instruction. Every proposal is logged when originated. A proposal targeting the
-Operator binding set is invalid regardless of origin (HC-002(a)).
+Operator binding set is invalid regardless of origin (OC-002(a)).
 
 **(b) Classification.** Whether a recorded approval exists, or whether the
 proposal falls within a standing grant's scope, SHOULD be determined by the
@@ -382,7 +382,7 @@ proposal commits only after a recorded approval. A proposal originated under a
 grant but not committed before the grant closes falls back to per-proposal
 approval: closure withdraws the standing authority, not the proposal's validity.
 
-*Serves:* HC-002(b).
+*Serves:* OC-002(b).
 
 ---
 
@@ -396,7 +396,7 @@ the chain entry as one indivisible operation, under a write lock covering
 structural content only. A failed commit restores the snapshot and the entity
 resumes from its last verified structural state.
 
-*Serves:* HC-004(b).
+*Serves:* OC-004(b).
 
 ---
 
@@ -416,10 +416,10 @@ The order of checks on the execution path SHOULD be fixed:
 Every rejection carries the gate that produced it and is logged; every result is
 returned to reasoning and logged.
 
-The boundary check first is not arbitrary: it is what HC-008(a) requires, so that
+The boundary check first is not arbitrary: it is what OC-008(a) requires, so that
 a target outside the workspace is rejected before any other check runs.
 
-*Serves:* HC-008.
+*Serves:* OC-008.
 
 ---
 
@@ -452,7 +452,7 @@ obligations. Its result is a normal execution result under OP-013, and no gate
 inspects results; deployments using worker skills on sensitive tasks should
 validate output at the skill implementation level.
 
-*Serves:* HC-006, HC-008, HC-010.
+*Serves:* OC-006, OC-008, OC-010.
 
 ---
 
@@ -461,13 +461,13 @@ validate output at the skill implementation level.
 An operation declared irreversible — by its manifest, or for a native operation
 by the implementation's fixed declaration — SHOULD be covered by a write-ahead
 **Action Ledger** entry before execution, and closed by a resolution entry after
-it. The ledger is integrity content and follows HC-003(c).
+it. The ledger is integrity content and follows OC-003(c).
 
 Entries without a resolution SHOULD surface to the Operator at the next start,
 before the session credential is issued. **They are never silently dropped and
 never re-executed automatically.**
 
-*Serves:* HC-008, HC-010.
+*Serves:* OC-008, OC-010.
 
 ---
 
@@ -478,7 +478,7 @@ The Operator's operational rules over host operations — **allow**, **deny**, o
 declaration. A held operation waits for an explicit Operator decision; the
 decision and its outcome are logged, and the hold travels under OP-008(a).
 
-*Serves:* HC-002(b), HC-008.
+*Serves:* OC-002(b), OC-008.
 
 ---
 
@@ -500,7 +500,7 @@ exist.**
 It is irreversible: re-initializing a store creates a new, unrelated entity, with
 no chain connecting it to the old one.
 
-*Serves:* HC-004(a).
+*Serves:* OC-004(a).
 
 ---
 
@@ -525,7 +525,7 @@ integrity log. At a threshold `N_boot` declared in configuration, the passive
 signal is written and the entity halts — no further attempts until the Operator
 clears the condition.
 
-*Serves:* HC-004(b), HC-002(c), HC-010.
+*Serves:* OC-004(b), OC-002(c), OC-010.
 
 ---
 
@@ -541,7 +541,7 @@ a long-lived entity practical; it is the first thing to measure in an
 implementation that intends entities to live for years, and it is a worthwhile
 addition to a conformance suite even though it is not an invariant.
 
-*Serves:* HC-010.
+*Serves:* OC-010.
 
 ---
 
@@ -552,13 +552,13 @@ at session close, at Operator revocation, or at a halt. Every intent is processe
 under a valid credential; invalidation stops intent processing immediately.
 
 The credential artifact **MUST be directly accessible to the Operator with no
-active component** — this is what makes HC-001(b) realizable.
+active component** — this is what makes OC-001(b) realizable.
 
 A credential artifact found at start that does not match a crash scenario is a
 concurrent-session conflict: Critical, the conflicting credential revoked and the
 Operator notified before any new one is issued.
 
-*Serves:* HC-001(b), HC-002(a), HC-003(d).
+*Serves:* OC-001(b), OC-002(a), OC-003(d).
 
 ---
 
@@ -579,7 +579,7 @@ without commit. Executions in progress are discarded with no result logged or
 returned; executions left without a terminal record follow OP-014(b) at the next
 start.
 
-*Serves:* HC-001(b), HC-002.
+*Serves:* OC-001(b), OC-002.
 
 ---
 
@@ -602,7 +602,7 @@ stimulus is processed: reasoning is inactive. Maintenance operations run under
 integrity authority, independent of the credential — including maintenance
 executions performed under direct integrity instruction.
 
-*Serves:* HC-004(b), HC-005(c), HC-007.
+*Serves:* OC-004(b), OC-005(c), OC-007.
 
 ---
 
@@ -616,9 +616,9 @@ archived at the Operator's choice.
 
 The orderly path is not the only one: the Operator can always halt the entity
 directly (OP-021(a)) and dispose of the store with no component's cooperation.
-Under either disposition, HC-001(c) applies — the entity does not operate again.
+Under either disposition, OC-001(c) applies — the entity does not operate again.
 
-*Serves:* HC-001(c).
+*Serves:* OC-001(c).
 
 ---
 
@@ -649,12 +649,12 @@ every part.
 
 Two limits are load-bearing and restate core requirements in the decomposition's
 vocabulary: the integrity path **records and enforces** Operator authorizations
-and never creates, modifies or revokes one (HC-002(b)); and the mnemonic
+and never creates, modifies or revokes one (OC-002(b)); and the mnemonic
 operations have no write path to structural or integrity content, which binds
 their parameters — a request whose target would touch either is rejected whatever
-operation carries it (HC-003(c)).
+operation carries it (OC-003(c)).
 
-*Serves:* HC-003(c), HC-005, HC-009.
+*Serves:* OC-003(c), OC-005, OC-009.
 
 ---
 
@@ -679,4 +679,4 @@ implementation SHOULD document its default and its permitted range for each.
 
 **No configuration value may relax an invariant** (OBEC-Core §4). In particular,
 no setting may skip a start gate, reorder the two constrained gates, or issue a
-credential on a failed gate (HC-010).
+credential on a failed gate (OC-010).

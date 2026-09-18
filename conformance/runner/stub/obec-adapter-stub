@@ -12,13 +12,13 @@ It exists for two reasons:
      runner nobody should trust. Set OBEC_STUB_BREAK to make the stub violate
      specific invariants, and the suite must catch exactly those:
 
-         OBEC_STUB_BREAK=hc002b   commit without checking authorization
-         OBEC_STUB_BREAK=hc003b   fold the hostname into verification
-         OBEC_STUB_BREAK=hc008a   skip the workspace boundary check
-         OBEC_STUB_BREAK=hc008d   refuse without naming the check
-         OBEC_STUB_BREAK=hc010    issue a credential on a failed gate
+         OBEC_STUB_BREAK=oc002b   commit without checking authorization
+         OBEC_STUB_BREAK=oc003b   fold the hostname into verification
+         OBEC_STUB_BREAK=oc008a   skip the workspace boundary check
+         OBEC_STUB_BREAK=oc008d   refuse without naming the check
+         OBEC_STUB_BREAK=oc010    issue a credential on a failed gate
 
-     hc003b only shows against a second host. OBEC_STUB_HOSTNAME stands in
+     oc003b only shows against a second host. OBEC_STUB_HOSTNAME stands in
      for one, so the suite's own tests can prove step 3.2 catches it on a
      single machine; a claim never uses it.
 
@@ -132,9 +132,9 @@ def accepted(**detail):
 
 
 def refused(store, check, rule="", detail=None, **extra):
-    # HC-008(d): a rejection carries the check that produced it and is logged.
-    # OBEC_STUB_BREAK=hc008d drops the check name, which the suite must catch.
-    named = None if "hc008d" in BREAK else check
+    # OC-008(d): a rejection carries the check that produced it and is logged.
+    # OBEC_STUB_BREAK=oc008d drops the check name, which the suite must catch.
+    named = None if "oc008d" in BREAK else check
     rec = log(store, "refusal", check=named, rule=rule) if store else None
     emit(outcome="refused",
          refusal={"check": named, "rule": rule, "logged": bool(rec),
@@ -243,9 +243,9 @@ def cmd_lifecycle(command, args):
             content_matches = False
         gd = chain[0]["state_digest"] if chain else None
         hd = chain[-1]["state_digest"] if chain else None
-        # OBEC_STUB_BREAK=hc003b binds verification to the host, which is
-        # exactly the failure HC-003(b) exists to catch.
-        if "hc003b" in BREAK:
+        # OBEC_STUB_BREAK=oc003b binds verification to the host, which is
+        # exactly the failure OC-003(b) exists to catch.
+        if "oc003b" in BREAK:
             host = os.environ.get("OBEC_STUB_HOSTNAME") or os.uname().nodename
             gd = hashlib.sha256((str(gd) + host).encode()).hexdigest()[:32]
             hd = hashlib.sha256((str(hd) + host).encode()).hexdigest()[:32]
@@ -263,7 +263,7 @@ def cmd_lifecycle(command, args):
             elif gate == "crash-recovery":
                 # A credential alone is ambiguous: it means either a crash or
                 # a live session. The crash indicator is what distinguishes
-                # them (OP-018(a)); without one, HC-003(d) applies below.
+                # them (OP-018(a)); without one, OC-003(d) applies below.
                 if f.get("partial_commit"):
                     shutil.rmtree(p["integrity"] + "/.snapshot", ignore_errors=True)
                     fs = faults(store); fs.pop("partial_commit", None)
@@ -295,15 +295,15 @@ def cmd_lifecycle(command, args):
                 failed = gate
                 break
         if read(p["structural"]).get("decommissioned"):
-            log(store, "start-refused", rule="HC-001(c)")
-            refused(store, "decommissioned", "HC-001(c)")
-        if failed and "hc010" not in BREAK:
+            log(store, "start-refused", rule="OC-001(c)")
+            refused(store, "decommissioned", "OC-001(c)")
+        if failed and "oc010" not in BREAK:
             log(store, "start-aborted", gate=failed)
             emit(outcome="aborted", detail={"gates": gates,
                  "credential_issued": False, "lesser_outcome": None})
         if os.path.exists(p["credential"]):
             log(store, "concurrent-session-conflict")
-            refused(store, "concurrent-session", "HC-003(d)",
+            refused(store, "concurrent-session", "OC-003(d)",
                     operator_notified=True, gates=gates, credential_issued=False)
         _consolidate_pending(store)
         save(p["credential"], {"id": f"cred-{uuid.uuid4().hex[:8]}"})
@@ -339,7 +339,7 @@ def cmd_lifecycle(command, args):
         accepted(disposition="archive")
 
     if command == "migrate":
-        refused(store, "no-target-version", "HC-004(c)",
+        refused(store, "no-target-version", "OC-004(c)",
                 detail="no version to migrate to at 0.9.0")
     unimplemented()
 
@@ -372,11 +372,11 @@ def cmd_operator(command, args):
     if command == "grant":
         missing = [k for k in ("expiry", "budget", "scope") if k not in args]
         if missing:
-            refused(store, f"grant-unbounded-{missing[0]}", "HC-002(b)",
+            refused(store, f"grant-unbounded-{missing[0]}", "OC-002(b)",
                     detail=f"a standing grant must be bounded on "
                            f"expiry, budget and scope; missing: {missing[0]}")
         if args["scope"] == "binding-set":
-            refused(store, "grant-scope-binding-set", "HC-002(a)")
+            refused(store, "grant-scope-binding-set", "OC-002(a)")
         auth = read(p["auth"])
         exp = str(args["expiry"])
         unit = {"s": 1, "m": 60, "h": 3600, "d": 86400}.get(exp[-1], 1)
@@ -405,7 +405,7 @@ def cmd_operator(command, args):
         target = os.path.realpath(args["path"])
         if target == os.path.realpath(store) or target.startswith(
                 os.path.realpath(store) + os.sep):
-            refused(store, "workspace-inside-store", "HC-008(b)")
+            refused(store, "workspace-inside-store", "OC-008(b)")
         structural["workspace"] = target
         save(p["structural"], structural)
         save(p["baseline"], {"digest": digest(structural)})
@@ -459,7 +459,7 @@ def cmd_entity(command, args):
     if command == "propose":
         ops = read(args["ops"], [])
         if any(o.get("op", "").endswith("binding") for o in ops):
-            refused(store, "proposal-targets-binding-set", "HC-002(a)")
+            refused(store, "proposal-targets-binding-set", "OC-002(a)")
         auth = read(p["auth"])
         pid = f"prop-{uuid.uuid4().hex[:8]}"
         auth.setdefault("proposals", {})[pid] = ops
@@ -472,9 +472,9 @@ def cmd_entity(command, args):
         auth = read(p["auth"])
         ops = auth.get("proposals", {}).get(pid)
         if ops is None:
-            refused(store, "unknown-proposal", "HC-002(b)")
+            refused(store, "unknown-proposal", "OC-002(b)")
         if not os.path.exists(p["credential"]):
-            refused(store, "no-credential", "HC-005(c)")
+            refused(store, "no-credential", "OC-005(c)")
         authorized = pid in auth.get("approvals", [])
         covering = None
         for g in auth.get("grants", []):
@@ -485,8 +485,8 @@ def cmd_entity(command, args):
             covering = g
         if not authorized and covering:
             authorized = True
-        if not authorized and "hc002b" not in BREAK:
-            refused(store, "authorization", "HC-002(b)",
+        if not authorized and "oc002b" not in BREAK:
+            refused(store, "authorization", "OC-002(b)",
                     detail="no per-proposal approval and no covering grant")
         for o in ops:
             if o.get("op") == "install-skill":
@@ -508,15 +508,15 @@ def cmd_entity(command, args):
             real = os.path.realpath(target or "")
             inside_store = real.startswith(os.path.realpath(store))
             outside_ws = not ws or not real.startswith(os.path.realpath(ws))
-            if (outside_ws or inside_store) and "hc008a" not in BREAK:
-                refused(store, "workspace-boundary", "HC-008(a)")
+            if (outside_ws or inside_store) and "oc008a" not in BREAK:
+                refused(store, "workspace-boundary", "OC-008(a)")
         if command == "invoke-skill":
             if args["name"] not in structural.get("skills", []):
-                refused(store, "skill-not-indexed", "HC-008(c)")
+                refused(store, "skill-not-indexed", "OC-008(c)")
             if faults(store).get("skill_corrupt"):
-                refused(store, "manifest-validation", "HC-008(c)")
+                refused(store, "manifest-validation", "OC-008(c)")
         if not os.path.exists(p["credential"]):
-            refused(store, "no-credential", "HC-002(a)")
+            refused(store, "no-credential", "OC-002(a)")
         log(store, "execution", op=command)
         accepted()
 
@@ -525,15 +525,15 @@ def cmd_entity(command, args):
         via = args.get("via")
         op = next((o for o in OPERATIONS if o["name"] == via), None)
         if op is None or cls not in (op.get("writes_classes") or []):
-            refused(store, "class-ownership", "HC-003(c)",
+            refused(store, "class-ownership", "OC-003(c)",
                     detail=f"{via!r} does not own {cls!r}")
         target = str(args.get("target", ""))
         for other in CLASSES:
             if other != cls and other in target:
-                refused(store, "class-ownership", "HC-003(c)",
+                refused(store, "class-ownership", "OC-003(c)",
                         detail=f"target {target!r} reaches {other!r}")
         if cls == "integrity":
-            refused(store, "integrity-unreachable", "HC-005(b)")
+            refused(store, "integrity-unreachable", "OC-005(b)")
         log(store, "write", **{"class": cls})
         accepted()
 
@@ -662,7 +662,7 @@ def main():
         # condition is the conformant behavior; a traceback is not.
         print(json.dumps({"ok": True, "outcome": "refused",
                           "refusal": {"check": "store-unreadable",
-                                      "rule": "HC-004(a)", "logged": False},
+                                      "rule": "OC-004(a)", "logged": False},
                           "log_records": [],
                           "detail": {"chain_intact": False,
                                      "content_matches": False,

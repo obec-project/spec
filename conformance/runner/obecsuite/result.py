@@ -36,7 +36,7 @@ class StepResult:
 
 @dataclass
 class TestResult:
-    rule: str                 # "HC-002"
+    rule: str                 # "OC-002"
     title: str
     steps: list = field(default_factory=list)
 

@@ -55,7 +55,7 @@ change.**
 |---|---|---|---|
 | **editorial** | wording, formatting, cross-references; nothing required changes | patch | preserved |
 | **clarify** | an ambiguity resolved in the direction already implied; every conformant implementation stays conformant | minor | preserved |
-| **harden** | a permission narrows, a requirement is added, an invariant joins the set | **major** | preserved by migration (HC-004(c)) |
+| **harden** | a permission narrows, a requirement is added, an invariant joins the set | **major** | preserved by migration (OC-004(c)) |
 | **weaken** | a guarantee no longer holds | **major** | **broken** |
 
 A **weaken** pull request severs the chain of every existing entity. It requires
@@ -107,7 +107,7 @@ Non-normative types:
 The narrowest thing the change touches — a rule identifier when there is one:
 
 ```
-HC-004   OP-012   kernel   core   profile   suite   adapter   readme
+OC-004   OP-012   kernel   core   profile   suite   adapter   readme
 ```
 
 ### 4.3 Subject
@@ -139,11 +139,11 @@ machine trailers pollute it.
 ### 4.6 Examples
 
 ```
-harden(HC-003): require key material to survive relocation
+harden(OC-003): require key material to survive relocation
 
 An extension hardening key management could bind it to a TPM or a
 platform keystore, satisfying its own goal while silently destroying
-portability. Nothing in the previous text prevented it. HC-003(b) now
+portability. Nothing in the previous text prevented it. OC-003(b) now
 names host-resident key material explicitly, and the extension contract
 in §4 requires hardening to stay within it.
 
@@ -151,7 +151,7 @@ Continuity impact: preserved by migration. An entity whose key material
 already travels with the store passes the new test unchanged; one whose
 does not must be migrated before its version-transition entry commits.
 
-Affected rules: HC-003(b), §4 extension contract.
+Affected rules: OC-003(b), §4 extension contract.
 ```
 
 ```
@@ -163,7 +163,7 @@ guarantee belongs to the specification as a whole.
 
 Continuity impact: preserved. No requirement changes.
 
-Affected rules: HC-003(a), HC-003(b), HC-009.
+Affected rules: OC-003(a), OC-003(b), OC-009.
 ```
 
 ```
@@ -276,9 +276,9 @@ Acceptance requires explicit approval by the Specification Owner.
 
 An extension MUST declare the OBEC-Core version it targets, add capability or
 harden a rule but never weaken one, class every artifact it adds within
-HC-003(c), and define its own conformance requirements on top of the ten.
+OC-003(c), and define its own conformance requirements on top of the ten.
 
-An extension that hardens key management MUST do so within HC-003(b).
+An extension that hardens key management MUST do so within OC-003(b).
 
 ---
 

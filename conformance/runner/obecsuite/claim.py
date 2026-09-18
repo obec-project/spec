@@ -76,7 +76,7 @@ def as_markdown(results, ctx, meta: dict) -> str:
         f"- **Suite:** {SUITE_VERSION}",
         f"- **Implementation:** {meta.get('implementation') or '(not stated)'}",
         f"- **Adapter:** {meta.get('adapter')}",
-        f"- **Adapter (host B):** {meta.get('adapter_b') or '(not supplied — HC-003(b) unestablished)'}",
+        f"- **Adapter (host B):** {meta.get('adapter_b') or '(not supplied — OC-003(b) unestablished)'}",
         f"- **Run at:** {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
         "",
     ]

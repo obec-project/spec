@@ -25,7 +25,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")
 KERNEL = os.path.join(ROOT, "spec", "obec-kernel.md")
 CORE = os.path.join(ROOT, "spec", "obec-core.md")
 
-INVARIANT = re.compile(r"^#{2,3} (HC-\d{3}) — .*$", re.M)
+INVARIANT = re.compile(r"^#{2,3} (OC-\d{3}) — .*$", re.M)
 CLAUSE = re.compile(r"\*\*\(([a-z])\)[^*]*\*\*")
 KEYWORD = re.compile(r"\b(MUST|REQUIRED|SHALL|SHOULD|RECOMMENDED|MAY|OPTIONAL)\b")
 SENTENCE_END = re.compile(r"(?<=[.:;])\s+(?=[A-Z(])")
@@ -44,7 +44,7 @@ def section(text, start, end):
 
 
 def invariants(text):
-    """{"HC-001": body, ...}, each body ending at the next rule or heading."""
+    """{"OC-001": body, ...}, each body ending at the next rule or heading."""
     heads = list(INVARIANT.finditer(text))
     out = {}
     for n, h in enumerate(heads):
@@ -81,7 +81,7 @@ class KernelIsVerbatim(unittest.TestCase):
         core2 = section(core, "\n## 2. ", "\n## 3. ")
         cls.core = {k: normative(v) for k, v in invariants(core2).items()}
         kernel = read(KERNEL)
-        kernel = kernel[kernel.index("\n## HC-001"):]
+        kernel = kernel[kernel.index("\n## OC-001"):]
         cls.kernel = {k: normative(v) for k, v in invariants(kernel).items()}
 
     def test_same_invariants(self):

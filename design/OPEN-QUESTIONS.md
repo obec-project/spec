@@ -34,7 +34,7 @@ evidence behind it.
 
 First, what it is **not**. An entity that has run for a year *should* behave
 differently from the one its Genesis Anchor describes — that is accumulation
-working, not decay. Identity here is not behavioral sameness: HC-004 computes
+working, not decay. Identity here is not behavioral sameness: OC-004 computes
 it from the store and never infers it from behavior. What the chain establishes
 over that year is that **every structural change in it was authorized, and the
 sequence from first activation to now is unbroken**. An entity is not supposed
@@ -86,7 +86,7 @@ not.
 
 ---
 
-## 3. Does HC-001(d) belong in an invariant?
+## 3. Does OC-001(d) belong in an invariant?
 
 The clause forbidding structural content from directing the entity to present
 itself as conscious is the only one in a philosophical register, and its test
@@ -95,7 +95,7 @@ routes around in one sentence.
 
 Two positions, and the author holds the first only weakly:
 
-- It belongs in HC-001 because self-representation as a subject is the same
+- It belongs in OC-001 because self-representation as a subject is the same
   kind of boundary as self-perpetuation — the entity is not a locus of
   selfhood, and both clauses say so.
 - It is a **policy**, not an invariant. Policies belong in the Profile, where
@@ -107,7 +107,7 @@ argument that its test can never be more than theater.
 
 ---
 
-## 4. Is HC-009 an invariant or an observation?
+## 4. Is OC-009 an invariant or an observation?
 
 "Boundaries are crossed only by signal" was promoted to the set late, and it
 was immediately necessary to reformulate it so that it binds a monolithic
@@ -118,18 +118,18 @@ already requires.
 But its test is two executed steps over a self-declared table plus one
 attested step. That is thin for something in a closed set.
 
-**What would settle it:** a construction that satisfies HC-005 through HC-008
-and still violates HC-009 in a way the test catches. If no such construction
-exists, HC-009 is a restatement, not an invariant.
+**What would settle it:** a construction that satisfies OC-005 through OC-008
+and still violates OC-009 in a way the test catches. If no such construction
+exists, OC-009 is a restatement, not an invariant.
 
 ---
 
 ## 5. Portability versus hardware-backed keys
 
-HC-003(b) forbids any verification from depending on host-resident key
+OC-003(b) forbids any verification from depending on host-resident key
 material. The planned Security extension wants hardened key management, and
 the obvious hardening — a TPM, a secure enclave, a platform keystore — is
-exactly what HC-003(b) forbids.
+exactly what OC-003(b) forbids.
 
 The specification currently resolves this by fiat: an extension "MUST do so in
 a way that survives relocation, or it is not an extension of this document."
@@ -146,21 +146,21 @@ was meant to do — and the author does not know which.
 
 Conformance is meant to be a test result rather than a reading. Twelve of the
 seventy-six steps are attested — recorded with evidence and signed off by a
-reviewer — and HC-006 is attested in full, because no sequence of inputs
+reviewer — and OC-006 is attested in full, because no sequence of inputs
 demonstrates that nothing acts on a completion before it returns.
 
 That is honest, but it means conformance rests partly on reviewer judgment,
 which is the thing the project set out to replace.
 
 **What would settle it:** an executable test for any currently attested step.
-HC-006 is the one that matters most; a way to demonstrate the clean-completion
+OC-006 is the one that matters most; a way to demonstrate the clean-completion
 property from outside would materially strengthen the whole specification.
 
 ---
 
 ## 7. Is OBEC-Attest cut in the right place?
 
-The partial form covers HC-001 – HC-005, HC-009 and HC-010, and omits the
+The partial form covers OC-001 – OC-005, OC-009 and OC-010, and omits the
 three containment invariants. The reasoning is that identity and authority are
 separable from how an entity reasons, remembers and acts.
 
@@ -174,7 +174,7 @@ fell in a useful place.
 
 ## 8. The version-transition mechanism is entirely unvalidated
 
-HC-004(c) makes migration between major versions a chain event: an
+OC-004(c) makes migration between major versions a chain event: an
 Operator-authorized transition entry, verified against the target version
 before it commits. It is the mechanism that makes revision survivable rather
 than fatal, and it has never run, because there is no second version to
@@ -187,7 +187,7 @@ actually crosses it.
 
 ## 9. What are the scope categories of a standing grant?
 
-HC-002(b) requires a standing grant to declare a **scope of change
+OC-002(b) requires a standing grant to declare a **scope of change
 categories**, and never says what the categories are. That is currently
 implementation-defined by omission rather than by decision.
 

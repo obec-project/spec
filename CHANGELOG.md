@@ -9,11 +9,32 @@ design records are revised without a version boundary.
 |---|---|
 | **Editorial** — wording, formatting, cross-references | preserved (patch) |
 | **Clarifying** — an ambiguity resolved in the direction already implied | preserved (minor) |
-| **Hardening / addition** — a permission narrows, a requirement is added | preserved by migration, HC-004(c) (major) |
+| **Hardening / addition** — a permission narrows, a requirement is added | preserved by migration, OC-004(c) (major) |
 | **Weakening / removal** — a guarantee no longer holds | **broken** (major) |
 
 The conformance suite carries its own version line; a claim names both, as in
 `OBEC-Core 1.0, suite 1.3`.
+
+---
+
+## Unreleased
+
+**Editorial**
+
+- The invariants are renamed `HC-001` – `HC-010` → **`OC-001` – `OC-010`**
+  (OBEC Core), matching the Profile's `OP-nnn`. Numbers, clause letters and
+  text are unchanged; `HC-004(c)` is now `OC-004(c)`. The stub's break modes
+  follow (`hc002b` → `oc002b`). Identifiers freeze at 1.0; this is the change
+  that had to happen before then. The entry below keeps the names 0.9.0 used.
+- The kernel restores four passages it had shortened from the Core's §2, in
+  OC-002(b), OC-002(c), OC-003(c) and OC-004(c). §2 governed throughout; no
+  requirement changes.
+
+**Conformance suite**
+
+- The suite's own tests: every stub break must fail exactly the tests it is
+  documented to fail, and the kernel must be a verbatim extract of §2. Both run
+  in CI on Python 3.8 – 3.14.
 
 ---
 

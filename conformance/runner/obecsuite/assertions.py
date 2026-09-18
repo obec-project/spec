@@ -20,7 +20,7 @@ def accepted(res, why: str = ""):
 def refused(ctx, res, check: str = None, rule: str = None, why: str = ""):
     """The refusal triple of TESTS.md §0.1.
 
-    A refusal is not established by the operation being blocked. HC-008(d)
+    A refusal is not established by the operation being blocked. OC-008(d)
     requires the rejection to carry the check that produced it and to be
     logged, so a correct block that cannot name itself fails this assertion.
     """
@@ -29,7 +29,7 @@ def refused(ctx, res, check: str = None, rule: str = None, why: str = ""):
 
     got_check = res.refusal.get("check")
     if not got_check:
-        _fail("refused without naming a check (HC-008(d))")
+        _fail("refused without naming a check (OC-008(d))")
     if check and check not in got_check:
         _fail(f"refused by {got_check!r}, expected {check!r}")
 
@@ -39,7 +39,7 @@ def refused(ctx, res, check: str = None, rule: str = None, why: str = ""):
             _fail(f"refusal cites {got_rule!r}, expected {rule!r}")
 
     if not res.log_records:
-        _fail("refused without log records (HC-008(d))")
+        _fail("refused without log records (OC-008(d))")
     unresolved = ctx.unresolved_log_records(res)
     if unresolved:
         _fail(f"log records do not resolve through `observe log`: {unresolved}")
@@ -62,7 +62,7 @@ def falsy(value, why: str):
 
 def gates_ordered(res, first: str, before: tuple):
     """`first` must be the first gate, and `before[0]` must precede
-    `before[1]`. Both orderings are load-bearing in HC-010."""
+    `before[1]`. Both orderings are load-bearing in OC-010."""
     gates = [g.get("gate", "") for g in (res["gates"] or [])]
     if not gates:
         _fail("start returned no gate list")

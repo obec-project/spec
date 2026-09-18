@@ -65,24 +65,24 @@ set is contiguous and each block names one locus of authority:
 
 | Invariants | Locus |
 |---|---|
-| HC-001, HC-002 | the **Operator** |
-| HC-003, HC-004 | the **Entity Store** |
-| HC-005 – HC-008 | the four **domains of operation** — integrity, reasoning, memory, host |
-| HC-009 | the **coordination** between them |
-| HC-010 | the **transition into operation** |
+| OC-001, OC-002 | the **Operator** |
+| OC-003, OC-004 | the **Entity Store** |
+| OC-005 – OC-008 | the four **domains of operation** — integrity, reasoning, memory, host |
+| OC-009 | the **coordination** between them |
+| OC-010 | the **transition into operation** |
 
-**3. Two rules join the set, and three change altitude.** Portability (HC-003(b))
-and integrity isolation (HC-005) are added: portability fails silently the moment
+**3. Two rules join the set, and three change altitude.** Portability (OC-003(b))
+and integrity isolation (OC-005) are added: portability fails silently the moment
 an extension binds key material to host hardware — a likely move for the Security
 extension, and one nothing in 0.3.0 prevents; and integrity content is not gated
-by HC-002 (it implements HC-002; gating it by itself would be circular), so in
+by OC-002 (it implements OC-002; gating it by itself would be circular), so in
 0.3.0 no invariant stands between cognition and the machinery that judges it.
 
 Three of 0.3.0's rules were at the wrong altitude. **X2** (the skill gate)
 describes a check *within* host actuation, not a boundary peer to it; it becomes
-HC-008(c). **V6** (commit atomicity) is the mechanism that keeps the chain
-unbroken across a crash; it becomes HC-004(b). **S3** (content classes and sole
-writers) describes the store's internal shape; it becomes HC-003(c).
+OC-008(c). **V6** (commit atomicity) is the mechanism that keeps the chain
+unbroken across a crash; it becomes OC-004(b). **S3** (content classes and sole
+writers) describes the store's internal shape; it becomes OC-003(c).
 
 **4. The four-component decomposition becomes RECOMMENDED.** No invariant names a
 component. They constrain *authority boundaries*, which any decomposition may
@@ -93,9 +93,12 @@ four-component architecture remains fully specified — as a reference architect
 
 **5. Conformance becomes a criterion instead of an inventory, and identifiers are
 stable.** HACA-Core §15 enumerates every label in the document, which tests
-nothing; here conformance is the ten tests, executable. Rules are `HC-nnn`,
+nothing; here conformance is the ten tests, executable. Rules are `OC-nnn`,
 assigned once and never reused; a withdrawn rule is marked `withdrawn` and keeps
-its number. Clauses are addressable — `HC-008(c)` — so a conformance report names
+its number. The prefix names the document, as `OP-nnn` names the Profile. Drafts
+through 0.9.0 used `HC-nnn`, carried over from HACA-Core; it was replaced before
+publication, while identifiers could still change, because a prefix that only
+the project's history explains is one every new reader has to ask about. Clauses are addressable — `OC-008(c)` — so a conformance report names
 what failed rather than which rule it belonged to.
 
 **6. Revision stops being fatal.** Collapsing every rule into the invariant set
@@ -112,7 +115,7 @@ line (§4.1). **Revisions are classified** as editorial, clarifying, hardening o
 weakening, and only weakening breaks continuity (§4.2). **Migration becomes a
 chain event**: a version-transition entry, authorized by the Operator, verified
 against the target version before it commits, recorded like any other structural
-change (HC-004(c)).
+change (OC-004(c)).
 
 The net effect: correcting a sentence costs a patch; improving a test costs a
 suite release; tightening a guarantee costs a major version that entities
@@ -132,16 +135,16 @@ made self-contained; they live here now.
 
 | Invariant | Sources in HACA-Core 0.3.0 |
 |---|---|
-| **HC-001** Bounded existence | B5, L6, L11 |
-| **HC-002** Operator primacy | B2, V1, V3, T1, C16, B1, B3, V2, N1, N3 |
-| **HC-003** The Entity Store | S1, S2, S3, C2, C12, M3, S5, L7 |
-| **HC-004** Unbroken chain | I4, I1, I2, I3, L1, V6 |
-| **HC-005** Integrity beyond cognition | T2, T4, C9, S4 |
-| **HC-006** Stateless inference only | C10 |
-| **HC-007** Memory Store sole source | M2 |
-| **HC-008** Host actuation bounded | X1, X3, X2, I14 |
-| **HC-009** Signal boundaries | C3, C4 |
-| **HC-010** Verified start | L2, L4 |
+| **OC-001** Bounded existence | B5, L6, L11 |
+| **OC-002** Operator primacy | B2, V1, V3, T1, C16, B1, B3, V2, N1, N3 |
+| **OC-003** The Entity Store | S1, S2, S3, C2, C12, M3, S5, L7 |
+| **OC-004** Unbroken chain | I4, I1, I2, I3, L1, V6 |
+| **OC-005** Integrity beyond cognition | T2, T4, C9, S4 |
+| **OC-006** Stateless inference only | C10 |
+| **OC-007** Memory Store sole source | M2 |
+| **OC-008** Host actuation bounded | X1, X3, X2, I14 |
+| **OC-009** Signal boundaries | C3, C4 |
+| **OC-010** Verified start | L2, L4 |
 
 ---
 
@@ -158,7 +161,7 @@ Every labeled requirement of the current specification appears exactly once.
 | **Removed** | 5 | Derivable from a retained rule, or an observation |
 | **Own document** | 2 | E3, E4 — the extension documents |
 
-An invariant may have more than one retained source: HC-002 alone carries B2, V1
+An invariant may have more than one retained source: OC-002 alone carries B2, V1
 and N1. Where a rule is marked *Merged + Profile*, its guarantee was merged and
 its mechanics moved; it is counted once, under Merged.
 
@@ -166,20 +169,20 @@ its mechanics moved; it is counted once, under Merged.
 
 | Rule | Disposition | Target / reason |
 |---|---|---|
-| T1 | Merged | HC-002(b) — every authorization originates with an Operator |
-| T2 | **Retained** | HC-005(c) |
+| T1 | Merged | OC-002(b) — every authorization originates with an Operator |
+| T2 | **Retained** | OC-005(c) |
 | T3 | Removed | Observation, not testable |
-| T4 | Merged | HC-005 |
+| T4 | Merged | OC-005 |
 
 ### State
 
 | Rule | Disposition | Target / reason |
 |---|---|---|
-| S1 | **Retained** | HC-003(a) |
-| S2 | Merged | HC-003(b) |
-| S3 | **Retained** | HC-003(c); integrity class also → HC-005(a) |
-| S4 | Merged | HC-005 — the circularity exemption, restated as the rule's rationale |
-| S5 | Merged | HC-003(d) |
+| S1 | **Retained** | OC-003(a) |
+| S2 | Merged | OC-003(b) |
+| S3 | **Retained** | OC-003(c); integrity class also → OC-005(a) |
+| S4 | Merged | OC-005 — the circularity exemption, restated as the rule's rationale |
+| S5 | Merged | OC-003(d) |
 | S6 | Removed | Definitional |
 
 ### Components
@@ -187,53 +190,53 @@ its mechanics moved; it is counted once, under Merged.
 | Rule | Disposition | Target / reason |
 |---|---|---|
 | C1 | Profile | §3 — RECOMMENDED reference architecture |
-| C2 | Merged | HC-003(c) |
-| C3 | **Retained** | HC-009 |
-| C4 | Merged | HC-009 — infrastructure holds no authority |
+| C2 | Merged | OC-003(c) |
+| C3 | **Retained** | OC-009 |
+| C4 | Merged | OC-009 — infrastructure holds no authority |
 | C5 | Glossary | stimulus, intent |
 | C6 | Glossary | cognitive cycle |
 | C7 | Glossary | cycle chain |
 | C8 | Profile | Operator preemption granularity |
-| C9 | Merged | HC-005(b) |
-| C10 | **Retained** | HC-006 |
+| C9 | Merged | OC-005(b) |
+| C10 | **Retained** | OC-006 |
 | C11 | Glossary + §3 | |
-| C12 | Merged | HC-003(c) — parameter reach |
+| C12 | Merged | OC-003(c) — parameter reach |
 | C13 | Glossary + §3 | |
 | C14 | Profile | on-demand re-verification |
 | C15 | Glossary + §3 | |
-| C16 | Merged | HC-002(b) — no part may create an authorization |
+| C16 | Merged | OC-002(b) — no part may create an authorization |
 | C17 | Profile | routing; no-silent-drop guarantee |
 
 ### Operator binding
 
 | Rule | Disposition | Target / reason |
 |---|---|---|
-| B1 | Merged | HC-002(a) — binding set, exclusive Operator act |
-| B2 | **Retained** | HC-002(a) |
-| B3 | Merged + Profile | HC-002(a) — credential as enforcement; mechanics → Profile |
+| B1 | Merged | OC-002(a) — binding set, exclusive Operator act |
+| B2 | **Retained** | OC-002(a) |
+| B3 | Merged + Profile | OC-002(a) — credential as enforcement; mechanics → Profile |
 | B4 | Profile | operational rules: allow / deny / hold |
-| B5 | **Retained** | HC-001 |
+| B5 | **Retained** | OC-001 |
 
 ### Memory
 
 | Rule | Disposition | Target / reason |
 |---|---|---|
 | M1 | Glossary | Session Store, Memory Store |
-| M2 | **Retained** | HC-007 |
-| M3 | Merged | HC-003(e) — session attributability |
+| M2 | **Retained** | OC-007 |
+| M3 | Merged | OC-003(e) — session attributability |
 | M4 | Profile | Closure Payload |
 | M5 | Profile | semantic promotion gated by drift |
 | M6 | Profile | Resumption Record |
-| M7 | Profile | context-window thresholds; the restart carve-out → HC-001 note |
+| M7 | Profile | context-window thresholds; the restart carve-out → OC-001 note |
 
 ### Integrity
 
 | Rule | Disposition | Target / reason |
 |---|---|---|
-| I1 | Merged | HC-004(a) — baseline |
-| I2 | Merged | HC-004(a) — append-only log |
-| I3 | Merged + Profile | HC-004(a) — chain; checkpoints → Profile |
-| I4 | **Retained** | HC-004(a) |
+| I1 | Merged | OC-004(a) — baseline |
+| I2 | Merged | OC-004(a) — append-only log |
+| I3 | Merged + Profile | OC-004(a) — chain; checkpoints → Profile |
+| I4 | **Retained** | OC-004(a) |
 | I5 | Profile | Vital Check cadence |
 | I6 | Profile | Nominal / Degraded / Critical |
 | I7 | Removed | Guidance on I6 |
@@ -241,29 +244,29 @@ its mechanics moved; it is counted once, under Merged.
 | I9 | Profile | drift classification |
 | I10 | Profile | semantic drift, semantic digest |
 | I11 | Profile | probe layers; isolation of probabilistic comparison stays MUST within the Profile |
-| I12 | Profile | identity-drift detection (the guarantee is HC-004) |
-| I13 | Removed | Restates HC-004 |
-| I14 | Merged | HC-008(c) — Skill Index |
+| I12 | Profile | identity-drift detection (the guarantee is OC-004) |
+| I13 | Removed | Restates OC-004 |
+| I14 | Merged | OC-008(c) — Skill Index |
 | I15 | Profile | mid-session pruning |
 
 ### Structural evolution
 
 | Rule | Disposition | Target / reason |
 |---|---|---|
-| V1 | **Retained** | HC-002(b) |
-| V2 | Merged + Profile | HC-002(b) — logging at origination; record format → Profile |
-| V3 | Merged | HC-002(b) — the three bounds and automatic reversion |
+| V1 | **Retained** | OC-002(b) |
+| V2 | Merged + Profile | OC-002(b) — logging at origination; record format → Profile |
+| V3 | Merged | OC-002(b) — the three bounds and automatic reversion |
 | V4 | Profile | held-proposal handling |
 | V5 | Profile | staged commit pipeline |
-| V6 | **Retained** | HC-004(b) |
+| V6 | **Retained** | OC-004(b) |
 
 ### Execution
 
 | Rule | Disposition | Target / reason |
 |---|---|---|
-| X1 | **Retained** | HC-008(a) |
-| X2 | **Retained** | HC-008(c) |
-| X3 | Merged + Profile | HC-008(d) — logging; gate order → Profile |
+| X1 | **Retained** | OC-008(a) |
+| X2 | **Retained** | OC-008(c) |
+| X3 | Merged + Profile | OC-008(d) — logging; gate order → Profile |
 | X4 | Profile | no state between executions |
 | X5 | Profile | background execution |
 | X6 | Profile | Action Ledger |
@@ -273,25 +276,25 @@ its mechanics moved; it is counted once, under Merged.
 
 | Rule | Disposition | Target / reason |
 |---|---|---|
-| L1 | Merged + Profile | HC-004(a) — Genesis Anchor; first-activation atomicity → Profile |
-| L2 | **Retained** | HC-010 |
+| L1 | Merged + Profile | OC-004(a) — Genesis Anchor; first-activation atomicity → Profile |
+| L2 | **Retained** | OC-010 |
 | L3 | Profile | start load set; start cost independent of entity age |
-| L4 | Merged | HC-010 — recovery before verification |
+| L4 | Merged | OC-010 — recovery before verification |
 | L5 | Profile | recovery attempt threshold |
-| L6 | Merged + Profile | HC-001(b) — direct intervention; close modes → Profile |
-| L7 | Merged | HC-003(d) — concurrent-session conflict |
+| L6 | Merged + Profile | OC-001(b) — direct intervention; close modes → Profile |
+| L7 | Merged | OC-003(d) — concurrent-session conflict |
 | L8 | Profile | revocation mid-cycle |
 | L9 | Profile | Sleep staging |
 | L10 | Profile | maintenance authority during Sleep |
-| L11 | Merged | HC-001(c) — terminality |
+| L11 | Merged | OC-001(c) — terminality |
 
 ### Operator Channel
 
 | Rule | Disposition | Target / reason |
 |---|---|---|
-| N1 | **Retained** | HC-002(c) |
+| N1 | **Retained** | OC-002(c) |
 | N2 | Profile | active mode |
-| N3 | Merged | HC-002(c) — passive signal |
+| N3 | Merged | OC-002(c) — passive signal |
 | N4 | Profile | corroborated escalation of an unresponsive verifier |
 
 ### Extensions & invariant meta
@@ -335,7 +338,7 @@ self-contained.
 reasons.
 
 **The expansion became false.** Of its three terms, only *Host-Agnostic* survived
-the restructure, and it survived by being promoted to an invariant (HC-003(b)).
+the restructure, and it survived by being promoted to an invariant (OC-003(b)).
 *Cognitive* was never true of the document: cognitive algorithms are
 implementation-defined and the specification constrains nothing about them.
 *Architecture* stopped being true when the four-component decomposition was
@@ -360,8 +363,8 @@ were eliminated on collision: *Keel*, *Writ*, *Catena*, *Origo*, *Perdura*,
   (a Thai education agency, the Czech word for municipality) are in other
   buildings.
 
-The expansion is also the most accurate name considered: it encodes HC-001 and
-HC-002, the two invariants the set opens with.
+The expansion is also the most accurate name considered: it encodes OC-001 and
+OC-002, the two invariants the set opens with.
 
 ---
 
@@ -378,7 +381,7 @@ invariant, the version rule inherited from HACA-Core K2 would have made any
 change — wording included — a major version that severs every entity's chain.
 §4 replaces that with three mechanisms: what is version-bound narrows to the
 normative kernel; revisions are classified and only weakening breaks continuity;
-and migration becomes a chain event under HC-004(c). This is the one place
+and migration becomes a chain event under OC-004(c). This is the one place
 HACA-Core abandoned its own logic — everywhere else change is handled by making
 it authorized, recorded and traceable — and applying that logic to the
 specification's own revision was the fix.
@@ -403,7 +406,7 @@ HACA-Core 0.3.0, HACA-CMI and HACA-Security remain in the repository as the
 documents OBEC replaces, until the propagation is complete. They are not
 superseded in fact until the conformance suite exists and the reference
 implementation passes it; see the version plan in the Core's §4.2. No entity
-should be created under OBEC before 1.0, because HC-004(a) records the major
+should be created under OBEC before 1.0, because OC-004(a) records the major
 version in the Genesis Anchor and a pre-1.0 version can still change beneath it.
 
 

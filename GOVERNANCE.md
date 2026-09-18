@@ -78,7 +78,7 @@ not the size of the diff.
 |---|---|---|
 | **editorial** | PATCH | preserved |
 | **clarify** | MINOR | preserved |
-| **harden** / addition | **MAJOR** | preserved by migration (HC-004(c)) |
+| **harden** / addition | **MAJOR** | preserved by migration (OC-004(c)) |
 | **weaken** / removal | **MAJOR** | **broken** |
 
 Two consequences follow, and they are what distinguish this policy from ordinary
@@ -128,7 +128,7 @@ a formal review cycle.
 
 ### 5.2 Entity safety during pre-release
 
-HC-004(a) records the major version in the Genesis Anchor. A pre-release version
+OC-004(a) records the major version in the Genesis Anchor. A pre-release version
 can still change beneath an entity that already recorded it, and the remedy would
 be a weakening release that severs the chain. **No entity should be created under
 a pre-release version.**
@@ -142,7 +142,7 @@ A system may claim:
 - **OBEC-Core conformant** — it passes the ten conformance tests of
   [Core §2](spec/obec-core.md).
 - **OBEC-Attest** — it passes the subset covering identity and authority
-  (HC-001 – HC-005, HC-009, HC-010), without the operational containment
+  (OC-001 – OC-005, OC-009, OC-010), without the operational containment
   invariants. An implementation claiming OBEC-Attest MUST NOT claim OBEC-Core.
 - **OBEC-Core + \<extension names\>** — it additionally satisfies each active
   extension's own conformance requirements.
@@ -165,7 +165,7 @@ requirements on top of the ten. An extension MUST:
 
 - declare the OBEC-Core version it targets;
 - add capability or harden a rule, and never weaken one;
-- class every artifact it adds within HC-003(c) and follow its write rules;
+- class every artifact it adds within OC-003(c) and follow its write rules;
 - declare whether it is experimental or stable.
 
 The invariant set is closed. No extension may add to it, weaken it, or

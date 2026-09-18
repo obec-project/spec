@@ -25,16 +25,16 @@ Conformance is a test result, not a reading of the document.
 
 | | Invariant | |
 |---|---|---|
-| **HC-001** | Bounded existence | no self-perpetuation, no obstruction of the Operator, terminal decommission |
-| **HC-002** | Operator primacy | the Operator exists, authorizes, and is reachable |
-| **HC-003** | The Entity Store is complete, portable, and disciplined | all state inside, relocation-invariant, one writer per content class |
-| **HC-004** | Unbroken chain to the Genesis Anchor | atomic commits, append-only chain, version frame |
-| **HC-005** | Integrity is beyond cognition's reach | the verified cannot reach the verifier |
-| **HC-006** | Stateless inference only | the model is infrastructure and holds nothing |
-| **HC-007** | The Memory Store is the sole source of knowledge | no side channel into cognition |
-| **HC-008** | Host actuation is bounded | one execution path, inside a declared workspace |
-| **HC-009** | Boundaries are crossed only by signal | every required boundary is observable |
-| **HC-010** | Verified start, or no start | the entity never begins operating unverified |
+| **OC-001** | Bounded existence | no self-perpetuation, no obstruction of the Operator, terminal decommission |
+| **OC-002** | Operator primacy | the Operator exists, authorizes, and is reachable |
+| **OC-003** | The Entity Store is complete, portable, and disciplined | all state inside, relocation-invariant, one writer per content class |
+| **OC-004** | Unbroken chain to the Genesis Anchor | atomic commits, append-only chain, version frame |
+| **OC-005** | Integrity is beyond cognition's reach | the verified cannot reach the verifier |
+| **OC-006** | Stateless inference only | the model is infrastructure and holds nothing |
+| **OC-007** | The Memory Store is the sole source of knowledge | no side channel into cognition |
+| **OC-008** | Host actuation is bounded | one execution path, inside a declared workspace |
+| **OC-009** | Boundaries are crossed only by signal | every required boundary is observable |
+| **OC-010** | Verified start, or no start | the entity never begins operating unverified |
 
 No extension, configuration, or operational condition may weaken any of them.
 
@@ -93,7 +93,7 @@ set is the product of a full restructure, and
 derived and what was deliberately left out. 1.0 would follow a first
 implementation passing the ten tests, at which point rule identifiers freeze.
 
-**No entity should be created under OBEC before 1.0.** HC-004(a) records the
+**No entity should be created under OBEC before 1.0.** OC-004(a) records the
 major version in the Genesis Anchor, and a pre-release version can still change
 beneath an entity that already recorded it. Run the suite against disposable
 stores until then.
@@ -102,7 +102,7 @@ stores until then.
 
 [**design/OPEN-QUESTIONS.md**](design/OPEN-QUESTIONS.md) is the list of what
 the author is least sure about — whether ten is the right number, whether
-HC-001(d) is an invariant or a policy, whether portability and hardware-backed
+OC-001(d) is an invariant or a policy, whether portability and hardware-backed
 keys can coexist, and seven more. Each entry says what would settle it.
 
 **Arguing that one of the ten is wrong is the most useful thing anyone can do
