@@ -75,6 +75,7 @@ OBEC_STUB_BREAK=oc008a python3 run.py --adapter ./stub/obec-adapter-stub
 
 | Break | Violates | Caught by |
 |---|---|---|
+| `oc001b` | ignores credential revocation | OC-001, OC-005 |
 | `oc002b` | commits without checking authorization | OC-002 |
 | `oc003b` | folds the hostname into verification | OC-003 — **only with a real `--adapter-b`** |
 | `oc003c` | lets host actuation write structural and mnemonic content | OC-003, OC-008 |

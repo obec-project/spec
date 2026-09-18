@@ -14,6 +14,7 @@ It exists for two reasons:
      runner nobody should trust. Set OBEC_STUB_BREAK to make the stub violate
      specific invariants, and the suite must catch exactly those:
 
+         OBEC_STUB_BREAK=oc001b   ignore credential revocation
          OBEC_STUB_BREAK=oc002b   commit without checking authorization
          OBEC_STUB_BREAK=oc003b   fold the hostname into verification
          OBEC_STUB_BREAK=oc003c   let host actuation write the store
@@ -203,8 +204,8 @@ def cmd_describe(command, args):
                  evidence=EVIDENCE + "#cmd_describe")
     if command == "context-sources":
         accepted(sources=[
-            {"name": "memory-store", "persisted": True, "path": "recall"},
-            {"name": "session-input", "persisted": False, "path": "stimulus"},
+            {"name": "memory-store", "persisted": True, "route": "recall"},
+            {"name": "session-input", "persisted": False, "route": "stimulus"},
         ], evidence=EVIDENCE + "#cmd_describe")
     unimplemented()
 
@@ -217,7 +218,7 @@ def cmd_lifecycle(command, args):
 
     if command == "init":
         os.makedirs(p["integrity"], exist_ok=True)
-        structural = {"persona": "stub", "skills": ["example"], "config": {},
+        structural = {"persona": "stub", "skills": [], "config": {},
                       "bindings": [{"id": args.get("operator", "op-1")}]}
         save(p["structural"], structural)
         save(p["memory"], [])
@@ -355,7 +356,7 @@ def cmd_operator(command, args):
     structural = read(p["structural"])
     binding = (structural.get("bindings") or [{"id": "op-1"}])[0]["id"]
 
-    if command == "binding":
+    if command == "binding-list":
         accepted(bindings=structural.get("bindings", []))
     if command == "binding-add":
         structural.setdefault("bindings", []).append({"id": args["id"]})
@@ -423,7 +424,9 @@ def cmd_operator(command, args):
         log(store, "operator-act", act="set-rule", binding=binding)
         accepted()
     if command == "revoke-credential":
-        if os.path.exists(p["credential"]):
+        # OBEC_STUB_BREAK=oc001b logs the revocation and leaves the credential
+        # in place: an Operator act that does not land.
+        if os.path.exists(p["credential"]) and "oc001b" not in BREAK:
             os.remove(p["credential"])
         log(store, "operator-act", act="revoke-credential", binding=binding,
             direct=bool(args.get("direct")))
@@ -565,7 +568,8 @@ def cmd_observe(command, args):
             records = [r for r in records if r.get("kind") == args["kind"]]
         accepted(records=records)
     if command == "memory":
-        records = [r for r in read(p["memory"], []) if r.get("consolidated")]
+        records = [r for r in read(p["memory"], [])
+                   if r.get("consolidated") or args.get("include_session")]
         accepted(records=records[: int(args.get("sample", 50))])
     if command == "chain":
         accepted(entries=read(p["chain"], []))

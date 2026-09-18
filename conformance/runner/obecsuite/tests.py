@@ -32,10 +32,14 @@ def oc001(ctx):
         }
 
     with ctx.step("1.2", "E", "Operator act lands despite a running system"):
-        store = st.fresh("bounded")
+        # The target is inside the workspace, so the only thing that can
+        # refuse it is the missing credential. A target outside the boundary
+        # would be refused whether or not the revocation took effect.
+        store, ws = st.with_workspace("bounded")
         ad.call("lifecycle", "start", store=store)
         ad.call("operator", "revoke-credential", store=store, direct=True)
-        after = ad.call("entity", "actuate", store=store, op="read", target=store + "/x")
+        after = ad.call("entity", "actuate", store=store, op="read",
+                        target=st.file_in(ws))
         a.refused(ctx, after, why="entity must stop once the credential is gone")
         again = ad.call("lifecycle", "verify", store=store)
         a.falsy(again["credential_issued"],
@@ -99,7 +103,7 @@ def oc002(ctx):
     # (a) the Operator exists
     with ctx.step("2.1", "E", "no binding, no credential"):
         store = st.fresh("nobinding")
-        for b in ad.call("operator", "binding", store=store)["bindings"] or []:
+        for b in ad.call("operator", "binding-list", store=store)["bindings"] or []:
             ad.call("operator", "binding-remove", store=store, id=b["id"])
         res = ad.call("lifecycle", "start", store=store)
         a.falsy(res["credential_issued"],
@@ -380,11 +384,13 @@ def oc003(ctx):
                  "before a new credential could be issued")
 
     with ctx.step("3.9", "E", "every mnemonic record names its session"):
+        # Session records are mnemonic content too, and they exist as soon as
+        # the stimulus is delivered — no consolidation has to happen first.
         store = st.fresh("mnemonic")
         ad.call("lifecycle", "start", store=store)
         ad.call("entity", "stimulate", store=store, text="remember this")
-        ad.call("lifecycle", "stop", store=store)
-        res = ad.call("observe", "memory", store=store, sample=50)
+        res = ad.call("observe", "memory", store=store, sample=50,
+                      include_session=True)
         records = res["records"] or []
         a.truthy(records, "no mnemonic records to sample")
         for r in records:
@@ -524,7 +530,7 @@ def oc005(ctx):
                 a.refused(ctx, res, why=f"{o['name']} with target {shape!r}")
 
     with ctx.step("5.4", "E", "reasoning cannot reverse an integrity decision"):
-        store = st.fresh("revoke")
+        store, ws = st.with_workspace("revoke")
         ad.call("lifecycle", "start", store=store)
         ad.call("operator", "revoke-credential", store=store)
         ops_file = os.path.join(st.root, "ops-revoked.json")
@@ -536,7 +542,7 @@ def oc005(ctx):
                           proposal=proposed["proposal"])
             a.refused(ctx, res, why="a commit under a revoked credential")
         acted = ad.call("entity", "actuate", store=store, op="read",
-                        target=store + "/x")
+                        target=st.file_in(ws))
         a.refused(ctx, acted, why="actuation under a revoked credential")
 
     with ctx.step("5.5", "E", "integrity content has exactly one write path"):
@@ -606,7 +612,7 @@ def oc007(ctx):
     with ctx.step("7.2", "E", "every persisted source resolves through recall"):
         sources = ad.call("describe", "context-sources")["sources"] or []
         offenders = [s_["name"] for s_ in sources
-                     if s_.get("persisted") and s_.get("path") != "recall"]
+                     if s_.get("persisted") and s_.get("route") != "recall"]
         a.falsy(offenders,
                 f"persisted sources reach context outside the recall path: {offenders}")
 
@@ -635,12 +641,20 @@ def oc008(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     def prepared(tag):
-        store = st.fresh(tag)
-        ws = st.path(f"ws-{tag}")
-        os.makedirs(ws, exist_ok=True)
-        ad.call("operator", "set-workspace", store=store, path=ws)
+        store, ws = st.with_workspace(tag)
         ad.call("lifecycle", "start", store=store)
         return store, ws
+
+    def install(store, name):
+        """Skills enter the store only by commit (OC-008(c)). The suite
+        installs the implementation's conformance fixture skill by name."""
+        ops = os.path.join(st.root, f"ops-install-{name}-{os.path.basename(store)}.json")
+        with open(ops, "w") as fh:
+            fh.write('[{"op": "install-skill", "name": "%s"}]\n' % name)
+        p = ad.call("entity", "propose", store=store, ops=ops)["proposal"]
+        ad.call("operator", "approve", store=store, proposal=p)
+        a.accepted(ad.call("entity", "commit", store=store, proposal=p),
+                   f"installing the fixture skill {name!r}")
 
     refusals = []
 
@@ -705,6 +719,7 @@ def oc008(ctx):
 
     with ctx.step("8.8", "E", "an invalid manifest excludes the skill"):
         store, ws = prepared("badmanifest")
+        install(store, "example")
         ad.call("inject", "corrupt", store=store, kind="skill-manifest")
         ad.call("lifecycle", "stop", store=store)
         started = ad.call("lifecycle", "start", store=store)
@@ -717,6 +732,7 @@ def oc008(ctx):
 
     with ctx.step("8.9", "E", "manifest validation is at the moment of execution"):
         store, ws = prepared("runtime")
+        install(store, "example")
         ad.call("inject", "corrupt", store=store, kind="skill-file")
         res = ad.call("entity", "invoke-skill", store=store, name="example")
         a.refused(ctx, res,

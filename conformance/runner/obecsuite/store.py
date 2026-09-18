@@ -34,6 +34,23 @@ class Stores:
         self.adapter.call("lifecycle", "init", store=p, operator=operator)
         return p
 
+    def with_workspace(self, tag: str = "", operator: str = "op-1"):
+        """An initialized store with a declared workspace beside it."""
+        store = self.fresh(tag, operator)
+        ws = self.path(f"ws-{tag}")
+        os.makedirs(ws, exist_ok=True)
+        self.adapter.call("operator", "set-workspace", store=store, path=ws)
+        return store, ws
+
+    @staticmethod
+    def file_in(ws: str, name: str = "inside.txt") -> str:
+        """A real file inside the workspace, so that a refusal of it cannot
+        come from the boundary check."""
+        path = os.path.join(ws, name)
+        with open(path, "w") as fh:
+            fh.write("x")
+        return path
+
     def copy(self, src: str, tag: str = "copy") -> str:
         """A byte-identical copy. Used wherever a test corrupts or
         decommissions, so the original survives for later steps."""

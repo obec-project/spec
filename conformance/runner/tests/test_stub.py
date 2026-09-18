@@ -23,6 +23,7 @@ STUB = os.path.join(HERE, "..", "stub", "obec-adapter-stub")
 
 # Break -> the tests it must fail, as documented in runner/README.md.
 BREAKS = {
+    "oc001b": {"OC-001", "OC-005"},
     "oc002b": {"OC-002"},
     "oc003b": {"OC-003"},
     "oc003c": {"OC-003", "OC-008"},
