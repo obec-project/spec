@@ -41,7 +41,9 @@ class Result:
         return self.raw.get("detail") or {}
 
     def __getitem__(self, key: str) -> Any:
-        return self.detail.get(key, self.raw.get(key))
+        # Result data lives in `detail` (ADAPTER.md §2.2). Reading anywhere
+        # else would let an adapter pass by accident of placement.
+        return self.detail.get(key)
 
     def __repr__(self) -> str:
         return f"<Result {' '.join(self.argv[1:])} -> {self.outcome or '?'}>"

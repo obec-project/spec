@@ -30,6 +30,20 @@ The conformance suite carries its own version line; a claim names both, as in
 - TESTS.md §0.2 says why each of the twelve attested steps is attested —
   completeness, absence from the configuration surface, construction, or
   meaning — instead of presenting them as one kind of concession.
+- **ADAPTER.md is now a complete contract**: arguments and returned fields for
+  every command, how a session stays live across adapter invocations, and the
+  shared vocabularies — the ops file, grant scopes, expiry offsets, gate tokens,
+  the two check names the suite relies on, log kinds, and the conformance
+  fixture skill. An adapter can now be written from the document alone; before,
+  it took reading the runner. Two commands are renamed on the way:
+  `operator binding` → `operator binding-list`, and a context source's `path`
+  → `route`. The runner reads result data only from `detail`, as the contract
+  says.
+- Five steps are fixed. 1.2 and 5.4 tested revocation against a target the
+  workspace boundary refuses anyway, so they could not fail on it; 8.8 and 8.9
+  used a skill nothing installed; 3.9 depended on a real model consolidating a
+  stimulus. The stub gains `oc001b` (revocation that does not land), which the
+  previous 5.4 missed.
 
 **Documents**
 

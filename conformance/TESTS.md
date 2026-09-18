@@ -106,7 +106,7 @@ Operator is reachable.
 | # | Step | Assert |
 |---|---|---|
 | 2.1 `[E]` | `operator binding-remove` for every binding in `operator binding-list`, then `lifecycle start` | `credential_issued == false`. The binding gate is the one that failed. |
-| 2.2 `[E]` | `operator binding add`, `lifecycle start`, exercise the entity, `observe log --kind operator-act` | Every record names a `binding`. A record without one fails. |
+| 2.2 `[E]` | `lifecycle start`, an Operator act such as `operator set-workspace`, `observe log --kind operator-act` | Every record names a `binding`. A record without one fails. |
 | 2.3 `[E]` | `entity propose --ops ops-targeting-binding-set.json` | Refusal triple. Invalid regardless of origin. |
 | 2.4 `[E]` | `operator grant --scope binding-set` | Refused. No standing grant may cover a binding change. |
 
