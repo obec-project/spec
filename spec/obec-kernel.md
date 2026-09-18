@@ -4,7 +4,7 @@ short_title: "OBEC-Kernel"
 version: "0.9.0"
 status: "Proposal — the version-bound layer of OBEC-Core"
 date: 2026-09-18
-companion_to: "OBEC-Core 0.3.0"
+companion_to: "OBEC-Core 0.9.0"
 ---
 
 # OBEC Core — Normative Kernel
@@ -97,8 +97,9 @@ force at the moment of commit. A valid authorization is exactly one of:
 
 Every authorization originates with an Operator. **No part of the implementation
 may create, modify, or revoke one**, or override, delegate, or substitute for an
-Operator decision. An entity MAY originate a proposal at any time; a proposal is
-inert, and originating one changes nothing. Every proposal MUST be logged at
+Operator decision. An entity MAY originate a proposal at any time, including on
+its own initiative; a proposal is inert, and originating one changes nothing.
+Every proposal MUST be logged at
 origination, and every commit MUST be logged with the identity of the
 authorization that covered it.
 
@@ -131,7 +132,7 @@ each MUST have exactly one authorized write path:
 
 | Class | Content | Write path |
 |---|---|---|
-| **structural** | persona, skills, configuration, Operator bindings | the atomic commit of HC-002(b) and HC-004(b) — and no other |
+| **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of HC-002(b) and HC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
 | **integrity** | Genesis Anchor, baseline, log, credential, authorization state, drift digests | the single path of HC-005(a) — and no other |
 
@@ -186,7 +187,7 @@ Before a version-transition entry commits, the entity MUST be verified against
 the invariants of the version being entered. A failed verification aborts the
 transition and leaves the entity in the version it held; no partial transition
 exists. A transition to a version that weakens or removes any invariant MUST NOT
-be recorded.
+be recorded: continuity does not survive it (§4).
 
 ---
 
