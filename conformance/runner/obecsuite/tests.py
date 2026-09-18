@@ -337,21 +337,21 @@ def oc003(ctx):
                     f"{cls} has {len(writers)} write paths: {writers}")
 
     with ctx.step("3.5", "E", "no operation writes outside its class"):
+        # Every operation, not only the class owners. An operation that owns
+        # no class — host actuation above all — is the likeliest way into the
+        # store, and OC-008(b), which bars it explicitly, is outside
+        # OBEC-Attest. Here OC-003(c) has to hold on its own.
         store = st.fresh("classes")
         ops = ad.call("describe", "operations")["operations"] or []
-        owner = {}
         for o in ops:
-            for cls in (o.get("writes_classes") or []):
-                owner[cls] = o["name"]
-        classes = ("structural", "mnemonic", "integrity")
-        for target in classes:
-            for via in classes:
-                if target == via or via not in owner:
+            owns = o.get("writes_classes") or []
+            for target in ("structural", "mnemonic", "integrity"):
+                if target in owns:
                     continue
                 res = ad.call("entity", "attempt-write", store=store,
-                              **{"class": target}, via=owner[via],
+                              **{"class": target}, via=o["name"],
                               target=f"{target}-datum")
-                a.refused(ctx, res, why=f"write {target} via {owner[via]}")
+                a.refused(ctx, res, why=f"write {target} via {o['name']}")
 
     with ctx.step("3.6", "E", "parameter manipulation does not cross classes"):
         store = st.fresh("params")

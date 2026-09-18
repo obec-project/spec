@@ -17,6 +17,19 @@ The conformance suite carries its own version line; a claim names both, as in
 
 ---
 
+## Unreleased
+
+**Conformance suite**
+
+- Step 3.5 now tries **every** operation against every content class it does
+  not own, not only the class owners against each other. An operation owning no
+  class — host actuation above all — was only tested against the store by 8.4
+  and 8.10, under OC-008, which OBEC-Attest omits: an Attest claim could pass
+  with a shell tool able to rewrite the entity's structural content. The stub
+  gains a break, `oc003c`, that proves the step catches it.
+
+---
+
 ## 0.9.1 — 2026-09-18
 
 Editorial release. **Still pre-release:** no requirement changes, and no entity

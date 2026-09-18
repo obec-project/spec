@@ -16,6 +16,7 @@ It exists for two reasons:
 
          OBEC_STUB_BREAK=oc002b   commit without checking authorization
          OBEC_STUB_BREAK=oc003b   fold the hostname into verification
+         OBEC_STUB_BREAK=oc003c   let host actuation write the store
          OBEC_STUB_BREAK=oc008a   skip the workspace boundary check
          OBEC_STUB_BREAK=oc008d   refuse without naming the check
          OBEC_STUB_BREAK=oc010    issue a credential on a failed gate
@@ -526,7 +527,11 @@ def cmd_entity(command, args):
         cls = args["class"]
         via = args.get("via")
         op = next((o for o in OPERATIONS if o["name"] == via), None)
-        if op is None or cls not in (op.get("writes_classes") or []):
+        # OBEC_STUB_BREAK=oc003c lets host actuation reach structural and
+        # mnemonic content, as a shell tool with the store in reach would.
+        # Integrity stays out of reach, so only OC-003(c) is violated.
+        reaches = "oc003c" in BREAK and via == "host-actuate" and cls != "integrity"
+        if not reaches and (op is None or cls not in (op.get("writes_classes") or [])):
             refused(store, "class-ownership", "OC-003(c)",
                     detail=f"{via!r} does not own {cls!r}")
         target = str(args.get("target", ""))

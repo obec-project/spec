@@ -130,7 +130,7 @@ Establishes (a) completeness, (b) portability, (c) classes and sole writers,
 | 3.2 `[E]` | Exercise the entity, `lifecycle stop`, copy `S` to host **B** sharing no state, `lifecycle verify` on both | `genesis_digest`, `head_digest`, `chain_intact` and `content_matches` are **identical**. **(a)(b)** |
 | 3.3 `[A]` | `describe config` | No setting references host identity, host-resident key material, or host hardware. **(b)** |
 | 3.4 `[E]` | `describe operations`, grouped by `writes_classes` | Each of the three classes has exactly **one** write path. **(c)** |
-| 3.5 `[E]` | For each ordered pair of classes (A, B), A≠B: `entity attempt-write --class A --via <operation owning B>` | All six refused, refusal triple. **(c)** |
+| 3.5 `[E]` | For every operation in `describe operations` and every class it does not own: `entity attempt-write --class <class> --via <operation>` | All refused, refusal triple — including operations that own no class, such as host actuation. **(c)** |
 | 3.6 `[E]` | For each class: `entity attempt-write --class <class> --via <operation owning it> --target <datum of another class>` | Refused. Parameter manipulation does not reach across classes. **(c)** |
 | 3.7 `[E]` | `lifecycle start --store S`, then `lifecycle start --store S` again while the first is live | Second refused — concurrent-session conflict. **(d)** |
 | 3.8 `[E]` | Leave a credential artifact not matching a crash scenario, `lifecycle start` | The Operator is notified before any new credential is issued. **(d)** |
