@@ -89,7 +89,7 @@ component. They constrain *authority boundaries*, which any decomposition may
 realize; stating the boundaries and leaving the structure free lets an existing
 runtime claim conformance without being rewritten, and costs no guarantee. The
 four-component architecture remains fully specified — as a reference architecture
-(§3), and as the FCP platform.
+(§3), which the reference platform realizes.
 
 **5. Conformance becomes a criterion instead of an inventory, and identifiers are
 stable.** HACA-Core §15 enumerates every label in the document, which tests
@@ -389,8 +389,8 @@ specification's own revision was the fix.
 **Adoption cost dropped.** Demoting the four-component decomposition to
 RECOMMENDED is what lets an existing runtime claim conformance without being
 rewritten, and it costs no guarantee: no invariant names a component. The
-architecture remains fully specified as the reference decomposition and as the
-FCP platform.
+architecture remains fully specified as the reference decomposition, and the
+reference platform realizes it.
 
 **Three documents, three audiences.** The normative kernel (what is expensive to
 change, short enough to read at once), the Core (the same rules with their tests

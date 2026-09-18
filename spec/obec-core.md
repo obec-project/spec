@@ -502,7 +502,7 @@ OC-009 is the constraint on what coordinates them. An implementation that assign
 one part to each domain and routes their signals through neutral infrastructure
 is not making an arbitrary choice; it is realizing the invariants in the most
 direct way available. That is why the decomposition below is RECOMMENDED rather
-than merely permitted, and it is the one the FCP platform implements:
+than merely permitted, and it is the one the reference platform implements:
 
 | Part | Domain | Invariant it realizes |
 |---|---|---|
