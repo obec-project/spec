@@ -1,7 +1,7 @@
 ---
 title: "OBEC Core — Normative Kernel"
 short_title: "OBEC-Kernel"
-version: "0.3.0"
+version: "0.9.0"
 status: "Proposal — the version-bound layer of OBEC-Core"
 date: 2026-09-18
 companion_to: "OBEC-Core 0.3.0"
@@ -104,7 +104,8 @@ authorization that covered it.
 
 **(c) The Operator is reachable.** There MUST exist a path by which any part of
 the implementation reaches the Operator **without passing through the reasoning
-layer**. That path MUST provide a **passive signal**: a persistent,
+layer** — which may be compromised, or may simply have no part in the condition
+being reported. That path MUST provide a **passive signal**: a persistent,
 network-independent record in the Entity Store, written when live delivery has
 failed a declared number of attempts or the condition requires a halt. The
 passive signal MUST be directly readable by the Operator with nothing running,
