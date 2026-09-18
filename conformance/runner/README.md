@@ -9,8 +9,9 @@ Drives an implementation's [conformance adapter](../ADAPTER.md) through the
 `claim.json` for a machine.
 
 Standard library only, Python 3.8+. Being testable should cost an implementer
-no toolchain they do not already have, and the runner and the implementation
-never share a language — they speak the adapter contract.
+no toolchain they do not already have. The runner and the implementation share
+no code — neither imports the other, whatever language each is written in — and
+speak only the adapter contract.
 
 ## Options
 
