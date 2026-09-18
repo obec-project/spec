@@ -736,6 +736,11 @@ the Security extension's scope. Risks arising from coordination between entities
 — peer spoofing, identity forgery in shared spaces — are the CMI extension's
 scope.
 
+Both extensions are planned and not yet written. Until they exist, a reference
+to either in this document marks where OBEC-Core's scope ends; it does not point
+to a document, and nothing in OBEC-Core depends on one. Each will be bound by the
+extension contract of §4.
+
 ---
 
 ## 7. Glossary

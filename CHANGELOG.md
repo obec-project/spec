@@ -41,6 +41,12 @@ The conformance suite carries its own version line; a claim names both, as in
   OBEC, and for third-party products that behave as agents without being
   entities.
 - The project's status is stated once, in the README, instead of in five places.
+- Core §6.3 says the Security and CMI extensions are planned and not yet
+  written, so their names mark where OBEC-Core's scope ends rather than point
+  to documents.
+- ADR 0001 §8 no longer claims the HACA documents are in this repository or
+  that OBEC awaits a propagation from them; the Profile rule map is back in §5,
+  where the text announces it.
 
 ---
 

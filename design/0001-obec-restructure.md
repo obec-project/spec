@@ -91,15 +91,16 @@ runtime claim conformance without being rewritten, and costs no guarantee. The
 four-component architecture remains fully specified — as a reference architecture
 (§3), which the reference platform realizes.
 
-**5. Conformance becomes a criterion instead of an inventory, and identifiers are
-stable.** HACA-Core §15 enumerates every label in the document, which tests
+**5. Conformance becomes a criterion instead of an inventory, and identifiers
+are stable.** HACA-Core §15 enumerates every label in the document, which tests
 nothing; here conformance is the ten tests, executable. Rules are `OC-nnn`,
 assigned once and never reused; a withdrawn rule is marked `withdrawn` and keeps
 its number. The prefix names the document, as `OP-nnn` names the Profile. Drafts
 through 0.9.0 used `HC-nnn`, carried over from HACA-Core; it was replaced before
 publication, while identifiers could still change, because a prefix that only
-the project's history explains is one every new reader has to ask about. Clauses are addressable — `OC-008(c)` — so a conformance report names
-what failed rather than which rule it belonged to.
+the project's history explains is one every new reader has to ask about. Clauses
+are addressable — `OC-008(c)` — so a conformance report names what failed rather
+than which rule it belonged to.
 
 **6. Revision stops being fatal.** Collapsing every rule into the invariant set
 would, under 0.3.0 K2, make any change to any rule — wording included — a major
@@ -330,6 +331,38 @@ compaction took 41 to 24 without dropping a sentence.
 The full map follows. It lived in the Profile until the Profile was made
 self-contained.
 
+Forty-one requirements of HACA-Core 0.3.0 describe mechanism rather than
+guarantee. Twenty-nine were dispositioned **Profile** in §4; six were
+dispositioned **Merged + Profile** (†), their guarantee absorbed into an
+invariant and their mechanics left to the Profile; six were dispositioned
+elsewhere (‡) but carry operational detail that has nowhere else to live.
+
+| 0.3.0 | Rule | 0.3.0 | Rule | 0.3.0 | Rule |
+|---|---|---|---|---|---|
+| C1 | OP-024 | I5 | OP-003 | V2 † | OP-011 |
+| C6 ‡ | OP-001 | I6 | OP-003 | V4 | OP-011 |
+| C7 ‡ | OP-001 | I8 | OP-014 | V5 | OP-012 |
+| C8 | OP-002 | I9 | OP-004 | X3 † | OP-013 |
+| C14 | OP-006 | I10 | OP-005 | X4 | OP-014 |
+| C17 | OP-002 | I11 | OP-005 | X5 | OP-014 |
+| B3 † | OP-020 | I12 | OP-004 | X6 | OP-015 |
+| B4 | OP-016 | I15 | OP-006 | X7 ‡ | OP-014 |
+| M4 | OP-009 | L1 † | OP-017 | N2 | OP-008 |
+| M5 | OP-009 | L3 | OP-019 | N4 | OP-008 |
+| M6 | OP-009 | L4 ‡ | OP-018 | | |
+| M7 | OP-010 | L5 | OP-018 | | |
+| I2 ‡ | OP-007 | L6 † | OP-021 | | |
+| I3 † | OP-007 | L8 | OP-021 | | |
+| | | L9 | OP-022 | | |
+| | | L10 | OP-022 | | |
+| | | L11 ‡ | OP-023 | | |
+
+† *Merged + Profile* in §4: the guarantee is an invariant, the mechanism is in
+the Profile.
+
+‡ Dispositioned *Glossary* (C6, C7, X7) or *Merged* (I2, L4, L11) in §4;
+their operational detail is in the Profile.
+
 ---
 
 ## 6. The name
@@ -402,45 +435,16 @@ same reason the other three were separated.
 
 ## 8. Status of the predecessor
 
-HACA-Core 0.3.0, HACA-CMI and HACA-Security remain in the repository as the
-documents OBEC replaces, until the propagation is complete. They are not
-superseded in fact until the conformance suite exists and the reference
-implementation passes it; see the version plan in the Core's §4.2. No entity
-should be created under OBEC before 1.0, because OC-004(a) records the major
-version in the Genesis Anchor and a pre-1.0 version can still change beneath it.
+HACA-Core 0.3.0, HACA-CMI and HACA-Security live in the HACA repository, not in
+this one. OBEC replaces them and is not derived from them any further: the
+reference implementation is being written from this specification alone, and
+where the specification is not enough to implement from, that is a defect to
+fix here rather than a reason to consult the predecessor.
 
+The two extensions OBEC-Core names — Security and CMI — are planned and not yet
+written. When they are, they will be written against OBEC-Core, not ported from
+HACA-Security and HACA-CMI.
 
-Forty-one requirements of HACA-Core 0.3.0 describe mechanism rather than
-guarantee. Twenty-nine were dispositioned **Profile** in OBEC-Core Appendix A;
-six were dispositioned **Merged + Profile** (†), their guarantee absorbed into an
-invariant and their mechanics left here; six were dispositioned elsewhere (‡) but
-carry operational detail that has nowhere else to live.
-
-| 0.3.0 | Rule | 0.3.0 | Rule | 0.3.0 | Rule |
-|---|---|---|---|---|---|
-| C1 | OP-024 | I5 | OP-003 | V2 † | OP-011 |
-| C6 ‡ | OP-001 | I6 | OP-003 | V4 | OP-011 |
-| C7 ‡ | OP-001 | I8 | OP-014 | V5 | OP-012 |
-| C8 | OP-002 | I9 | OP-004 | X3 † | OP-013 |
-| C14 | OP-006 | I10 | OP-005 | X4 | OP-014 |
-| C17 | OP-002 | I11 | OP-005 | X5 | OP-014 |
-| B3 † | OP-020 | I12 | OP-004 | X6 | OP-015 |
-| B4 | OP-016 | I15 | OP-006 | X7 ‡ | OP-014 |
-| M4 | OP-009 | L1 † | OP-017 | N2 | OP-008 |
-| M5 | OP-009 | L3 | OP-019 | N4 | OP-008 |
-| M6 | OP-009 | L4 ‡ | OP-018 | | |
-| M7 | OP-010 | L5 | OP-018 | | |
-| I2 ‡ | OP-007 | L6 † | OP-021 | | |
-| I3 † | OP-007 | L8 | OP-021 | | |
-| | | L9 | OP-022 | | |
-| | | L10 | OP-022 | | |
-| | | L11 ‡ | OP-023 | | |
-
-† *Merged + Profile* in OBEC-Core: the guarantee is an invariant, the mechanism
-is here.
-
-‡ Dispositioned *Glossary* (C6, C7, X7) or *Merged* (I2, L4, L11) in OBEC-Core;
-their operational detail is recorded here.
-
----
-
+No entity should be created under OBEC before 1.0, because OC-004(a) records
+the major version in the Genesis Anchor and a pre-1.0 version can still change
+beneath it.
