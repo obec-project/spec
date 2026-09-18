@@ -5,10 +5,11 @@
 Governance for the OBEC specification: decision-making, release management, and
 conformance policy.
 
-> **OBEC is a proposal.** Nothing in it has been ratified, no implementation has
-> run the conformance suite, and governance below describes how the project is
-> run today — by one author, in the open — not a settled institution. Section 10
-> is the intended exit from that.
+> **OBEC is a proposal.** Nothing in it has been ratified and no implementation
+> has yet run the conformance suite, though the architecture itself has been
+> implemented twice and entities have operated under it. Governance below
+> describes how the project is run today — by one author, in the open — not a
+> settled institution. Section 10 is the intended exit from that.
 
 ---
 

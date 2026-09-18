@@ -76,11 +76,16 @@ evolves within a budget you set. Same rule, whole range.
 
 ## Status: this is a proposal
 
-**Nothing here has been ratified by anyone.** No implementation has run the
-conformance suite, no entity has ever been created under OBEC, and the ten
-invariants are one person's answer that has not yet met an implementer. The
-documents use MUST because that is how you state a requirement without
-ambiguity — not because anyone has agreed to be bound by it.
+**Nothing here has been ratified by anyone.** The documents use MUST because
+that is how you state a requirement without ambiguity — not because anyone has
+agreed to be bound by it.
+
+The architecture is not untried: it has been implemented twice, in Python and
+in TypeScript, and entities have run under it. **What is unvalidated is
+longevity and cost** — how an entity behaves after months of accumulated
+memory, what the guarantees cost per session and per year, and whether the
+mechanisms that look right on one week of operation still look right on one
+year of it. No implementation has yet run the conformance suite, which is new.
 
 **0.9.0 — pre-release.** It is a first release rather than a first draft: the
 set is the product of a full restructure, and

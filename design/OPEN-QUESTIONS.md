@@ -6,11 +6,15 @@ date: 2026-09-18
 
 # Open questions
 
-OBEC is a **proposal**. Nothing in it has been ratified by anyone, no
-implementation has run the conformance suite, and no entity has ever been
-created under it. The normative documents use MUST because that is how you
-state a requirement without ambiguity — not because anyone has agreed to be
-bound by it.
+OBEC is a **proposal**. Nothing in it has been ratified by anyone, and no
+implementation has yet run the conformance suite. The normative documents use
+MUST because that is how you state a requirement without ambiguity — not
+because anyone has agreed to be bound by it.
+
+The architecture is not untried. It has been implemented twice — in Python and
+in TypeScript — and entities have run under both. So the questions below are
+not *does this work*; they are **at what cost, for how long, and which parts
+earn their keep**.
 
 This page is the list of things the author is least sure about. It is here
 because a proposal that only publishes its confident parts is asking for
@@ -23,20 +27,43 @@ Disagreement on any of them is a welcome issue; see
 
 ---
 
-## 1. Is ten the right number?
+## 1. What does an entity cost, and for how long does it hold?
 
-Ten came from applying two filters mechanically to 88 inherited requirements:
-*can this be given a test?* and *could a configuration plausibly relax it?*
-That is a defensible method, but it was applied by one person in one pass, and
-the result has never met an implementer.
+This is the question the whole proposal turns on, and it is the one with the
+least evidence behind it.
 
-**What would settle it:** someone implementing against the set and reporting
-which invariants were expensive for no benefit, and which guarantee they
-expected to find and did not.
+The architecture runs. What nobody has measured is what it costs to keep
+running: the per-session price of consolidation and drift detection, the growth
+of the chain and the log over months, whether start cost really stays flat as
+an entity ages (the Profile requires it at OP-019, and requiring is not
+measuring), and whether an entity that has accumulated a year of memory still
+behaves like the entity the Genesis Anchor describes.
+
+An architecture that is correct and unaffordable is not useful, and the
+specification currently has opinions about correctness and none about price.
+
+**What would settle it:** an entity operated continuously for months, with
+numbers — start latency against chain length, consolidation time per session,
+store growth per session, and how often drift detection fired and whether it
+was right.
 
 ---
 
-## 2. Does HC-001(d) belong in an invariant?
+## 2. Is ten the right number?
+
+Ten came from applying two filters mechanically to 88 inherited requirements:
+*can this be given a test?* and *could a configuration plausibly relax it?*
+That is a defensible method, but it was applied by one person in one pass,
+against an architecture whose earlier form had 88 rules — so the risk is not
+that something is missing but that something survived out of habit.
+
+**What would settle it:** an implementer reporting which invariants were
+expensive for no benefit, and which guarantee they expected to find and did
+not.
+
+---
+
+## 3. Does HC-001(d) belong in an invariant?
 
 The clause forbidding structural content from directing the entity to present
 itself as conscious is the only one in a philosophical register, and its test
@@ -57,7 +84,7 @@ argument that its test can never be more than theater.
 
 ---
 
-## 3. Is HC-009 an invariant or an observation?
+## 4. Is HC-009 an invariant or an observation?
 
 "Boundaries are crossed only by signal" was promoted to the set late, and it
 was immediately necessary to reformulate it so that it binds a monolithic
@@ -74,7 +101,7 @@ exists, HC-009 is a restatement, not an invariant.
 
 ---
 
-## 4. Portability versus hardware-backed keys
+## 5. Portability versus hardware-backed keys
 
 HC-003(b) forbids any verification from depending on host-resident key
 material. The planned Security extension wants hardened key management, and
@@ -92,7 +119,7 @@ was meant to do — and the author does not know which.
 
 ---
 
-## 5. Are twelve attested steps too many?
+## 6. Are twelve attested steps too many?
 
 Conformance is meant to be a test result rather than a reading. Twelve of the
 seventy-six steps are attested — recorded with evidence and signed off by a
@@ -108,7 +135,7 @@ property from outside would materially strengthen the whole specification.
 
 ---
 
-## 6. Is OBEC-Attest cut in the right place?
+## 7. Is OBEC-Attest cut in the right place?
 
 The partial form covers HC-001 – HC-005, HC-009 and HC-010, and omits the
 three containment invariants. The reasoning is that identity and authority are
@@ -122,7 +149,7 @@ fell in a useful place.
 
 ---
 
-## 7. The version-transition mechanism is entirely unvalidated
+## 8. The version-transition mechanism is entirely unvalidated
 
 HC-004(c) makes migration between major versions a chain event: an
 Operator-authorized transition entry, verified against the target version
@@ -135,7 +162,7 @@ actually crosses it.
 
 ---
 
-## 8. What are the scope categories of a standing grant?
+## 9. What are the scope categories of a standing grant?
 
 HC-002(b) requires a standing grant to declare a **scope of change
 categories**, and never says what the categories are. That is currently
@@ -152,7 +179,7 @@ for why that is safe.
 
 ---
 
-## 9. Should the specification describe an architecture at all?
+## 10. Should the specification describe an architecture at all?
 
 Section 3 of the Core describes a four-domain decomposition and marks it
 RECOMMENDED. Demoting it from mandatory was the change that lets an existing
@@ -169,7 +196,7 @@ document rather than a section that looks normative.
 
 ---
 
-## 10. "Entity" or "agent"?
+## 11. "Entity" or "agent"?
 
 The normative text says *entity* because it is more precise: an OBEC entity is
 something narrower than what the word "agent" covers in 2026. Every
