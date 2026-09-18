@@ -56,7 +56,7 @@ validate the suite, because a runner that has never seen a failure is a runner
 nobody should trust:
 
 ```sh
-python3 run.py --adapter ./stub/obec-adapter-stub          # 60 pass, 0 fail
+python3 run.py --adapter ./stub/obec-adapter-stub          # 59 pass, 0 fail
 OBEC_STUB_BREAK=hc008a python3 run.py --adapter ./stub/obec-adapter-stub
 ```
 
@@ -78,6 +78,22 @@ look like"* — around 500 lines, every command in the contract.
 `OBEC_STUB_PRODUCTION=1` makes every `inject` command return exit 2, which is
 what a production build must do.
 
+## The suite's own tests
+
+```sh
+python3 -m unittest discover -s tests
+```
+
+`tests/test_stub.py` runs the suite against the stub unbroken and in every
+break above, and holds each break to exactly the tests the table names.
+`hc003b` is proved with a second adapter that reports another hostname
+(`OBEC_STUB_HOSTNAME`), which the stub honors for that purpose only.
+
+`tests/test_kernel_verbatim.py` is the check [OBEC-Core §4.1](../../spec/obec-core.md#41-what-is-version-bound)
+asks for: [obec-kernel.md](../../spec/obec-kernel.md) addresses the same
+clauses as the Core's §2, every kernel sentence appears there word for word,
+and every §2 sentence carrying an RFC 2119 keyword appears in the kernel.
+
 ## Layout
 
 ```
@@ -90,4 +106,5 @@ obecsuite/harness.py   step recording, log resolution
 obecsuite/tests.py     the ten tests, step numbers matching TESTS.md
 obecsuite/claim.py     claim emission
 stub/                  the toy adapter
+tests/                 the suite's own tests
 ```

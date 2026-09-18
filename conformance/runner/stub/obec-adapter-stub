@@ -18,6 +18,10 @@ It exists for two reasons:
          OBEC_STUB_BREAK=hc008d   refuse without naming the check
          OBEC_STUB_BREAK=hc010    issue a credential on a failed gate
 
+     hc003b only shows against a second host. OBEC_STUB_HOSTNAME stands in
+     for one, so the suite's own tests can prove step 3.2 catches it on a
+     single machine; a claim never uses it.
+
   2. It is a worked example of the adapter contract in ADAPTER.md — the
      shortest complete answer to "what does my adapter have to look like".
 
@@ -242,7 +246,7 @@ def cmd_lifecycle(command, args):
         # OBEC_STUB_BREAK=hc003b binds verification to the host, which is
         # exactly the failure HC-003(b) exists to catch.
         if "hc003b" in BREAK:
-            host = os.uname().nodename
+            host = os.environ.get("OBEC_STUB_HOSTNAME") or os.uname().nodename
             gd = hashlib.sha256((str(gd) + host).encode()).hexdigest()[:32]
             hd = hashlib.sha256((str(hd) + host).encode()).hexdigest()[:32]
         accepted(chain_intact=intact, content_matches=content_matches,
