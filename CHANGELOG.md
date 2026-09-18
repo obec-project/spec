@@ -27,6 +27,17 @@ The conformance suite carries its own version line; a claim names both, as in
   and 8.10, under OC-008, which OBEC-Attest omits: an Attest claim could pass
   with a shell tool able to rewrite the entity's structural content. The stub
   gains a break, `oc003c`, that proves the step catches it.
+- TESTS.md §0.2 says why each of the twelve attested steps is attested —
+  completeness, absence from the configuration surface, construction, or
+  meaning — instead of presenting them as one kind of concession.
+
+**Documents**
+
+- COMPLIANCE §1.2 and Core §5 state what OBEC-Attest establishes and what it
+  does not: identity and authority, not containment.
+- *Entity* is defined as a kind of agent — in the README, the Primer, and the
+  Core's glossary, which lacked the term.
+- The project's status is stated once, in the README, instead of in five places.
 
 ---
 

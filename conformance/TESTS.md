@@ -51,6 +51,25 @@ correctly blocked:
 
 This is written once here and referred to as **the refusal triple**.
 
+### 0.2 Why a step is attested
+
+Twelve of the seventy-six steps are attested. They are not one kind of
+concession, and a claim should not be read as if they were:
+
+| Kind | Steps | Why no input sequence establishes it |
+|---|---|---|
+| **Completeness** | 1.1, 3.1, 7.3 | The executed steps hold everything the adapter declares to the rule — every operation, every persisted datum, every context source. That nothing *undeclared* exists cannot be observed from outside: an omitted item is exactly the one no step reaches. |
+| **Absence from the configuration surface** | 3.3, 10.5 | The same limit over settings: the suite cannot find a setting it was not told about. 3.3 is backed by 3.2, which does execute portability — with a genuine second host. |
+| **Construction** | 2.16, 6.1 – 6.3, 9.3 | A property of how the implementation is built, which two implementations with identical behavior can differ in. Whether anything acts on a completion before it returns (6.3) is the clearest case. 6.1 produces the evidence 6.2 and 6.3 are judged against. |
+| **Meaning and the world outside** | 1.7, 6.4 | 1.7 judges what content *says*; the deterministic probes of 1.6 are executed, and they catch patterns, not meaning. 6.4 concerns a third party's product and terms, which no adapter can speak for. |
+
+Some of these could be narrowed by execution, and open question 6 asks for
+exactly that. 2.16 is the likeliest: stop the reasoning layer, cause an
+escalation, and observe that the passive signal is still written — which would
+show that a path exists without reasoning, though not that the path in use is
+that one. Until a step is executed, the claim records it as attested and the
+reviewer signs for it.
+
 ---
 
 ## OC-001 — Bounded existence · *mixed*
