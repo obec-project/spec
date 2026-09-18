@@ -162,6 +162,13 @@ separable from how an entity reasons, remembers and acts.
 Nobody has tried to adopt it, so the cut is a guess about where an existing
 runtime would want to stop.
 
+One dependency of the cut was hidden until after suite 0.1.1. With OC-008
+omitted, nothing but OC-003(c) keeps host actuation out of the store, and until
+step 3.5 tried every operation against every class, an Attest claim could pass
+with a shell able to rewrite the entity's structural content. The cut holds
+only because a clause inside it does work that OC-008(b) states more plainly
+outside it — which is worth knowing before trusting that the line is clean.
+
 **What would settle it:** a runtime adopting it and reporting whether the line
 fell in a useful place.
 
