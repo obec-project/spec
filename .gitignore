@@ -1,0 +1,42 @@
+# --- System and OS ---
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.swp
+*~
+
+# --- IDEs, editors and agents ---
+.vscode/
+.idea/
+.claude/
+.gemini/
+.antigravity/
+.cursor/
+.agent/
+.agents/
+.gstack/
+*.sublime-project
+*.sublime-workspace
+
+# --- Environment and dependencies ---
+.env
+.venv
+venv/
+env/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- Build and test output ---
+dist/
+build/
+coverage/
+*.log
+npm-debug.log*
+
+# --- Conformance run artifacts ---
+# Test runs create disposable Entity Stores; claims are committed, runs are not.
+conformance/runs/
+tmp/
