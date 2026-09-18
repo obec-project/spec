@@ -36,6 +36,26 @@ This form exists for a runtime adding auditable identity and authorization
 without changing how it reasons, remembers or acts. It covers the Operator, the
 store, the chain, integrity isolation, boundary discipline, and verified start.
 
+**What it establishes.** Who the entity is, and that it became what it is only
+with an Operator's authorization. Every structural change is in the chain with
+the authorization that covered it; the proof travels with the store; nothing the
+entity can invoke — host actuation included — writes a content class it does not
+own (OC-003(c)); the Operator can halt it with nothing running; and it never
+starts unverified.
+
+**What it does not.** What the entity does, knows or runs through while it
+operates. Without OC-008 its host actions are not confined to a declared
+workspace, and skills are not admitted through an index. Without OC-007 its
+context may draw on sources outside the Memory Store. Without OC-006 the
+inference channel may hold state or authority of its own. An Attest entity is
+one whose identity you can audit, acting in a world you have not bounded.
+
+That is still worth having. The questions an operator is first asked about a
+long-running agent — *is this the one we deployed*, *who changed its
+instructions*, *can we stop it* — are the ones Attest answers, and a runtime can
+answer them without being rebuilt. The questions it leaves open are the ones
+containment answers, and that is what the step to OBEC-Core adds.
+
 An implementation claiming OBEC-Attest **MUST NOT** claim OBEC-Core.
 
 ### 1.3 Extensions

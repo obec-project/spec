@@ -635,6 +635,13 @@ Two profiles exist so that partial adoption has a name:
 | **OBEC-Attest** | OC-001 – OC-005, OC-009, OC-010 | An existing runtime adding auditable identity and authorization without changing how it reasons, remembers, or acts. Covers the Operator, the store, the chain, integrity isolation, boundary discipline, and verified start. |
 | **OBEC-Core** | all ten | A system built to these boundaries end to end. The three it adds — OC-006, OC-007, OC-008 — are the operational containment of reasoning, memory, and host. |
 
+OBEC-Attest establishes identity and authority, not containment: that the entity
+is the one activated, that every structural change was authorized, and that no
+operation it can invoke — host actuation included — writes outside its content
+class. It does not bound what the entity does on the host, what reaches its
+context, or what the inference channel holds. Where that difference matters,
+the claim to look for is OBEC-Core ([COMPLIANCE.md §1.2](../COMPLIANCE.md#12-obec-attest)).
+
 An implementation claiming **OBEC-Attest** MUST NOT claim OBEC-Core. An
 implementation with extensions active is conformant as
 **OBEC-Core + \<extension names\>** and MUST additionally satisfy each active
