@@ -47,13 +47,14 @@ requirement)
 
 | Document | What it is | Version-bound |
 |---|---|---|
+| [**obec-primer.md**](spec/obec-primer.md) | Plain language, no requirements: what OBEC is for, whether you need it, and how the pieces fit. Start here if it is new to you. | no |
 | [**obec-kernel.md**](spec/obec-kernel.md) | The ten invariants, MUST sentences only. What is expensive to change, short enough to read at once. | **yes** |
 | [**obec-core.md**](spec/obec-core.md) | The same ten with their conformance tests, the reference architecture, the extension and revision rules, security considerations, and the glossary. | no |
 | [**obec-profile.md**](spec/obec-profile.md) | The Implementation Profile: 24 rules of operational machinery, stated as SHOULD. Not required for conformance. | no |
 | [design/0001](design/0001-obec-restructure.md) | Why the set is shaped this way. Not needed to implement. | no |
 
-Three layers, three audiences. An implementer reads the Core. A reviewer reads
-the Kernel. Someone asking *why* reads the ADR.
+Four audiences. Someone new reads the Primer. An implementer reads the Core. A
+reviewer reads the Kernel. Someone asking *why* reads the ADR.
 
 ---
 

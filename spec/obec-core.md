@@ -35,6 +35,11 @@ test.
 > stated as SHOULD. The reasoning behind the shape of the set is recorded in
 > [ADR 0001](../design/0001-obec-restructure.md) and is not needed to implement
 > this document.
+>
+> This document is self-contained and assumes no prior acquaintance with OBEC.
+> The [**Primer**](obec-primer.md) explains the design in plain language for
+> readers who want the shape before the requirements; it is non-normative and
+> implementers can skip it.
 
 ---
 
