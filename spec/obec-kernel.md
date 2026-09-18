@@ -99,9 +99,8 @@ Every authorization originates with an Operator. **No part of the implementation
 may create, modify, or revoke one**, or override, delegate, or substitute for an
 Operator decision. An entity MAY originate a proposal at any time, including on
 its own initiative; a proposal is inert, and originating one changes nothing.
-Every proposal MUST be logged at
-origination, and every commit MUST be logged with the identity of the
-authorization that covered it.
+Every proposal MUST be logged at origination, and every commit MUST be logged
+with the identity of the authorization that covered it.
 
 **(c) The Operator is reachable.** There MUST exist a path by which any part of
 the implementation reaches the Operator **without passing through the reasoning
