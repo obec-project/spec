@@ -5,6 +5,11 @@
 Governance for the OBEC specification: decision-making, release management, and
 conformance policy.
 
+> **OBEC is a proposal.** Nothing in it has been ratified, no implementation has
+> run the conformance suite, and governance below describes how the project is
+> run today — by one author, in the open — not a settled institution. Section 10
+> is the intended exit from that.
+
 ---
 
 ## 1. Principles
@@ -23,7 +28,10 @@ conformance policy.
 
 **Specification Owner** — maintains architectural coherence, approves releases
 and status transitions, resolves disputes. The repository founder serves as
-Specification Owner.
+Specification Owner. This is a description of who is currently doing the work,
+not a claim of standing: while OBEC is a proposal, the role's real authority is
+over the document, and anyone is free to disagree with it in public or to fork
+it.
 
 **Maintainers** — review pull requests, propose revisions, maintain
 documentation. Maintainers do not unilaterally change an invariant.
@@ -46,9 +54,16 @@ Each document declares a status:
 
 Status changes require explicit approval by the Specification Owner.
 
-OBEC-Core is currently **Pre-release at 0.9.0**. Promotion to Proposed Standard
-requires the version to advance to 1.0.0 and the first implementation to pass the
-ten conformance tests. Rule identifiers freeze at 1.0.
+OBEC-Core is currently **Pre-release at 0.9.0**, and no status above that has
+been claimed. Promotion to Proposed Standard requires the version to advance to
+1.0.0 and the first implementation to pass the ten conformance tests. Rule
+identifiers freeze at 1.0.
+
+The most useful thing that can happen before then is for someone to show that
+one of the ten invariants is wrong. [design/OPEN-QUESTIONS.md](design/OPEN-QUESTIONS.md)
+lists where the author expects that to be found, and
+[CONTRIBUTING §7](CONTRIBUTING.md#7-challenging-an-invariant) says how to argue
+it.
 
 ---
 

@@ -13,9 +13,11 @@ Read [GOVERNANCE.md](GOVERNANCE.md) before proposing a normative change.
 - **Specification first.** The normative text is authoritative. Reference
   implementations do not define the standard, and behavior is never defined by
   pointing at code.
-- **The invariant set is closed.** Ten invariants, no more, and nothing may
-  weaken one. Adding to the set, removing from it, or rewording it is a major
-  version (Core §4).
+- **The invariant set is closed *within a version*.** Ten invariants, no more,
+  and no extension or configuration may weaken one. Adding to the set,
+  removing from it, or rewording it is a major version (Core §4). Closure is a
+  guarantee to implementers, not a claim that the ten are right — arguing that
+  one of them is wrong is §7, and it is welcome.
 - **Minimalism.** Every rule that survived the restructure survived two filters:
   *can it be given a mechanical test?* and *could a configuration plausibly relax
   it?* A proposed rule that fails either belongs in the Profile or nowhere.
@@ -217,7 +219,48 @@ Most proposals that pass 1 and 2 fail 3, and belong in the Profile.
 
 ---
 
-## 7. RFC process
+## 7. Challenging an invariant
+
+**This is the most valuable contribution the project can receive right now.**
+
+OBEC is a proposal. Nothing in it has been ratified, no implementation has run
+the conformance suite, and no entity has ever been created under it. Section 6
+tells you how to argue that an eleventh invariant is missing; this section
+tells you how to argue that one of the ten is wrong — which is more likely and
+more useful.
+
+[design/OPEN-QUESTIONS.md](design/OPEN-QUESTIONS.md) is the author's own list
+of what is least settled. Starting there costs you nothing and may save you the
+work of discovering a known doubt.
+
+A challenge is an issue, not a pull request, and it is strongest when it names
+one of:
+
+- **It is not testable.** The conformance test for it is theater — it passes
+  for implementations that plainly violate the rule, or it cannot fail. An
+  invariant nobody can check is a slogan.
+- **It is a restatement.** It follows from the other nine, so the set is nine
+  and one observation.
+- **It is a policy.** It is a reasonable thing to require of some deployments
+  and not of others, which makes it a Profile rule rather than a member of a
+  closed set.
+- **It is unsatisfiable, or unsatisfiable together with another.** Two
+  invariants cannot both hold in any real construction.
+- **It names structure.** It constrains how an implementation is built rather
+  than what must be true of it, which would defeat the point of leaving the
+  decomposition free.
+
+What a challenge does not need: a replacement, a migration plan, or a pull
+request. Being right that something is wrong is a complete contribution, and
+the author would rather learn it now than after someone has built on it.
+
+**The set is closed within a version, not beyond question.** Closure means an
+extension cannot quietly add to it or weaken it — it has never meant that the
+ten are correct.
+
+---
+
+## 8. RFC process
 
 Significant architectural changes SHOULD begin as an RFC in `ietf/` or as an ADR
 in `design/`, depending on whether the audience is external or the project
@@ -228,7 +271,7 @@ Acceptance requires explicit approval by the Specification Owner.
 
 ---
 
-## 8. Extensions
+## 9. Extensions
 
 An extension MUST declare the OBEC-Core version it targets, add capability or
 harden a rule but never weaken one, class every artifact it adds within
@@ -238,7 +281,7 @@ An extension that hardens key management MUST do so within HC-003(b).
 
 ---
 
-## 9. Conformance changes
+## 10. Conformance changes
 
 A change affecting what conformance means MUST update the affected test and the
 suite version. The suite versions independently of the specification
@@ -250,7 +293,7 @@ project.
 
 ---
 
-## 10. Licensing
+## 11. Licensing
 
 By contributing you agree your contributions may be redistributed under the
 licenses in [LICENSE](LICENSE). Disclose any known patent or licensing
@@ -258,7 +301,7 @@ restriction affecting a contribution.
 
 ---
 
-## 11. Final authority
+## 12. Final authority
 
 The normative specification text is the final authority. Where contributors
 disagree, the Specification Owner decides, subject to

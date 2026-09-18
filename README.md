@@ -52,6 +52,7 @@ requirement)
 | [**obec-core.md**](spec/obec-core.md) | The same ten with their conformance tests, the reference architecture, the extension and revision rules, security considerations, and the glossary. | no |
 | [**obec-profile.md**](spec/obec-profile.md) | The Implementation Profile: 24 rules of operational machinery, stated as SHOULD. Not required for conformance. | no |
 | [design/0001](design/0001-obec-restructure.md) | Why the set is shaped this way. Not needed to implement. | no |
+| [design/OPEN-QUESTIONS](design/OPEN-QUESTIONS.md) | What the author is least sure about, and what would settle each. | no |
 
 Four audiences. Someone new reads the Primer. An implementer reads the Core. A
 reviewer reads the Kernel. Someone asking *why* reads the ADR.
@@ -73,19 +74,40 @@ evolves within a budget you set. Same rule, whole range.
 
 ---
 
-## Status
+## Status: this is a proposal
 
-**0.9.0 — pre-release.** The normative content is complete; the conformance suite
-is not.
+**Nothing here has been ratified by anyone.** No implementation has run the
+conformance suite, no entity has ever been created under OBEC, and the ten
+invariants are one person's answer that has not yet met an implementer. The
+documents use MUST because that is how you state a requirement without
+ambiguity — not because anyone has agreed to be bound by it.
+
+**0.9.0 — pre-release.** It is a first release rather than a first draft: the
+set is the product of a full restructure, and
+[ADR 0001](design/0001-obec-restructure.md) records how each invariant was
+derived and what was deliberately left out. 1.0 would follow a first
+implementation passing the ten tests, at which point rule identifiers freeze.
 
 **No entity should be created under OBEC before 1.0.** HC-004(a) records the
 major version in the Genesis Anchor, and a pre-release version can still change
-beneath an entity that already recorded it. 1.0 follows the first implementation
-passing the ten tests, at which point rule identifiers freeze.
+beneath an entity that already recorded it. Run the suite against disposable
+stores until then.
 
-0.9.0 is a first release, not a first draft: the invariant set is the product of
-a full restructure, and [ADR 0001](design/0001-obec-restructure.md) records how
-each of the ten was derived and what was deliberately left out.
+### What would help most
+
+[**design/OPEN-QUESTIONS.md**](design/OPEN-QUESTIONS.md) is the list of what
+the author is least sure about — whether ten is the right number, whether
+HC-001(d) is an invariant or a policy, whether portability and hardware-backed
+keys can coexist, and seven more. Each entry says what would settle it.
+
+**Arguing that one of the ten is wrong is the most useful thing anyone can do
+with this repository right now.** It does not need a replacement, a migration
+plan or a pull request — being right that something is wrong is a complete
+contribution. [CONTRIBUTING §7](CONTRIBUTING.md#7-challenging-an-invariant)
+says what makes such an argument land.
+
+Implementations, conformance runs, and reports that an invariant was expensive
+for no benefit are all equally welcome.
 
 ---
 
