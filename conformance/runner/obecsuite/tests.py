@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The ten conformance tests of ../../TESTS.md.
 
 One function per invariant. Each step is an adapter call and an assertion, and

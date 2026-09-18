@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The suite catches what it claims to catch.
 
 A runner that has never seen a failure is a runner nobody should trust. The

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Invocation of an implementation's conformance adapter.
 
 The contract is in ../../ADAPTER.md: one executable, subcommands, JSON on

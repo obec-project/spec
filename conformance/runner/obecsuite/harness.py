@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Run context: ties the adapter, the disposable stores, and result collection.
 
 A step's outcome is decided here and nowhere else, so that every test reads as

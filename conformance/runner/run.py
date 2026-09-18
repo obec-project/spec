@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """OBEC conformance suite.
 
     python3 run.py --adapter ./obec-adapter

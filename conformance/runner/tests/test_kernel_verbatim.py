@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The kernel is a verbatim extract of OBEC-Core §2.
 
 OBEC-Core §4.1 says that where spec/obec-kernel.md differs from §2, §2 governs

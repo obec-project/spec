@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Claim emission.
 
 A run produces two artifacts: machine-readable JSON, and the Markdown a human

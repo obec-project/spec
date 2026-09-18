@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Outcome vocabulary for steps, tests and runs."""
 
 from dataclasses import dataclass, field

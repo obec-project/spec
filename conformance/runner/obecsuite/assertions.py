@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The assertion vocabulary of TESTS.md.
 
 Every assertion raises StepFailure with a message naming what was expected and

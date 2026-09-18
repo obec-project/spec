@@ -1,0 +1,9 @@
+OBEC — Operator-Bounded Entity Continuity
+Copyright 2026 Jonas Orrico
+
+The code in conformance/ and implementations/ is licensed under the Apache
+License, Version 2.0. The documents in spec/ and design/ are licensed under
+Creative Commons Attribution 4.0 International. See LICENSE.
+
+This product includes no third-party code. The conformance runner and the stub
+use the Python standard library only.

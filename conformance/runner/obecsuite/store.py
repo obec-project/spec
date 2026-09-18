@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Disposable Entity Stores.
 
 Every test works on a store the runner created and will destroy. The runner
