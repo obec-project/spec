@@ -1,31 +1,47 @@
 # OBEC Project Licensing
 
-The Operator-Bounded Entity Continuity (OBEC) project uses different licenses for the specification and for code.
+The Operator-Bounded Entity Continuity (OBEC) project uses one license for its
+documents and another for its code. The full text of each is in
+[`LICENSES/`](LICENSES/).
 
-## 1. Specification License
+## 1. Documents — CC BY 4.0
 
-All documentation located in the `/spec` and `/design` directories are licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
+Licensed under the **Creative Commons Attribution 4.0 International** license
+([`LICENSES/CC-BY-4.0.txt`](LICENSES/CC-BY-4.0.txt)):
 
-You are free to:
-- **Share** — copy and redistribute the material in any medium or format.
-- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially.
+- the specification, in `spec/`;
+- the design records, in `design/`;
+- the Internet-Drafts in `ietf/`, which are generated from `spec/`;
+- the documents at the root of the repository — README, CONTRIBUTING,
+  GOVERNANCE, COMPLIANCE, CHANGELOG, SECURITY.
 
-Under the following terms:
-- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+You are free to **share** — copy and redistribute the material in any medium or
+format — and to **adapt** — remix, transform, and build upon the material for
+any purpose, even commercially — provided you give appropriate credit, provide
+a link to the license, and indicate if changes were made.
 
-Full license text: [https://creativecommons.org/licenses/by/4.0/](https://creativecommons.org/licenses/by/4.0/)
+**Internet-Drafts.** A draft submitted to the IETF is also subject to the IETF
+Trust's Legal Provisions under BCP 78 and BCP 79, as the boilerplate of each
+submitted draft states. That grant is made to the IETF Trust in addition to
+this license, not in place of it.
 
----
+## 2. Code — Apache 2.0
 
-## 2. Software License
+Licensed under the **Apache License, Version 2.0**
+([`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt)):
 
-Code located in the `/conformance` and `/implementations` directories are licensed under the **Apache License, Version 2.0** (the "License").
+- the conformance suite, in `conformance/` — the runner, the stub, and the
+  documents that define the adapter contract, the tests and the claim process,
+  so that the suite can be copied into an implementation's repository whole;
+- implementations, in `implementations/`;
+- repository automation, in `.github/`.
 
-You may not use this file except in compliance with the License. You may obtain a copy of the License at:
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
 
-[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+Attribution notices for the code are in [`NOTICE`](NOTICE).
 
 ---
 

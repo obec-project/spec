@@ -154,8 +154,8 @@ the full list of what is deliberately left open.
 
 ## License
 
-Specification (`spec/`, `design/`): [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
-Code (`conformance/`, `implementations/`): [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+Documents (`spec/`, `design/`, `ietf/`, and the documents at the root): [CC BY 4.0](LICENSES/CC-BY-4.0.txt)
+Code (`conformance/`, `implementations/`): [Apache 2.0](LICENSES/Apache-2.0.txt)
 
 See [LICENSE](LICENSE).
 
