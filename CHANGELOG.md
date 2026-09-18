@@ -36,6 +36,9 @@ should be created under this version, for the reason 0.9.0 gives.
 
 - Targets OBEC-Core 0.9.1. The stub's break modes follow the rename
   (`hc002b` → `oc002b`).
+- The runner's exit code says why a run is not conformant: `1` a step failed,
+  `3` nothing failed but a step is unestablished, `4` the adapter errored.
+  Only `0` is conformant, and no flag turns `3` into `0`.
 - The suite's own tests: every stub break must fail exactly the tests it is
   documented to fail, and the kernel must be a verbatim extract of §2. Both run
   in CI on Python 3.8 – 3.14. `OBEC_STUB_HOSTNAME` lets the stub stand in for a

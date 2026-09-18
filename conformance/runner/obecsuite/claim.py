@@ -31,6 +31,29 @@ def conformant(results) -> bool:
     return all(r.outcome in (Outcome.PASS, Outcome.ATTESTED) for r in results)
 
 
+# Exit codes. 2 is argparse's usage error and stays that.
+EXIT_CONFORMANT = 0
+EXIT_FAIL = 1
+EXIT_UNESTABLISHED = 3
+EXIT_ERROR = 4
+
+
+def exit_code(results) -> int:
+    """Only 0 means conformant. The others say why not, in the precedence a
+    test's own outcome uses: a run the adapter broke is incomplete, and says
+    nothing reliable about failures; a failure outranks what could not be
+    established. There is deliberately no way to turn 3 into 0 — "we could
+    not tell" must not read as "it holds", not even to a CI script."""
+    outcomes = {r.outcome for r in results}
+    if Outcome.ERROR in outcomes:
+        return EXIT_ERROR
+    if Outcome.FAIL in outcomes:
+        return EXIT_FAIL
+    if Outcome.UNESTABLISHED in outcomes:
+        return EXIT_UNESTABLISHED
+    return EXIT_CONFORMANT
+
+
 def as_json(results, ctx, meta: dict) -> dict:
     return {
         "suite_version": SUITE_VERSION,

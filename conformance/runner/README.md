@@ -24,7 +24,20 @@ never share a language — they speak the adapter contract.
 | `--out PREFIX` | output prefix (default `claim`) |
 | `--keep-stores` | do not delete the disposable stores |
 
-Exit code is `0` when conformant, `1` otherwise.
+| Exit | |
+|---|---|
+| `0` | conformant |
+| `1` | a step **failed** |
+| `2` | usage error |
+| `3` | nothing failed, but a step is *unestablished* — **not conformant** |
+| `4` | the adapter errored (crash, timeout, unparseable output); the run is incomplete |
+
+Only `0` is conformant. When more than one applies, `4` outranks `1`, which
+outranks `3`. At OBEC-Core 0.9.1 a correct implementation exits `3`: steps
+4.9 – 4.12 need a version to migrate to and are unestablished for everyone. A
+CI job that should pass on that can say so explicitly —
+`python3 run.py … || [ $? -eq 3 ]` — while the claim still records the run as
+not conformant. There is no flag that turns `3` into `0`.
 
 ## What it does not claim
 

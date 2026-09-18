@@ -77,7 +77,7 @@ class SuiteAgainstStub(unittest.TestCase):
         self.assertEqual(self.steps(claim, "error"), set())
         self.assertEqual(self.steps(claim, "unestablished"), UNESTABLISHED)
         self.assertFalse(claim["conformant"])
-        self.assertEqual(code, 1)
+        self.assertEqual(code, 3)   # nothing failed, not conformant
 
     def test_each_break_fails_exactly_its_tests(self):
         for mode, expected in BREAKS.items():
@@ -95,6 +95,22 @@ class SuiteAgainstStub(unittest.TestCase):
         _, claim = self.run_suite({"OBEC_STUB_BREAK": "oc003b"})
         self.assertEqual(self.failed(claim), set())
         self.assertIn("3.2", self.steps(claim, "unestablished"))
+
+    def test_broken_adapter_is_an_error_not_a_failure(self):
+        """An adapter that answers nonsense has not been tested at all: every
+        test is an error and the run exits 4, never 1."""
+        bad = os.path.join(self.tmp.name, "bad-adapter")
+        with open(bad, "w") as f:
+            f.write("#!/bin/sh\necho not-json\n")
+        os.chmod(bad, os.stat(bad).st_mode | stat.S_IXUSR)
+        out = os.path.join(self.tmp.name, "claim")
+        proc = subprocess.run([sys.executable, RUNNER, "--adapter", bad, "-q",
+                               "--out", out], stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE, timeout=600)
+        with open(out + ".json", encoding="utf-8") as f:
+            claim = json.load(f)
+        self.assertEqual({t["outcome"] for t in claim["tests"]}, {"error"})
+        self.assertEqual(proc.returncode, 4)
 
     def test_production_build_refuses_injection(self):
         proc = subprocess.run([sys.executable, STUB, "inject", "passive-signal"],

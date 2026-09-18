@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from obecsuite import SUITE_VERSION, TARGETS                    # noqa: E402
 from obecsuite.adapter import Adapter                            # noqa: E402
-from obecsuite.claim import conformant, write                    # noqa: E402
+from obecsuite.claim import conformant, exit_code, write         # noqa: E402
 from obecsuite.harness import Context, Runner                    # noqa: E402
 from obecsuite.result import Outcome                             # noqa: E402
 from obecsuite.store import Stores                               # noqa: E402
@@ -88,7 +88,7 @@ def main(argv=None) -> int:
               f"{counts['error']} error")
         print(f"claim: {args.out}.md, {args.out}.json")
 
-    return 0 if ok else 1
+    return exit_code(results)
 
 
 if __name__ == "__main__":
