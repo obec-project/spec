@@ -223,10 +223,9 @@ Most proposals that pass 1 and 2 fail 3, and belong in the Profile.
 
 **This is the most valuable contribution the project can receive right now.**
 
-OBEC is a proposal. Nothing in it has been ratified, and no implementation has
-yet run the conformance suite. The architecture itself has run — two
-implementations, entities operating under them — so the open question is not
-whether it works but at what cost and for how long. Section 6 tells you how to
+OBEC is a proposal ([status](README.md#status-this-is-a-proposal)), and its
+architecture has already run, so the open question is not whether it works but
+at what cost and for how long. Section 6 tells you how to
 argue that an eleventh invariant is missing; this section tells you how to
 argue that one of the ten is wrong, which is more likely and more useful.
 

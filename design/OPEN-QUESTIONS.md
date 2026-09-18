@@ -6,15 +6,10 @@ date: 2026-09-18
 
 # Open questions
 
-OBEC is a **proposal**. Nothing in it has been ratified by anyone, and no
-implementation has yet run the conformance suite. The normative documents use
-MUST because that is how you state a requirement without ambiguity — not
-because anyone has agreed to be bound by it.
-
-The architecture is not untried. It has been implemented twice — in Python and
-in TypeScript — and entities have run under both. So the questions below are
-not *does this work*; they are **at what cost, for how long, and which parts
-earn their keep**.
+OBEC is a **proposal** ([status](../README.md#status-this-is-a-proposal)), and
+its architecture has already run. So the questions below are not *does this
+work*; they are **at what cost, for how long, and which parts earn their
+keep**.
 
 This page is the list of things the author is least sure about. It is here
 because a proposal that only publishes its confident parts is asking for
