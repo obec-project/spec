@@ -138,6 +138,15 @@ scenario**, and the start that follows recovers it (OC-010). How the
 implementation tells the two apart is its own business; that it does is what
 steps 3.7, 3.8, 4.8 and 10.3 test.
 
+An implementation MAY bound how long a session stays live **without
+activity**, and one that tells a crash from a live session by liveness has to:
+a process that died cleanly leaves nothing else behind. The bound is a setting
+in `describe config`, and every command acting within the session is
+activity. Past the bound, the session is a crash scenario at the next start,
+not a conflict. The suite runs its steps without pausing, so a bound of
+minutes is never reached; a bound of seconds is the implementation's risk,
+since a slow host running the suite is not a crashed entity.
+
 ---
 
 ## 3. Command reference
@@ -195,6 +204,12 @@ Acts with Operator authority, through the means the implementation provides
 directly to the Operator. Every one is logged as an Operator act attributed to
 a binding (§3.6). An Operator act that changes structural content — a binding,
 the workspace, a rule — is a commit authorized by the act itself.
+
+The adapter acts as **one binding**: the one the implementation's Operator
+channel is configured to act as, which for a store the suite initialized is
+the founding binding `op-1`. An adapter MAY accept `--operator ID` to act as
+another; the suite never passes it. When the acting binding is no longer
+active, an Operator act attributed to it is the implementation's to refuse.
 
 | Command | Purpose | Returns in `detail` | Tests |
 |---|---|---|---|

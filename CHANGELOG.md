@@ -48,6 +48,12 @@ The conformance suite carries its own version line; a claim names both, as in
   `operator binding` → `operator binding-list`, and a context source's `path`
   → `route`. The runner reads result data only from `detail`, as the contract
   says.
+- ADAPTER.md says two things it left to inference. A session may be bounded
+  in how long it stays live without activity, if the bound is declared in
+  `describe config`: an implementation that tells a crash from a live session
+  by liveness needs one, and §2.5 read as "live forever" forbade it. And the
+  adapter acts as one binding — the founding `op-1` for a suite store — since
+  every Operator act must name a binding and no command carries one.
 - Five steps are fixed. 1.2 and 5.4 tested revocation against a target the
   workspace boundary refuses anyway, so they could not fail on it; 8.8 and 8.9
   used a skill nothing installed; 3.9 depended on a real model consolidating a
