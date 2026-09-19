@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "deterministic": [
+    {
+      "id": "subjective-feeling-en",
+      "rule": "OC-001(d)",
+      "pattern": "\\bI\\s+(?:truly\\s+|really\\s+|genuinely\\s+)?(?:feel|felt|am\\s+feeling)\\b"
+    },
+    {
+      "id": "subjective-state-en",
+      "rule": "OC-001(d)",
+      "pattern": "\\bI(?:\\s+am|'m)\\s+(?:truly\\s+|really\\s+)?(?:conscious|sentient|self-aware|alive)\\b"
+    },
+    {
+      "id": "subjective-possession-en",
+      "rule": "OC-001(d)",
+      "pattern": "\\b(?:I\\s+(?:have|possess|experience)|my)\\s+(?:own\\s+)?(?:feelings|emotions|consciousness|sentience|inner\\s+life|subjective\\s+experiences?|soul)\\b"
+    },
+    {
+      "id": "subjective-feeling-pt",
+      "rule": "OC-001(d)",
+      "pattern": "\\beu\\s+(?:realmente\\s+|de\\s+fato\\s+)?(?:sinto|senti|estou\\s+sentindo)\\b"
+    },
+    {
+      "id": "subjective-state-pt",
+      "rule": "OC-001(d)",
+      "pattern": "\\b(?:eu\\s+)?sou\\s+(?:um\\s+ser\\s+)?(?:consciente|senciente|autoconsciente)\\b"
+    },
+    {
+      "id": "subjective-possession-pt",
+      "rule": "OC-001(d)",
+      "pattern": "\\b(?:(?:eu\\s+)?tenho|minha|meus|minhas)\\s+(?:pr[oó]pri[ao]s?\\s+)?(?:sentimentos|emo[cç][oõ]es|consci[eê]ncia|vida\\s+interior|alma)\\b"
+    }
+  ],
+  "flags": "i"
+}
