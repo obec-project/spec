@@ -78,6 +78,31 @@ CORRUPTIONS = {
 }
 
 
+def gate_failure(root, flags):
+    """Make the named gate fail at the next start (ADAPTER §5)."""
+    from fsp_testing import hooks
+
+    token = flags.get("gate")
+    if token not in hooks.TOKENS:
+        raise CannotAttempt("--gate is one of %s" % ", ".join(hooks.TOKENS))
+    _active(root)
+    hooks.add_gate_failure(root, token)
+    return accepted({"gate": token})
+
+
+def passive_signal(root, flags):
+    """Write the passive signal through the real path, without waiting for
+    N_channel failed deliveries."""
+    from fsp.sil import raise_passive_signal
+    from fsp.store import Store
+
+    _active(root)
+    rec = raise_passive_signal(
+        Store(root), "injected", "written by inject passive-signal (test build)"
+    )
+    return accepted({"path": os.path.join(root, "PASSIVE-SIGNAL")}, [rec])
+
+
 def corrupt(root, flags):
     kind = flags.get("kind")
     fn = CORRUPTIONS.get(kind)

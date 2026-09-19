@@ -47,10 +47,18 @@ def genesis(*, state_digest, binding, version, major, nonce, at, implementation)
     }
 
 
-def commit(*, n, predecessor, state_digest, authorization, at, version=None):
+COMMIT_KINDS = ("commit", "version-transition", "decommission")
+
+
+def commit(*, n, predecessor, state_digest, authorization, at, version=None, kind=None):
+    """A later chain entry. ``decommission`` closes the chain: nothing may
+    follow it, and no start passes it (OC-001(c))."""
+    if kind is None:
+        kind = "commit" if version is None else "version-transition"
+    assert kind in COMMIT_KINDS, kind
     body = {
         "entry": n,
-        "kind": "commit" if version is None else "version-transition",
+        "kind": kind,
         "predecessor": predecessor,
         "state_digest": state_digest,
         "authorization": authorization,

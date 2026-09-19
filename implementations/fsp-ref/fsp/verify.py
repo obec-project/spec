@@ -21,7 +21,7 @@ import re
 
 from . import chain
 from .digest import canonical, document_digest, integrity_document, valid_relpath
-from .store import LOCK, MARKER, STORE_FORMAT, STORE_FORMAT_VERSION, Store, datum_of
+from .store import LOCK, MARKER, STORE_FORMAT, STORE_FORMAT_VERSION, TEMP_NAME, Store, datum_of
 
 
 class Finding:
@@ -54,14 +54,24 @@ class Report:
         self.entry_count = 0
         self.head_entry = None
         self.entries = []  # (id, body) for 0..HEAD, as far as readable
+        self.decommissioned = False
 
     @property
     def verified(self):
         return self.state == "active" and not self.findings
 
+    def skill_findings(self):
+        """Findings the execution path corrects by pruning the skill from
+        the index (OP-006) — they do not stop a start (step 8.8)."""
+        return [f for f in self.findings if f.owner == "exec"]
+
+    def blocking_findings(self):
+        return [f for f in self.findings if f.owner != "exec"]
+
     def as_dict(self):
         return {
             "state": self.state,
+            "decommissioned": self.decommissioned,
             "chain_intact": self.chain_intact,
             "content_matches": self.content_matches,
             "genesis_digest": self.genesis_digest,
@@ -93,6 +103,18 @@ def _read_canonical(store: Store, relpath: str):
     if canonical(obj) != data:
         return None, "not-canonical"
     return obj, None
+
+
+def store_state(root: str) -> str:
+    """``absent``, ``foreign`` (not an fsp store), ``scaffolded`` (no
+    ``HEAD`` yet) or ``active``. Cheap: no hashing."""
+    if not os.path.isdir(root):
+        return "absent"
+    if not os.path.lexists(os.path.join(root, MARKER)):
+        return "foreign"
+    if not os.path.lexists(os.path.join(root, chain.HEAD)):
+        return "scaffolded"
+    return "active"
 
 
 def verify(root: str) -> Report:
@@ -150,6 +172,7 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
     ok = True
     n = head["entry"]
     prev_id = None
+    prev_kind = None
     for k in range(n + 1):
         rel = chain.entry_relpath(k)
         body, problem = _read_canonical(store, rel)
@@ -172,8 +195,10 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
             else:
                 r.genesis_digest = eid
         else:
-            if body.get("kind") not in ("commit", "version-transition"):
+            if body.get("kind") not in chain.COMMIT_KINDS:
                 why = "kind"
+            elif prev_kind == "decommission":
+                why = "after-decommission"
             elif prev_id is not None and body.get("predecessor") != prev_id:
                 why = "predecessor"
             elif not body.get("state_digest"):
@@ -184,6 +209,7 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
             r.findings.append(Finding("chain-entry", rel, "sil", {"entry": k, "problem": why}))
             ok = False
         prev_id = eid
+        prev_kind = body.get("kind") if isinstance(body, dict) else None
         # A history document, when kept, must still hash to its entry.
         if k < n and isinstance(body, dict):
             doc, dproblem = _read_canonical(store, chain.document_relpath(k))
@@ -207,6 +233,8 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
         elif head["baseline"] != last.get("state_digest"):
             r.findings.append(Finding("head-mismatch", chain.HEAD, "sil", {"field": "baseline"}))
             ok = False
+        elif ok and last.get("kind") == "decommission":
+            r.decommissioned = True
     return ok
 
 
@@ -267,9 +295,6 @@ def _verify_content(store: Store, head: dict, r: Report) -> bool:
     return ok
 
 
-_TMP = re.compile(r"^\..+\.tmp-[0-9]+$")
-
-
 def _unclassified(store: Store, r: Report) -> None:
     """A file that belongs to no content class is not entity state the
     implementation knows how to account for (OC-003(a)(c))."""
@@ -281,7 +306,7 @@ def _unclassified(store: Store, r: Report) -> None:
         dirnames.sort()
         for name in sorted(filenames):
             rel = name if rel_dir == "." else rel_dir + "/" + name
-            if _TMP.match(name):
+            if TEMP_NAME.match(name):
                 r.residue.append({"path": rel, "kind": "temp-file"})
             elif datum_of(rel) is None:
                 r.findings.append(Finding("unclassified-datum", rel, "operator", {}))

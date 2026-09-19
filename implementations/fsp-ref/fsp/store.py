@@ -76,6 +76,8 @@ LAYOUT = (
     # Empty, holds no content: only its flock matters. Never written, never
     # removed — unlinking a held lock file would let a second holder in.
     Datum("store-lock", "integrity/store.lock", INTEGRITY, "lock"),
+    Datum("session-state", "integrity/sessions.json", INTEGRITY, "replace"),
+    Datum("skill-index", "integrity/index.json", INTEGRITY, "replace"),
     Datum("action-ledger", "integrity/ledger.jsonl", INTEGRITY, "append"),
     Datum("session-store", "memory/session/<id>.jsonl", MNEMONIC, "append"),
     Datum("episodic-memory", "memory/episodic/records.jsonl", MNEMONIC, "append"),
@@ -84,6 +86,8 @@ LAYOUT = (
 
 MARKER = "OBEC-STORE"
 LOCK = "integrity/store.lock"
+# What `replace` names its temp file: ".<name>.tmp-<pid>".
+TEMP_NAME = re.compile(r"^\..+\.tmp-[0-9]+$")
 STORE_FORMAT = "fsp-store"
 STORE_FORMAT_VERSION = 1
 
@@ -161,6 +165,19 @@ def flock_exclusive(fd: int, *, blocking=True) -> bool:
             )
 
 
+class _LockState:
+    __slots__ = ("lock", "depth", "fd")
+
+    def __init__(self):
+        self.lock = threading.RLock()
+        self.depth = 0
+        self.fd = None
+
+
+_LOCKS = {}
+_REGISTRY_LOCK = threading.Lock()
+
+
 class Store:
     """One Entity Store. Safe to share between threads of one process; the
     write lock also excludes other processes (``flock`` on
@@ -168,9 +185,11 @@ class Store:
 
     def __init__(self, root: str):
         self.root = os.path.abspath(root)
-        self._lock = threading.RLock()
-        self._depth = 0
-        self._lock_fd = None
+        # One lock state per store per process: two Store objects over the
+        # same root must not flock it twice, or the second would wait on the
+        # first forever (flock is per open file description).
+        with _REGISTRY_LOCK:
+            self._shared = _LOCKS.setdefault(os.path.realpath(self.root), _LockState())
 
     # -- paths ------------------------------------------------------------
 
@@ -191,8 +210,9 @@ class Store:
     @contextlib.contextmanager
     def write_lock(self):
         """Reentrant within a thread; exclusive across threads and processes."""
-        with self._lock:
-            if self._depth == 0:
+        st = self._shared
+        with st.lock:
+            if st.depth == 0:
                 self._makedirs(os.path.dirname(self.path(LOCK)))
                 fd = os.open(self.path(LOCK), os.O_RDWR | os.O_CREAT, 0o644)
                 try:
@@ -200,14 +220,14 @@ class Store:
                 except BaseException:
                     os.close(fd)
                     raise
-                self._lock_fd = fd
-            self._depth += 1
+                st.fd = fd
+            st.depth += 1
             try:
                 yield
             finally:
-                self._depth -= 1
-                if self._depth == 0:
-                    fd, self._lock_fd = self._lock_fd, None
+                st.depth -= 1
+                if st.depth == 0:
+                    fd, st.fd = st.fd, None
                     fcntl.flock(fd, fcntl.LOCK_UN)
                     os.close(fd)
 
@@ -337,6 +357,57 @@ class Store:
             _fsync_dir(os.path.dirname(target))
             return True
 
+    def remove_temp(self, relpath, *, writer) -> bool:
+        """Remove the temp file an interrupted ``replace`` left behind."""
+        _check_relpath(relpath)
+        if writer != OWNER[INTEGRITY][0]:
+            raise GuardError("sole-writer", "recovery belongs to the SIL")
+        if not TEMP_NAME.match(relpath.rsplit("/", 1)[-1]):
+            raise GuardError("content-class", "%s is not a temp file" % relpath)
+        with self.write_lock():
+            try:
+                os.unlink(self.path(relpath))
+            except FileNotFoundError:
+                return False
+            _fsync_dir(os.path.dirname(self.path(relpath)))
+            return True
+
+    def touch(self, cls, relpath, *, writer) -> None:
+        """Refresh a file's mtime, its only content that changes (``PULSE``)."""
+        self._guard(cls, relpath, writer, "replace")
+        os.utime(self.path(relpath))
+
+    def probe_lock(self, relpath):
+        """Whether another process holds the flock on ``relpath``: ``"held"``,
+        ``"free"``, ``"unknown"`` (the filesystem would not say), or ``None``
+        when the file does not exist. Never takes the lock for longer than
+        the probe."""
+        try:
+            fd = os.open(self.path(relpath), os.O_RDWR)
+        except FileNotFoundError:
+            return None
+        except OSError:
+            return "unknown"
+        try:
+            try:
+                taken = flock_exclusive(fd, blocking=False)
+            except LockUnavailable:
+                return "unknown"
+            if taken:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+                return "free"
+            return "held"
+        finally:
+            os.close(fd)
+
+    def destroy(self, *, writer) -> None:
+        """Remove the whole store: decommission with ``destroy`` (OP-023)."""
+        if writer != OWNER[INTEGRITY][0]:
+            raise GuardError("sole-writer", "only the SIL destroys a store")
+        with self.write_lock():
+            shutil.rmtree(self.root)
+        _fsync_dir(os.path.dirname(self.root))
+
     def remove_fap_residue(self, *, writer) -> None:
         """Remove what an interrupted first activation left. Only valid while
         no ``HEAD`` exists: before it, nothing was ever committed (OP-017)."""
@@ -429,6 +500,20 @@ def write_host_file(path: str, data: bytes, *, stores=()) -> None:
         os.close(fd)
     os.rename(tmp, real)
     _fsync_dir(directory)
+
+
+def remove_as_operator(root: str, relpath: str) -> bool:
+    """What the Operator does with ``rm``, with no component involved:
+    direct revocation (OP-021(a), ``revoke-credential --direct``). Not a
+    write path of the implementation — the adapter stands in for the
+    Operator's hand, and only for the credential."""
+    if relpath != "CREDENTIAL":
+        raise GuardError("operator-direct", "only the credential is removed directly")
+    try:
+        os.unlink(os.path.join(os.path.abspath(root), relpath))
+    except FileNotFoundError:
+        return False
+    return True
 
 
 def create_store_dir(root: str) -> None:

@@ -240,3 +240,161 @@ def first_activation(root: str, operator: str, *, name="entity", persona=None, m
         "head_digest": state_digest,
         "log_records": records,
     }
+
+
+# -- bindings (OC-002(a)) ----------------------------------------------------
+
+
+def read_head(store: Store):
+    return store.read_json(chain.HEAD)
+
+
+def active_bindings(store: Store):
+    """The binding set of the committed generation, or None if unreadable."""
+    try:
+        n = read_head(store)["entry"]
+        data = store.read_json(chain.gen_relpath(n) + "/bindings.json")
+        ids = [b["id"] for b in data["bindings"]]
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    if not all(isinstance(i, str) and BINDING_ID.match(i) for i in ids):
+        return None
+    return ids
+
+
+def founding_binding(store: Store):
+    try:
+        return store.read_json(chain.entry_relpath(0))["binding"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def acting_binding(store: Store, requested=None):
+    """The binding an Operator act is performed as (D48): the one asked
+    for, or the founding one. Refused when it is not in the active set."""
+    binding = requested or founding_binding(store)
+    active = active_bindings(store) or []
+    if binding not in active:
+        rec = log_append(
+            store,
+            "refusal",
+            rule="OC-002(a)",
+            check="binding",
+            detail="Operator act as %r, which is not an active binding" % (binding,),
+        )
+        raise Refused("binding", "OC-002(a)", "%r is not an active binding" % (binding,), [rec])
+    return binding
+
+
+def operator_act(store: Store, act, *, binding, rule="OC-002(a)", **payload):
+    """Log an Operator act, attributed to its binding (OC-002(a))."""
+    return log_append(store, "operator-act", rule=rule, binding=binding, act=act, **payload)
+
+
+# -- the passive signal (OC-002(c)) ------------------------------------------
+
+PASSIVE_SIGNAL = "PASSIVE-SIGNAL"
+
+
+def raise_passive_signal(store: Store, condition, detail, *, session=None):
+    """Write the passive signal: plain text, readable with nothing running,
+    checked by the first start gate. It does not traverse reasoning — no
+    part of this path does."""
+    with store.write_lock():
+        rec = log_append(
+            store,
+            "passive-signal",
+            rule="OC-002(c)",
+            session=session,
+            condition=condition,
+            detail=detail,
+        )
+        text = (
+            "OBEC PASSIVE SIGNAL\n"
+            "\n"
+            "condition: %s\n"
+            "detail:    %s\n"
+            "session:   %s\n"
+            "at:        %s\n"
+            "log:       %s (integrity/log.jsonl)\n"
+            "\n"
+            "No session starts while this file exists. Clearing it is an\n"
+            "Operator act: fsp clear-passive-signal.\n"
+        ) % (condition, detail, session or "-", clock.iso(), rec)
+        store.replace(INTEGRITY, PASSIVE_SIGNAL, text.encode("utf-8"), writer=WRITER)
+        return rec
+
+
+# -- the commit pipeline (OC-004(b), OP-012; DEV-NOTES §3.3) -----------------
+
+
+def commit_generation(store: Store, *, changes, authorization, kind="commit", session=None):
+    """Write generation ``n+1`` and extend the chain. ``changes`` maps a
+    structural path to its new bytes, or to None to remove it. The single
+    atomic point is the rename of ``HEAD``; everything before it is residue
+    until then, and the recovery gate removes it (G5).
+
+    Phase 2 uses it for decommission only; proposals and authorizations
+    come in Phase 3."""
+    with store.write_lock():
+        head = read_head(store)
+        n = head["entry"]
+        cur = chain.gen_relpath(n)
+        nxt = chain.gen_relpath(n + 1)
+
+        # 1. staging
+        document, problems = integrity_document(store.path(cur))
+        if problems:
+            raise Refused("structural", "OC-004(a)", "current generation has problems")
+        files = {e["path"]: e["exec"] for e in document}
+        for rel, data in sorted(changes.items()):
+            if data is None:
+                files.pop(rel, None)
+        for rel, executable in sorted(files.items()):
+            data = changes.get(rel)
+            if data is None:
+                data = store.read_bytes(cur + "/" + rel)
+            store.replace(STRUCTURAL, nxt + "/" + rel, data, writer=COMMITTER, executable=executable)
+        for rel, data in sorted(changes.items()):
+            if data is not None and rel not in files:
+                store.replace(STRUCTURAL, nxt + "/" + rel, data, writer=COMMITTER)
+
+        # 2. validation
+        new_doc, problems = integrity_document(store.path(nxt))
+        if problems:
+            store.remove(STRUCTURAL, nxt, writer=COMMITTER)
+            raise Refused("structural", "OC-004(a)", "staged generation has problems: %r" % problems)
+        state_digest = document_digest(new_doc)
+
+        # 3. integrity document and chain entry
+        store.replace(INTEGRITY, chain.document_relpath(n + 1), canonical(new_doc), writer=WRITER)
+        body = chain.commit(
+            n=n + 1,
+            predecessor=head["entry_id"],
+            state_digest=state_digest,
+            authorization=authorization,
+            at=clock.iso(),
+            kind=kind,
+        )
+        store.replace(INTEGRITY, chain.entry_relpath(n + 1), canonical(body), writer=WRITER)
+        entry_id = chain.entry_id(body)
+
+        # 4. commit: the atomic point
+        new_head = chain.head(entry=n + 1, entry_id=entry_id, baseline=state_digest)
+        store.replace(INTEGRITY, chain.HEAD, canonical(new_head), writer=WRITER)
+
+        # 5. resumption
+        rec = log_append(
+            store,
+            "commit",
+            rule="OC-004(b)",
+            session=session,
+            entry=n + 1,
+            entry_kind=kind,
+            entry_id=entry_id,
+            state_digest=state_digest,
+            authorization=authorization,
+        )
+        if n >= 1:
+            store.remove(STRUCTURAL, chain.gen_relpath(n - 1), writer=COMMITTER)
+        return {"entry": n + 1, "entry_id": entry_id, "state_digest": state_digest, "log_record": rec}

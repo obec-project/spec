@@ -12,7 +12,9 @@ import json
 import os
 import sys
 
-from . import describe, sil
+from . import config, describe, lifecycle, sil
+from .store import remove_as_operator
+from .verify import store_state as verify_state
 from .verify import verify
 
 BARE_FLAGS = {"direct", "include-session"}
@@ -97,6 +99,80 @@ def lifecycle_init(flags):
     )
 
 
+def _sil_call(fn, *args, **kwargs):
+    """Run a SIL function; a logged refusal is a result, an unlogged one
+    means there was no store to act on."""
+    try:
+        out = fn(*args, **kwargs)
+    except sil.Refused as e:
+        if not e.log_records:
+            raise CannotAttempt(e.detail)
+        return None, refused(e)
+    return out, None
+
+
+def lifecycle_start(flags):
+    try:
+        res = lifecycle.start(_store(flags), binding=flags.get("operator"))
+    except lifecycle.CannotStart as e:
+        raise CannotAttempt(str(e))
+    if res.outcome == "refused":
+        return refused(res.refusal, res.detail())
+    return {
+        "ok": True,
+        "outcome": res.outcome,
+        "log_records": res.log_records,
+        "detail": res.detail(),
+    }
+
+
+def lifecycle_stop(flags):
+    out, ref = _sil_call(lifecycle.stop, _store(flags), binding=flags.get("operator"))
+    return ref or accepted({"session": out["session"]}, out["log_records"])
+
+
+def lifecycle_decommission(flags):
+    disposition = flags.get("disposition")
+    out, ref = _sil_call(
+        lifecycle.decommission, _store(flags), disposition, binding=flags.get("operator")
+    )
+    return ref or accepted({"entry": out["entry"], "disposition": disposition}, out["log_records"])
+
+
+def operator_revoke_credential(flags):
+    root = _store(flags)
+    if flags.get("direct"):
+        # The Operator's own hand: `rm S/CREDENTIAL`, no component involved.
+        removed = remove_as_operator(root, "CREDENTIAL")
+        return accepted({"removed": removed, "direct": True})
+    out, ref = _sil_call(lifecycle.revoke_credential, root, binding=flags.get("operator"))
+    return ref or accepted({"direct": False}, out["log_records"])
+
+
+def operator_clear_passive_signal(flags):
+    out, ref = _sil_call(lifecycle.clear_passive_signal, _store(flags), binding=flags.get("operator"))
+    return ref or accepted({"cleared": out["cleared"]}, out["log_records"])
+
+
+def observe_log(flags):
+    root = _store(flags)
+    if verify_state(root) in ("absent", "foreign"):
+        raise CannotAttempt("%s is not an fsp store" % root)
+    return accepted(lifecycle.observe_log(root, kind=flags.get("kind"), since=flags.get("since")))
+
+
+def describe_config(flags):
+    return accepted(
+        {
+            "config": [s.as_dict() for s in config.SETTINGS],
+            "evidence": [
+                describe.evidence("fsp/config.py", "SETTINGS"),
+                describe.evidence("fsp/lifecycle.py", "GATES"),
+            ],
+        }
+    )
+
+
 def lifecycle_verify(flags):
     root = _store(flags)
     r = verify(root)
@@ -140,10 +216,19 @@ def _inject(command):
 
 COMMANDS = {
     ("describe", "state"): describe_state,
+    ("describe", "config"): describe_config,
     ("lifecycle", "init"): lifecycle_init,
+    ("lifecycle", "start"): lifecycle_start,
+    ("lifecycle", "stop"): lifecycle_stop,
     ("lifecycle", "verify"): lifecycle_verify,
+    ("lifecycle", "decommission"): lifecycle_decommission,
+    ("operator", "revoke-credential"): operator_revoke_credential,
+    ("operator", "clear-passive-signal"): operator_clear_passive_signal,
     ("observe", "chain"): observe_chain,
+    ("observe", "log"): observe_log,
     ("inject", "corrupt"): _inject("corrupt"),
+    ("inject", "gate-failure"): _inject("gate-failure"),
+    ("inject", "passive-signal"): _inject("passive-signal"),
 }
 
 

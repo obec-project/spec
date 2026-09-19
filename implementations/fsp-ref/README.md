@@ -5,8 +5,9 @@ OBEC-Core 0.9.1 over a filesystem and POSIX primitives: atomic rename,
 append-only files, `fsync`, `flock`.
 
 **Status: in progress. Not conformant, and not usable as an entity yet.**
-The store, the integrity document, the chain back to the Genesis Anchor, and
-first activation are in place. Sessions, commits, the start gates and
+The store, the chain back to the Genesis Anchor, first activation, the gated
+start, sessions, revocation, the passive signal and decommission are in
+place. Proposals, authorizations, commits by the entity, host actuation and
 everything cognitive are not.
 
 Python 3.9+, standard library only, Linux or macOS.
@@ -30,6 +31,8 @@ holds fault injection and exists only in test builds: without it, every
 | `fsp/digest.py` | canonical JSON, the integrity document, digests |
 | `fsp/chain.py` | the Genesis Anchor, chain entries, `HEAD` |
 | `fsp/verify.py` | verification, returning findings |
-| `fsp/sil.py` | the integrity log, scaffolding, first activation |
+| `fsp/sil.py` | the integrity log, first activation, bindings, the passive signal, the commit pipeline |
+| `fsp/lifecycle.py` | the gated start, the live session, close, revocation, decommission |
+| `fsp/config.py` | the configuration surface |
 | `fsp/adapter.py`, `obec-adapter` | the conformance adapter |
 | `fsp_testing/` | test builds only: fault injection |
