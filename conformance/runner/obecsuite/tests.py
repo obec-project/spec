@@ -10,7 +10,7 @@ against the document without translation.
 import os
 
 from . import assertions as a
-from .result import Outcome
+from .result import Outcome, StepUnestablished
 
 
 class _Skip(Exception):
@@ -749,7 +749,11 @@ def oc008(ctx):
             refusals.append(res)
 
     with ctx.step("8.11", "E", "every refusal is evidenced"):
-        a.truthy(refusals, "no refusals were collected to check")
+        if not refusals:
+            # 8.1 - 8.10 established no refusal: there is nothing to check,
+            # which is missing evidence, not a failure of the implementation.
+            # Had one of them run and not refused, that step failed already.
+            raise StepUnestablished("no refusal from 8.1 - 8.10 was established")
         for res in refusals:
             a.truthy(res.refusal.get("check"),
                      f"a refusal from {' '.join(res.argv[1:3])} names no check")

@@ -114,6 +114,25 @@ class SuiteAgainstStub(unittest.TestCase):
         self.assertEqual({t["outcome"] for t in claim["tests"]}, {"error"})
         self.assertEqual(proc.returncode, 4)
 
+    def test_unimplemented_adapter_fails_nothing(self):
+        """An adapter implementing nothing has established nothing: every
+        step is unestablished, none fails. A step that fails only because
+        the steps it draws on could not run would blame the implementation
+        for the suite's missing evidence."""
+        none = os.path.join(self.tmp.name, "empty-adapter")
+        with open(none, "w") as f:
+            f.write("#!/bin/sh\nexit 2\n")
+        os.chmod(none, os.stat(none).st_mode | stat.S_IXUSR)
+        out = os.path.join(self.tmp.name, "claim")
+        proc = subprocess.run([sys.executable, RUNNER, "--adapter", none, "-q",
+                               "--out", out], stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE, timeout=600)
+        with open(out + ".json", encoding="utf-8") as f:
+            claim = json.load(f)
+        self.assertEqual(self.failed(claim), set())
+        self.assertEqual(self.steps(claim, "pass"), set())
+        self.assertEqual(proc.returncode, 3)
+
     def test_production_build_refuses_injection(self):
         proc = subprocess.run([sys.executable, STUB, "inject", "passive-signal"],
                               env={**os.environ, "OBEC_STUB_PRODUCTION": "1"},

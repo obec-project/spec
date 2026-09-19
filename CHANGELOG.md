@@ -54,6 +54,11 @@ The conformance suite carries its own version line; a claim names both, as in
   by liveness needs one, and §2.5 read as "live forever" forbade it. And the
   adapter acts as one binding — the founding `op-1` for a suite store — since
   every Operator act must name a binding and no command carries one.
+- Step 8.11 no longer fails when none of 8.1 – 8.10 could run. With no
+  refusal to check, it reported a failure of the implementation for evidence
+  the suite never obtained; it is now unestablished. A new self-test runs the
+  suite against an adapter that implements nothing and requires that no step
+  fail.
 - Five steps are fixed. 1.2 and 5.4 tested revocation against a target the
   workspace boundary refuses anyway, so they could not fail on it; 8.8 and 8.9
   used a skill nothing installed; 3.9 depended on a real model consolidating a
