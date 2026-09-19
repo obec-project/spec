@@ -144,6 +144,12 @@ class Detection(TempDirTest):
             },
         )
 
+    def test_bytes_in_the_lock_file_are_detected(self):
+        with open(os.path.join(self.S, "integrity", "store.lock"), "wb") as f:
+            f.write(b"x")
+        r = verify(self.S)
+        self.assertEqual([(f.type, f.target) for f in r.findings], [("store-lock", "integrity/store.lock")])
+
     def test_residue_beyond_head_is_not_committed_state(self):
         before = verify(self.S).as_dict()
         shutil.copytree(
@@ -168,6 +174,8 @@ class Detection(TempDirTest):
             path = os.path.join(self.S, rel)
             with open(path, "rb") as f:
                 data = bytearray(f.read())
+            if not data:
+                continue  # nothing to flip (integrity/store.lock)
             for i in (0, len(data) // 2, len(data) - 2):
                 orig = data[i]
                 data[i] ^= 0x01

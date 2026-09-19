@@ -46,6 +46,33 @@ class Refused(Exception):
         self.log_records = list(log_records)
 
 
+# -- a credential found at start (D25, OC-003(d)) ---------------------------
+
+LOCK_HELD = "held"  # another process holds the credential's flock
+LOCK_FREE = "free"  # we took it: no process holds it
+LOCK_UNKNOWN = "unknown"  # the filesystem would not say
+
+
+def classify_credential(lock, *, residue, pulse_fresh):
+    """``"conflict"`` or ``"crash"`` for a credential present at start.
+
+    The operating system's lock takes absolute precedence: while a process
+    holds it, or while its state cannot be established, the session is live
+    and nothing else is consulted — not residue (a live session mid-commit
+    has some) and not the ``PULSE`` (a live process can be slow to touch
+    it). Only a free lock lets the rest decide: residue of interrupted work
+    means a crash; otherwise a fresh ``PULSE`` means a session live without
+    a process (ADAPTER.md §2.5), and a stale one a crash.
+    """
+    if lock not in (LOCK_HELD, LOCK_FREE, LOCK_UNKNOWN):
+        raise ValueError("lock state %r" % (lock,))
+    if lock != LOCK_FREE:
+        return "conflict"
+    if residue:
+        return "crash"
+    return "conflict" if pulse_fresh else "crash"
+
+
 # -- the integrity log (DEV-NOTES §3.4) -------------------------------------
 
 

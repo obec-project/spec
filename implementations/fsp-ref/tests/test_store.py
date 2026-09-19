@@ -1,17 +1,22 @@
+import errno
 import os
 import subprocess
 import sys
+from unittest import mock
 
 from helpers import ROOT, TempDirTest
 
 from fsp.store import (
     INTEGRITY,
+    LOCK,
     MNEMONIC,
     STRUCTURAL,
     GuardError,
+    LockUnavailable,
     Store,
     class_of,
     create_store_dir,
+    flock_exclusive,
 )
 
 
@@ -123,18 +128,24 @@ class WriteForms(TempDirTest):
 
 
 class WriteLock(TempDirTest):
-    def test_excludes_another_process_and_is_reentrant(self):
+    def setUp(self):
+        super().setUp()
         create_store_dir(self.p("S"))
-        s = Store(self.p("S"))
+        self.s = Store(self.p("S"))
+        with self.s.write_lock():  # creates integrity/store.lock
+            pass
+
+    def test_excludes_another_process_and_is_reentrant(self):
+        s = self.s
         probe = (
-            "import fcntl,os,sys; fd=os.open(sys.argv[1], os.O_RDONLY)\n"
+            "import fcntl,os,sys; fd=os.open(sys.argv[1], os.O_RDWR|os.O_CREAT)\n"
             "try:\n fcntl.flock(fd, fcntl.LOCK_EX|fcntl.LOCK_NB); print('free')\n"
             "except BlockingIOError: print('held')\n"
         )
 
         def other():
             return subprocess.run(
-                [sys.executable, "-c", probe, s.root], capture_output=True, text=True
+                [sys.executable, "-c", probe, s.path(LOCK)], capture_output=True, text=True
             ).stdout.strip()
 
         self.assertEqual(other(), "free")
@@ -143,6 +154,46 @@ class WriteLock(TempDirTest):
                 self.assertEqual(other(), "held")
             self.assertEqual(other(), "held")
         self.assertEqual(other(), "free")
+        self.assertEqual(class_of(LOCK), INTEGRITY)
+        self.assertEqual(os.path.getsize(s.path(LOCK)), 0)
+
+    def test_a_filesystem_without_flock_fails_closed(self):
+        def no_locks(fd, op):
+            raise OSError(errno.ENOLCK, "No locks available")
+
+        with mock.patch("fcntl.flock", no_locks):
+            with self.assertRaises(LockUnavailable) as cm:
+                self.s.replace(INTEGRITY, "HEAD", b"{}", writer="sil")
+        self.assertEqual(cm.exception.check, "store-lock")
+        self.assertIn("ENOLCK", cm.exception.detail)
+        self.assertFalse(self.s.exists("HEAD"))
+
+    def test_non_blocking_probe_distinguishes_held_from_free(self):
+        fd = os.open(self.s.path(LOCK), os.O_RDWR | os.O_CREAT)
+        self.addCleanup(os.close, fd)
+        with self.s.write_lock():
+            self.assertFalse(flock_exclusive(fd, blocking=False))
+        self.assertTrue(flock_exclusive(fd, blocking=False))
+
+    def test_the_lock_file_is_never_written_or_removed(self):
+        with self.s.write_lock():
+            pass
+        for call in (
+            lambda: self.s.replace(INTEGRITY, LOCK, b"x", writer="sil"),
+            lambda: self.s.append(INTEGRITY, LOCK, {}, writer="sil"),
+            lambda: self.s.remove(INTEGRITY, LOCK, writer="sil"),
+        ):
+            with self.assertRaises(GuardError):
+                call()
+        self.assertTrue(self.s.exists(LOCK))
+
+    def test_fap_residue_removal_keeps_the_held_lock_file(self):
+        with self.s.write_lock():
+            inode = os.stat(self.s.path(LOCK)).st_ino
+            self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil")
+            self.s.remove_fap_residue(writer="sil")
+            self.assertEqual(os.stat(self.s.path(LOCK)).st_ino, inode)
+            self.assertEqual(self.s.listdir("integrity"), ["store.lock"])
 
 
 class NoRawWrites(TempDirTest):

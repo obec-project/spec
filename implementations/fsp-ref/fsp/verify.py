@@ -21,7 +21,7 @@ import re
 
 from . import chain
 from .digest import canonical, document_digest, integrity_document, valid_relpath
-from .store import MARKER, STORE_FORMAT, STORE_FORMAT_VERSION, Store, datum_of
+from .store import LOCK, MARKER, STORE_FORMAT, STORE_FORMAT_VERSION, Store, datum_of
 
 
 class Finding:
@@ -285,6 +285,9 @@ def _unclassified(store: Store, r: Report) -> None:
                 r.residue.append({"path": rel, "kind": "temp-file"})
             elif datum_of(rel) is None:
                 r.findings.append(Finding("unclassified-datum", rel, "operator", {}))
+            elif rel == LOCK and os.path.getsize(os.path.join(dirpath, name)):
+                # The lock file carries no content; bytes in it are not ours.
+                r.findings.append(Finding("store-lock", rel, "sil", {"problem": "not-empty"}))
 
 
 def _residue(store: Store, n: int, r: Report) -> None:

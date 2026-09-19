@@ -73,6 +73,9 @@ LAYOUT = (
     Datum("integrity-log", "integrity/log.jsonl", INTEGRITY, "append"),
     Datum("authorization-state", "integrity/auth.json", INTEGRITY, "replace"),
     Datum("operational-settings", "integrity/operational.json", INTEGRITY, "replace"),
+    # Empty, holds no content: only its flock matters. Never written, never
+    # removed — unlinking a held lock file would let a second holder in.
+    Datum("store-lock", "integrity/store.lock", INTEGRITY, "lock"),
     Datum("action-ledger", "integrity/ledger.jsonl", INTEGRITY, "append"),
     Datum("session-store", "memory/session/<id>.jsonl", MNEMONIC, "append"),
     Datum("episodic-memory", "memory/episodic/records.jsonl", MNEMONIC, "append"),
@@ -80,6 +83,7 @@ LAYOUT = (
 )
 
 MARKER = "OBEC-STORE"
+LOCK = "integrity/store.lock"
 STORE_FORMAT = "fsp-store"
 STORE_FORMAT_VERSION = 1
 
@@ -124,10 +128,43 @@ def _fsync_dir(path: str) -> None:
         os.close(fd)
 
 
+class LockUnavailable(GuardError):
+    """The filesystem would not give the write lock. Writes fail closed:
+    without the lock, one writer at a time (OC-003(d)) is not established."""
+
+    def __init__(self, detail):
+        super().__init__("store-lock", detail)
+
+
+def flock_exclusive(fd: int, *, blocking=True) -> bool:
+    """``flock(LOCK_EX)`` on ``fd``. True if taken, False if another holder
+    has it (non-blocking only). Any other failure — a filesystem without
+    locking, NFS without a lock daemon, a descriptor of the wrong kind —
+    raises ``LockUnavailable``: an unknown lock state is never read as free.
+    ``fd`` must be open for writing (NFS emulates flock with fcntl locks,
+    which require it for an exclusive lock; flock(2))."""
+    op = fcntl.LOCK_EX if blocking else fcntl.LOCK_EX | fcntl.LOCK_NB
+    while True:
+        try:
+            fcntl.flock(fd, op)
+            return True
+        except InterruptedError:
+            continue
+        except BlockingIOError:
+            if blocking:
+                raise LockUnavailable("flock reported contention on a blocking lock")
+            return False
+        except OSError as e:
+            raise LockUnavailable(
+                "this filesystem does not provide flock (%s); refusing to write"
+                % (errno.errorcode.get(e.errno, e.errno),)
+            )
+
+
 class Store:
     """One Entity Store. Safe to share between threads of one process; the
-    write lock also excludes other processes (``flock`` on the store
-    directory itself, so the lock is not a datum)."""
+    write lock also excludes other processes (``flock`` on
+    ``integrity/store.lock``, an empty file that is never removed)."""
 
     def __init__(self, root: str):
         self.root = os.path.abspath(root)
@@ -156,9 +193,10 @@ class Store:
         """Reentrant within a thread; exclusive across threads and processes."""
         with self._lock:
             if self._depth == 0:
-                fd = os.open(self.root, os.O_RDONLY)
+                self._makedirs(os.path.dirname(self.path(LOCK)))
+                fd = os.open(self.path(LOCK), os.O_RDWR | os.O_CREAT, 0o644)
                 try:
-                    fcntl.flock(fd, fcntl.LOCK_EX)
+                    flock_exclusive(fd)
                 except BaseException:
                     os.close(fd)
                     raise
@@ -284,6 +322,8 @@ class Store:
             d = datum_of(relpath)
             if d is not None and d.form == "append":
                 raise GuardError("append-only", "%s is append-only" % relpath)
+            if d is not None and d.form == "lock":
+                raise GuardError("store-lock", "%s is never removed" % relpath)
             self._guard(cls, relpath, writer, d.form if d and d.form != "tree" else "replace")
         target = self.path(relpath)
         with self.write_lock():
@@ -305,10 +345,20 @@ class Store:
         with self.write_lock():
             if self.exists("HEAD"):
                 raise GuardError("first-activation", "store is active; nothing is residue")
-            for name in ("structural", "integrity", "memory"):
+            for name in ("structural", "memory"):
                 target = os.path.join(self.root, name)
                 if os.path.isdir(target):
                     shutil.rmtree(target)
+            integrity = os.path.join(self.root, "integrity")
+            for name in os.listdir(integrity):
+                if name == os.path.basename(LOCK):
+                    continue  # held by us right now
+                target = os.path.join(integrity, name)
+                if os.path.isdir(target) and not os.path.islink(target):
+                    shutil.rmtree(target)
+                else:
+                    os.unlink(target)
+            _fsync_dir(integrity)
             for name in os.listdir(self.root):
                 if name.startswith(".") and ".tmp-" in name:
                     os.unlink(os.path.join(self.root, name))
