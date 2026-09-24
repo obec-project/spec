@@ -18,7 +18,7 @@ Each phase ends with `run.py --only …` green on its invariants
 | **6** | workspace, allowlist, native primitives, `http_fetch`, skills, monitoring | OC-008, OC-001 1.2, 5.4 |
 | **7** | session store, conversation, `mnemonic-save`/`mnemonic-recall`, probes, promotion, Sleep | OC-007, OC-003(e), OC-001(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover | OC-006, OC-009 (attested) |
-| **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for opening the repository** |
+| **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json` | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
 
 After that: a test entity on Ollama, operated for days, measuring what

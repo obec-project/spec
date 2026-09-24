@@ -77,6 +77,11 @@ evolves within a budget you set. Same rule, whole range.
 
 ## Status: this is a proposal
 
+**Published for early reading.** The repository is public before it is ready,
+so that the people it has been shared with can read it. It will be announced
+when the reference implementation passes every executed step of the
+conformance suite.
+
 **Nothing here has been ratified by anyone.** The documents use MUST because
 that is how you state a requirement without ambiguity — not because anyone has
 agreed to be bound by it.
@@ -86,7 +91,9 @@ in TypeScript, and entities have run under it. **What is unvalidated is
 longevity and cost** — how an entity behaves after months of accumulated
 memory, what the guarantees cost per session and per year, and whether the
 mechanisms that look right on one week of operation still look right on one
-year of it. No implementation has yet run the conformance suite, which is new.
+year of it. No implementation has yet passed the conformance suite, which is
+new; the [reference implementation](implementations/fsp-ref/) is partway
+through it.
 
 **0.9.1 — pre-release.** It is a first release rather than a first draft: the
 set is the product of a full restructure, and

@@ -111,6 +111,12 @@ The conformance suite carries its own version line; a claim names both, as in
 - `AGENTS.md`, at the root and in fsp-ref, gathers for coding agents the
   rules CONTRIBUTING states for people and the ones that were only implicit:
   where each kind of record lives, how to verify a change, and what CI runs.
+- The repository is public for early reading, ahead of its announcement. What
+  the documents called the trigger for *opening* it is now the trigger for
+  *announcing* it, with the same condition: the reference implementation passes
+  every executed step of the suite. The README says so, and no longer claims
+  that nobody has run the suite. Private vulnerability reporting is enabled, so
+  the channel SECURITY.md names exists, and the repository has its topics.
 - fsp-ref's code carries SPDX headers, as the rest of the code has since 0.9.1.
 - CI runs fsp-ref's unit tests on Python 3.9 – 3.14.
 

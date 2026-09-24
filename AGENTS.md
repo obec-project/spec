@@ -61,9 +61,10 @@ specification's shape that changed.
 
 ## Operational facts
 
-- **The repository is private** until the reference implementation passes
-  every executed step of the suite ([BACKLOG.md](BACKLOG.md)). The status text
-  in the README and `implementations/README.md` changes only then.
+- **The repository is public but not announced.** It is published for early
+  reading; the announcement waits until the reference implementation passes
+  every executed step of the suite ([BACKLOG.md](BACKLOG.md)). The status in
+  the README and `implementations/README.md` says so, and changes then.
 - **A push to `main` runs CI**: the verbatim test, the suite against the stub
   on Python 3.8 – 3.14, and fsp-ref's unit tests on 3.9 – 3.14. It deploys
   nothing.

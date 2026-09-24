@@ -22,7 +22,7 @@ repository's commit convention and change classification are in
    what an entity needs to actually operate goes in; deviations are recorded in
    [DESIGN.md §9](DESIGN.md#9-deviations-from-the-profile).
 5. **The suite is the judge.** Each phase ends with `run.py --only …` green on
-   the phase's invariants. The trigger for opening the repository: **every
+   the phase's invariants. The trigger for announcing the repository: **every
    executed step passes** (3.2 with a real second host; 4.9–4.12 stay
    *unestablished* for everyone).
 6. **No real entity before 1.0** (OC-004(a) records the version in the Genesis

@@ -2,14 +2,14 @@
 
 **Status: in progress.**
 
-No implementation currently claims OBEC conformance — the suite is new and
-nobody has run it.
+No implementation currently claims OBEC conformance — the suite is new, and
+the reference implementation is partway through it.
 
 The architecture itself has been implemented twice under the predecessor
 specification, in Python and in TypeScript, and entities have operated under
-both. A reference platform for OBEC — a filesystem realization using only POSIX
-primitives such as atomic rename and append-only logs — is in progress and will
-land here once it passes the ten tests.
+both. The reference implementation for OBEC, [fsp-ref](fsp-ref/) — a
+filesystem realization using only POSIX primitives such as atomic rename and
+append-only logs — is in progress here, written from this specification alone.
 
 What those earlier runs did not establish is longevity and cost, which is
 [open question 1](../design/OPEN-QUESTIONS.md).

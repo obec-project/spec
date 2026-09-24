@@ -4,14 +4,14 @@ What is left to do in this repository, by priority. What is done is in
 [CHANGELOG.md](CHANGELOG.md). The reference implementation keeps its own
 backlog in [implementations/fsp-ref/BACKLOG.md](implementations/fsp-ref/BACKLOG.md).
 
-The repository stays private until **the reference implementation passes every
-executed step of the suite**. Attested steps go with evidence and review; step
-3.2 requires a real second host; 4.9–4.12 stay *unestablished* for everyone
-until a second version exists.
+The repository is public for early reading and is **announced when the
+reference implementation passes every executed step of the suite**. Attested
+steps go with evidence and review; step 3.2 requires a real second host;
+4.9–4.12 stay *unestablished* for everyone until a second version exists.
 
 ---
 
-## 1. Before opening
+## 1. Before announcing
 
 - **The reference implementation passes the suite** — the trigger above.
   Phases 3–9 of [fsp-ref's backlog](implementations/fsp-ref/BACKLOG.md).
@@ -25,19 +25,12 @@ until a second version exists.
     [design/OPEN-QUESTIONS.md](design/OPEN-QUESTIONS.md);
   - `conformance-claim.md`, with the instructions and checklist for submitting
     a conformance result.
-- **On opening, update the status** in the [README](README.md#status-this-is-a-proposal)
-  and in [implementations/README.md](implementations/README.md) — the only two
-  places that state no implementation has run the suite.
+- **On announcing, update the status** in the [README](README.md#status-this-is-a-proposal)
+  and in [implementations/README.md](implementations/README.md) — the two
+  places that say the repository is published for early reading and that no
+  implementation has passed the suite.
 
-## 2. Right after opening
-
-- **Enable Private Vulnerability Reporting** (Settings → Code security).
-  [SECURITY.md](SECURITY.md) points to it, and it exists only on a public
-  repository.
-- **GitHub topics:** `ai-agents`, `specification`, `agent-governance`,
-  `conformance`, `auditability`, `llm`.
-
-## 3. Needs the author
+## 2. Needs the author
 
 - **"Implemented twice, in Python and in TypeScript, and entities have run
   under it"** appears in four documents. Confirm the framing, and whether those
@@ -57,7 +50,7 @@ until a second version exists.
   trademark risk of "OBEC" (a search found no conflict in software or AI; not
   legal advice).
 
-## 4. Release
+## 3. Release
 
 - **Release the Unreleased section.** It holds a clarifying revision of
   OC-008(a), so the next specification version is a minor one, with a new
@@ -65,7 +58,7 @@ until a second version exists.
 - **Decide whether releases are tagged in git.** There are no tags, not even
   `v0.9.0`.
 
-## 5. Community and tooling
+## 4. Community and tooling
 
 - **Before 2026-10-19: keep fsp-ref's Python 3.9 job alive.** `ubuntu-latest`
   moves to Ubuntu 26 on that date
@@ -88,7 +81,7 @@ until a second version exists.
   and schema of the `.json` and `.md` files submitted to `conformance/claims/`.
 - **A CI status badge** in the README.
 
-## 6. Specification — during or after the reference implementation
+## 5. Specification — during or after the reference implementation
 
 - **Gaps found by the reference implementation**, to be decided and corrected
   in the specification: [fsp-ref BACKLOG §3](implementations/fsp-ref/BACKLOG.md#3-gaps-in-the-specification-and-the-contract).
@@ -101,7 +94,7 @@ until a second version exists.
 - **Run step 2.16 partially:** stop the reasoning, cause an escalation,
   observe the passive signal.
 
-## 7. Extensions — after the reference implementation
+## 6. Extensions — after the reference implementation
 
 Core §6.3 names both as planned and not yet written. Both are to be written
 from OBEC, without porting HACA-Security or HACA-CMI.
@@ -111,7 +104,7 @@ from OBEC, without porting HACA-Security or HACA-CMI.
 - **CMI** (Cognitive Mesh Interface) — needs at least two entities operating
   under the reference implementation.
 
-## 8. Repository layout — later
+## 7. Repository layout — later
 
 - Separate repositories for `implementations/` and `ietf/` once they have
   content, adjusting the README's layout table with them.
