@@ -39,3 +39,18 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: python3 -m unittest -v tests/test_stub.py
         working-directory: conformance/runner
+
+  fsp-ref:
+    name: fsp-ref unit tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python3 -m unittest discover -v -s tests
+        working-directory: implementations/fsp-ref
