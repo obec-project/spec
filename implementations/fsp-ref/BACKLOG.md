@@ -12,12 +12,12 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval, windows (G11/G13 first), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-002(a)(b), OC-004, 10.3 |
+| **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval and the review (D52), windows (G13 first), what may be proposed (D50), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-002(a)(b), OC-004, 10.3 |
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
-| **6** | workspace, allowlist, native primitives, `http_fetch`, skills, monitoring | OC-008, OC-001 1.2, 5.4 |
-| **7** | session store, conversation, `mnemonic-save`/`mnemonic-recall`, probes, promotion, Sleep | OC-007, OC-003(e), OC-001(d) |
-| **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover | OC-006, OC-009 (attested) |
+| **6** | workspace, allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-001 1.2, 5.4 |
+| **7** | session store, conversation, `mnemonic-save`/`mnemonic-recall`, probes, promotion under authorization (D53), Sleep | OC-007, OC-003(e), OC-001(d) |
+| **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the review at `/exit` and before the first stimulus (D52) | OC-006, OC-009 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json` | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
 
@@ -76,8 +76,6 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
   network destination does not appear.
 - **G10 — episodic memory during the session.** Propose changing OP-009 to
   fsp's design (D11).
-- **G11 — protected scopes** (D20): today only `binding-set` is protected by
-  OC-002(a); propose extending it to `rules`, `workspace` and `probes`.
 - **G12 — "exactly one path" for mnemonic.** Resolved in fsp (D21) with a
   single operation. The specification could say that destinations within a
   class (session, episodic, semantic) are legitimate parameters of the single
@@ -91,13 +89,6 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
   tells them apart. fsp uses residue of interrupted work or stale liveness
   (D25); the specification should name the criterion, or say it is the
   implementation's, with the requirement that it be deterministic.
-- **G15 — structural vs. runtime configuration.** The OC-003(c) table (kernel)
-  and the glossary put all of "configuration" in structural. fsp's criterion
-  (D33): structural shapes the entity or its bounds; runtime is current use,
-  changed only by the Operator, kept in integrity. Proposed revision: limit
-  "configuration" to what shapes the entity and add "operational settings" to
-  the integrity row. It touches the normative table — **classify when
-  writing** (probably *clarify*).
 - **G16 — a workspace that contains the store.** OC-008(b) requires
   disjointness; it does not say whether a declaration containing the store is
   refused or trimmed. fsp refuses (D30).

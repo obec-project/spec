@@ -33,17 +33,16 @@ not built yet; the [README](README.md) says what is.
 | D8 | **A conversation is not a session.** The conversation is what the Operator sees: one window, continuous, cleared only when they ask. An OBEC session is the life of one credential. A conversation spans sessions. (§6) |
 | D9 | **Rollover**: the single "apply now" mechanism for a **structural** change (allowlist, skill, persona, probes): Sleep + a full start, transparent, no Closure Payload, conversation preserved. Model and workspace do **not** need it (D28). (§6.3) |
 | D10 | **The session store** (`memory/session/<id>.jsonl`, append-only, transient) is the single source for the UI **and** for context assembly. Owner: MIL. |
-| D11 | **Episodic memory is written during the session**, freely, by the CPE signalling the MIL (`mnemonic-save`). **Only promotion from episodic to semantic goes through the Sleep**, gated by the probes. (G10) |
+| D11 | **Episodic memory is written during the session**, freely, by the CPE signalling the MIL (`mnemonic-save`). **Only promotion from episodic to semantic goes through the Sleep**, gated by the probes and by an Operator authorization (D53). (G10) |
 | D12 | **Deterministic probes run on every episodic write** (regex, negligible cost) and on promotion. |
 | D13 | **`/clear` clears without saving.** If the Operator wants something kept, they ask the entity first. |
 | D14 | **An Operator act is already an approval.** For a structural change (e.g. `/allow`), the command records proposal + approval in one act, through the Operator's channel. Text in the chat is never a command: `/…` is interpreted before the CPE. |
 | D15 | **The CPE has no shell.** Reading and writing only through native `file_read`/`file_write`/`file_list` (real confinement); network only through native `http_fetch`; any command becomes a **skill** with a fixed `argv` and typed arguments. |
-| D16 | **Allowlist** (OP-016 rules, for CPE intents only) = **domains** (`http_fetch`) + **skills** (execution). Outside the allowlist: **`hold`** (ask the Operator). |
-| D17 | **Approval window** = a standing grant by scope, for a structural change of any kind. Always with expiry, budget and scope (OC-002(b)); the UI warns before it closes, and only the Operator renews it. Personal companion: a wide, long window. Company: never opened. |
+| D16 | **Allowlist** (OP-016 rules, for CPE intents only) = **domains** (`http_fetch`) + **skills** (execution), checked on **every** execution. Outside the allowlist: **`hold`** (ask the Operator). A skill entry names the skill **and its digest** from the integrity document (D34): a commit that changes any of the skill's files sends it back to `hold` until the Operator allows the new content. |
+| D17 | **Approval window** = a standing grant by scope, over what the entity may propose (D50), and over semantic promotion as the scope `memory.semantic` (D53). Always with expiry, budget and scope (OC-002(b)); the UI warns before it closes, and only the Operator renews it. Personal companion: a wide, long window. Company: never opened. |
 | D18 | The second host for step 3.2: **a VM or a real remote machine**, never a container on the same host. |
 | D19 | **Suspend vs. crash**: `SIGHUP`/`SIGINT`/`SIGTERM` caught → *suspend* (revoke the credential, log, exit); the next start is normal and reassembles the conversation. A real crash goes through the recovery gate and also reassembles it. |
-| D20 | **Protected scopes**: `binding-set`, `rules` (allowlist), `workspace` and `probes` are out of reach of any window — a direct Operator act only. Requires a change to the specification (G11). |
-| D21 | **The MIL has two operations:** `mnemonic-save` (the only operation that writes the mnemonic class) and `mnemonic-recall`. The allowed destination depends on the caller: CPE → `episodic` only (after the probes); Orchestrator → `session` only; Sleep → `semantic` only (promotion gated by the probes). Operation name = intent name. Resolves G12. |
+| D21 | **The MIL has two operations:** `mnemonic-save` (the only operation that writes the mnemonic class) and `mnemonic-recall`. The allowed destination depends on the caller: CPE → `episodic` only (after the probes); Orchestrator → `session` only; Sleep → `semantic` only (promotion gated by the probes and an authorization, D53). Operation name = intent name. Resolves G12. |
 | D22 | **Deterministic context truncation**, in the Orchestrator, always (not only on rollover): the Operator's first turn + the latest turns that fit the budget; a `context-truncated` event in the session store. Explicit `options.num_ctx` on every Ollama call. (§6.5) |
 | D23 | **Action Ledger through the SIL**: EXEC signals, the SIL writes `pending` before and a resolution entry after (append-only, never updated). A `file_write` in the workspace is atomic (tmp → fsync → rename → fsync dir) and only then resolved. (§5) |
 | D24 | **No `conversation.json`.** The conversation is derived from the session store: the first record of each session carries `conversation` and `continues`; `/clear` writes `conversation-cleared`. Everything in `memory/` is append-only. (§3) |
@@ -53,9 +52,9 @@ not built yet; the [README](README.md) says what is.
 | D28 | **Model and workspace are operational settings**, not structural: an Operator act recorded in the integrity log, no commit, no rollover, effective from the next cycle. Outside the Genesis. `fsp run` in a folder declares that folder the workspace; `/work set P` and `/model X` change it mid-session. Every cycle records which model answered. Resolves G4. |
 | D29 | **FAP — First Activation Protocol**: the first `fsp run` without an Anchor. The only moment a Genesis may be written: the Operator's binding, persona (provided or default), the OC-001(d) probes, digest → Genesis → `HEAD` (the atomic point, OP-017); the disclaimer acceptance and the model chosen at init become the first Operator acts in the log. Then a normal start with every gate issues the credential. Adapter: `lifecycle init` = scaffolding + non-interactive FAP, no session. |
 | D30 | **A workspace never crosses a store**: refused if it equals, lies inside, or contains `~/.fsp` or any store registered in `~/.fsp/config.json` (by `realpath`). In practice this refuses `/` and `~`. |
-| D31 | **The allowlist stays structural** (commit + rollover to take effect in the session; protected scope, D20). |
+| D31 | **The allowlist stays structural** (commit + rollover to take effect in the session); it is configuration, so only an Operator act changes it (D50). |
 | D32 | **`fsp endure`** manages the entity's git repository: `status`, `commit`, `remote set`, `push`, `pull`, `clone <url> [name]` (alias `fsp init --clone`). **Fast-forward only**: divergent histories are an identity fork (OC-003(d)), never a merge — fsp refuses and explains. `commit` takes the store's write lock. `remote set` warns that the repository must be private. `fsp run` may warn when the remote is ahead. After a `clone`: normal gates (no FAP), workspace = current folder, the model reconfirmed if the last one does not exist on the host, keys asked for again. (§3.0) |
-| D33 | **Structural vs. runtime**, the general criterion (G15). *Structural* = what the entity is, or its bounds; verified on every start; changed by commit (the entity may propose, except for protected scopes, D20): persona, skills, probes, bindings, allowlist, parameters that shape memory. *Runtime* = how the Operator uses the entity now; **only the Operator changes it**, by a direct act in the log, no commit; it lives in the store (OC-003(a)) but is **resolved per host**: model, endpoint, `num_ctx`, workspace, timeouts, session store retention, UI preferences. Generalizes D28. |
+| D33 | **Structural vs. runtime**, the general criterion (G15). *Structural* = what the entity is, or its bounds; verified on every start; changed by commit (the entity may propose persona and skills only, D50): persona, skills, probes, bindings, allowlist, parameters that shape memory. *Runtime* = how the Operator uses the entity now; **only the Operator changes it**, by a direct act in the log, no commit; it lives in the store (OC-003(a)) but is **resolved per host**: model, endpoint, `num_ctx`, workspace, timeouts, session store retention, UI preferences. Generalizes D28. |
 | D34 | **Integrity document** (`integrity/documents/<n>.json`, one per generation): a canonical list `[{path, sha256, exec}]` of **all** structural content — structural config, persona, bindings, probes, allowlist, and every skill file by file (manifest **and** code). Excluded: runtime, memory, the session store, the log. `sha256(document)` = the baseline in `HEAD` = the chain entry's `state_digest`. Written in the commit pipeline before the `rename` of `HEAD`. Boot: a full hash of every file, the exact difference reported, three values that must agree. A Vital Check optimization outside v0 may skip files whose size and mtime are unchanged; the boot never does. The execute bit is included (G6). |
 | D35 | **Implementation fingerprint** (version + hash of the fsp code) recorded in the log on every start — **audit, not a gate**; the start warns if it changed since the previous session. It never enters verification: the fsp code does not travel with the store (OC-003(b)), and a tampered fsp would lie about its own hash (defence against a hostile host belongs to the Security extension). |
 | D36 | **Provenance of every effect of the entity.** A `model-fingerprint` record in the log on every start and every `/model` (provider, name, **weights digest** when the server reports one, `num_ctx`, endpoint). Every cycle has an id (`s-42/c-17`) and points to the fingerprint in force; every dispatched intent carries the cycle, and its owner passes it to whatever it records: a host action and a skill (log), a proposal (log), an episodic memory (Memory Store), a turn (session store). Every record answers **who authorized** (binding) and **who originated** (session, cycle, model). The log keeps actions, not full text; none of this enters the chain (the model is runtime, D33). The digest is declared by the server: audit, not guarantee. (G17) |
@@ -72,6 +71,10 @@ not built yet; the [README](README.md) says what is.
 | D47 | **`PULSE` by activity in the adapter.** In an `fsp run`, the SIL touches `PULSE` at the end of every Vital Check (D39, Phase 4). The adapter has no process between invocations: **every invocation that acts within the live session touches `PULSE`** after checking the credential (liveness by activity, like OP-003(a)'s activity cadence). Interval `pulse_interval_s`, default **600**, declared in `describe config`; ADAPTER.md §2.5 admits the bound (G18). |
 | D48 | **Identity of the Operator's channel.** Every Operator act is made *as* a binding. `fsp`: the Operator id configured for the entity on the host (`~/.fsp/config.json`, Phase 10; until then `--operator`). Adapter: optional `--operator ID` (§2.4 allows extra flags), **default = the founding binding recorded in the Genesis** (ADAPTER.md §3.3, G19). If that binding is not active, the act is refused (`check: binding`) — what to do with an empty set of bindings is Phase 3. The start is also made as a binding: the credential's `binding` (D46) and that of the `session-open` record. |
 | D49 | **A conflict at start: refuse and notify, do not revoke the live session.** OP-020 says a conflict is Critical, with *"the conflicting credential revoked"*. In fsp a conflict is only declared when the other session is alive (lock held, lock state unknown, or a fresh `PULSE` — D25): revoking it would let a mistaken second start bring down a legitimate session, and the start out of order is the second one. OC-003(d) only requires the Operator to be notified before any new credential, which is met. An Operator who wants the session dead has direct revocation (`rm S/CREDENTIAL`). A deviation recorded in §9. |
+| D50 | **What the entity may propose: persona and skills** (OC-002(b)). Configuration — the allowlist, the probes, the parameters that shape memory — and the bindings change only by an Operator act (D14), and no window covers them: a grant whose scope reaches `configuration` or `binding-set` is refused, and so is a proposal that changes either. Stating what may be proposed closes every category added later. The workspace is not structural at all (D28). |
+| D51 | **A skill runs only in the context it was invoked from.** Its manifest declares targets **relative to the workspace**, never absolute host paths — the skill travels with the store and the workspace is resolved per host. Every execution passes the same gates as a native primitive (§5): each target is resolved with `realpath` **at that execution**, then the allowlist entry and its digest (D16); `cwd` is the workspace; at completion or timeout the skill's whole **process group** is terminated, so nothing it started outlives the invocation. What the admitted code does beyond its declared targets is trusted to the Operator who allowed that exact content (OC-008(a)). |
+| D52 | **The Operator reviews proposals without stopping the session.** A proposal is recorded by the SIL in the log and the Operator is told through the Operator Channel; the session goes on. The `review` commands — `fsp review` and `/review list`, `/review approve ID`, `/review reject ID` — call the same functions, as every CLI command and its `/` form do, and as the adapter does (§7). Approving mid-session triggers a rollover (D9). At `/exit` the review comes **before** the Sleep: each pending proposal is approved, rejected or left for later, and the Sleep commits what was approved; closing the terminal during the review is a suspend (D19). **Pending proposals never gate a start** — originating a proposal changes nothing (OC-002(b)); the UI shows the count and offers the review before the first stimulus. Proposals a window covers commit at the next Sleep or rollover and appear in the review as committed under that window. Pending proposals are capped by a configuration setting; past the cap a new one is refused (`check: pending-cap`), logged, and the entity told. `review` is the Operator's; *inbox* is left for peer messages under CMI. |
+| D53 | **Semantic promotion needs an Operator authorization.** Semantic memory is what the entity knows from then on, and the probes of OC-001(d) catch one kind of bad content, not a planted fact. The Closure Payload's promotion requests become **pending promotions** (`memory/semantic/pending.jsonl`, written by the MIL, append-only), and the Sleep goes on without them; the content stays episodic and recallable meanwhile. The probes run first: content that fails them is never offered. A pending promotion is promoted at the first Sleep after it is authorized — by approval in the `review` (D52), or by a window over the scope `memory.semantic`, bounded like any other (D17). The authorization names the **digest of the content**, so the MIL writes exactly what was authorized. The SIL validates and consumes the authorization and logs it; the MIL, the only writer of the class, refuses a semantic write without one; the Orchestrator only routes. If the Operator edits the text before approving, the record promoted is the edited one, attributed to the originating session and to the Operator's binding (OC-003(e)). A rejected promotion is marked so, and its content stays episodic. The GC keeps the session records a pending promotion refers to. |
 
 ---
 
@@ -175,7 +178,9 @@ S/
     ├── session/<session-id>.jsonl transient: turns, intents, results, events (D10);
     │                              1st record: session-open {conversation, continues} (D24)
     ├── episodic/records.jsonl     written during the session through mnemonic-save (D11)
-    └── semantic/records.jsonl     by promotion in the Sleep only
+    └── semantic/
+        ├── pending.jsonl          promotion requests awaiting an authorization (D53)
+        └── records.jsonl          by authorized promotion in the Sleep only
 ```
 
 - Only paths relative to the store; nothing of the host in verified content
@@ -283,9 +288,12 @@ checks before touching disk or network.
 **Skills** — `structural/gen/<n>/skills/<name>/manifest.json`: `name`,
 `description`, `argv` (a fixed command with `{arg}` placeholders), `args`
 (schema: type, pattern/regex, and which ones are paths — checked as targets),
-declared `targets`, declared `domains`, `irreversible`, `timeout_s`. Execution:
-`subprocess` **without a shell** (`argv` as a list), `cwd` = the workspace, a
-minimal environment, a watchdog. The result is logged (OC-008(d)).
+declared `targets` (relative to the workspace, D51), declared `domains`,
+`irreversible`, `timeout_s`. Execution: `subprocess` **without a shell** (`argv`
+as a list), `cwd` = the workspace, a minimal environment, a watchdog, and the
+process group terminated at completion or timeout (D51). The allowlist entry is
+checked against the skill's current digest on every execution (D16). The result
+is logged (OC-008(d)).
 
 **`file_write` and the Action Ledger** (OP-015, D23). The ledger is integrity:
 EXEC does not write it, it signals the SIL.
@@ -341,10 +349,11 @@ Interpreted by the UI/Orchestrator; they **never become a stimulus** to the CPE.
 | `/model X` · `fsp model X` | continues | pre-check → operational act in the log (D28); the next cycle uses the new model |
 | `/work set P` · `fsp run` in a folder | continues | operational act in the log (D28, D30) |
 | `/allow …` · `/deny …` | continues | commit to the allowlist → rollover |
-| `/grant <scope> --for T --budget N` | continues | opens a window (integrity, no rollover) |
+| `/grant <scope> --for T --budget N` | continues | opens a window (integrity, no rollover); `configuration` and `binding-set` refused (D50) |
+| `/review` · `fsp review` | continues | lists pending proposals; `approve ID` → rollover (D9), `reject ID` → logged (D52) |
 | `/compact` | history replaced by a summary (separate call) | summary written to `session/` as an event |
 | `/clear` · `/new` | new, no history | **nothing is saved** (D13); only the `conversation-cleared` marker |
-| `/exit` | ends | Closure Payload (outside the chat) → full Sleep (promotion, GC, commits) |
+| `/exit` | ends | review of pending proposals and promotions (D52, D53) → Closure Payload (outside the chat) → full Sleep (promotion, GC, commits) |
 | terminal closed / Ctrl+C | continues on return | suspend (D19) or crash → the start reassembles it |
 
 ### 6.3 Rollover
@@ -420,9 +429,11 @@ Deterministic: same history + same `num_ctx` → same context.
   (OC-003(e)).
 - `mnemonic-recall` v0: keywords over `episodic/` + `semantic/`.
 - Full Sleep (`/exit`): Closure Payload in a separate call (working context for
-  the next conversation + promotion requests) → episodic → semantic promotion
-  gated by the probes → GC of `session/` for ended conversations → approved
-  commits. The credential is removed only at the end.
+  the next conversation + promotion requests) → the requests that pass the
+  probes are recorded as pending (D53) → pending promotions already authorized
+  are promoted → GC of `session/` for ended conversations, keeping what a
+  pending promotion refers to → approved commits. The credential is removed only
+  at the end.
 
 ### 6.7 Vital Check (D37–D40)
 
@@ -563,7 +574,6 @@ All SHOULD, all recorded.
 |---|---|---|
 | OP-009(a)(b): cognitive consolidation only at close; Memory Store written only in the Sleep | episodic written during the session (`mnemonic-save`); only promotion goes through the Sleep | memory grows without depending on `/exit` (D11) |
 | OP-009(d)/OP-010: resumption through a Resumption Record | rollover reassembles the conversation from `session/` | a transparent switch, with no payload polluting the conversation (D9) |
-| OP-016: the workspace declaration is structural | the workspace is an operational setting in the log (D28) | it changes constantly; a host path does not belong to the identity (G4) |
 | OP-017: first activation issues the credential | the FAP writes the Genesis; the credential comes from the start that follows it, with every gate | even the first session goes through OC-010 |
 | OP-020: a session conflict is Critical and revokes the conflicting credential | refuses the start and notifies the Operator; the live session continues (D49) | the one out of order is the second start, not the session the lock or `PULSE` shows alive |
 | OP-018: a crash without a payload loses the session's progress | the conversation is reassembled on the next start | usability (D8); what was not saved stays transient |

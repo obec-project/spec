@@ -18,6 +18,31 @@ The specification decisions the phase depends on come first.
   rename of `HEAD` is therefore not a record until then, and recovery removing
   it is the restore OC-004(b) requires, not a deletion OC-004(a) forbids. No
   change to fsp-ref.
+- **G11 closed** (2026-09-24, *harden* of OC-002(b)): a proposal changes only
+  persona or skills; configuration and bindings change only by an Operator act,
+  and no window covers them. D50 replaces D20, which protected a list of scopes
+  — `binding-set`, `rules`, `workspace`, `probes` — and so left every category
+  added later open. D17, D31 and D33 now point to D50.
+- **G15 closed** (2026-09-24, *clarify* of OC-003(c)): operational settings,
+  the workspace among them, MAY be integrity content changed only by Operator
+  acts. D28 and D33 are what the specification now allows, so the OP-016
+  workspace row leaves the deviations in DESIGN §9.
+- **D16 revised, D51 added:** an allow entry for a skill pins its digest, so
+  changed skill code returns to `hold`; a skill declares targets relative to the
+  workspace, passes the gates on every execution, and its process group ends
+  with the invocation. An allow by name would let a later commit run code the
+  Operator never saw.
+- **D52 added — the review.** Proposals do not interrupt the session; the
+  Operator reviews them with `review`, mid-session or at `/exit`, before the
+  Sleep. Pending proposals never gate a start: that would let an entity block its
+  own boot by proposing, and a Sleep held open for an answer would leave the
+  credential behind and count as a crash toward `N_boot`.
+- **D53 added — promotion under authorization;** D11, D17 and D21 revised to
+  point to it. Semantic memory is what the entity knows from then on, and the
+  probes catch only what OC-001(d) forbids, not a planted fact. Promotions wait,
+  pending, for an approval in the review or a window over `memory.semantic`,
+  pinned to the content's digest; the Sleep does not wait for them. OP-009(c)
+  allows this as a MAY, so it is not a deviation.
 
 ---
 
