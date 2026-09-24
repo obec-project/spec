@@ -67,6 +67,19 @@ until a second version exists.
 
 ## 5. Community and tooling
 
+- **Before 2026-10-19: keep fsp-ref's Python 3.9 job alive.** `ubuntu-latest`
+  moves to Ubuntu 26 on that date
+  ([runner-images#14748](https://github.com/actions/runner-images/issues/14748)).
+  Python 3.9 has been end-of-life since October 2025, and `setup-python` is
+  unlikely to ship it for the new image, which would break the job that
+  checks fsp-ref's declared floor. Either pin that job's image, as the suite's
+  3.8 job already pins `ubuntu-22.04`, or raise fsp-ref's floor — which
+  changes its decision D1.
+- **Move the CI actions off Node 20.** `actions/checkout@v4` and
+  `actions/setup-python@v5` target Node 20, which GitHub has deprecated and
+  already forces onto Node 24
+  ([changelog](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/)).
+  Upgrade both to their Node 24 majors.
 - `CODE_OF_CONDUCT.md` — the convention; its absence is noticed.
 - `.github/PULL_REQUEST_TEMPLATE.md` — materializes what
   [CONTRIBUTING §5](CONTRIBUTING.md#5-pull-requests) already requires: the
