@@ -315,6 +315,12 @@ episodic content into the semantic store is requested through the payload and
 **SHOULD be gated by the drift comparison of OP-005(a)**. Content that fails the
 comparison is not promoted, and the failure is logged.
 
+An implementation MAY also require an Operator authorization for promotion, in
+the shape of OC-002(b): a per-promotion approval, or a standing grant bounded by
+expiry, budget and scope. The authorization then names the content it covers,
+and a promotion waiting for one does not hold up the rest of Sleep — the
+content stays episodic, and recallable, until it is authorized or rejected.
+
 **(d) The Resumption Record.** A **Resumption Record** SHOULD be produced during
 Sleep as the digest of the payload, carrying three things: a pointer map to the
 working memories the next session needs, resolved to Memory Store addresses after
@@ -474,9 +480,16 @@ never re-executed automatically.**
 #### OP-016 — Operational rules: allow, deny, hold
 
 The Operator's operational rules over host operations — **allow**, **deny**, or
-**hold for approval** — are structural content, as is the workspace boundary
-declaration. A held operation waits for an explicit Operator decision; the
-decision and its outcome are logged, and the hold travels under OP-008(a).
+**hold for approval** — are configuration, and so structural content changed
+only by an Operator act. The workspace boundary declaration is either
+configuration or an operational setting (OC-003(c)); either way only the
+Operator changes it. A held operation waits for an explicit Operator decision;
+the decision and its outcome are logged, and the hold travels under OP-008(a).
+
+An allow rule for a skill SHOULD name the admitted content it allows — the
+skill's digest — and not only its name. A skill whose content changes, by any
+commit, then returns to **hold** until the Operator allows it again: an
+authorization to run code is an authorization to run that code.
 
 *Serves:* OC-002(b), OC-008.
 

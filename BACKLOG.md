@@ -102,7 +102,13 @@ Core §6.3 names both as planned and not yet written. Both are to be written
 from OBEC, without porting HACA-Security or HACA-CMI.
 
 - **Security** — blocked by open question 5 (hardware-backed keys vs. the
-  portability of OC-003(b)). Decide that before writing it.
+  portability of OC-003(b)). Decide that before writing it. Its scope includes
+  **memory poisoning**: a false fact or a planted instruction promoted into
+  semantic memory shapes every later session, and the deterministic probes of
+  OC-001(d) look only for what that clause forbids. OP-009(c) lets an
+  implementation put promotion under Operator authorization; the extension
+  decides what more is required — the probabilistic probe layer (OP-005(b)),
+  provenance that finds and withdraws what one source promoted (fsp-ref D36).
 - **CMI** (Cognitive Mesh Interface) — needs at least two entities operating
   under the reference implementation.
 

@@ -52,6 +52,17 @@ The conformance suite carries its own version line; a claim names both, as in
   **operational settings** — the model, the workspace — MAY be integrity
   content changed only by Operator acts. An implementation that keeps them
   structural still conforms. The glossary defines both terms.
+- **OP-016** (Profile): the operational rules are configuration, and an allow
+  rule for a skill SHOULD pin the admitted content, not only the name — a skill
+  whose code changes returns to hold until the Operator allows it again.
+  Otherwise a commit under a window could replace code the Operator allowed
+  with code nobody read.
+- **OP-009(c)** (Profile): an implementation MAY require an Operator
+  authorization for semantic promotion, per promotion or under a bounded grant,
+  pinned to the content; a promotion waiting for one does not hold up Sleep.
+
+**Conformance suite**
+
 - Step 3.5 now tries **every** operation against every content class it does
   not own, not only the class owners against each other. An operation owning no
   class — host actuation above all — was only tested against the store by 8.4
