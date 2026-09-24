@@ -212,7 +212,8 @@ A single point of atomicity: the `rename` of `HEAD`.
 5. **resumption** — logs; removes `gen/<n-1>`.
 
 **Recovery** (the crash gate, before verification): removes `gen/<k>`,
-`documents/<k>` and `chain/<k>` newer than `HEAD` (G5). `inject interrupt
+`documents/<k>` and `chain/<k>` newer than `HEAD` — an entry whose commit did
+not complete is not a chain record (OC-004(a); G5). `inject interrupt
 --stage`: `staging` = after 1, `write` = after 2, `chain-entry` = after 3.
 
 ### 3.4 Integrity log
@@ -490,7 +491,7 @@ the index gate excludes the skill and tells the Operator (OP-006, step 8.8).
 Any other drift aborts at the structural gate.
 
 **Recovery (gate 2, crash):** removes entries, documents and generations beyond
-`HEAD`, and temporary files (G5); removes the stale `CREDENTIAL` and `PULSE`;
+`HEAD`, and temporary files (OC-004(a); G5); removes the stale `CREDENTIAL` and `PULSE`;
 logs `recovery {evidence, attempt}`. The residue list is the one `verify()`
 already returns.
 

@@ -164,7 +164,10 @@ artifacts realize this and MUST exist:
   content, updated only inside a commit;
 - the **integrity chain** — one append-only entry per commit, each referencing
   its predecessor, the resulting structural state, and the authorization that
-  covered it. Chain records MUST NOT be compacted or deleted.
+  covered it. Committed chain records MUST NOT be compacted or deleted. An entry
+  becomes a chain record when its commit completes; an entry left by a commit
+  that did not complete is not one, and restoring the prior state under (b)
+  removes it.
 
 Verification is two mechanical checks: current structural content matches the
 chain's latest entry, and the chain is unbroken from that entry back to the

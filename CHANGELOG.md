@@ -27,6 +27,14 @@ The conformance suite carries its own version line; a claim names both, as in
   admitted code does beyond them is bounded by its admission under (c). A note
   adds that a free shell fails both OC-008(a) and OC-003(c), and §6.2 lists a
   skill that exceeds its declaration as a residual risk.
+- **Clarifying revision of OC-004(a).** "Chain records MUST NOT be compacted or
+  deleted" read, literally, as forbidding the rollback OC-004(b) and OC-010
+  require: a commit that writes its chain entry before its atomic point and
+  then crashes leaves an entry that recovery must remove, and steps 4.8 and
+  10.3 test exactly that. An entry now becomes a chain record when its commit
+  completes; one left by a commit that did not complete is not a record, and
+  restoring the prior state removes it. No conformant implementation stops
+  conforming.
 
 **Conformance suite**
 

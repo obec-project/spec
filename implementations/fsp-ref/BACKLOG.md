@@ -12,7 +12,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval, windows (G11/G13 first), atomic commit + recovery (G5 first), `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-002(a)(b), OC-004, 10.3 |
+| **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval, windows (G11/G13 first), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-002(a)(b), OC-004, 10.3 |
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
 | **6** | workspace, allowlist, native primitives, `http_fetch`, skills, monitoring | OC-008, OC-001 1.2, 5.4 |
@@ -64,8 +64,6 @@ Where the specification does not suffice, it is a defect of the specification
 ([AGENTS.md](AGENTS.md)): each gap below is to be decided and corrected in the
 specification in a commit of its own. Closed gaps are in the CHANGELOG.
 
-- **G5 — an orphan chain entry** is removed on recovery: confirm that the
-  prohibition on deleting applies only to committed records.
 - **G6 — file mode outside the digest.** Largely resolved in fsp by D34 (the
   execute bit is in the integrity document).
 - **G7 — secrets vs. completeness.** The API key lives outside the store (D7).

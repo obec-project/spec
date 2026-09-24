@@ -9,6 +9,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
+## Phase 3 — the commit (in progress)
+
+The specification decisions the phase depends on come first.
+
+- **G5 closed** (2026-09-24, *clarify* of OC-004(a)): an entry becomes a chain
+  record when its commit completes. The entry the pipeline writes before the
+  rename of `HEAD` is therefore not a record until then, and recovery removing
+  it is the restore OC-004(b) requires, not a deletion OC-004(a) forbids. No
+  change to fsp-ref.
+
+---
+
 ## Phase 2 — the start (2026-09-18)
 
 **Built.** `fsp/lifecycle.py`: the six gates in `GATES`, `start`,
