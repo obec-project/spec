@@ -133,6 +133,8 @@ ietf/            Internet-Drafts generated from spec/                 (in progre
 | [GOVERNANCE.md](GOVERNANCE.md) | roles, lifecycle, versioning policy, extension policy |
 | [COMPLIANCE.md](COMPLIANCE.md) | what conformance means, how to claim it, how to verify someone else's claim |
 | [CHANGELOG.md](CHANGELOG.md) | releases, classified by revision kind |
+| [BACKLOG.md](BACKLOG.md) | what is left to do, by priority |
+| [AGENTS.md](AGENTS.md) | for coding agents: the rules that are easy to break, and how to verify a change |
 
 ---
 

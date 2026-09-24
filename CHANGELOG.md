@@ -82,6 +82,30 @@ The conformance suite carries its own version line; a claim names both, as in
   that OBEC awaits a propagation from them; the Profile rule map is back in §5,
   where the text announces it.
 
+**Reference implementation**
+
+- **fsp-ref** begins in `implementations/fsp-ref/`: a filesystem realization
+  of OBEC-Core 0.9.1 over POSIX primitives, written from the specification and
+  the adapter contract alone. The store, the chain back to the Genesis Anchor,
+  first activation, the gated start, sessions, revocation, the passive signal
+  and decommission are in place; it is not conformant yet. It keeps its own
+  design, backlog and changelog in its directory, and its phases are recorded
+  in [its CHANGELOG](implementations/fsp-ref/CHANGELOG.md). The gaps it found
+  in the specification are the clarifying revision of OC-008(a) and the
+  ADAPTER.md changes above.
+
+**Repository**
+
+- `BACKLOG.md` records what is left before and after the repository opens.
+  The working notes it replaces were kept out of git; the backlog and fsp-ref's
+  design now live in the repository, so the code's references to them resolve
+  for anyone who clones it.
+- `AGENTS.md`, at the root and in fsp-ref, gathers for coding agents the
+  rules CONTRIBUTING states for people and the ones that were only implicit:
+  where each kind of record lives, how to verify a change, and what CI runs.
+- fsp-ref's code carries SPDX headers, as the rest of the code has since 0.9.1.
+- CI runs fsp-ref's unit tests on Python 3.9 – 3.14.
+
 ---
 
 ## 0.9.1 — 2026-09-18

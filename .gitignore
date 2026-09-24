@@ -36,10 +36,6 @@ coverage/
 *.log
 npm-debug.log*
 
-# --- Working notes, not part of the specification ---
-PENDENCIAS.md
-implementations/DEV-NOTES.md
-
 # --- Conformance run artifacts ---
 # Test runs create disposable Entity Stores; claims are committed, runs are not.
 conformance/runs/

@@ -1,0 +1,106 @@
+# Backlog
+
+What is left to do in this repository, by priority. What is done is in
+[CHANGELOG.md](CHANGELOG.md). The reference implementation keeps its own
+backlog in [implementations/fsp-ref/BACKLOG.md](implementations/fsp-ref/BACKLOG.md).
+
+The repository stays private until **the reference implementation passes every
+executed step of the suite**. Attested steps go with evidence and review; step
+3.2 requires a real second host; 4.9–4.12 stay *unestablished* for everyone
+until a second version exists.
+
+---
+
+## 1. Before opening
+
+- **The reference implementation passes the suite** — the trigger above.
+  Phases 3–9 of [fsp-ref's backlog](implementations/fsp-ref/BACKLOG.md).
+- **`.github/ISSUE_TEMPLATE/challenge-invariant.md`** — the most important
+  template, because it turns [CONTRIBUTING §7](CONTRIBUTING.md#7-challenging-an-invariant)
+  from an invitation into a process: fields for which of the ten invariants,
+  which of the five forms (*not testable*, *restatement*, *policy*,
+  *unsatisfiable*, *names structure*), and the argument with its evidence.
+  Alongside it, less urgent:
+  - `open-question.md`, for contributions on
+    [design/OPEN-QUESTIONS.md](design/OPEN-QUESTIONS.md);
+  - `conformance-claim.md`, with the instructions and checklist for submitting
+    a conformance result.
+- **On opening, update the status** in the [README](README.md#status-this-is-a-proposal)
+  and in [implementations/README.md](implementations/README.md) — the only two
+  places that state no implementation has run the suite.
+
+## 2. Right after opening
+
+- **Enable Private Vulnerability Reporting** (Settings → Code security).
+  [SECURITY.md](SECURITY.md) points to it, and it exists only on a public
+  repository.
+- **GitHub topics:** `ai-agents`, `specification`, `agent-governance`,
+  `conformance`, `auditability`, `llm`.
+
+## 3. Needs the author
+
+- **"Implemented twice, in Python and in TypeScript, and entities have run
+  under it"** appears in four documents. Confirm the framing, and whether those
+  implementations can be cited (repository, commit, period). If they can, they
+  become partial evidence for open question 1 instead of "nobody measured".
+- **How long did they run, and what broke?** Any number — sessions, store size,
+  something that degraded — turns open question 1 from speculation into
+  observation. Something that broke probably deserves an open question of its
+  own.
+- **Open question 5** (portability vs. hardware-backed keys) says there may be
+  no construction that satisfies both. If the author already knows there is,
+  or is not, the text is weaker than it needs to be.
+- **Not verifiable from inside the repository:** whether the repository
+  description (153 characters) reads well; whether the "proposal" framing is
+  calibrated — it may be too modest, since the architecture has run twice and
+  the documents spend much of their length on what is not known; and the
+  trademark risk of "OBEC" (a search found no conflict in software or AI; not
+  legal advice).
+
+## 4. Release
+
+- **Release the Unreleased section.** It holds a clarifying revision of
+  OC-008(a), so the next specification version is a minor one, with a new
+  suite version beside it.
+- **Decide whether releases are tagged in git.** There are no tags, not even
+  `v0.9.0`.
+
+## 5. Community and tooling
+
+- `CODE_OF_CONDUCT.md` — the convention; its absence is noticed.
+- `.github/PULL_REQUEST_TEMPLATE.md` — materializes what
+  [CONTRIBUTING §5](CONTRIBUTING.md#5-pull-requests) already requires: the
+  revision kind, the continuity impact and the affected rules.
+- **A claims validator** — a script or GitHub Action that checks the integrity
+  and schema of the `.json` and `.md` files submitted to `conformance/claims/`.
+- **A CI status badge** in the README.
+
+## 6. Specification — during or after the reference implementation
+
+- **Gaps found by the reference implementation**, to be decided and corrected
+  in the specification: [fsp-ref BACKLOG §3](implementations/fsp-ref/BACKLOG.md#3-gaps-in-the-specification-and-the-contract).
+- **Diagrams** — the OC-010 start sequence, and store vs. model in the Primer.
+  No block diagram in Core §3 (open question 10).
+- **A taxonomy of standing-grant scopes** (open question 9) — the
+  implementation will have to choose one; bring it back to the Profile.
+- **Example artifacts** (Genesis Anchor, chain entry, passive signal) — as "one
+  realization", in `implementations/`, not in `spec/`.
+- **Run step 2.16 partially:** stop the reasoning, cause an escalation,
+  observe the passive signal.
+
+## 7. Extensions — after the reference implementation
+
+Core §6.3 names both as planned and not yet written. Both are to be written
+from OBEC, without porting HACA-Security or HACA-CMI.
+
+- **Security** — blocked by open question 5 (hardware-backed keys vs. the
+  portability of OC-003(b)). Decide that before writing it.
+- **CMI** (Cognitive Mesh Interface) — needs at least two entities operating
+  under the reference implementation.
+
+## 8. Repository layout — later
+
+- Separate repositories for `implementations/` and `ietf/` once they have
+  content, adjusting the README's layout table with them.
+- `conformance/` moves to its own repository when the suite has an independent
+  release, which Core §4.1's separate version lines call for.
