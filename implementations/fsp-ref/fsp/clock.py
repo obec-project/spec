@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The implementation's clock. Timestamps are for humans and audit; nothing
 verified depends on one (they vary, so they stay out of outcomes, ADAPTER §2.3)."""
 

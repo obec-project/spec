@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The configuration surface (Profile Appendix A, ``describe config``).
 
 Every setting here is a runtime setting (D33): the Operator's, per host,

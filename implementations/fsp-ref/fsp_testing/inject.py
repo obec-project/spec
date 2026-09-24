@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Fault injection (ADAPTER.md §5). Corrupts the store the way a fault or a
 careless hand would: directly on disk, bypassing every guard — that is the
 point. Nothing in ``fsp`` imports this module.

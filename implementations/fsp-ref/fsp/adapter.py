@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The conformance adapter (ADAPTER.md). A driver over the same functions the
 ``fsp`` CLI uses; it adds no capability of its own (§1.1, §1.2).
 

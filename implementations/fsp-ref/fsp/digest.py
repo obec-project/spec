@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Canonical form and digests.
 
 Everything the store hashes is hashed in one canonical form, so that a digest

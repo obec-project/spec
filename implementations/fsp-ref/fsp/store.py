@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The Entity Store on disk: layout, the two write forms, and the class guard.
 
 Every write to the store goes through this module (DESIGN.md §2). A write

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Formats of the integrity chain, the integrity documents and ``HEAD``.
 
 Every one is stored as canonical JSON, so a file's identity is the sha256 of

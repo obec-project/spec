@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """fsp-ref — Filesystem Substrate Platform, reference implementation of
 OBEC-Core 0.9.1 over a filesystem and POSIX primitives."""
 

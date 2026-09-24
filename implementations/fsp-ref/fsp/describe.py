@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Introspection for ``describe`` (ADAPTER.md §3.1). Generated from the tables
 the implementation actually runs on, never written by hand beside them."""
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Test-build hooks the start consults (DESIGN.md §8.2).
 
 ``inject gate-failure`` has to reach the *next* start, which runs in another

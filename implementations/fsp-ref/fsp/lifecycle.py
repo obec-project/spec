@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The SIL's lifecycle: the gated start, the live session, close, revocation,
 the passive signal and decommission (DESIGN.md §8).
 

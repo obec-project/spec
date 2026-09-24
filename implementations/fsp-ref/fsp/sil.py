@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """The System Integrity Layer: the one writer of integrity content, and the
 committer of structural content (OC-003(c), OC-005(a)).
 

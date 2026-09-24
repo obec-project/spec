@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Jonas Orrico
 """Verification of committed structural content against the chain (OC-004(a)).
 
 One function serves the start gate, ``lifecycle verify`` and, later, the
