@@ -3,7 +3,7 @@
 One function serves the start gate, ``lifecycle verify`` and, later, the
 Vital Check (D37). It never repairs anything: it returns **findings**, each
 ``{type, target, owner, evidence}``, and the caller decides. ``owner`` is the
-component whose authority covers the correction (DEV-NOTES §6.7).
+component whose authority covers the correction (DESIGN.md §6.7).
 
 Only what is committed is verified. Residue of an interrupted commit — an
 entry, document or generation beyond ``HEAD`` — is not committed state; it is

@@ -1,12 +1,12 @@
 """The Entity Store on disk: layout, the two write forms, and the class guard.
 
-Every write to the store goes through this module (DEV-NOTES §2). A write
+Every write to the store goes through this module (DESIGN.md §2). A write
 names the content class it writes and the writer performing it; the guard
 refuses when the path does not belong to that class, or the writer is not the
 class's sole writer (OC-003(c), OC-005(a)). A unit test scans the rest of the
 code for raw writes.
 
-Two write forms, and only two (DEV-NOTES §3.1):
+Two write forms, and only two (DESIGN.md §3.1):
 
 - **append** — one canonical JSON record per line, ``O_APPEND``, ``fsync``
   per record; a truncated final line is detected on read, never repaired.
@@ -58,7 +58,7 @@ class Datum:
         self.regex = re.compile("^" + rx + "$")
 
 
-# Everything the implementation persists inside the store (DEV-NOTES §3.1).
+# Everything the implementation persists inside the store (DESIGN.md §3.1).
 # `describe state` is generated from this table, and a file matching no entry
 # is a datum without a class — reported by verification.
 LAYOUT = (

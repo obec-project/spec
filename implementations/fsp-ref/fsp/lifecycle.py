@@ -1,5 +1,5 @@
 """The SIL's lifecycle: the gated start, the live session, close, revocation,
-the passive signal and decommission (DEV-NOTES §12).
+the passive signal and decommission (DESIGN.md §8).
 
 Every function here runs under the store's write lock, so two starts over
 one store serialize and the second sees the first one's credential.

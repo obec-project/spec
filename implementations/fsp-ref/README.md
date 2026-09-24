@@ -23,6 +23,10 @@ and returns exit code `2` for every command not built yet. `fsp_testing/`
 holds fault injection and exists only in test builds: without it, every
 `inject` command exits `2`.
 
+[DESIGN.md](DESIGN.md) has the architecture and the decisions behind it,
+[BACKLOG.md](BACKLOG.md) what is left, [CHANGELOG.md](CHANGELOG.md) what has
+been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
+
 ## Layout
 
 | | |

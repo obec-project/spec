@@ -73,7 +73,7 @@ def classify_credential(lock, *, residue, pulse_fresh):
     return "conflict" if pulse_fresh else "crash"
 
 
-# -- the integrity log (DEV-NOTES §3.4) -------------------------------------
+# -- the integrity log (DESIGN.md §3.4) -------------------------------------
 
 
 def log_append(store: Store, kind, *, rule=None, binding=None, session=None, **payload):
@@ -325,7 +325,7 @@ def raise_passive_signal(store: Store, condition, detail, *, session=None):
         return rec
 
 
-# -- the commit pipeline (OC-004(b), OP-012; DEV-NOTES §3.3) -----------------
+# -- the commit pipeline (OC-004(b), OP-012; DESIGN.md §3.3) -----------------
 
 
 def commit_generation(store: Store, *, changes, authorization, kind="commit", session=None):

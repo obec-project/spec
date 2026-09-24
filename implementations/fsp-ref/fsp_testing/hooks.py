@@ -1,4 +1,4 @@
-"""Test-build hooks the start consults (DEV-NOTES §12.2).
+"""Test-build hooks the start consults (DESIGN.md §8.2).
 
 ``inject gate-failure`` has to reach the *next* start, which runs in another
 process. The marker lives **outside** the store — never in it, where it would

@@ -197,7 +197,7 @@ class WriteLock(TempDirTest):
 
 
 class NoRawWrites(TempDirTest):
-    """Every write to the store goes through store.py (DEV-NOTES §2)."""
+    """Every write to the store goes through store.py (DESIGN.md §2)."""
 
     FORBIDDEN = (
         "os.rename(",
