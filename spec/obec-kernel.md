@@ -137,7 +137,13 @@ each MUST have exactly one authorized write path:
 |---|---|---|
 | **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-002(b) and OC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
-| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, drift digests | the single path of OC-005(a) — and no other |
+| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, operational settings, drift digests | the single path of OC-005(a) — and no other |
+
+Configuration is structural content that shapes or bounds the entity.
+**Operational settings** — how an Operator runs the entity on a given host, such
+as the model it uses or the workspace it acts in — MAY instead be held as
+integrity content; they are then changed only by an Operator act, never by a
+commit, and are not part of the structural state the chain verifies.
 
 No operation may exist whose parameters allow it to write outside its own class:
 a request that would reach another class MUST be rejected whatever operation

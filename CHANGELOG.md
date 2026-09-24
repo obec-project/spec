@@ -45,6 +45,13 @@ The conformance suite carries its own version line; a claim names both, as in
   completes; one left by a commit that did not complete is not a record, and
   restoring the prior state removes it. No conformant implementation stops
   conforming.
+- **Clarifying revision of OC-003(c).** The table put all of configuration in
+  structural content, which read as requiring the workspace — a host path —
+  inside the verified state, where it breaks relocation and changes by commit.
+  Configuration is now defined as what shapes or bounds the entity, and
+  **operational settings** — the model, the workspace — MAY be integrity
+  content changed only by Operator acts. An implementation that keeps them
+  structural still conforms. The glossary defines both terms.
 - Step 3.5 now tries **every** operation against every content class it does
   not own, not only the class owners against each other. An operation owning no
   class — host actuation above all — was only tested against the store by 8.4

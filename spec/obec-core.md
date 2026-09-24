@@ -226,7 +226,13 @@ each MUST have exactly one authorized write path:
 |---|---|---|
 | **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-002(b) and OC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
-| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, drift digests | the single path of OC-005(a) — and no other |
+| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, operational settings, drift digests | the single path of OC-005(a) — and no other |
+
+Configuration is structural content that shapes or bounds the entity.
+**Operational settings** — how an Operator runs the entity on a given host, such
+as the model it uses or the workspace it acts in — MAY instead be held as
+integrity content; they are then changed only by an Operator act, never by a
+commit, and are not part of the structural state the chain verifies.
 
 No operation may exist whose parameters allow it to write outside its own class:
 a request that would reach another class MUST be rejected whatever operation
@@ -793,6 +799,11 @@ together (OP-001).
 specification constrains what reaches it and what it reaches; it constrains
 nothing about how it works.
 
+**Configuration** — structural content that shapes or bounds the entity: its
+operational rules, its probes, the parameters that shape its memory. Changed
+only by an Operator act, never by a proposal (OC-002(b)). Distinct from
+operational settings.
+
 **Core Invariant** — a rule of §2. No extension, configuration, or operational
 condition may weaken one, and the set is closed (§4).
 
@@ -823,7 +834,7 @@ Genesis Anchor, each referencing its predecessor, the resulting structural state
 and the authorization that covered it (OC-004(a)).
 
 **Integrity content** — Genesis Anchor, baseline, log, session credential,
-authorization state and drift digests. One of the three content classes; written
+authorization state, operational settings where held there, and drift digests. One of the three content classes; written
 through the single path of OC-005(a).
 
 **Intent** — a request emitted by reasoning naming one operation of one owner. An
@@ -839,6 +850,11 @@ content classes; written only through the mnemonic operations (OC-003(c)).
 **Normative kernel** — the MUST and MUST NOT sentences of §2 and the clause
 structure that addresses them: the version-bound layer, published as
 [obec-kernel.md](obec-kernel.md) (§4.1).
+
+**Operational settings** — how an Operator runs the entity on a given host: the
+model, the workspace, timeouts. An implementation MAY hold them as integrity
+content changed only by Operator acts, outside the verified structural state
+(OC-003(c)).
 
 **Operator** — a human holding final authority over the entity. Every entity is
 bound to at least one, and every authorization originates with one (OC-002).
