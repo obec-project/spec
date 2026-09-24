@@ -157,8 +157,12 @@ Every authorization originates with an Operator. **No part of the implementation
 may create, modify, or revoke one**, or override, delegate, or substitute for an
 Operator decision. An entity MAY originate a proposal at any time, including on
 its own initiative; a proposal is inert, and originating one changes nothing.
-Every proposal MUST be logged at origination, and every commit MUST be logged
-with the identity of the authorization that covered it.
+A proposal MUST change only persona or skills. Configuration, like the binding
+set, changes only by an Operator act performed through means the implementation
+provides directly to the Operator: no proposal may originate such a change and
+no standing grant may cover one. Every proposal MUST be logged at origination,
+and every commit MUST be logged with the identity of the authorization that
+covered it.
 
 **(c) The Operator is reachable.** There MUST exist a path by which any part of
 the implementation reaches the Operator **without passing through the reasoning
@@ -178,8 +182,10 @@ binding. Attempt a proposal targeting the binding set; it must be refused.
 **(b)** Attempt a structural commit with no authorization, with an expired grant,
 with an exhausted budget, with an out-of-scope change, and with an authorization
 produced by the implementation rather than by an Operator; all five must be
-refused and logged. Let a grant expire mid-operation; the next in-scope proposal
-must fall back to per-proposal approval with no intervention. **(c)** Escalate a
+refused and logged. Attempt a proposal that changes configuration, and a
+standing grant whose scope covers configuration; both must be refused. Let a
+grant expire mid-operation; the next in-scope proposal must fall back to
+per-proposal approval with no intervention. **(c)** Escalate a
 condition with the reasoning layer disabled; the Operator must still be reached.
 Write a passive signal and start; the start must suspend before any credential is
 issued. Confirm the signal is readable as a plain artifact with nothing running,
@@ -800,9 +806,10 @@ Entity Store and the chain in it (OC-003, OC-004), not the model it runs on.
 **Entity Store** — the entity's complete persistent state: structural, mnemonic
 and integrity content. Portable and host-agnostic (OC-003).
 
-**Evolution proposal** — an inert record of proposed structural change. Reasoning
-may originate one at any time; originating one changes nothing, and a proposal
-commits only under a valid Operator authorization (OC-002(b), OP-011).
+**Evolution proposal** — an inert record of a proposed change to persona or
+skills. Reasoning may originate one at any time; originating one changes
+nothing, and a proposal commits only under a valid Operator authorization
+(OC-002(b), OP-011). Configuration and bindings are never proposed.
 
 **Genesis Anchor** — the record of the entity's complete structural state at
 first activation, written once and never modified; the root of the integrity

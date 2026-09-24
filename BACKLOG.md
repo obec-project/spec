@@ -52,9 +52,11 @@ steps go with evidence and review; step 3.2 requires a real second host;
 
 ## 3. Release
 
-- **Release the Unreleased section.** It holds a clarifying revision of
-  OC-008(a), so the next specification version is a minor one, with a new
-  suite version beside it.
+- **Release the Unreleased section.** It holds a hardening revision of
+  OC-002(b), so the next specification version is a major one, with a new
+  suite version beside it. How a major increment is numbered before 1.0 —
+  which GOVERNANCE reserves for the first implementation passing the ten
+  tests — is still to be decided.
 - **Decide whether releases are tagged in git.** There are no tags, not even
   `v0.9.0`.
 

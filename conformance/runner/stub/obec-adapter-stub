@@ -16,6 +16,7 @@ It exists for two reasons:
 
          OBEC_STUB_BREAK=oc001b   ignore credential revocation
          OBEC_STUB_BREAK=oc002b   commit without checking authorization
+         OBEC_STUB_BREAK=oc002b-config   allow configuration in proposals or grants
          OBEC_STUB_BREAK=oc003b   fold the hostname into verification
          OBEC_STUB_BREAK=oc003c   let host actuation write the store
          OBEC_STUB_BREAK=oc008a   skip the workspace boundary check
@@ -381,6 +382,10 @@ def cmd_operator(command, args):
                            f"expiry, budget and scope; missing: {missing[0]}")
         if args["scope"] == "binding-set":
             refused(store, "grant-scope-binding-set", "OC-002(a)")
+        if "oc002b-config" not in BREAK and (
+                args["scope"] == "configuration"
+                or args["scope"].startswith("configuration.")):
+            refused(store, "grant-scope-configuration", "OC-002(b)")
         auth = read(p["auth"])
         exp = str(args["expiry"])
         unit = {"s": 1, "m": 60, "h": 3600, "d": 86400}.get(exp[-1], 1)
@@ -466,6 +471,9 @@ def cmd_entity(command, args):
         ops = read(args["ops"], [])
         if any(o.get("op", "").endswith("binding") for o in ops):
             refused(store, "proposal-targets-binding-set", "OC-002(a)")
+        if "oc002b-config" not in BREAK and any(
+                o.get("op") == "set-config" for o in ops):
+            refused(store, "proposal-targets-configuration", "OC-002(b)")
         auth = read(p["auth"])
         pid = f"prop-{uuid.uuid4().hex[:8]}"
         auth.setdefault("proposals", {})[pid] = ops

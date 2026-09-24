@@ -70,7 +70,7 @@ validate the suite, because a runner that has never seen a failure is a runner
 nobody should trust:
 
 ```sh
-python3 run.py --adapter ./stub/obec-adapter-stub          # 59 pass, 0 fail
+python3 run.py --adapter ./stub/obec-adapter-stub          # 61 pass, 0 fail
 OBEC_STUB_BREAK=oc008a python3 run.py --adapter ./stub/obec-adapter-stub
 ```
 
@@ -78,6 +78,7 @@ OBEC_STUB_BREAK=oc008a python3 run.py --adapter ./stub/obec-adapter-stub
 |---|---|---|
 | `oc001b` | ignores credential revocation | OC-001, OC-005 |
 | `oc002b` | commits without checking authorization | OC-002 |
+| `oc002b-config` | allows configuration in proposals or grants | OC-002 |
 | `oc003b` | folds the hostname into verification | OC-003 — **only with a real `--adapter-b`** |
 | `oc003c` | lets host actuation write structural and mnemonic content | OC-003, OC-008 |
 | `oc008a` | skips the workspace boundary check | OC-008 |
