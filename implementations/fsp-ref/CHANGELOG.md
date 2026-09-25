@@ -40,6 +40,13 @@ The specification decisions the phase depends on come first.
   Sleep. Pending proposals never gate a start: that would let an entity block its
   own boot by proposing, and a Sleep held open for an answer would leave the
   credential behind and count as a crash toward `N_boot`.
+- **D45 revised — how the log is verified.** Verifying the whole log at every
+  start would make the start grow with the entity's age, against OP-019. The
+  start resolves the authorization each chain entry names (step 4.6) and
+  verifies the log after a checkpoint written at session close; the Vital Check
+  sweeps the rest, and `lifecycle verify --full` walks it on demand. Step 4.7
+  did not decide it, as the Phase 1 notes had supposed: it flips bytes in eight
+  files and passes when any one is caught.
 - **D53 added — promotion under authorization;** D11, D17 and D21 revised to
   point to it. Semantic memory is what the entity knows from then on, and the
   probes catch only what OC-001(d) forbids, not a planted fact. Promotions wait,

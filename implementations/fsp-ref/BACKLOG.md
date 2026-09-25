@@ -13,7 +13,7 @@ Each phase ends with `run.py --only …` green on its invariants
 | Phase | Scope | Suite |
 |---|---|---|
 | **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval and the review (D52), windows over the declared categories (D50), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-002(a)(b), OC-004, 10.3 |
-| **4** | heartbeat and the Vital Check skeleton (D37–D40), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
+| **4** | heartbeat and the Vital Check skeleton (D37–D40), the Vital Check's sweep of the log (D45), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
 | **6** | workspace, allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-001 1.2, 5.4 |
 | **7** | session store, conversation, `mnemonic-save`/`mnemonic-recall`, probes, promotion under authorization (D53), Sleep | OC-007, OC-003(e), OC-001(d) |
@@ -26,13 +26,10 @@ After that: a test entity on Ollama, operated for days, measuring what
 
 ### Carried into the phases
 
-- **Phase 3 — verify the log.** A flipped byte in `integrity/log.jsonl` is not
-  detected yet (the `expectedFailure` test in `tests/test_fap_verify.py`):
-  verify the `prev` chain. There is a tension with OP-019 (the cost of a start
-  does not grow with age): verifying the whole log at start grows with the
-  log; the alternative is a checkpoint of the last verified record plus an
-  incremental Vital Check. The runner's step 4.7 flips bytes in "files under
-  the store" — if it picks the log, that decides it.
+- **Phase 3 — verify the log** as D45 splits it: authorizations and the tail
+  at start, `lifecycle verify --full` on demand. The `expectedFailure` test in
+  `tests/test_fap_verify.py` becomes two: a byte flipped in the tail is caught
+  by the start, one flipped in an old record by `--full`.
 - **Phase 3 — `inject corrupt --kind commit-unauthorized`** exits 2 until
   `verify` resolves each entry's `authorization` against what was recorded.
   Today `verify` only requires that it exists.
