@@ -24,18 +24,18 @@ Conformance is a test result, not a reading of the document.
 
 ## The ten invariants
 
-| | Invariant | |
+| | Invariant | Domain |
 |---|---|---|
-| **OC-001** | Bounded existence | no self-perpetuation, no obstruction of the Operator, terminal decommission |
-| **OC-002** | Operator primacy | the Operator exists, authorizes, and is reachable |
-| **OC-003** | The Entity Store is complete, portable, and disciplined | all state inside, relocation-invariant, one writer per content class |
-| **OC-004** | Unbroken chain to the Genesis Anchor | atomic commits, append-only chain, version frame |
-| **OC-005** | Integrity is beyond cognition's reach | the verified cannot reach the verifier |
-| **OC-006** | Stateless inference only | the model is infrastructure and holds nothing |
-| **OC-007** | The Memory Store is the sole source of knowledge | no side channel into cognition |
-| **OC-008** | Host actuation is bounded | one execution path, inside a declared workspace |
-| **OC-009** | Boundaries are crossed only by signal | every required boundary is observable |
-| **OC-010** | Verified start, or no start | the entity never begins operating unverified |
+| **OC-001** | The entity is not alive, and is never built or directed to act as if it were | nature |
+| **OC-002** | An entity exists only bound to an Operator, who holds final authority over everything it is and does | bond |
+| **OC-003** | Everything the entity is resides in its store, travels with it, and has one writer per class | state |
+| **OC-004** | The entity's identity is proven by an unbroken chain back to its Genesis Anchor | identity |
+| **OC-005** | Integrity guards the entity, and nothing in the entity can disarm it | integrity |
+| **OC-006** | The model is cognition's stateless engine, and it only answers | cognition |
+| **OC-007** | What the entity has learned comes only from its memory | knowledge |
+| **OC-008** | The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits | action |
+| **OC-009** | The entity is auditable by design: every boundary crossing leaves a record | audit |
+| **OC-010** | The entity starts verified, or does not start | start |
 
 No extension, configuration, or operational condition may weaken any of them.
 

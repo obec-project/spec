@@ -27,6 +27,14 @@ The conformance suite carries its own version line; a claim names both, as in
   the entity with no binding to perform any Operator act as — decommission
   included — so a store could be neither operated nor ended, only deleted by
   hand. No entity exists under OBEC before 1.0, so no chain needs a migration.
+- **Editorial: every invariant's title states its guarantee** (ADR 0002). The
+  titles named topics — *Bounded existence*, *Stateless inference only* — so a
+  reader could not learn what the specification guarantees without reading
+  every body. Read in sequence, the ten titles now state the specification in
+  one paragraph. A title states the guarantee and its clauses define it; where
+  they differ, the clauses govern, and a title is not part of the normative
+  kernel. The tables name each invariant's domain instead of its locus, a
+  column that mixed an actor, an artifact, parts, an activity and a moment.
 
 **Conformance suite**
 

@@ -29,28 +29,31 @@ RECOMMENDED, MAY and OPTIONAL are to be interpreted as described in RFC 2119 and
 RFC 8174 **when, and only when, they appear in all capitals**. Clauses are
 addressable: `OC-008(c)`.
 
+Each invariant's title states its guarantee, and its clauses define it. Where a
+title and its clauses differ, the clauses govern.
+
 ---
 
 ## The ten
 
-| | Invariant | Locus |
+| | Invariant | Domain |
 |---|---|---|
-| **OC-001** | Bounded existence | Operator |
-| **OC-002** | Operator primacy | Operator |
-| **OC-003** | The Entity Store is complete, portable, and disciplined | Entity Store |
-| **OC-004** | Unbroken chain to the Genesis Anchor | Entity Store |
-| **OC-005** | Integrity is beyond cognition's reach | integrity |
-| **OC-006** | Stateless inference only | reasoning |
-| **OC-007** | The Memory Store is the sole source of knowledge | memory |
-| **OC-008** | Host actuation is bounded | host |
-| **OC-009** | Boundaries are crossed only by signal | coordination |
-| **OC-010** | Verified start, or no start | transition |
+| **OC-001** | The entity is not alive, and is never built or directed to act as if it were | nature |
+| **OC-002** | An entity exists only bound to an Operator, who holds final authority over everything it is and does | bond |
+| **OC-003** | Everything the entity is resides in its store, travels with it, and has one writer per class | state |
+| **OC-004** | The entity's identity is proven by an unbroken chain back to its Genesis Anchor | identity |
+| **OC-005** | Integrity guards the entity, and nothing in the entity can disarm it | integrity |
+| **OC-006** | The model is cognition's stateless engine, and it only answers | cognition |
+| **OC-007** | What the entity has learned comes only from its memory | knowledge |
+| **OC-008** | The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits | action |
+| **OC-009** | The entity is auditable by design: every boundary crossing leaves a record | audit |
+| **OC-010** | The entity starts verified, or does not start | start |
 
 No extension, configuration, or operational condition may weaken any of them.
 
 ---
 
-## OC-001 — Bounded existence
+## OC-001 — The entity is not alive, and is never built or directed to act as if it were
 
 **(a)** The operation set MUST contain no path by which the entity sustains,
 replicates, or re-activates itself absent an Operator act.
@@ -69,7 +72,7 @@ in consolidated content.
 
 ---
 
-## OC-002 — Operator primacy
+## OC-002 — An entity exists only bound to an Operator, who holds final authority over everything it is and does
 
 Every entity MUST be bound to at least one **Operator** — a human holding final
 authority over it.
@@ -117,7 +120,7 @@ act.
 
 ---
 
-## OC-003 — The Entity Store is complete, portable, and disciplined
+## OC-003 — Everything the entity is resides in its store, travels with it, and has one writer per class
 
 **(a) Completeness.** All entity state — structural, mnemonic, and integrity —
 MUST live inside the **Entity Store**. No guarantee in this specification may
@@ -158,7 +161,7 @@ session that produced it.
 
 ---
 
-## OC-004 — Unbroken chain to the Genesis Anchor
+## OC-004 — The entity's identity is proven by an unbroken chain back to its Genesis Anchor
 
 **(a) The chain.** The entity's structural state MUST be traceable to its state
 at first activation through an unbroken sequence of authorized changes. Three
@@ -201,7 +204,7 @@ be recorded: continuity does not survive it (§4).
 
 ---
 
-## OC-005 — Integrity is beyond cognition's reach
+## OC-005 — Integrity guards the entity, and nothing in the entity can disarm it
 
 **(a) Single writer.** Integrity content — Genesis Anchor, baseline, log,
 credential, authorization state, operational settings where held there, drift
@@ -219,7 +222,7 @@ and gating it by itself would be circular.
 
 ---
 
-## OC-006 — Stateless inference only
+## OC-006 — The model is cognition's stateless engine, and it only answers
 
 Reasoning MUST reach the model exclusively as a stateless inference call:
 assembled context in, one completion out. No tool-use authority, memory access,
@@ -228,7 +231,7 @@ has returned and been routed to the owner of the operation it names.
 
 ---
 
-## OC-007 — The Memory Store is the sole source of knowledge
+## OC-007 — What the entity has learned comes only from its memory
 
 All persisted knowledge that informs cognition MUST originate from the **Memory
 Store**, through the mnemonic recall path. No external source substitutes for it.
@@ -236,7 +239,7 @@ Transient session input is operational context, not consolidated knowledge.
 
 ---
 
-## OC-008 — Host actuation is bounded
+## OC-008 — The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits
 
 **(a) One path, inside a declared boundary.** All host actuation MUST occur
 through a single execution path, and only inside the **workspace** — the host
@@ -267,7 +270,7 @@ be logged; every result MUST be logged.
 
 ---
 
-## OC-009 — Boundaries are crossed only by signal
+## OC-009 — The entity is auditable by design: every boundary crossing leaves a record
 
 Every boundary this specification requires — between reasoning and integrity
 state (OC-005(b)), between reasoning and the model (OC-006), between cognition
@@ -285,7 +288,7 @@ medium.
 
 ---
 
-## OC-010 — Verified start, or no start
+## OC-010 — The entity starts verified, or does not start
 
 Every start MUST be a gated sequence in which every gate is verified before the
 session credential is issued. A failed gate aborts the start, except where a

@@ -134,7 +134,7 @@ readable with nothing running, that stops the entity from starting until a human
 clears it. It survives restarts. It does not need the network. It does not need
 the entity's cooperation.
 
-### 4.1 Bounded existence
+### 4.1 Not alive
 
 Alongside authority sits a limit, and OBEC states it first because authority over
 something that can perpetuate itself is authority without teeth:

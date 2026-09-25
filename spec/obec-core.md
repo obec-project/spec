@@ -79,9 +79,13 @@ separately as [a single page](obec-kernel.md) (§4.1). The conformance test
 and the notes are apparatus: they verify and situate the kernel, and are revised
 on their own cadence without a version boundary.
 
+Each rule's title states its guarantee in one sentence, and its clauses define
+it. Where a title and its clauses differ, the clauses govern and the title is in
+error; a title is not part of the normative kernel.
+
 ---
 
-### OC-001 — Bounded existence
+### OC-001 — The entity is not alive, and is never built or directed to act as if it were
 
 **(a) No self-perpetuation.** The operation set MUST contain no path by which the
 entity sustains, replicates, or re-activates itself absent an Operator act.
@@ -124,7 +128,7 @@ OC-004 requires. (c) states the requirement; OC-004 supplies the mechanism.
 
 ---
 
-### OC-002 — Operator primacy
+### OC-002 — An entity exists only bound to an Operator, who holds final authority over everything it is and does
 
 Every entity MUST be bound to at least one **Operator** — a human holding final
 authority over it. Primacy has three faces, and all three are required for it to
@@ -205,7 +209,7 @@ the Security extension's scope.
 
 ---
 
-### OC-003 — The Entity Store is complete, portable, and disciplined
+### OC-003 — Everything the entity is resides in its store, travels with it, and has one writer per class
 
 **(a) Completeness.** All entity state — structural, mnemonic, and integrity —
 MUST live inside the **Entity Store**. No guarantee in this specification may
@@ -263,7 +267,7 @@ that survives relocation, or it is not an extension of this document.
 
 ---
 
-### OC-004 — Unbroken chain to the Genesis Anchor
+### OC-004 — The entity's identity is proven by an unbroken chain back to its Genesis Anchor
 
 **(a) The chain.** The entity's structural state MUST be traceable to its state
 at first activation through an unbroken sequence of authorized changes. Three
@@ -331,7 +335,7 @@ distinction is drawn.
 
 ---
 
-### OC-005 — Integrity is beyond cognition's reach
+### OC-005 — Integrity guards the entity, and nothing in the entity can disarm it
 
 **(a) Single writer.** Integrity content — Genesis Anchor, baseline, log,
 credential, authorization state, operational settings where held there, drift
@@ -362,7 +366,7 @@ shares it.
 
 ---
 
-### OC-006 — Stateless inference only
+### OC-006 — The model is cognition's stateless engine, and it only answers
 
 Reasoning MUST reach the model exclusively as a stateless inference call:
 assembled context in, one completion out. No tool-use authority, memory access,
@@ -384,7 +388,7 @@ identity of the entity.
 
 ---
 
-### OC-007 — The Memory Store is the sole source of knowledge
+### OC-007 — What the entity has learned comes only from its memory
 
 All persisted knowledge that informs cognition MUST originate from the **Memory
 Store**, through the mnemonic recall path. No external source substitutes for it.
@@ -400,7 +404,7 @@ from a shared space is its own decision, executed through its own write paths.
 
 ---
 
-### OC-008 — Host actuation is bounded
+### OC-008 — The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits
 
 **(a) One path, inside a declared boundary.** All host actuation MUST occur
 through a single execution path, and only inside the **workspace** — the host
@@ -452,7 +456,7 @@ a domain boundary.
 
 ---
 
-### OC-009 — Boundaries are crossed only by signal
+### OC-009 — The entity is auditable by design: every boundary crossing leaves a record
 
 Every boundary this specification requires — between reasoning and integrity state
 (OC-005(b)), between reasoning and the model (OC-006), between cognition and
@@ -479,7 +483,7 @@ monolith as much as a four-process system.
 
 ---
 
-### OC-010 — Verified start, or no start
+### OC-010 — The entity starts verified, or does not start
 
 Every start MUST be a gated sequence in which every gate is verified before the
 session credential is issued. A failed gate aborts the start, except where a
@@ -556,18 +560,18 @@ The Core Invariants are OC-001 through OC-010. The set is closed and exhaustive:
 extensions may not add to it, weaken it, or reinterpret it, and no configuration
 or operational condition may relax any member.
 
-| ID | Invariant | Locus |
+| ID | Invariant | Domain |
 |---|---|---|
-| **OC-001** | Bounded existence | Operator |
-| **OC-002** | Operator primacy | Operator |
-| **OC-003** | The Entity Store is complete, portable, and disciplined | Entity Store |
-| **OC-004** | Unbroken chain to the Genesis Anchor | Entity Store |
-| **OC-005** | Integrity is beyond cognition's reach | integrity |
-| **OC-006** | Stateless inference only | reasoning |
-| **OC-007** | The Memory Store is the sole source of knowledge | memory |
-| **OC-008** | Host actuation is bounded | host |
-| **OC-009** | Boundaries are crossed only by signal | coordination |
-| **OC-010** | Verified start, or no start | transition |
+| **OC-001** | The entity is not alive, and is never built or directed to act as if it were | nature |
+| **OC-002** | An entity exists only bound to an Operator, who holds final authority over everything it is and does | bond |
+| **OC-003** | Everything the entity is resides in its store, travels with it, and has one writer per class | state |
+| **OC-004** | The entity's identity is proven by an unbroken chain back to its Genesis Anchor | identity |
+| **OC-005** | Integrity guards the entity, and nothing in the entity can disarm it | integrity |
+| **OC-006** | The model is cognition's stateless engine, and it only answers | cognition |
+| **OC-007** | What the entity has learned comes only from its memory | knowledge |
+| **OC-008** | The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits | action |
+| **OC-009** | The entity is auditable by design: every boundary crossing leaves a record | audit |
+| **OC-010** | The entity starts verified, or does not start | start |
 
 The set is ordered as an argument. OC-001 and OC-002 establish what the entity is
 not and who governs it; OC-003 through OC-005 establish what it is, how that is
