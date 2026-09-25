@@ -12,7 +12,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval and the review (D52), windows (G13 first), what may be proposed (D50), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-002(a)(b), OC-004, 10.3 |
+| **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval and the review (D52), windows over the declared categories (D50), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-002(a)(b), OC-004, 10.3 |
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
 | **6** | workspace, allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-001 1.2, 5.4 |
@@ -80,9 +80,6 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
   single operation. The specification could say that destinations within a
   class (session, episodic, semantic) are legitimate parameters of the single
   path.
-- **G13 — scope vocabulary** ([open question 9](../../design/OPEN-QUESTIONS.md)):
-  the suite already assumes one; fsp will need a hierarchical one
-  (`skills.install`, `configuration.model`, …).
 - **G14 — "crash scenario" is not defined mechanically.** OP-018 says a
   credential present at start signals a crash; OC-003(d) says a credential that
   does not match a crash is a conflict. The specification does not say what

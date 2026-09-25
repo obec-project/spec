@@ -18,11 +18,14 @@ The specification decisions the phase depends on come first.
   rename of `HEAD` is therefore not a record until then, and recovery removing
   it is the restore OC-004(b) requires, not a deletion OC-004(a) forbids. No
   change to fsp-ref.
-- **G11 closed** (2026-09-24, *harden* of OC-002(b)): a proposal changes only
-  persona or skills; configuration and bindings change only by an Operator act,
-  and no window covers them. D50 replaces D20, which protected a list of scopes
-  — `binding-set`, `rules`, `workspace`, `probes` — and so left every category
-  added later open. D17, D31 and D33 now point to D50.
+- **G11 and G13 closed** (2026-09-24): a window covers the categories fsp
+  declares — every structural one but the bindings — and nothing it does not
+  declare (OP-011(d)). D50 replaces D20, which kept `rules`, `workspace` and
+  `probes` out of every window, and D17, D31 and D33 point to it. A hardening of
+  OC-002(b) that kept all configuration out of every window was committed and
+  withdrawn the same day: it decided for the Operator what is the Operator's to
+  decide, and a regime without standing grants belongs to the Security
+  extension, whose adversarial host could roll a grant's budget back.
 - **G15 closed** (2026-09-24, *clarify* of OC-003(c)): operational settings,
   the workspace among them, MAY be integrity content changed only by Operator
   acts. D28 and D33 are what the specification now allows, so the OP-016
