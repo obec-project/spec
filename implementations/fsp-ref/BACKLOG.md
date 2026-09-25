@@ -45,7 +45,9 @@ After that: a test entity on Ollama, operated for days, measuring what
 ## 2. Outside v0 (Profile, SHOULD)
 
 - The probabilistic layer of the probes (OP-005(b)).
-- Checkpoints (OP-007(c)).
+- Checkpoints (OP-007(c)). When they come in, the chain gets the split D45
+  gives the log: the start verifies since the last checkpoint, and the Vital
+  Check and `lifecycle verify --full` cover the entries before it.
 - Corroborated escalation with a second reporter (OP-008(c)) — the evidence
   (`PULSE`) already exists.
 - Background execution (OP-014(b)).
