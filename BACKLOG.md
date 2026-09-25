@@ -52,11 +52,9 @@ steps go with evidence and review; step 3.2 requires a real second host;
 
 ## 3. Release
 
-- **Release the Unreleased section.** It holds a hardening revision of
-  OC-002(b), so the next specification version is a major one, with a new
-  suite version beside it. How a major increment is numbered before 1.0 —
-  which GOVERNANCE reserves for the first implementation passing the ten
-  tests — is still to be decided.
+- **Release the Unreleased section.** It holds a clarifying revision of
+  OC-008(a), so the next specification version is a minor one, with a new
+  suite version beside it.
 - **Decide whether releases are tagged in git.** There are no tags, not even
   `v0.9.0`.
 
@@ -101,8 +99,13 @@ steps go with evidence and review; step 3.2 requires a real second host;
 Core §6.3 names both as planned and not yet written. Both are to be written
 from OBEC, without porting HACA-Security or HACA-CMI.
 
-- **Security** — blocked by open question 5 (hardware-backed keys vs. the
-  portability of OC-003(b)). Decide that before writing it. Its scope includes
+- **Security** — hardens the host assumption from Semi-Trusted to
+  **adversarial**. Under it there are **no standing grants**: a grant's budget
+  and expiry live in state and time the host controls, and an adversarial host
+  can roll back the one and skew the other; every structural change and every
+  promotion requires a per-change approval the Operator signs. Blocked by open
+  question 5 (hardware-backed keys vs. the portability of OC-003(b)). Decide
+  that before writing it. Its scope includes
   **memory poisoning**: a false fact or a planted instruction promoted into
   semantic memory shapes every later session, and the deterministic probes of
   OC-001(d) look only for what that clause forbids. OP-009(c) lets an

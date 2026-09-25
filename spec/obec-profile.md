@@ -480,10 +480,9 @@ never re-executed automatically.**
 #### OP-016 — Operational rules: allow, deny, hold
 
 The Operator's operational rules over host operations — **allow**, **deny**, or
-**hold for approval** — are configuration, and so structural content changed
-only by an Operator act. The workspace boundary declaration is either
-configuration or an operational setting (OC-003(c)); either way only the
-Operator changes it. A held operation waits for an explicit Operator decision;
+**hold for approval** — are configuration, and so structural content. The
+workspace boundary declaration is either configuration or an operational
+setting (OC-003(c)). A held operation waits for an explicit Operator decision;
 the decision and its outcome are logged, and the hold travels under OP-008(a).
 
 An allow rule for a skill SHOULD name the admitted content it allows — the

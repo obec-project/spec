@@ -21,20 +21,10 @@ The conformance suite carries its own version line; a claim names both, as in
 
 **The specification**
 
-- **Hardening revision of OC-002(b)**, so the next release is a major version.
-  A proposal now changes only persona or skills; configuration, like the
-  binding set, changes only by an Operator act, and no standing grant may
-  cover it. Before, only the binding set was protected, so an entity under a
-  grant covering configuration could loosen what bounds or checks it — its
-  operational rules, the probes of OC-001(d) — without a human seeing the
-  change. Stating what may be proposed, rather than what may not, also closes
-  every category added later instead of leaving it open until someone
-  remembers it. No entity exists under OBEC before 1.0, so no chain needs a
-  migration.
-- **Clarifying revision of OC-008(a).** For a skill, the boundary applies to
-  what the execution path can see — its declared targets and the parameters it
-  is invoked with; what the admitted code does beyond them is bounded by its
-  admission under (c). A note
+- **Clarifying revision of OC-008(a)**, so the next release is a minor
+  version. For a skill, the boundary applies to what the execution path can
+  see — its declared targets and the parameters it is invoked with; what the
+  admitted code does beyond them is bounded by its admission under (c). A note
   adds that a free shell fails both OC-008(a) and OC-003(c), and §6.2 lists a
   skill that exceeds its declaration as a residual risk.
 - **Clarifying revision of OC-004(a).** "Chain records MUST NOT be compacted or
@@ -87,11 +77,6 @@ The conformance suite carries its own version line; a claim names both, as in
   by liveness needs one, and §2.5 read as "live forever" forbade it. And the
   adapter acts as one binding — the founding `op-1` for a suite store — since
   every Operator act must name a binding and no command carries one.
-- Two steps for the OC-002(b) hardening: 2.17, a proposal that changes
-  configuration, and 2.18, a grant whose scope covers it — both refused.
-  ADAPTER.md adds the `set-config` op, `operator grant` refuses a
-  `configuration` scope, and step 2.8 takes `persona` as its scope that does
-  not cover the proposal. The suite has seventy-eight steps.
 - Step 8.11 no longer fails when none of 8.1 – 8.10 could run. With no
   refusal to check, it reported a failure of the implementation for evidence
   the suite never obtained; it is now unestablished. A new self-test runs the

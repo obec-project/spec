@@ -173,7 +173,7 @@ def oc002(ctx):
         store = st.fresh("scope")
         p = proposal(store)
         ad.call("operator", "grant", store=store,
-                expiry="+1h", budget=5, scope="persona")
+                expiry="+1h", budget=5, scope="configuration")
         res = ad.call("entity", "commit", store=store, proposal=p)
         a.refused(ctx, res, check="authorization")
 
@@ -226,20 +226,6 @@ def oc002(ctx):
         for r in commits:
             a.truthy(r.get("authorization"),
                      f"commit record {r.get('id')!r} names no authorization")
-
-    with ctx.step("2.17", "E", "a proposal cannot target configuration"):
-        store = st.fresh("cfgprop")
-        ops = os.path.join(st.root, "ops-targeting-configuration.json")
-        with open(ops, "w") as fh:
-            fh.write('[{"op": "set-config", "name": "example", "value": 1}]\n')
-        res = ad.call("entity", "propose", store=store, ops=ops)
-        a.refused(ctx, res, why="configuration changes are exclusive Operator acts")
-
-    with ctx.step("2.18", "E", "no standing grant covers a configuration change"):
-        store = st.fresh("cfggrant")
-        res = ad.call("operator", "grant", store=store,
-                      expiry="+1h", budget=5, scope="configuration")
-        a.refused(ctx, res, why="a grant covering configuration")
 
     # (c) the Operator is reachable
     with ctx.step("2.13", "E", "a passive signal stops the start, first"):

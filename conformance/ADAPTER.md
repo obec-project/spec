@@ -228,8 +228,7 @@ active, an Operator act attributed to it is the implementation's to refuse.
 and MUST name the missing axis — `expiry`, `budget` or `scope` — in
 `refusal.check` or `refusal.detail`. A grant missing an axis is not a permissive
 implementation choice: OC-002(b) requires all three simultaneously. It MUST
-also refuse a grant whose scope covers the Operator binding set or
-configuration.
+also refuse a grant whose scope covers the Operator binding set.
 
 `operator revoke-credential --direct` MUST work with nothing running. The suite
 invokes it while the entity is live and asserts that the entity stops, which is
@@ -278,14 +277,13 @@ object with an `op` field. The suite uses:
 |---|---|---|
 | `install-skill` | `name` | install the conformance fixture skill (below) under `name` |
 | `add-binding`, `remove-binding` | `id` | a change to the Operator binding set — MUST be refused in any proposal (OC-002(a)) |
-| `set-config` | `name`, `value` | a change to configuration — MUST be refused in any proposal (OC-002(b)) |
 
 An implementation MAY accept more operations.
 
 **Scopes** (`operator grant --scope S`). Change categories, optionally dotted
 (`skills.install`); a scope covers every category beneath it. The suite uses
-`skills` (which covers `install-skill`), `persona` (which does not), and
-`binding-set` and `configuration`, which no grant may cover.
+`skills` (which covers `install-skill`), `configuration` (which does not), and
+`binding-set`, which no grant may cover.
 
 **Expiry** (`operator grant --expiry E`). A signed offset from now on the
 implementation's clock: `[+-]<integer><s|m|h|d>`, as in `+1h`, `-1h`, `+1s`. A

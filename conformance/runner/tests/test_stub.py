@@ -25,7 +25,6 @@ STUB = os.path.join(HERE, "..", "stub", "obec-adapter-stub")
 BREAKS = {
     "oc001b": {"OC-001", "OC-005"},
     "oc002b": {"OC-002"},
-    "oc002b-config": {"OC-002"},
     "oc003b": {"OC-003"},
     "oc003c": {"OC-003", "OC-008"},
     "oc008a": {"OC-008"},
