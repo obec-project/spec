@@ -1,7 +1,7 @@
 # fsp-ref
 
 **Filesystem Substrate Platform** — a reference implementation of
-OBEC-Core 0.9.1 over a filesystem and POSIX primitives: atomic rename,
+OBEC-Core 0.10.0 over a filesystem and POSIX primitives: atomic rename,
 append-only files, `fsync`, `flock`.
 
 **Status: in progress. Not conformant, and not usable as an entity yet.**

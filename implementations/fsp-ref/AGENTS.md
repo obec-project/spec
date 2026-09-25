@@ -25,7 +25,10 @@ repository's commit convention and change classification are in
    the phase's invariants. The trigger for announcing the repository: **every
    executed step passes** (3.2 with a real second host; 4.9–4.12 stay
    *unestablished* for everyone).
-6. **No real entity before 1.0** (OC-004(a) records the version in the Genesis
+6. **fsp-ref targets the latest OBEC release.** A release of the
+   specification moves `OBEC_VERSION` and the documents that name the version
+   in the same commit.
+7. **No real entity before 1.0** (OC-004(a) records the version in the Genesis
    Anchor). Development stores are disposable.
 
 ## Invariants of the code

@@ -1,7 +1,7 @@
 # fsp-ref — changelog
 
 What changed in fsp-ref, by phase, and why. fsp-ref has no release of its own
-yet; it targets OBEC-Core 0.9.1. Changes to the specification and the suite
+yet; it targets the latest OBEC release, now OBEC-Core 0.10.0. Changes to the specification and the suite
 that fsp-ref prompted are recorded in the [root CHANGELOG](../../CHANGELOG.md).
 
 Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
@@ -40,6 +40,11 @@ The specification decisions the phase depends on come first.
   Sleep. Pending proposals never gate a start: that would let an entity block its
   own boot by proposing, and a Sleep held open for an answer would leave the
   credential behind and count as a crash toward `N_boot`.
+- **Retargeted to OBEC-Core 0.10.0** (2026-09-24). As the reference
+  implementation, fsp-ref always targets the latest release. Nothing in 0.10.0
+  changes what fsp-ref already does; the Genesis records the new version, and
+  development stores made under 0.9.1 are disposable, as every store is before
+  1.0.
 - **D45 revised — how the log is verified.** Verifying the whole log at every
   start would make the start grow with the entity's age, against OP-019. The
   start resolves the authorization each chain entry names (step 4.6) and

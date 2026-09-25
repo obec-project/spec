@@ -20,7 +20,7 @@ class Adapter(TempDirTest):
         e0 = c["detail"]["entries"][0]
         self.assertEqual(e0["id"], d["genesis_digest"])
         self.assertEqual(e0["state_digest"], d["head_digest"])
-        self.assertEqual((e0["binding"], e0["version"]), ("op-1", "0.9.1"))
+        self.assertEqual((e0["binding"], e0["version"]), ("op-1", "0.10.0"))
 
     def test_second_init_is_a_logged_refusal(self):
         S = self.p("S")

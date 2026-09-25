@@ -23,7 +23,7 @@ class FirstActivation(TempDirTest):
         self.assertEqual(r.entry_count, 1)
         _, genesis = r.entries[0]
         self.assertEqual(genesis["binding"], "op-1")
-        self.assertEqual(genesis["version"], "0.9.1")
+        self.assertEqual(genesis["version"], "0.10.0")
         self.assertEqual(genesis["major"], 0)
         # No credential: the first one comes from a gated start (D29).
         self.assertFalse(os.path.exists(self.p("S", "CREDENTIAL")))

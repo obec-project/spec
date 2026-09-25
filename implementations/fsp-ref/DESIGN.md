@@ -6,7 +6,7 @@ each. A decision that is replaced leaves this file and is recorded in
 [BACKLOG.md](BACKLOG.md).
 
 **fsp-ref** — *Filesystem Substrate Platform*, the reference implementation of
-OBEC-Core 0.9.1 over a filesystem and POSIX primitives. A future `dbsp-ref`
+OBEC-Core 0.10.0 over a filesystem and POSIX primitives. A future `dbsp-ref`
 would change the substrate (a database), not the architecture.
 
 Decisions are numbered `Dnn` and gaps in the specification or the adapter
