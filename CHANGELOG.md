@@ -42,6 +42,8 @@ The conformance suite carries its own version line; a claim names both, as in
   **operational settings** — the model, the workspace — MAY be integrity
   content changed only by Operator acts. An implementation that keeps them
   structural still conforms. The glossary defines both terms.
+- **Editorial:** OC-005(a) lists operational settings among the integrity
+  content that has exactly one write path, as the OC-003(c) table already does.
 - **OP-016** (Profile): the operational rules are configuration, and an allow
   rule for a skill SHOULD pin the admitted content, not only the name — a skill
   whose code changes returns to hold until the Operator allows it again.

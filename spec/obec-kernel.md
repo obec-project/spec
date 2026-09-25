@@ -202,8 +202,8 @@ be recorded: continuity does not survive it (§4).
 ## OC-005 — Integrity is beyond cognition's reach
 
 **(a) Single writer.** Integrity content — Genesis Anchor, baseline, log,
-credential, authorization state, drift digests — MUST have exactly one write
-path.
+credential, authorization state, operational settings where held there, drift
+digests — MUST have exactly one write path.
 
 **(b) Unreachable from cognition.** No reasoning operation may reach integrity
 state, by any operation and by any parameter of any operation.
