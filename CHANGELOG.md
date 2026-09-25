@@ -47,6 +47,10 @@ The conformance suite carries its own version line; a claim names both, as in
   whose code changes returns to hold until the Operator allows it again.
   Otherwise a commit under a window could replace code the Operator allowed
   with code nobody read.
+- **OP-011(d)** (Profile): the categories a standing grant may name are the
+  implementation's, declared on its configuration surface, never including the
+  binding set; a grant naming an undeclared category is refused. This settles
+  open question 9.
 - **OP-009(c)** (Profile): an implementation MAY require an Operator
   authorization for semantic promotion, per promotion or under a bounded grant,
   pinned to the content; a promotion waiting for one does not hold up Sleep.

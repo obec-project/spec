@@ -202,6 +202,16 @@ this specification leans on hardest.
 explicit statement that the taxonomy is the implementation's and an argument
 for why that is safe.
 
+**Settled: the taxonomy is the implementation's.** OP-011(d) asks that it be
+declared, and that a grant naming an undeclared category be refused. It is safe
+to leave to the implementation because the one boundary a grant must never
+cross is fixed by the kernel — no standing grant covers the binding set
+(OC-002(a)) — and because no grant, whatever its scope, can weaken an
+invariant. What differs between implementations is only how finely an Operator
+can cut the autonomy they grant, and the Operator reads that from the
+implementation they run. A deployment that wants no standing autonomy at all
+opens no grant; the Security extension is to make that the rule.
+
 ---
 
 ## 10. Should the specification describe an architecture at all?

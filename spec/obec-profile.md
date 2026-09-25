@@ -388,6 +388,12 @@ proposal commits only after a recorded approval. A proposal originated under a
 grant but not committed before the grant closes falls back to per-proposal
 approval: closure withdraws the standing authority, not the proposal's validity.
 
+**(d) Scope categories.** The categories a standing grant's scope may name
+SHOULD be declared by the implementation, on its configuration surface; the
+binding set is never among them. A category covers the categories beneath it
+and nothing else. A grant naming an undeclared category SHOULD be refused, so
+that a mistyped scope is not a grant that silently covers nothing.
+
 *Serves:* OC-002(b).
 
 ---
