@@ -201,9 +201,12 @@ OC-003(b) regardless of what else it does.
 ### 3.3 `operator`
 
 Acts with Operator authority, through the means the implementation provides
-directly to the Operator. Every one is logged as an Operator act attributed to
-a binding (§3.6). An Operator act that changes structural content — a binding,
-the workspace, a rule — is a commit authorized by the act itself.
+directly to the Operator. Every one that changes the entity's state is logged
+as an Operator act attributed to a binding (§3.6); `operator binding-list` only
+reads. An Operator act that changes structural content — a binding, a rule — is
+a commit authorized by the act itself. The workspace is structural content or an
+operational setting, as the implementation holds it (Core OC-003(c)); as an
+operational setting, it changes by the Operator act alone, with no commit.
 
 The adapter acts as **one binding**: the one the implementation's Operator
 channel is configured to act as, which for a store the suite initialized is

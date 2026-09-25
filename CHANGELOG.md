@@ -35,6 +35,12 @@ The conformance suite carries its own version line; a claim names both, as in
   not; that state is no longer reachable by any Operator act. ADAPTER.md says
   `operator binding-remove` never removes the last binding. The stub gains a
   break, `oc002a-last`, that proves the step catches it.
+- ADAPTER.md §3.3 no longer calls the workspace structural content. Core
+  OC-003(c) lets an implementation hold it as an operational setting, changed
+  by the Operator act alone with no commit, and the adapter contract said
+  otherwise. It also says that `operator binding-list` only reads, so only the
+  acts that change the entity's state are logged. No step checked either, so
+  what conformance means does not change.
 
 ---
 
