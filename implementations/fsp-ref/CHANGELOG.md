@@ -34,6 +34,14 @@ The specification decisions the phase depends on come first.
   last active binding is refused, and an entity leaves its Operator only by
   decommission. D48 no longer leaves an empty binding set to this phase: the
   set is never empty, so an Operator act always has a binding to be made as.
+- **D55 added — the owner;** D48 revised to act as the owner by default. The
+  binding set names one owner, at first the founding binding: only it adds a
+  binding or removes another's, any other binding may remove only itself, and
+  the owner leaves only by handing ownership to a binding that accepts it.
+  Bindings change only outside a session, from the CLI, so no session runs as a
+  binding removed under it. It orders honest Operators; it is not access
+  control, since an Operator's id is a claim until the Security extension binds
+  it by key.
 - **D16 revised, D51 added:** an allow entry for a skill pins its digest, so
   changed skill code returns to `hold`; a skill declares targets relative to the
   workspace, passes the gates on every execution, and its process group ends

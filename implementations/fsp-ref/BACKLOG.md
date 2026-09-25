@@ -34,11 +34,19 @@ After that: a test entity on Ollama, operated for days, measuring what
   `verify` resolves each entry's `authorization` against what was recorded.
   Today `verify` only requires that it exists.
 - **Phase 3 — step 10.3** comes with the commit.
+- **Phase 3 — handing ownership over** (D55): the owner offers it to another
+  active binding, which accepts by an act of its own, and the commit changes
+  `owner`. Until then the owner leaves only by decommission.
 - **Phase 7 — the default probes** (`defaults/probes.json`) exist as structural
   content of the Genesis; nothing runs them yet.
+- **Phase 8 — `fsp run` in a folder D30 refuses** (`~`, the entity folder):
+  what `run` does instead is not decided.
 - **Phase 10 — the entity folder** (`.git`, `.gitignore`, `.gitattributes`,
   D27) is scaffolded by `fsp init`/`endure`; the store's own scaffolding is
   done.
+- **Phase 10 — D30 against the registered stores** of `~/.fsp/config.json`.
+  Until the registry exists, a workspace is checked against its own store and
+  `~/.fsp`.
 
 ---
 
