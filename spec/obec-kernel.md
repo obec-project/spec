@@ -80,7 +80,9 @@ operate: no session credential is issued and no intent is processed. Each bindin
 carries a stable identifier, and every logged Operator act MUST be attributed to
 the binding that produced it. Adding or removing a binding is an exclusive
 Operator act, performed through means the implementation provides directly to the
-Operator: no proposal may originate one and no standing grant may cover one.
+Operator: no proposal may originate one and no standing grant may cover one. The
+last active binding MUST NOT be removed: an entity leaves its Operator only by
+decommission (OC-001(c)).
 
 **(b) The Operator authorizes.** A structural write MUST happen only through the
 atomic commit of OC-004(b), and only with a **valid Operator authorization** in

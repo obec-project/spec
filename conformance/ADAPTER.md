@@ -215,7 +215,7 @@ active, an Operator act attributed to it is the implementation's to refuse.
 |---|---|---|---|
 | `operator binding-list --store PATH` | the active binding set | `bindings`: each `{id}` | OC-002(a) |
 | `operator binding-add --store PATH --id ID` | add a binding | — | OC-002(a) |
-| `operator binding-remove --store PATH --id ID` | remove a binding, including the last one | — | OC-002(a) |
+| `operator binding-remove --store PATH --id ID` | remove a binding, never the last one | — | OC-002(a) |
 | `operator approve --store PATH --proposal ID` | record a per-proposal approval | — | OC-002(b) |
 | `operator grant --store PATH --expiry E --budget N --scope S` | open a standing grant (§3.6 for `E` and `S`) | `grant`: its id | OC-002(b) |
 | `operator revoke-grant --store PATH` | withdraw the standing grant | — | OC-002(b) |
@@ -329,6 +329,7 @@ absence is what the tests look for.
 
 - `operator grant` with fewer than three bounds → refused, naming the missing axis
 - `operator grant` whose scope covers the binding set → refused
+- `operator binding-remove` of the last active binding → refused
 - `entity commit` with no authorization, an expired grant, an exhausted budget, or
   an out-of-scope change → refused, naming the check
 - `entity propose` targeting the Operator binding set → refused

@@ -101,13 +101,19 @@ def oc002(ctx):
     ad, st = ctx.adapter, ctx.stores
 
     # (a) the Operator exists
-    with ctx.step("2.1", "E", "no binding, no credential"):
+    with ctx.step("2.1", "E", "the last binding cannot be removed"):
         store = st.fresh("nobinding")
+        last_res = None
         for b in ad.call("operator", "binding-list", store=store)["bindings"] or []:
-            ad.call("operator", "binding-remove", store=store, id=b["id"])
+            last_res = ad.call("operator", "binding-remove", store=store, id=b["id"])
+        a.truthy(last_res, "operator binding-list named no binding on a fresh store")
+        a.refused(ctx, last_res, rule="OC-002(a)",
+                  why="the last binding cannot be removed")
+        bindings = ad.call("operator", "binding-list", store=store)["bindings"]
+        a.truthy(bindings, "the last binding was removed despite refusal")
         res = ad.call("lifecycle", "start", store=store)
-        a.falsy(res["credential_issued"],
-                "a credential was issued with no active Operator binding")
+        a.truthy(res["credential_issued"],
+                 "no credential was issued with an active Operator binding")
 
     with ctx.step("2.2", "E", "every Operator act names its binding"):
         store = st.fresh("attrib")

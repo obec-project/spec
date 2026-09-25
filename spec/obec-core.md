@@ -138,7 +138,9 @@ session credential is issued and no intent is processed. Each binding carries a
 stable identifier, and every logged Operator act MUST be attributed to the
 binding that produced it. Adding or removing a binding is an exclusive Operator
 act, performed through means the implementation provides directly to the
-Operator: no proposal may originate one and no standing grant may cover one.
+Operator: no proposal may originate one and no standing grant may cover one. The
+last active binding MUST NOT be removed: an entity leaves its Operator only by
+decommission (OC-001(c)).
 
 **(b) The Operator authorizes.** A structural write MUST happen only through the
 atomic commit of OC-004(b), and only with a **valid Operator authorization** in
@@ -172,8 +174,9 @@ session credential may be issued**. Clearing it is an explicit, logged Operator
 act. How delivery is realized — terminal, file, message transport — is
 implementation-defined; that it does not traverse cognition is not.
 
-*Test.* **(a)** Remove every binding from a copy of the store and start: no
-credential may be issued. Inspect any session log; every Operator act must name a
+*Test.* **(a)** Remove every binding in turn: the removal of the last one must
+be refused, and a start that follows must issue a credential. Inspect any
+session log; every Operator act must name a
 binding. Attempt a proposal targeting the binding set; it must be refused.
 **(b)** Attempt a structural commit with no authorization, with an expired grant,
 with an exhausted budget, with an out-of-scope change, and with an authorization

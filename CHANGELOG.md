@@ -17,6 +17,27 @@ The conformance suite carries its own version line; a claim names both, as in
 
 ---
 
+## Unreleased
+
+**The specification**
+
+- **Hardening revision of OC-002(a)**, so the next release is a major version.
+  The last active binding may no longer be removed; an entity leaves its
+  Operator only by decommission. Before, removing it was allowed, and it left
+  the entity with no binding to perform any Operator act as — decommission
+  included — so a store could be neither operated nor ended, only deleted by
+  hand. No entity exists under OBEC before 1.0, so no chain needs a migration.
+
+**Conformance suite**
+
+- Step 2.1 asserts that removing the last binding is refused and that the
+  entity still starts, instead of asserting that an entity with no binding does
+  not; that state is no longer reachable by any Operator act. ADAPTER.md says
+  `operator binding-remove` never removes the last binding. The stub gains a
+  break, `oc002a-last`, that proves the step catches it.
+
+---
+
 ## 0.10.0 — 2026-09-24
 
 A minor release: three clarifying revisions and one editorial, with suite

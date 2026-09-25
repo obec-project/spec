@@ -16,6 +16,7 @@ It exists for two reasons:
 
          OBEC_STUB_BREAK=oc001b   ignore credential revocation
          OBEC_STUB_BREAK=oc002b   commit without checking authorization
+         OBEC_STUB_BREAK=oc002a-last remove the last Operator binding
          OBEC_STUB_BREAK=oc003b   fold the hostname into verification
          OBEC_STUB_BREAK=oc003c   let host actuation write the store
          OBEC_STUB_BREAK=oc008a   skip the workspace boundary check
@@ -366,8 +367,11 @@ def cmd_operator(command, args):
         log(store, "operator-act", act="binding-add", binding=args["id"])
         accepted()
     if command == "binding-remove":
-        structural["bindings"] = [b for b in structural.get("bindings", [])
-                                  if b["id"] != args["id"]]
+        remaining = [b for b in structural.get("bindings", [])
+                     if b["id"] != args["id"]]
+        if not remaining and "oc002a-last" not in BREAK:
+            refused(store, "last-binding", "OC-002(a)")
+        structural["bindings"] = remaining
         save(p["structural"], structural)
         save(p["baseline"], {"digest": digest(structural)})
         _extend_chain(store, structural, "operator-binding-remove")
