@@ -30,6 +30,10 @@ The specification decisions the phase depends on come first.
   the workspace among them, MAY be integrity content changed only by Operator
   acts. D28 and D33 are what the specification now allows, so the OP-016
   workspace row leaves the deviations in DESIGN §9.
+- **The last binding stays** (2026-09-25, *harden* of OC-002(a)): removing the
+  last active binding is refused, and an entity leaves its Operator only by
+  decommission. D48 no longer leaves an empty binding set to this phase: the
+  set is never empty, so an Operator act always has a binding to be made as.
 - **D16 revised, D51 added:** an allow entry for a skill pins its digest, so
   changed skill code returns to `hold`; a skill declares targets relative to the
   workspace, passes the gates on every execution, and its process group ends
@@ -52,6 +56,11 @@ The specification decisions the phase depends on come first.
   sweeps the rest, and `lifecycle verify --full` walks it on demand. Step 4.7
   did not decide it, as the Phase 1 notes had supposed: it flips bytes in eight
   files and passes when any one is caught.
+- **D54 added — `fsp init` on a name in use.** It warns that the name holds an
+  activated entity and, confirmed, deletes the entity folder and scaffolds a
+  new one; what `fsp endure` pushed can still be cloned back. It is the
+  Operator's direct disposal (OP-023), not a decommission. Init refuses while a
+  session is live and never deletes a folder that is not an fsp entity's.
 - **D53 added — promotion under authorization;** D11, D17 and D21 revised to
   point to it. Semantic memory is what the entity knows from then on, and the
   probes catch only what OC-001(d) forbids, not a planted fact. Promotions wait,

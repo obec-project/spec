@@ -19,7 +19,7 @@ Each phase ends with `run.py --only …` green on its invariants
 | **7** | session store, conversation, `mnemonic-save`/`mnemonic-recall`, probes, promotion under authorization (D53), Sleep | OC-007, OC-003(e), OC-001(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the review at `/exit` and before the first stimulus (D52) | OC-006, OC-009 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
-| **10** | a complete interactive `fsp init`, `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json` | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
+| **10** | a complete interactive `fsp init`, including a name already in use (D54), `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json` | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
 
 After that: a test entity on Ollama, operated for days, measuring what
 [open question 1](../../design/OPEN-QUESTIONS.md) asks for.
