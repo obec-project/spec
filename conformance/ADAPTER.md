@@ -1,6 +1,6 @@
 # The Conformance Adapter
 
-**Version:** suite 0.1.1 (draft) · targets OBEC-Core 0.9.1
+**Version:** suite 0.2.0 (draft) · targets OBEC-Core 0.10.0
 
 The specification leaves storage formats, wire protocols and operation sets
 implementation-defined. A conformance suite therefore cannot inspect an

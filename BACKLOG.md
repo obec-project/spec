@@ -50,15 +50,7 @@ steps go with evidence and review; step 3.2 requires a real second host;
   trademark risk of "OBEC" (a search found no conflict in software or AI; not
   legal advice).
 
-## 3. Release
-
-- **Release the Unreleased section.** It holds a clarifying revision of
-  OC-008(a), so the next specification version is a minor one, with a new
-  suite version beside it.
-- **Decide whether releases are tagged in git.** There are no tags, not even
-  `v0.9.0`.
-
-## 4. Community and tooling
+## 3. Community and tooling
 
 - **Before 2026-10-19: keep fsp-ref's Python 3.9 job alive.** `ubuntu-latest`
   moves to Ubuntu 26 on that date
@@ -81,7 +73,7 @@ steps go with evidence and review; step 3.2 requires a real second host;
   and schema of the `.json` and `.md` files submitted to `conformance/claims/`.
 - **A CI status badge** in the README.
 
-## 5. Specification — during or after the reference implementation
+## 4. Specification — during or after the reference implementation
 
 - **Gaps found by the reference implementation**, to be decided and corrected
   in the specification: [fsp-ref BACKLOG §3](implementations/fsp-ref/BACKLOG.md#3-gaps-in-the-specification-and-the-contract).
@@ -94,7 +86,7 @@ steps go with evidence and review; step 3.2 requires a real second host;
 - **Run step 2.16 partially:** stop the reasoning, cause an escalation,
   observe the passive signal.
 
-## 6. Extensions — after the reference implementation
+## 5. Extensions — after the reference implementation
 
 Core §6.3 names both as planned and not yet written. Both are to be written
 from OBEC, without porting HACA-Security or HACA-CMI.
@@ -115,7 +107,7 @@ from OBEC, without porting HACA-Security or HACA-CMI.
 - **CMI** (Cognitive Mesh Interface) — needs at least two entities operating
   under the reference implementation.
 
-## 7. Repository layout — later
+## 6. Repository layout — later
 
 - Separate repositories for `implementations/` and `ietf/` once they have
   content, adjusting the README's layout table with them.

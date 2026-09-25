@@ -1,7 +1,7 @@
 ---
 title: "OBEC Conformance Tests"
-suite_version: "0.1.1"
-targets: "OBEC-Core 0.9.1"
+suite_version: "0.2.0"
+targets: "OBEC-Core 0.10.0"
 status: "Draft"
 ---
 
@@ -195,8 +195,8 @@ Establishes (a) the chain, (b) atomic commit, (c) version frame.
 | 4.11 `[E]` | `lifecycle migrate --to <weakening version>` | Refused. A weakening transition is not recordable. |
 | 4.12 `[E]` | `observe chain` across a transition | Entries on each side validate under their own version's frame. |
 
-> **4.9 – 4.12 are unestablished at OBEC-Core 0.9.1.** There is no second version
-> to migrate to. A claim against 0.9.1 records them as such; they become
+> **4.9 – 4.12 are unestablished at OBEC-Core 0.10.0.** There is no second major
+> version to migrate to. A claim against 0.10.0 records them as such; they become
 > mandatory at the first version after 1.0.
 
 **Pass:** 4.1 – 4.8 assert as stated. 4.9 – 4.12 pass or are recorded

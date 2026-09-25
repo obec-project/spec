@@ -17,14 +17,18 @@ The conformance suite carries its own version line; a claim names both, as in
 
 ---
 
-## Unreleased
+## 0.10.0 — 2026-09-24
+
+A minor release: three clarifying revisions and one editorial, with suite
+0.2.0. **Still pre-release:** no entity should be created under this version,
+for the reason 0.9.0 gives.
 
 **The specification**
 
-- **Clarifying revision of OC-008(a)**, so the next release is a minor
-  version. For a skill, the boundary applies to what the execution path can
-  see — its declared targets and the parameters it is invoked with; what the
-  admitted code does beyond them is bounded by its admission under (c). A note
+- **Clarifying revision of OC-008(a).** For a skill, the boundary applies to
+  what the execution path can see — its declared targets and the parameters it
+  is invoked with; what the admitted code does beyond them is bounded by its
+  admission under (c). A note
   adds that a free shell fails both OC-008(a) and OC-003(c), and §6.2 lists a
   skill that exceeds its declaration as a residual risk.
 - **Clarifying revision of OC-004(a).** "Chain records MUST NOT be compacted or
@@ -57,8 +61,10 @@ The conformance suite carries its own version line; a claim names both, as in
   authorization for semantic promotion, per promotion or under a bounded grant,
   pinned to the content; a promotion waiting for one does not hold up Sleep.
 
-**Conformance suite**
+**Conformance suite 0.2.0**
 
+- Targets OBEC-Core 0.10.0. A minor version of the suite: ADAPTER.md renames
+  two commands (below), so an adapter written against 0.1.1 needs changing.
 - Step 3.5 now tries **every** operation against every content class it does
   not own, not only the class owners against each other. An operation owning no
   class — host actuation above all — was only tested against the store by 8.4
@@ -125,6 +131,9 @@ The conformance suite carries its own version line; a claim names both, as in
 
 **Repository**
 
+- Releases are tagged in git from this one on: `v0.10.0`, with `v0.9.0` and
+  `v0.9.1` added to the commits that completed those releases. The README says
+  that `main` may be ahead of the latest tag and that a claim cites a tag.
 - `BACKLOG.md` records what is left before and after the repository opens.
   The working notes it replaces were kept out of git; the backlog and fsp-ref's
   design now live in the repository, so the code's references to them resolve

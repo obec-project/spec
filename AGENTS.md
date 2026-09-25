@@ -65,6 +65,11 @@ specification's shape that changed.
   reading; the announcement waits until the reference implementation passes
   every executed step of the suite ([BACKLOG.md](BACKLOG.md)). The status in
   the README and `implementations/README.md` says so, and changes then.
+- **Releases are tags** (`vX.Y.Z`). The version fields — the spec documents'
+  frontmatter, the suite version in TESTS.md, ADAPTER.md and `SUITE_VERSION` —
+  change only in a release commit, which turns *Unreleased* in the CHANGELOG
+  into that release's entry. Between releases, `main` keeps the last release's
+  numbers and every change goes under *Unreleased*.
 - **A push to `main` runs CI**: the verbatim test, the suite against the stub
   on Python 3.8 – 3.14, and fsp-ref's unit tests on 3.9 – 3.14. It deploys
   nothing.

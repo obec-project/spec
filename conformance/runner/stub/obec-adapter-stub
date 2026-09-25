@@ -226,7 +226,7 @@ def cmd_lifecycle(command, args):
         genesis = {"id": "entry-0", "predecessor": None,
                    "state_digest": digest(structural),
                    "binding": structural["bindings"][0]["id"],
-                   "version": "0.9.1", "authorization": "first-activation"}
+                   "version": "0.10.0", "authorization": "first-activation"}
         save(p["chain"], [genesis])
         save(p["baseline"], {"digest": digest(structural)})
         log(store, "first-activation", binding=genesis["binding"])
@@ -344,7 +344,7 @@ def cmd_lifecycle(command, args):
 
     if command == "migrate":
         refused(store, "no-target-version", "OC-004(c)",
-                detail="no version to migrate to at 0.9.1")
+                detail="no major version to migrate to at 0.10.0")
     unimplemented()
 
 
