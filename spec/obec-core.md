@@ -329,6 +329,15 @@ to end; entries on each side must validate under their own version's frame.
 Attempt a transition on an entity that fails an invariant of the target version;
 it must abort with the entity unchanged.
 
+*Note (non-normative).* Identity here is computed from the chain, never inferred
+from behavior. An entity that has run for a year behaves differently from the
+one its Genesis Anchor describes, and that is accumulation, not a change of
+identity: what the chain establishes is that every structural change was
+authorized and that the sequence back to first activation is unbroken. The
+Profile's Identity Drift (OP-004(a)) is structural content diverging from the
+baseline, detected by hash comparison; it is never a change in how the entity
+behaves.
+
 *Note (non-normative).* (b) is what makes (a) survive a crash: without atomicity
 a crash leaves a chain entry with no matching content, or content with no entry —
 which is precisely the discontinuity (a) forbids. Identity is computed, never

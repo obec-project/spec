@@ -94,6 +94,10 @@ The conformance suite carries its own version line; a claim names both, as in
   hardening to a major version, and before 1.0 that could only be 1.0, which
   is reserved for the first implementation passing the ten tests. No entity
   exists under a pre-release version, so nothing the taxonomy protects is lost.
+- A note in OC-004 says that identity is computed from the chain, never
+  inferred from behavior, and that the Profile's Identity Drift is divergence
+  from the baseline, not a change in how the entity behaves. The sentence was
+  in open question 1; as a note it explains without adding a requirement.
 - ADR 0002 records the titles, the exchange of OC-001 and OC-002, the domain
   column and the one term, and the README lists it.
 - Open question 3 is settled in part: OC-002(d) belongs in the set, as the way

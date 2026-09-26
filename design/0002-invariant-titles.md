@@ -219,9 +219,11 @@ says so.
 
 ---
 
-## 4. Not decided here
+## 4. After acceptance
 
-- **The first sentence of OC-004.** *The entity's identity is computed from its
-  chain, never inferred from its behavior* — from
-  [OPEN-QUESTIONS §1](OPEN-QUESTIONS.md#1-what-does-a-long-lived-entity-cost-and-does-its-record-stay-legible)
-  — is a candidate for the opening of OC-004's body.
+- **OC-004's note on identity.** *The entity's identity is computed from its
+  chain, never inferred from its behavior*, from
+  [OPEN-QUESTIONS §1](OPEN-QUESTIONS.md#1-what-does-a-long-lived-entity-cost-and-does-its-record-stay-legible),
+  became a non-normative note in OC-004 rather than a sentence of its body. In
+  the body it would forbid establishing identity from behavior, a requirement
+  the kernel does not state; as a note it explains and costs nothing.
