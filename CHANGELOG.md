@@ -46,6 +46,27 @@ The conformance suite carries its own version line; a claim names both, as in
   names or presumes a model, provider, runtime or host platform, or can be met
   by only one, and that products appear only as non-normative examples.
 
+**Documents**
+
+- The README introduces its terms before it uses them. A paragraph opening
+  *The ten invariants* says what the titles rely on — the Operator, the store
+  and its three classes, the Genesis Anchor and the chain, cognition and the
+  model, skills, the workspace, a boundary crossing. The first claim names
+  what the chain covers — instructions, skills and configuration, not memory
+  — which the phrase *structural state* left to the reader. The standing
+  grant is described as an Operator's approval given in advance, after the
+  default it departs from; *version-bound*, the inference channel, the
+  four-domain architecture and the manifest are said in words the README has
+  already given.
+- The README no longer says that each invariant has a mechanical test. Each
+  has a test, and the tests form the conformance suite: executed where the
+  suite can drive an implementation, attested with evidence and a reviewer's
+  sign-off where it cannot. OC-006 is attested in full, and twelve of the
+  seventy-seven steps are attested, so the old sentence claimed more than the
+  suite does. *Autonomy is a dial, not a setting* replaces *not a profile*,
+  which read as the Implementation Profile, and *extension* is explained where
+  it first appears.
+
 ---
 
 ## 0.11.0 — 2026-09-25

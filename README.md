@@ -4,25 +4,45 @@
 verifiable from their own portable state.**
 
 An entity is an agent whose claims about itself can be checked rather than
-believed. It is built on a stateless language model. It reasons, remembers, and
-acts on a host — and it can prove four things about itself:
+believed. It is built on a language model, which keeps nothing from one call to
+the next. It reasons, remembers, and acts on a host — and it can prove four
+things about itself:
 
-1. **It is the entity that was activated.** Its current structural state traces
-   back to first activation through an unbroken chain of authorized changes.
-2. **Every change to what it is was authorized by a human.** The entity can
+1. **It is the entity that was activated.** Its instructions, skills and
+   configuration trace back to its first activation through an unbroken chain
+   of authorized changes. What it remembers is kept apart, and changes freely.
+2. **Every one of those changes was authorized by a human.** The entity can
    propose changing itself. It can never approve one.
-3. **That proof travels with it.** Move the store to another host and every
-   verification returns the same result. Replace the model and the identity does
-   not change.
+3. **That proof travels with it.** Copy the entity's files to another host and
+   every verification returns the same result. Replace the model and the
+   identity does not change.
 4. **It cannot exceed its bounds.** What reaches it and what it reaches are each
    confined to one declared path.
 
-Ten invariants carry those four claims, and **each one has a mechanical test**.
-Conformance is a test result, not a reading of the document.
+Ten invariants — requirements no configuration may relax — carry those four
+claims, and **each one has a test**. The tests form the **conformance suite**:
+executed where the suite can drive an implementation, attested with evidence
+and a reviewer's sign-off where it cannot. Conformance is a test result, not a
+reading of the document.
 
 ---
 
 ## The ten invariants
+
+An entity is bound to an **Operator**: the human who holds final authority over
+it. Everything the entity is lives in its **store**, a set of files in three
+classes — its **structure** (instructions, skills, configuration, and its
+bindings to Operators), its **memory** (what it records and learns), and its
+**integrity** records, which prove the other two untampered and decide whether
+the entity may run. Each class has one writer: a single path allowed to change
+it. The **Genesis Anchor** is written once, at first activation, and every
+authorized change to the structure adds an entry to a **chain** that leads back
+to it. **Cognition** is the part that reasons, and the model is its engine, a
+**stateless** one: context in, one answer out, nothing kept between calls. The
+entity acts only through **skills** — packaged operations its Operator admits —
+and only inside its **workspace**, the part of the host its Operator declares.
+Cognition is kept apart from the model, from memory, from the integrity records
+and from the host; passing between any of them is a **boundary crossing**.
 
 | | Invariant | Domain |
 |---|---|---|
@@ -51,7 +71,9 @@ Read in sequence, the ten titles are OBEC in one paragraph:
 > design: every boundary crossing leaves a record. The entity starts verified,
 > or does not start.
 
-No extension, configuration, or operational condition may weaken any of them.
+No configuration, operational condition, or extension — a document that adds
+operations or stricter rules on top of the specification — may weaken any of
+them.
 
 **[Read the ten in full →](spec/obec-kernel.md)** (15 KB, the whole normative
 requirement)
@@ -59,6 +81,9 @@ requirement)
 ---
 
 ## Documents
+
+Only what is expensive to change is **version-bound**: changing a sentence in it
+is a revision of the specification, under a new version.
 
 | Document | What it is | Version-bound |
 |---|---|---|
@@ -75,14 +100,16 @@ reviewer reads the Kernel. Someone asking *why* reads the ADRs.
 
 ---
 
-## Autonomy is a dial, not a profile
+## Autonomy is a dial, not a setting
 
-The distinctive mechanism is the **standing grant**: an Operator authorization
-bounded simultaneously on three axes — **expiry**, **commit budget**, and
-**declared scope**. While it is open, in-scope changes commit with no
-per-proposal step, logged under the grant's identity. On expiry or budget
-exhaustion it reverts to per-proposal sign-off automatically, with no action
-required from anything.
+By default, every change the entity proposes waits for an Operator to approve
+that one proposal. The distinctive mechanism is the **standing grant**: an
+Operator's approval given in advance, bounded simultaneously on three axes — an
+**expiry**, a **commit budget** of how many changes it covers, and a **declared
+scope** of the kinds of change it covers. While it is open, a change inside its
+scope is applied without waiting for its own approval, and logged under the
+grant's identity. On expiry or budget exhaustion it reverts to approval proposal
+by proposal automatically, with no action required from anything.
 
 Never open one and every change requires explicit human approval — zero standing
 autonomy, no additional mechanism needed. Open a narrow one and the entity
@@ -167,15 +194,15 @@ ietf/            Internet-Drafts generated from spec/                 (in progre
 ## What OBEC does not do
 
 It does not specify cognitive algorithms, storage formats, wire protocols, model
-choice, or how the inference channel is realized. It does not require a
-particular component decomposition — the four-domain architecture in the Core is
-RECOMMENDED, so that an existing runtime can claim conformance without being
-rewritten.
+choice, or how the model is called. It does not require a particular division
+into components — the architecture the Core describes is RECOMMENDED, so that an
+existing runtime can claim conformance without being rewritten.
 
-It also does not solve prompt injection. The checks verify an operation's
-identity, authorization and manifest; they do not judge intent, and a valid skill
-invoked with adversarial arguments passes every one of them. What OBEC bounds is
-the blast radius and the evidence trail. See
+It also does not solve prompt injection. The checks verify which operation is
+requested, that it is authorized, and that the skill matches the declaration it
+was admitted with; they do not judge intent, and a valid skill invoked with
+adversarial arguments passes every one of them. What OBEC bounds is the blast
+radius and the evidence trail. See
 [§6 of the Core](spec/obec-core.md#6-security-considerations-non-normative) for
 the full list of what is deliberately left open.
 
