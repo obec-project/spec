@@ -125,8 +125,8 @@ structural change, and no configuration that adds one.
 
 **The Operator is reachable.** This is the face people forget. Authority that
 cannot be informed is authority in name only. So OBEC requires a path to the
-Operator that **does not pass through the entity's reasoning** — because the
-reasoning is the part most likely to be compromised, and a component that can
+Operator that **does not pass through the entity's cognition** — because
+cognition is the part most likely to be compromised, and a component that can
 suppress the report of its own compromise is not being watched.
 
 That path includes a **passive signal**: a plain record written into the store,
@@ -289,7 +289,7 @@ part. The part corrects itself; the verifier re-checks **externally**. That
 external re-check is the point: a component's own report that it fixed itself is
 not evidence.
 
-**Critical** — beyond correction, or involving the reasoning layer or the
+**Critical** — beyond correction, or involving cognition or the
 verifier itself. The session credential is revoked immediately and the Operator
 is told.
 
@@ -351,7 +351,7 @@ consolidation and its commits.
 ## 10. What OBEC does not do
 
 **It is not an architecture.** OBEC describes a reference decomposition — four
-domains for integrity, reasoning, memory and host — and marks it RECOMMENDED. No
+domains for integrity, cognition, memory and host — and marks it RECOMMENDED. No
 requirement names a component. This is deliberate: it means an existing runtime
 can become conformant by satisfying the boundaries, without being rewritten
 around someone else's structure.

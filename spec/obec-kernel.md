@@ -89,9 +89,9 @@ Every proposal MUST be logged at origination, and every commit MUST be logged
 with the identity of the authorization that covered it.
 
 **(c) The Operator is reachable.** There MUST exist a path by which any part of
-the implementation reaches the Operator **without passing through the reasoning
-layer** — which may be compromised, or may simply have no part in the condition
-being reported. That path MUST provide a **passive signal**: a persistent,
+the implementation reaches the Operator **without passing through cognition** —
+which may be compromised, or may simply have no part in the condition being
+reported. That path MUST provide a **passive signal**: a persistent,
 network-independent record in the Entity Store, written when live delivery has
 failed a declared number of attempts or the condition requires a halt. The
 passive signal MUST be directly readable by the Operator with nothing running,
@@ -210,7 +210,7 @@ be recorded: continuity does not survive it (§4).
 credential, authorization state, operational settings where held there, drift
 digests — MUST have exactly one write path.
 
-**(b) Unreachable from cognition.** No reasoning operation may reach integrity
+**(b) Unreachable from cognition.** No cognitive operation may reach integrity
 state, by any operation and by any parameter of any operation.
 
 **(c) Binding decisions.** Integrity decisions — credential issuance and
@@ -224,7 +224,7 @@ and gating it by itself would be circular.
 
 ## OC-006 — The model is cognition's stateless engine, and it only answers
 
-Reasoning MUST reach the model exclusively as a stateless inference call:
+Cognition MUST reach the model exclusively as a stateless inference call:
 assembled context in, one completion out. No tool-use authority, memory access,
 or host capability travels with the call. Nothing acts on the completion until it
 has returned and been routed to the owner of the operation it names.
@@ -272,8 +272,8 @@ be logged; every result MUST be logged.
 
 ## OC-009 — The entity is auditable by design: every boundary crossing leaves a record
 
-Every boundary this specification requires — between reasoning and integrity
-state (OC-005(b)), between reasoning and the model (OC-006), between cognition
+Every boundary this specification requires — between cognition and integrity
+state (OC-005(b)), between cognition and the model (OC-006), between cognition
 and persisted knowledge (OC-007), between cognition and the host (OC-008) — MUST
 be crossable only by a signal that is observable and loggable.
 

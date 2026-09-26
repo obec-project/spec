@@ -44,6 +44,12 @@ The conformance suite carries its own version line; a claim names both, as in
   outside the project and no claim has been submitted. The hardening above was
   committed as OC-002(a). Records made before the exchange, a store's log
   among them, cite the old numbers; every store made before 1.0 is disposable.
+- **Editorial: one term, *cognition*** (ADR 0002). The specification said
+  *reasoning* and *cognition* for the same thing; the glossary already defined
+  cognition as the entity's reasoning activity, and the Profile's component
+  for it is the Cognitive Processing Engine. Six kernel sentences, in OC-001(c),
+  OC-005(b), OC-006 and OC-009, say *cognition* with the meaning they had, and
+  the Core, the Profile and the Primer follow.
 
 **Conformance suite**
 

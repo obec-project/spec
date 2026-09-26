@@ -91,7 +91,7 @@ not have seen it either.
 An aborted cycle emits nothing: no partial output is observable, and nothing
 persists except through a dispatched intent.
 
-**(b) Chains.** A sequence of cycles continuing one reasoning operation with no
+**(b) Chains.** A sequence of cycles continuing one cognitive operation with no
 new external stimulus between them — each cycle's resolved results serving as the
 next cycle's internal stimulus — is a **cycle chain**. Every cycle in a chain
 remains individually atomic under (a).
@@ -152,14 +152,14 @@ first, both declared in configuration. The recurring cycle of these checks is th
   verifier re-verifies **externally**. Verified resolution returns to Nominal;
   failed re-verification, or an anomaly that cannot be externally verified,
   escalates to Critical.
-- **Critical** — beyond correction, or involving reasoning or the verifier
+- **Critical** — beyond correction, or involving cognition or the verifier
   itself. The session credential is revoked immediately and the condition
   escalates through OP-008.
 
-An anomaly in reasoning itself classifies as **Critical, never Degraded**. The
-Degraded corrections that resemble reasoning self-repair in fact target the
+An anomaly in cognition itself classifies as **Critical, never Degraded**. The
+Degraded corrections that resemble cognitive self-repair in fact target the
 transient state around it — assembled context discarded and rebuilt, or an active
-cycle aborted without committing. Neither leaves a trace that reasoning could
+cycle aborted without committing. Neither leaves a trace that cognition could
 attest to, and external re-verification is what confirms the correction, never
 the correcting side's own report.
 
@@ -206,7 +206,7 @@ the probes during Sleep. The same comparison SHOULD gate semantic promotion
 runs first and confirms drift without inference. The **probabilistic** layer —
 similarity metrics — runs only when the deterministic layer is inconclusive.
 
-Probabilistic comparison **MUST** run isolated from reasoning: a comparison
+Probabilistic comparison **MUST** run isolated from cognition: a comparison
 mechanism must not inherit the drift it detects.
 
 The deterministic layer MUST include the patterns OC-002(d) requires.
@@ -295,7 +295,7 @@ becomes long-term memory.
 #### OP-009 — The session-close memory flow
 
 **(a) The Closure Payload.** Consolidation SHOULD be a cognitive act. At session
-close, reasoning — the only part able to structure memory coherently for its own
+close, cognition — the only part able to structure memory coherently for its own
 later use — consolidates the session's episodic memory and emits the **Closure
 Payload**, carrying: the session's consolidation; a declaration of the working
 context the next session needs; the message that contextualizes that context and
@@ -339,10 +339,10 @@ starts without resumption context.
 
 #### OP-010 — Context-window thresholds
 
-Reasoning SHOULD report its context-window utilization as a health signal,
+Cognition SHOULD report its context-window utilization as a health signal,
 evaluated against two thresholds declared in configuration:
 
-- past the **soft** threshold, reasoning SHOULD close the session itself;
+- past the **soft** threshold, cognition SHOULD close the session itself;
 - past the **hard** threshold, it is signaled to stop current processing, persist
   the working context worth keeping through normal mnemonic writes, and emit the
   Closure Payload.
@@ -354,7 +354,7 @@ cadence, so that a breach is detected while the guarantee still holds.
 A threshold breach is a **capacity condition, not an anomaly**: OP-003(b)'s state
 is unaffected. Either way the session closes normally, Sleep follows, and the
 start sequence runs immediately after, delivering the Resumption Record so
-reasoning continues from where it stopped.
+cognition continues from where it stopped.
 
 This restart continues the same Operator-initiated operation and is not
 self-activation (OC-002(a)).
@@ -373,14 +373,14 @@ does not say what a proposal looks like or how a commit is staged.
 #### OP-011 — The proposal
 
 **(a) The record.** An **evolution proposal** SHOULD be an inert record carrying
-the proposed operations plus a human-readable description. Reasoning may
+the proposed operations plus a human-readable description. Cognition may
 originate one at any time, or one may be recorded on the Operator's direct
 instruction. Every proposal is logged when originated. A proposal targeting the
 Operator binding set is invalid regardless of origin (OC-001(a)).
 
 **(b) Classification.** Whether a recorded approval exists, or whether the
 proposal falls within a standing grant's scope, SHOULD be determined by the
-integrity path alone, without input from reasoning.
+integrity path alone, without input from cognition.
 
 **(c) Held proposals.** A proposal outside a standing grant's scope SHOULD be
 held for explicit Operator review, logged, and the session continues. A held
@@ -426,7 +426,7 @@ The order of checks on the execution path SHOULD be fixed:
 4. manifest validation
 
 Every rejection carries the gate that produced it and is logged; every result is
-returned to reasoning and logged.
+returned to cognition and logged.
 
 The boundary check first is not arbitrary: it is what OC-008(a) requires, so that
 a target outside the workspace is rejected before any other check runs.
@@ -444,11 +444,11 @@ a deadline expiring before the operation returns is Critical (OP-003(b)).
 **(b) Background.** An execution MAY be background: the execution is spawned, a
 running record is logged immediately and returned as the intent's resolution, and
 the next cycle proceeds without blocking. A terminal record is appended when the
-execution completes within its session, and surfaces to reasoning as a stimulus
+execution completes within its session, and surfaces to cognition as a stimulus
 queued under OP-002(b).
 
 A background execution with no terminal record when the session ends is
-incomplete: the next start SHOULD surface it to reasoning as a reprocessing
+incomplete: the next start SHOULD surface it to cognition as a reprocessing
 stimulus. Background manifests SHOULD declare a handle — a process or job
 identifier — and a time-to-live, so that the start can probe or expire the
 execution instead of blindly reprocessing it.
@@ -584,7 +584,7 @@ Operator notified before any new one is issued.
 
 **(a) Close modes.** A session ends one of three ways:
 
-- **Normal close** — an Operator signal, a close intent from reasoning, or a
+- **Normal close** — an Operator signal, a close intent from cognition, or a
   condition declared in configuration (OP-010's thresholds are one such). The
   Closure Payload is emitted and Sleep follows.
 - **Critical** — escalation happens before any Sleep may run.
@@ -616,7 +616,7 @@ before Sleep begins; the artifact is removed only at Sleep completion, serving a
 the crash indicator throughout (OP-018(a)).
 
 **(b) Maintenance authority.** During Sleep no intent is generated and no
-stimulus is processed: reasoning is inactive. Maintenance operations run under
+stimulus is processed: cognition is inactive. Maintenance operations run under
 integrity authority, independent of the credential — including maintenance
 executions performed under direct integrity instruction.
 
@@ -656,7 +656,7 @@ implementation; skills are the only per-entity extension of capability.
 
 | Part | Owns |
 |---|---|
-| **CPE** | reasoning: turns stimuli into intents. Owns no operation on the store or the host |
+| **CPE** | cognition: turns stimuli into intents. Owns no operation on the store or the host |
 | **MIL** | the mnemonic operations — recall, session writes, consolidation, garbage collection — over the Session Store and the Memory Store |
 | **EXEC** | the host operations: native primitives and skill execution |
 | **SIL** | the integrity operations: store verification, skill admission, the Heartbeat, the commit pipeline, the standing-grant lifecycle, credential issuance and revocation |
