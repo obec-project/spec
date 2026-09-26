@@ -17,6 +17,19 @@ The conformance suite carries its own version line; a claim names both, as in
 
 ---
 
+## Unreleased
+
+**The specification**
+
+- Portability is across hosts, under the same implementation. The Profile's
+  §1.3 said OC-003(b) permits moving an Entity Store between implementations,
+  and OC-003(b) is about hosts; with no storage format fixed, another
+  implementation may not run a store at all, or run it without preserving its
+  integrity and the Operator's audit trail. The Profile now says so, and a
+  note on OC-003 in the Core states the scope of (b).
+
+---
+
 ## 0.11.0 — 2026-09-25
 
 A minor release: one hardening revision, OC-001(a), which before 1.0 advances

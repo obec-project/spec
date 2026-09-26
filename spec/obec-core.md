@@ -274,6 +274,13 @@ secure enclave, a platform keystore — satisfies its own goal and silently
 destroys this one. An extension MAY harden key management; it MUST do so in a way
 that survives relocation, or it is not an extension of this document.
 
+*Note (non-normative).* (b) is portability across hosts, under the same
+implementation. This document fixes no storage format, and it does not
+guarantee that a store moved to a different implementation runs there at all,
+or that one which runs it preserves the entity's integrity and the Operator's
+audit trail. Moving an entity between implementations is outside what it
+governs.
+
 ---
 
 ### OC-004 — The entity's identity is proven by an unbroken chain back to its Genesis Anchor

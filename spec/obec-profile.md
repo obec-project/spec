@@ -58,12 +58,15 @@ what would be at risk if the mechanism were dropped and nothing replaced it.
 Deviating costs nothing in conformance and something in expectation. Two
 implementations that both pass the ten tests but realize Sleep differently are
 both conformant, and neither can predict the other's behavior at session close.
-This matters for tooling, for the Cognitive Mesh Interface (CMI) extension, and
-for operators moving an Entity Store between implementations — which OBEC-Core
-OC-003(b) permits and this document does not guarantee is uneventful.
+This matters for tooling and for the Cognitive Mesh Interface (CMI) extension.
+It does not make a store portable between implementations: OBEC-Core OC-003(b)
+guarantees portability across hosts under the same implementation, and another
+implementation may not run a store at all, or run it without preserving its
+integrity and the Operator's audit trail.
 
 Where an implementation deviates, it SHOULD say so, naming the clauses it does
-not follow. A store that carries such a declaration is easier to migrate.
+not follow. A store that carries such a declaration tells whoever reads it what
+the implementation that wrote it did differently.
 
 ---
 
