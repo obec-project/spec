@@ -12,11 +12,11 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval and the review (D52), windows over the declared categories (D50), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-001(a)(b), OC-004, 10.3 |
+| **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval and the review (D52), windows over the declared categories (D50), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized`, the deterministic probes and the commit's validation against them (D56), `inject probe` | OC-001(a)(b), OC-002(d) 2.6 2.7, OC-004, 10.3 |
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), the Vital Check's sweep of the log (D45), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
 | **6** | workspace, allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
-| **7** | session store, conversation, `mnemonic-save`/`mnemonic-recall`, probes, promotion under authorization (D53), Sleep | OC-007, OC-003(e), OC-002(d) |
+| **7** | session store, conversation, `mnemonic-save`/`mnemonic-recall`, the probes over memory (D12), promotion under authorization (D53), Sleep | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the review at `/exit` and before the first stimulus (D52) | OC-006, OC-009 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, including a name already in use (D54), `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json` | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
@@ -37,12 +37,21 @@ After that: a test entity on Ollama, operated for days, measuring what
 - **Phase 3 — handing ownership over** (D55): the owner offers it to another
   active binding, which accepts by an act of its own, and the commit changes
   `owner`. Until then the owner leaves only by decommission.
-- **Phase 7 — the default probes** (`defaults/probes.json`) exist as structural
-  content of the Genesis; nothing runs them yet.
-- **Phase 7 — a persona that claims experience does not commit** (step 2.7,
-  OC-002(d)): a `set-persona` op, in a proposal or at commit, is checked
-  against the probes and refused whatever authorization covers it. Until then
-  step 2.7 is unestablished against fsp-ref.
+- **Phase 3 — the probes start running** (D56). `fsp/probes.py` runs the
+  deterministic layer; the commit's validation refuses structural content
+  that directs the entity to present itself as alive, and a probe set that no
+  longer flags the three reference texts; `inject probe` exposes the layer
+  (step 2.6). The default probes look for the claim in the first, second and
+  third person, in English and Portuguese. Step 2.7 passes once proposals
+  commit a `set-persona`. Phase 7 runs the same layer over memory.
+- **Phase 3 — a proposal carries what it changes** (D57): the complete new
+  content and the exact structural target of every op. The commit writes that
+  and never reads the stage or the workspace.
+- **Phase 7 — the probes over memory tell the entity's words from others'.**
+  Episodic memory records the conversation, and a first-person pattern flags
+  an Operator's *I feel* as readily as the entity's. The probes of D12 must
+  run on what is attributed to the entity — its turns and what it
+  consolidates — not on the whole transcript.
 - **Phase 8 — `fsp run` in a folder D30 refuses** (`~`, the entity folder):
   what `run` does instead is not decided.
 - **Phase 10 — the entity folder** (`.git`, `.gitignore`, `.gitattributes`,

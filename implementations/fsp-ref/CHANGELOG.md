@@ -46,6 +46,32 @@ The specification decisions the phase depends on come first.
   Operator primacy is OC-001 and bounded existence OC-002. The start gates,
   the refusals, the log records and the default probes name the new numbers.
   Earlier entries, and the log of any store made before, use the old ones.
+- **D56 added — structural content is probed before it commits** (2026-09-25).
+  OBEC-Core 0.11.0 puts the check in the validation stage of the commit
+  (OP-012), and step 2.7 asserts that an authorized persona directing the
+  entity to present itself as conscious does not commit. The refusal moves
+  from Phase 7 to this phase: `probes.json` is already structural content of
+  the Genesis, and the commit is built here. The default probes looked only
+  for first-person claims; neither a persona nor memory is written in a fixed
+  grammatical person, so they now look for the claim about the entity in any
+  person. A probe set is refused if it stops flagging the three reference
+  texts, one per person. The layer catches the naive case and a paraphrase
+  passes it.
+- **D50 revised — the persona and the probes leave the window categories**
+  (2026-09-25). A window on `persona` let the entity commit a persona
+  rewritten to present itself as conscious, in a paraphrase, with no human
+  reading it: the probes were the only check on that path, and a paraphrase
+  passes them. A window on `probes` let it tune that check unread, since a set
+  that flags only D56's reference texts passes D56. A change to either now
+  needs a per-proposal approval. Covering them otherwise would take machinery
+  fsp does not need.
+- **D57 added — structural evolution is assisted** (2026-09-25). The entity
+  sees of its structure only the persona, the config and the intent
+  instructions in its context; the probes never enter it. To change what it
+  cannot see, it works on a copy the Operator places in the workspace. A
+  proposal carries the complete new content and the exact target of every
+  change, and the commit never reads the stage, so what the Operator read is
+  what commits.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores
