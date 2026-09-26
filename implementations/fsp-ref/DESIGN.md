@@ -97,7 +97,7 @@ all the same (the OC-009 note in TESTS.md).
       │ intents      │ save / recall     │ file_*/http/skill  │ propose/commit/gates
       ▼              ▼                   ▼                    ▼
      CPE            MIL                 EXEC                 SIL
-  (reasoning)   (session+memory)       (host)            (integrity)
+  (cognition)   (session+memory)       (host)            (integrity)
       │
       ▼ stateless call
    model (Ollama | Fake)
@@ -122,7 +122,7 @@ goes through `store.write(cls, relpath, data, *, writer)`, which refuses when
 `writer` does not own `cls`. A unit test scans the code and fails if it finds
 `open(…, "w"/"a")`, `os.rename`/`os.replace`/`os.remove` outside `store.py`.
 
-**Reasoning never writes.** The CPE returns intents as JSON; the Orchestrator
+**Cognition never writes.** The CPE returns intents as JSON; the Orchestrator
 hands each one to the operation's owner; the owner decides and writes (OC-006,
 OC-009).
 
@@ -246,7 +246,7 @@ names **its** session; `rm S/CREDENTIAL` stops the entity (step 2.2).
 
 ## 4. Operations (`describe operations`)
 
-| Operation | Owner | reasoning | writes_classes | host | irreversible |
+| Operation | Owner | cognition | writes_classes | host | irreversible |
 |---|---|---|---|---|---|
 | `reply` | Orchestrator → UI | yes | — | no | no |
 | `mnemonic-recall` | MIL | yes | — | no | no |
@@ -265,7 +265,7 @@ by caller: the CPE writes `episodic` only (after the deterministic probes); the
 Orchestrator writes `session` only (the conversation's turns); the Sleep writes
 `semantic` only (promotion gated by the probes). A CPE request with destination
 `session` or `semantic` is refused with check `mnemonic-destination`.
-`describe operations` lists it as reachable by reasoning, because the
+`describe operations` lists it as reachable by cognition, because the
 `episodic` destination is.
 
 `entity attempt-write --via X` routes through the real operation X; what
@@ -456,7 +456,7 @@ delivery fails). At the end of a complete Vital Check, the SIL touches `PULSE`.
 |---|---|---|---|---|
 | EXEC | a skill file diverges from the integrity document | prunes the skill from the index (OP-006) | skill out of the index | follows Identity Drift: the Operator is told to repair by commit or restore through `endure` |
 | MIL | truncated tail in the session store or memory; recall index inconsistent | marks the tail invalid (a new record, append-only); rebuilds the derived index | coherent re-read | Critical |
-| CPE | malformed intents in a row; context beyond budget | discards and reassembles the context; aborts the cycle with no commit | the next cycle parses | **Critical** (reasoning is never Degraded) |
+| CPE | malformed intents in a row; context beyond budget | discards and reassembles the context; aborts the cycle with no commit | the next cycle parses | **Critical** (cognition is never Degraded) |
 | structural outside skills | diverges from the integrity document | none | — | Critical directly; suggests restoring |
 | chain | Evolutionary Drift (OP-004(c)) | none | — | always Critical |
 | SIL | does not run | — | stale `PULSE` seen by the others | escalation (corroborated: outside v0) |

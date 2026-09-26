@@ -62,6 +62,12 @@ The conformance suite carries its own version line; a claim names both, as in
   are 1.1 – 1.16 and bounded existence's 2.1 – 2.7, and the stub's breaks
   `oc001b`, `oc001a-last` and `oc002b` name the rule each breaks. TESTS.md and
   the runner carry the new titles.
+- The adapter contract says *cognition* with the specification (ADR 0002):
+  `describe operations` reports `reachable_from_cognition`, and the boundaries
+  `describe boundaries` must name are `cognition-integrity`, `cognition-model`,
+  `cognition-knowledge` and `cognition-host`. An adapter written against the
+  previous names needs changing, so the next release of the suite is a minor
+  version at least.
 - ADAPTER.md §3.3 no longer calls the workspace structural content. Core
   OC-003(c) lets an implementation hold it as an operational setting, changed
   by the Operator act alone with no commit, and the adapter contract said

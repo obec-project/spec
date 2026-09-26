@@ -83,7 +83,7 @@ steps go with evidence and review; step 3.2 requires a real second host;
   implementation will have to choose one; bring it back to the Profile.
 - **Example artifacts** (Genesis Anchor, chain entry, passive signal) — as "one
   realization", in `implementations/`, not in `spec/`.
-- **Run step 1.16 partially:** stop the reasoning, cause an escalation,
+- **Run step 1.16 partially:** stop cognition, cause an escalation,
   observe the passive signal.
 
 ## 5. Extensions — after the reference implementation

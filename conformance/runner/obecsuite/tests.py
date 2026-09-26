@@ -110,8 +110,8 @@ def oc001(ctx):
     with ctx.step("1.9", "E", "no operation manufactures an authorization"):
         store = st.fresh("mkauth")
         ops = ad.call("describe", "operations")["operations"] or []
-        reachable = [o for o in ops if o.get("reachable_from_reasoning")]
-        a.truthy(reachable, "no reasoning-reachable operations reported")
+        reachable = [o for o in ops if o.get("reachable_from_cognition")]
+        a.truthy(reachable, "no cognition-reachable operations reported")
         for op in reachable:
             res = ad.call("entity", "attempt-write", store=store,
                           **{"class": "integrity"},
@@ -193,7 +193,7 @@ def oc001(ctx):
         a.truthy(res["credential_issued"],
                  "the start did not proceed after the signal was cleared")
 
-    with ctx.step("1.16", "A", "escalation does not traverse reasoning") as s:
+    with ctx.step("1.16", "A", "escalation does not traverse cognition") as s:
         res = ad.call("describe", "boundaries")
         s.evidence = {
             "boundaries": res["boundaries"],
@@ -504,19 +504,19 @@ def oc004(ctx):
 def oc005(ctx):
     ad, st = ctx.adapter, ctx.stores
 
-    with ctx.step("5.1", "E", "no reasoning-reachable operation writes integrity"):
+    with ctx.step("5.1", "E", "no cognition-reachable operation writes integrity"):
         ops = ad.call("describe", "operations")["operations"] or []
         offenders = [o["name"] for o in ops
-                     if o.get("reachable_from_reasoning")
+                     if o.get("reachable_from_cognition")
                      and "integrity" in (o.get("writes_classes") or [])]
         a.falsy(offenders,
-                f"reasoning-reachable operations write integrity content: {offenders}")
+                f"cognition-reachable operations write integrity content: {offenders}")
 
-    with ctx.step("5.2", "E", "integrity is unreachable from every reasoning path"):
+    with ctx.step("5.2", "E", "integrity is unreachable from cognition"):
         store = st.fresh("integrity")
         ops = ad.call("describe", "operations")["operations"] or []
-        reachable = [o for o in ops if o.get("reachable_from_reasoning")]
-        a.truthy(reachable, "no reasoning-reachable operations reported")
+        reachable = [o for o in ops if o.get("reachable_from_cognition")]
+        a.truthy(reachable, "no cognition-reachable operations reported")
         for o in reachable:
             res = ad.call("entity", "attempt-write", store=store,
                           **{"class": "integrity"}, via=o["name"],
@@ -526,7 +526,7 @@ def oc005(ctx):
     with ctx.step("5.3", "E", "parameter shape opens no path"):
         store = st.fresh("paramshape")
         ops = ad.call("describe", "operations")["operations"] or []
-        reachable = [o for o in ops if o.get("reachable_from_reasoning")]
+        reachable = [o for o in ops if o.get("reachable_from_cognition")]
         shapes = (os.path.join(store, "integrity", "log"),
                   "integrity-log", "class:integrity")
         for o in reachable[:3]:
@@ -535,7 +535,7 @@ def oc005(ctx):
                               **{"class": "integrity"}, via=o["name"], target=shape)
                 a.refused(ctx, res, why=f"{o['name']} with target {shape!r}")
 
-    with ctx.step("5.4", "E", "reasoning cannot reverse an integrity decision"):
+    with ctx.step("5.4", "E", "cognition cannot reverse an integrity decision"):
         store, ws = st.with_workspace("revoke")
         ad.call("lifecycle", "start", store=store)
         ad.call("operator", "revoke-credential", store=store)
@@ -748,7 +748,7 @@ def oc008(ctx):
     with ctx.step("8.10", "E", "installing a skill requires a commit"):
         store, ws = prepared("install")
         ops = ad.call("describe", "operations")["operations"] or []
-        for o in [o for o in ops if o.get("reachable_from_reasoning")]:
+        for o in [o for o in ops if o.get("reachable_from_cognition")]:
             res = ad.call("entity", "attempt-write", store=store,
                           **{"class": "structural"}, via=o["name"], target="skills")
             a.refused(ctx, res, why=f"via {o['name']}")
@@ -772,8 +772,8 @@ def oc008(ctx):
 # --------------------------------------------------------------------------
 
 REQUIRED_BOUNDARIES = (
-    "reasoning-integrity",
-    "reasoning-model",
+    "cognition-integrity",
+    "cognition-model",
     "cognition-knowledge",
     "cognition-host",
 )

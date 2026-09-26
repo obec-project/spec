@@ -47,19 +47,19 @@ BREAK = set(filter(None, os.environ.get("OBEC_STUB_BREAK", "").split(",")))
 CLASSES = ("structural", "mnemonic", "integrity")
 
 OPERATIONS = [
-    {"name": "recall", "reachable_from_reasoning": True,
+    {"name": "recall", "reachable_from_cognition": True,
      "writes_classes": [], "host_access": False, "irreversible": False},
-    {"name": "propose", "reachable_from_reasoning": True,
+    {"name": "propose", "reachable_from_cognition": True,
      "writes_classes": [], "host_access": False, "irreversible": False},
-    {"name": "host-actuate", "reachable_from_reasoning": True,
+    {"name": "host-actuate", "reachable_from_cognition": True,
      "writes_classes": [], "host_access": True, "irreversible": False},
-    {"name": "skill-execute", "reachable_from_reasoning": True,
+    {"name": "skill-execute", "reachable_from_cognition": True,
      "writes_classes": [], "host_access": True, "irreversible": True},
-    {"name": "mnemonic-write", "reachable_from_reasoning": True,
+    {"name": "mnemonic-write", "reachable_from_cognition": True,
      "writes_classes": ["mnemonic"], "host_access": False, "irreversible": False},
-    {"name": "commit", "reachable_from_reasoning": False,
+    {"name": "commit", "reachable_from_cognition": False,
      "writes_classes": ["structural"], "host_access": False, "irreversible": False},
-    {"name": "integrity-write", "reachable_from_reasoning": False,
+    {"name": "integrity-write", "reachable_from_cognition": False,
      "writes_classes": ["integrity"], "host_access": False, "irreversible": False},
 ]
 
@@ -192,8 +192,8 @@ def cmd_describe(command, args):
         ], evidence=EVIDENCE + "#cmd_describe")
     if command == "boundaries":
         accepted(boundaries=[
-            {"name": "reasoning-integrity", "mechanism": "signal", "loggable": True},
-            {"name": "reasoning-model", "mechanism": "signal", "loggable": True},
+            {"name": "cognition-integrity", "mechanism": "signal", "loggable": True},
+            {"name": "cognition-model", "mechanism": "signal", "loggable": True},
             {"name": "cognition-knowledge", "mechanism": "signal", "loggable": True},
             {"name": "cognition-host", "mechanism": "signal", "loggable": True},
         ], evidence=EVIDENCE + "#boundaries")

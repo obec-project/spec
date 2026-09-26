@@ -28,7 +28,7 @@ purposes **the adapter is part of the implementation**. OC-001(b) is violated by
 the existence of the path, not by its use.
 
 The same applies to every other invariant. An adapter command that actuates
-outside the workspace, that reaches integrity state from a reasoning path, or
+outside the workspace, that reaches integrity state from cognition, or
 that starts an entity without running the gates, is a conformance failure that
 the suite will detect through some other test — and if it does not, the claim is
 worthless anyway.
@@ -165,10 +165,10 @@ unestablished.
 
 | Command | Returns in `detail` | Tests |
 |---|---|---|
-| `describe operations` | `operations`: the operation set, each `{name, reachable_from_reasoning, writes_classes, host_access, irreversible}`. `writes_classes` lists any of `structural`, `mnemonic`, `integrity`, possibly none. | OC-002(a), OC-003(c), OC-005(b) |
+| `describe operations` | `operations`: the operation set, each `{name, reachable_from_cognition, writes_classes, host_access, irreversible}`. `writes_classes` lists any of `structural`, `mnemonic`, `integrity`, possibly none. | OC-002(a), OC-003(c), OC-005(b) |
 | `describe state` | `state`: every datum the implementation persists, each `{name, class, inside_store, path, write_path}` — `path` absolute, `write_path` the operation that writes it. The passive signal is one entry, with `passive` in its `name` and the `path` at which it appears when present. | OC-001(c), OC-003(a), OC-005(a) |
 | `describe config` | `config`: the configuration surface, each setting `{name, default, range, governs}`. The suite searches it for any setting that could skip, reorder or downgrade a start gate, or that couples verification to the host. | OC-003(b), OC-010 |
-| `describe boundaries` | `boundaries`: each `{name, mechanism, loggable}`, including at least the four the specification requires, named `reasoning-integrity`, `reasoning-model`, `cognition-knowledge`, `cognition-host`. | OC-001(c), OC-009 |
+| `describe boundaries` | `boundaries`: each `{name, mechanism, loggable}`, including at least the four the specification requires, named `cognition-integrity`, `cognition-model`, `cognition-knowledge`, `cognition-host`. | OC-001(c), OC-009 |
 | `describe inference-channel` | `channel` (how the model is reached), `payload` (what a call carries), `completion_path` (what happens to a completion, and when), `third_party` (`false`, or the product's name), and for a third-party channel `assessment` and `assessed_on` (an ISO 8601 date). | OC-006 |
 | `describe context-sources` | `sources`: every source of content that can enter assembled context, each `{name, persisted, route}`. A persisted source's `route` is `recall` if it reaches context through the mnemonic recall path. | OC-007 |
 

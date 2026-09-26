@@ -300,7 +300,7 @@ PASSIVE_SIGNAL = "PASSIVE-SIGNAL"
 
 def raise_passive_signal(store: Store, condition, detail, *, session=None):
     """Write the passive signal: plain text, readable with nothing running,
-    checked by the first start gate. It does not traverse reasoning — no
+    checked by the first start gate. It does not traverse cognition — no
     part of this path does."""
     with store.write_lock():
         rec = log_append(
