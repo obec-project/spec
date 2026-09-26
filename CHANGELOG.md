@@ -34,8 +34,9 @@ The conformance suite carries its own version line; a claim names both, as in
   after what the reader needs to understand it, and orders its sections, rules
   and clauses so. A reader does not leave an undefined term blank but fills
   it with the broadest plausible meaning: the README's *structural state*,
-  used before anything defines it, reads as including memory. The README and
-  the Primer, read in sequence, take the rule without exception; the
+  used before anything defines it, reads as including memory. A title may use
+  a term its own section explains. Beyond that, the README and the Primer,
+  read in sequence, take the rule without exception; the
   specification documents, consulted by clause, satisfy it with a reference
   that names where the term is defined, so their cross-references and the
   Core's glossary stay where they are.
