@@ -54,7 +54,7 @@ python3 -m unittest discover -s tests
 The suite, from `conformance/runner/`:
 
 ```sh
-python3 run.py --adapter ../../implementations/fsp-ref/obec-adapter --only OC-010,OC-002,OC-001,OC-003
+python3 run.py --adapter ../../implementations/fsp-ref/obec-adapter --only OC-010,OC-001,OC-002,OC-003
 ```
 
 CI runs the unit tests on every push and pull request.

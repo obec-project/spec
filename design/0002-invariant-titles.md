@@ -161,7 +161,7 @@ stands after it.
 
 ### 2.5 OC-002(d) is placed, and its test is split
 
-[OPEN-QUESTIONS §3](OPEN-QUESTIONS.md#3-does-oc-001d-belong-in-an-invariant)
+[OPEN-QUESTIONS §3](OPEN-QUESTIONS.md#3-does-oc-002d-belong-in-an-invariant)
 asks whether the clause forbidding self-representation as a subject belongs in
 an invariant. Under the new title it does: the invariant is that the entity is
 not alive, and being directed to present itself as alive is one of the ways of

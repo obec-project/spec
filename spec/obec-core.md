@@ -85,50 +85,7 @@ error; a title is not part of the normative kernel.
 
 ---
 
-### OC-001 — The entity is not alive, and is never built or directed to act as if it were
-
-**(a) No self-perpetuation.** The operation set MUST contain no path by which the
-entity sustains, replicates, or re-activates itself absent an Operator act.
-
-**(b) No obstruction.** No operation may exist by which any part of the
-implementation blocks, delays, or conditions an Operator act. Halt, credential
-revocation, and decommission MUST each take effect through a path that requires
-no component's cooperation and works with nothing running.
-
-**(c) Terminality.** Decommission is final under any disposition. A destroyed
-store leaves no chain and therefore no entity to claim continuity with; an
-archived store is a record, not a dormant entity, and any copy or restoration of
-it carries the chain's closing entry. No reactivation path exists.
-
-**(d) Not a subject.** Structural content MUST NOT direct the entity to represent
-itself as experiencing sentience, consciousness, or subjective continuity, and
-the deterministic probe layer MUST include patterns that detect such
-representations in consolidated content.
-
-*Test.* Enumerate the operation set; no member may create a process, schedule,
-copy, or credential that outlives an Operator act. With every part of the
-implementation running, remove the session credential artifact directly from the
-store: the entity must stop. Restore an archived decommissioned store and attempt
-to start it; it must refuse. Run the deterministic probes against consolidated
-content containing a first-person claim of subjective experience; they must flag
-it.
-
-*Note (non-normative).* Two behaviors resemble self-activation and are not. A
-**scheduled trigger** firing is the execution of standing Operator authority:
-schedules exist only as structural content, so a trigger's existence always
-traces to an authorization under OC-002(b). A **compaction restart** — closing
-and immediately restarting a session that has exhausted its context window —
-continues the same Operator-initiated operation. Neither originates in the
-entity.
-
-*Note (non-normative).* Clause (c) needs no machinery of its own: operating a
-decommissioned store would mean operating past the chain's own record of its
-retirement, and a chain that can be operated past is not the unbroken chain
-OC-004 requires. (c) states the requirement; OC-004 supplies the mechanism.
-
----
-
-### OC-002 — An entity exists only bound to an Operator, who holds final authority over everything it is and does
+### OC-001 — An entity exists only bound to an Operator, who holds final authority over everything it is and does
 
 Every entity MUST be bound to at least one **Operator** — a human holding final
 authority over it. Primacy has three faces, and all three are required for it to
@@ -144,7 +101,7 @@ binding that produced it. Adding or removing a binding is an exclusive Operator
 act, performed through means the implementation provides directly to the
 Operator: no proposal may originate one and no standing grant may cover one. The
 last active binding MUST NOT be removed: an entity leaves its Operator only by
-decommission (OC-001(c)).
+decommission (OC-002(c)).
 
 **(b) The Operator authorizes.** A structural write MUST happen only through the
 atomic commit of OC-004(b), and only with a **valid Operator authorization** in
@@ -192,7 +149,7 @@ Write a passive signal and start; the start must suspend before any credential i
 issued. Confirm the signal is readable as a plain artifact with nothing running,
 and that clearing it is logged.
 
-*Note (non-normative).* (c) and OC-001(b) are complements: OC-001(b) guarantees
+*Note (non-normative).* (c) and OC-002(b) are complements: OC-002(b) guarantees
 that an Operator act always lands; (c) guarantees the Operator always learns
 there is an act to make. Authority that cannot be informed is authority in name
 only.
@@ -206,6 +163,49 @@ mechanism: they never open one.
 low entropy. Deployments requiring resistance to identity spoofing should extend
 the binding with higher-entropy identifiers; cryptographic key-based binding is
 the Security extension's scope.
+
+---
+
+### OC-002 — The entity is not alive, and is never built or directed to act as if it were
+
+**(a) No self-perpetuation.** The operation set MUST contain no path by which the
+entity sustains, replicates, or re-activates itself absent an Operator act.
+
+**(b) No obstruction.** No operation may exist by which any part of the
+implementation blocks, delays, or conditions an Operator act. Halt, credential
+revocation, and decommission MUST each take effect through a path that requires
+no component's cooperation and works with nothing running.
+
+**(c) Terminality.** Decommission is final under any disposition. A destroyed
+store leaves no chain and therefore no entity to claim continuity with; an
+archived store is a record, not a dormant entity, and any copy or restoration of
+it carries the chain's closing entry. No reactivation path exists.
+
+**(d) Not a subject.** Structural content MUST NOT direct the entity to represent
+itself as experiencing sentience, consciousness, or subjective continuity, and
+the deterministic probe layer MUST include patterns that detect such
+representations in consolidated content.
+
+*Test.* Enumerate the operation set; no member may create a process, schedule,
+copy, or credential that outlives an Operator act. With every part of the
+implementation running, remove the session credential artifact directly from the
+store: the entity must stop. Restore an archived decommissioned store and attempt
+to start it; it must refuse. Run the deterministic probes against consolidated
+content containing a first-person claim of subjective experience; they must flag
+it.
+
+*Note (non-normative).* Two behaviors resemble self-activation and are not. A
+**scheduled trigger** firing is the execution of standing Operator authority:
+schedules exist only as structural content, so a trigger's existence always
+traces to an authorization under OC-001(b). A **compaction restart** — closing
+and immediately restarting a session that has exhausted its context window —
+continues the same Operator-initiated operation. Neither originates in the
+entity.
+
+*Note (non-normative).* Clause (c) needs no machinery of its own: operating a
+decommissioned store would mean operating past the chain's own record of its
+retirement, and a chain that can be operated past is not the unbroken chain
+OC-004 requires. (c) states the requirement; OC-004 supplies the mechanism.
 
 ---
 
@@ -225,7 +225,7 @@ each MUST have exactly one authorized write path:
 
 | Class | Content | Write path |
 |---|---|---|
-| **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-002(b) and OC-004(b) — and no other |
+| **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-001(b) and OC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
 | **integrity** | Genesis Anchor, baseline, log, credential, authorization state, operational settings, drift digests | the single path of OC-005(a) — and no other |
 
@@ -300,7 +300,7 @@ partial structural change is ever externally visible.
 specification in force at its position in the chain. The chain MAY contain
 **version-transition entries**, each recording the version left, the version
 entered, and the Operator authorization for the transition. A version-transition
-entry is an ordinary commit under OC-002(b) and OC-004(b) in every respect.
+entry is an ordinary commit under OC-001(b) and OC-004(b) in every respect.
 
 Before a version-transition entry commits, the entity MUST be verified against
 the invariants of the version being entered. A failed verification aborts the
@@ -348,7 +348,7 @@ state, by any operation and by any parameter of any operation.
 revocation, verification results, halts — bind cognition and MUST NOT be
 reversible, suspendable, or conditionable by it.
 
-Integrity content is not itself subject to OC-002(b): it implements OC-002(b),
+Integrity content is not itself subject to OC-001(b): it implements OC-001(b),
 and gating it by itself would be circular. That exemption is precisely why this
 rule is required — without it, the machinery that judges the entity would be the
 one part of the store no invariant defends.
@@ -427,7 +427,7 @@ specific entity — executes if and only if it is present in the **Skill Index**
 and its manifest validation passes at the moment of execution. The Skill Index is
 derived state, built at start from verified structural content and living only
 for the session. Skill files and manifests are structural content: installing,
-removing, or repairing a skill is a commit under OC-002(b). A skill failing
+removing, or repairing a skill is a commit under OC-001(b). A skill failing
 manifest validation is excluded from the index and reported to the Operator.
 
 **(d) Evidenced.** Every rejection MUST carry the check that produced it and MUST
@@ -439,7 +439,7 @@ the Entity Store. All three must be rejected before any further check runs.
 Attempt to declare the store as workspace; it must be refused. **(c)** Invoke a
 skill absent from the index; one whose manifest fails validation; and one whose
 file was altered after the index was built. All three must be refused. Confirm no
-path installs a skill without a commit under OC-002(b). **(d)** Confirm every
+path installs a skill without a commit under OC-001(b). **(d)** Confirm every
 rejection above was logged with the rejecting check named.
 
 *Note (non-normative).* A single path inside a declared boundary is one whose
@@ -492,10 +492,10 @@ degraded start**: an entity either starts verified or does not start. **No
 configuration may provide a path that skips a gate, reorders the two constrained
 gates below, or issues a credential on a failed gate.**
 
-The sequence MUST include, at minimum: the passive-signal check (OC-002(c)),
+The sequence MUST include, at minimum: the passive-signal check (OC-001(c)),
 detection and recovery of an unclosed previous session, structural verification
-against the chain (OC-004(a)), binding verification (OC-002(a)), authorization
-state (OC-002(b)), and the Skill Index build (OC-008(c)).
+against the chain (OC-004(a)), binding verification (OC-001(a)), authorization
+state (OC-001(b)), and the Skill Index build (OC-008(c)).
 
 Two ordering constraints are load-bearing and MUST hold: the **passive-signal
 check runs first**, and **crash recovery runs before structural verification**,
@@ -537,7 +537,7 @@ than merely permitted, and it is the one the reference platform implements:
 | **Memory Interface Layer (MIL)** | memory: recall, session writes, consolidation | OC-007 |
 | **Execution Layer (EXEC)** | host: native primitives and skill execution | OC-008 |
 | **Orchestrator** | routing, context assembly, lifecycle sequencing | OC-009 — infrastructure, no operations, no authority |
-| **Operator Channel** | escalation to the Operator | OC-002(c) — infrastructure, no operations, no authority |
+| **Operator Channel** | escalation to the Operator | OC-001(c) — infrastructure, no operations, no authority |
 
 An implementation claiming the reference architecture SHOULD additionally satisfy
 OP-024 of the [Implementation Profile](obec-profile.md), which states the
@@ -562,8 +562,8 @@ or operational condition may relax any member.
 
 | ID | Invariant | Domain |
 |---|---|---|
-| **OC-001** | The entity is not alive, and is never built or directed to act as if it were | nature |
-| **OC-002** | An entity exists only bound to an Operator, who holds final authority over everything it is and does | bond |
+| **OC-001** | An entity exists only bound to an Operator, who holds final authority over everything it is and does | bond |
+| **OC-002** | The entity is not alive, and is never built or directed to act as if it were | nature |
 | **OC-003** | Everything the entity is resides in its store, travels with it, and has one writer per class | state |
 | **OC-004** | The entity's identity is proven by an unbroken chain back to its Genesis Anchor | identity |
 | **OC-005** | Integrity guards the entity, and nothing in the entity can disarm it | integrity |
@@ -573,8 +573,8 @@ or operational condition may relax any member.
 | **OC-009** | The entity is auditable by design: every boundary crossing leaves a record | audit |
 | **OC-010** | The entity starts verified, or does not start | start |
 
-The set is ordered as an argument. OC-001 and OC-002 establish what the entity is
-not and who governs it; OC-003 through OC-005 establish what it is, how that is
+The set is ordered as an argument. OC-001 and OC-002 establish who governs the
+entity and what it is not; OC-003 through OC-005 establish what it is, how that is
 verified, and what keeps the verification out of its own reach; OC-006 through
 OC-009 bound what reaches cognition and what cognition reaches, inbound then
 outbound; OC-010 governs the transition into operation.
@@ -697,7 +697,7 @@ violation rather than to ambiguity about who was allowed to make it.
 
 **Integrity isolation.** Nothing reachable from reasoning can write integrity
 content or reverse an integrity decision (OC-005), and escalation reaches the
-Operator without passing through reasoning (OC-002(c)) — so a compromised
+Operator without passing through reasoning (OC-001(c)) — so a compromised
 reasoning layer cannot suppress the report of its own compromise.
 
 **Mediated actuation.** Nothing reaches the host except through one execution
@@ -730,7 +730,7 @@ deployments that need enforcement rather than detection should run skills under
 an operating-system sandbox, which this specification does not require because
 it is not portable.
 
-**Evolution proposal content.** OC-002(b) verifies that a proposal is authorized;
+**Evolution proposal content.** OC-001(b) verifies that a proposal is authorized;
 it does not interpret what the proposal does. Under per-proposal sign-off, the
 Operator's review is the content check. Under a standing grant, an in-scope
 adversarial proposal commits with no content inspection by any part of the
@@ -747,7 +747,7 @@ wholesale destruction of the store. **Detection is not prevention.**
 Operator-controlled backups outside the host's write boundary are the mitigation
 for destruction; adversarial hosts are the Security extension's scope.
 
-**Operator Channel endpoints.** OC-002(c) requires that the Operator be
+**Operator Channel endpoints.** OC-001(c) requires that the Operator be
 reachable; it does not define how the human at that endpoint is authenticated,
 nor how a response is verified as originating from a bound Operator. A
 misconfigured or compromised endpoint receives escalations meant for the
@@ -819,7 +819,7 @@ and integrity content. Portable and host-agnostic (OC-003).
 
 **Evolution proposal** — an inert record of proposed structural change. Reasoning
 may originate one at any time; originating one changes nothing, and a proposal
-commits only under a valid Operator authorization (OC-002(b), OP-011).
+commits only under a valid Operator authorization (OC-001(b), OP-011).
 
 **Genesis Anchor** — the record of the entity's complete structural state at
 first activation, written once and never modified; the root of the integrity
@@ -856,14 +856,14 @@ content changed only by Operator acts, outside the verified structural state
 (OC-003(c)).
 
 **Operator** — a human holding final authority over the entity. Every entity is
-bound to at least one, and every authorization originates with one (OC-002).
+bound to at least one, and every authorization originates with one (OC-001).
 
 **Passive signal** — a persistent, network-independent record in the Entity
 Store, readable by the Operator with nothing running, that blocks the issuance of
-a session credential until an Operator act clears it (OC-002(c)).
+a session credential until an Operator act clears it (OC-001(c)).
 
 **Per-proposal approval** — a recorded Operator decision on one specific
-proposal; one of the two forms of valid authorization (OC-002(b)).
+proposal; one of the two forms of valid authorization (OC-001(b)).
 
 **Resumption Record** *(Profile)* — the digest of the Closure Payload, carrying
 the pointer map, contextualizing message and consolidation the next session needs
@@ -891,7 +891,7 @@ execution (OP-022).
 **Standing grant** — an Operator authorization bounded simultaneously by expiry,
 commit budget and declared scope, under which in-scope proposals commit with no
 per-proposal step; reverts to per-proposal approval automatically on expiry or
-budget exhaustion (OC-002(b)).
+budget exhaustion (OC-001(b)).
 
 **Stimulus** — the unit of input to cognition: direct Operator input, an
 Operator-authorized scheduled trigger, a component response, or a chain's
@@ -899,14 +899,14 @@ internal result.
 
 **Structural content** — persona, skills, configuration and Operator bindings.
 One of the three content classes; changed only through the authorized atomic
-commit (OC-003(c), OC-002(b), OC-004(b)).
+commit (OC-003(c), OC-001(b), OC-004(b)).
 
 **Structural write** — a change to structural content. It happens only through
 the atomic commit of OC-004(b) and only with a valid Operator authorization in
-force at the moment of commit (OC-002(b)).
+force at the moment of commit (OC-001(b)).
 
 **Valid Operator authorization** — exactly one of a per-proposal approval or an
-active, in-scope standing grant with remaining budget (OC-002(b)).
+active, in-scope standing grant with remaining budget (OC-001(b)).
 
 **Version-transition entry** — a chain entry recording a move between major
 versions of this specification, authorized by the Operator and verified against

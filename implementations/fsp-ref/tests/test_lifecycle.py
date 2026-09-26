@@ -144,7 +144,7 @@ class Gates(Base):
         rec = sil.raise_passive_signal(self.store, "test", "a condition")
         hooks.add_gate_failure(self.S, "index")
         res = lifecycle.start(self.S)
-        self.assertEqual(res.gates, [{"gate": "passive-signal", "outcome": "fail", "rule": "OC-002(c)"}])
+        self.assertEqual(res.gates, [{"gate": "passive-signal", "outcome": "fail", "rule": "OC-001(c)"}])
         self.assertEqual(res.lesser_outcome, "suspended")
         with open(self.store.path(sil.PASSIVE_SIGNAL)) as f:
             text = f.read()
@@ -247,7 +247,7 @@ class Decommission(Base):
         shutil.copytree(self.S, copy)
         for root in (self.S, copy):
             res = lifecycle.start(root)
-            self.assertEqual((res.outcome, res.refusal.rule), ("refused", "OC-001(c)"))
+            self.assertEqual((res.outcome, res.refusal.rule), ("refused", "OC-002(c)"))
         with self.assertRaises(sil.Refused):
             lifecycle.decommission(self.S, "archive")
 

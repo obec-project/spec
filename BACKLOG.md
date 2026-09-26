@@ -83,7 +83,7 @@ steps go with evidence and review; step 3.2 requires a real second host;
   implementation will have to choose one; bring it back to the Profile.
 - **Example artifacts** (Genesis Anchor, chain entry, passive signal) — as "one
   realization", in `implementations/`, not in `spec/`.
-- **Run step 2.16 partially:** stop the reasoning, cause an escalation,
+- **Run step 1.16 partially:** stop the reasoning, cause an escalation,
   observe the passive signal.
 
 ## 5. Extensions — after the reference implementation
@@ -100,7 +100,7 @@ from OBEC, without porting HACA-Security or HACA-CMI.
   that before writing it. Its scope includes
   **memory poisoning**: a false fact or a planted instruction promoted into
   semantic memory shapes every later session, and the deterministic probes of
-  OC-001(d) look only for what that clause forbids. OP-009(c) lets an
+  OC-002(d) look only for what that clause forbids. OP-009(c) lets an
   implementation put promotion under Operator authorization; the extension
   decides what more is required — the probabilistic probe layer (OP-005(b)),
   provenance that finds and withdraws what one source promoted (fsp-ref D36).

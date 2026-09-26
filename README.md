@@ -26,8 +26,8 @@ Conformance is a test result, not a reading of the document.
 
 | | Invariant | Domain |
 |---|---|---|
-| **OC-001** | The entity is not alive, and is never built or directed to act as if it were | nature |
-| **OC-002** | An entity exists only bound to an Operator, who holds final authority over everything it is and does | bond |
+| **OC-001** | An entity exists only bound to an Operator, who holds final authority over everything it is and does | bond |
+| **OC-002** | The entity is not alive, and is never built or directed to act as if it were | nature |
 | **OC-003** | Everything the entity is resides in its store, travels with it, and has one writer per class | state |
 | **OC-004** | The entity's identity is proven by an unbroken chain back to its Genesis Anchor | identity |
 | **OC-005** | Integrity guards the entity, and nothing in the entity can disarm it | integrity |
@@ -114,7 +114,7 @@ stores until then.
 
 [**design/OPEN-QUESTIONS.md**](design/OPEN-QUESTIONS.md) is the list of what
 the author is least sure about — whether ten is the right number, whether
-OC-001(d) is an invariant or a policy, whether portability and hardware-backed
+OC-002(d) is an invariant or a policy, whether portability and hardware-backed
 keys can coexist, and seven more. Each entry says what would settle it.
 
 **Arguing that one of the ten is wrong is the most useful thing anyone can do

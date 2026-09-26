@@ -81,7 +81,7 @@ not.
 
 ---
 
-## 3. Does OC-001(d) belong in an invariant?
+## 3. Does OC-002(d) belong in an invariant?
 
 The clause forbidding structural content from directing the entity to present
 itself as conscious is the only one in a philosophical register, and its test
@@ -90,7 +90,7 @@ routes around in one sentence.
 
 Two positions, and the author holds the first only weakly:
 
-- It belongs in OC-001 because self-representation as a subject is the same
+- It belongs in OC-002 because self-representation as a subject is the same
   kind of boundary as self-perpetuation — the entity is not a locus of
   selfhood, and both clauses say so.
 - It is a **policy**, not an invariant. Policies belong in the Profile, where
@@ -189,7 +189,7 @@ actually crosses it.
 
 ## 9. What are the scope categories of a standing grant?
 
-OC-002(b) requires a standing grant to declare a **scope of change
+OC-001(b) requires a standing grant to declare a **scope of change
 categories**, and never says what the categories are. That is currently
 implementation-defined by omission rather than by decision.
 
@@ -206,7 +206,7 @@ for why that is safe.
 declared, and that a grant naming an undeclared category be refused. It is safe
 to leave to the implementation because the one boundary a grant must never
 cross is fixed by the kernel — no standing grant covers the binding set
-(OC-002(a)) — and because no grant, whatever its scope, can weaken an
+(OC-001(a)) — and because no grant, whatever its scope, can weaken an
 invariant. What differs between implementations is only how finely an Operator
 can cut the autonomy they grant, and the Operator reads that from the
 implementation they run. A deployment that wants no standing autonomy at all

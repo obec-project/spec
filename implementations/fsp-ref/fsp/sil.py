@@ -159,7 +159,7 @@ def first_activation(root: str, operator: str, *, name="entity", persona=None, m
     issued here: the first one comes from a start that runs every gate.
     """
     if not BINDING_ID.match(operator or ""):
-        raise Refused("binding", "OC-002(a)", "invalid Operator binding id %r" % operator)
+        raise Refused("binding", "OC-001(a)", "invalid Operator binding id %r" % operator)
     store = scaffold_store(root, model=model)
     with store.write_lock():
         if store.exists(chain.HEAD):
@@ -205,7 +205,7 @@ def first_activation(root: str, operator: str, *, name="entity", persona=None, m
             log_append(
                 store,
                 "operator-act",
-                rule="OC-002(a)",
+                rule="OC-001(a)",
                 binding=operator,
                 act="found",
                 detail="founding Operator binding established at first activation",
@@ -216,7 +216,7 @@ def first_activation(root: str, operator: str, *, name="entity", persona=None, m
                 log_append(
                     store,
                     "operator-act",
-                    rule="OC-002(a)",
+                    rule="OC-001(a)",
                     binding=operator,
                     act="set-model",
                     model=marker["model"],
@@ -244,7 +244,7 @@ def first_activation(root: str, operator: str, *, name="entity", persona=None, m
     }
 
 
-# -- bindings (OC-002(a)) ----------------------------------------------------
+# -- bindings (OC-001(a)) ----------------------------------------------------
 
 
 def read_head(store: Store):
@@ -280,20 +280,20 @@ def acting_binding(store: Store, requested=None):
         rec = log_append(
             store,
             "refusal",
-            rule="OC-002(a)",
+            rule="OC-001(a)",
             check="binding",
             detail="Operator act as %r, which is not an active binding" % (binding,),
         )
-        raise Refused("binding", "OC-002(a)", "%r is not an active binding" % (binding,), [rec])
+        raise Refused("binding", "OC-001(a)", "%r is not an active binding" % (binding,), [rec])
     return binding
 
 
-def operator_act(store: Store, act, *, binding, rule="OC-002(a)", **payload):
-    """Log an Operator act, attributed to its binding (OC-002(a))."""
+def operator_act(store: Store, act, *, binding, rule="OC-001(a)", **payload):
+    """Log an Operator act, attributed to its binding (OC-001(a))."""
     return log_append(store, "operator-act", rule=rule, binding=binding, act=act, **payload)
 
 
-# -- the passive signal (OC-002(c)) ------------------------------------------
+# -- the passive signal (OC-001(c)) ------------------------------------------
 
 PASSIVE_SIGNAL = "PASSIVE-SIGNAL"
 
@@ -306,7 +306,7 @@ def raise_passive_signal(store: Store, condition, detail, *, session=None):
         rec = log_append(
             store,
             "passive-signal",
-            rule="OC-002(c)",
+            rule="OC-001(c)",
             session=session,
             condition=condition,
             detail=detail,

@@ -42,6 +42,10 @@ The specification decisions the phase depends on come first.
   binding removed under it. It orders honest Operators; it is not access
   control, since an Operator's id is a claim until the Security extension binds
   it by key.
+- **OC-001 and OC-002 exchange places** (2026-09-25, *editorial*, ADR 0002):
+  Operator primacy is OC-001 and bounded existence OC-002. The start gates,
+  the refusals, the log records and the default probes name the new numbers.
+  Earlier entries, and the log of any store made before, use the old ones.
 - **D16 revised, D51 added:** an allow entry for a skill pins its digest, so
   changed skill code returns to `hold`; a skill declares targets relative to the
   workspace, passes the gates on every execution, and its process group ends

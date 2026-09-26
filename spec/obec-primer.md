@@ -136,8 +136,9 @@ the entity's cooperation.
 
 ### 4.1 Not alive
 
-Alongside authority sits a limit, and OBEC states it first because authority over
-something that can perpetuate itself is authority without teeth:
+Alongside authority sits a limit, and OBEC states it right after authority,
+because authority over something that can perpetuate itself is authority without
+teeth:
 
 - **No self-perpetuation.** There is no operation by which the entity sustains,
   replicates, or re-activates itself without a human act.

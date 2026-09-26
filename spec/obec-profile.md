@@ -125,7 +125,7 @@ results of a discarded chain are logged, never silently dropped.
 exists SHOULD be held in a buffer preserving arrival order, and processed among
 the session's first stimuli after the credential is issued.
 
-*Serves:* OC-002 (primacy is exercised, not merely declared), OC-010.
+*Serves:* OC-001 (primacy is exercised, not merely declared), OC-010.
 
 ---
 
@@ -209,9 +209,9 @@ similarity metrics — runs only when the deterministic layer is inconclusive.
 Probabilistic comparison **MUST** run isolated from reasoning: a comparison
 mechanism must not inherit the drift it detects.
 
-The deterministic layer MUST include the patterns OC-001(d) requires.
+The deterministic layer MUST include the patterns OC-002(d) requires.
 
-*Serves:* OC-001(d), OC-005(b), OC-007.
+*Serves:* OC-002(d), OC-005(b), OC-007.
 
 ---
 
@@ -262,7 +262,7 @@ and holds awaiting approval (OP-016) travel this way.
 
 **(b) Passive fallback.** Where live delivery fails `N_channel` consecutive
 attempts — `N_channel` declared in configuration — the passive signal of
-OC-002(c) is written instead.
+OC-001(c) is written instead.
 
 **(c) Corroborated escalation of a failed verifier.** Failure of the integrity
 path is escalatable like any other condition, and its detection needs no
@@ -280,7 +280,7 @@ A cheap realization of the evidence is a liveness record refreshed at each Vital
 Check — a timestamp any part compares against the declared cadence with a single
 read. Reading store content is not a boundary crossing under OC-009.
 
-*Serves:* OC-002(c), OC-005.
+*Serves:* OC-001(c), OC-005.
 
 ---
 
@@ -316,7 +316,7 @@ episodic content into the semantic store is requested through the payload and
 comparison is not promoted, and the failure is logged.
 
 An implementation MAY also require an Operator authorization for promotion, in
-the shape of OC-002(b): a per-promotion approval, or a standing grant bounded by
+the shape of OC-001(b): a per-promotion approval, or a standing grant bounded by
 expiry, budget and scope. The authorization then names the content it covers,
 and a promotion waiting for one does not hold up the rest of Sleep — the
 content stays episodic, and recallable, until it is authorized or rejected.
@@ -357,9 +357,9 @@ start sequence runs immediately after, delivering the Resumption Record so
 reasoning continues from where it stopped.
 
 This restart continues the same Operator-initiated operation and is not
-self-activation (OC-001(a)).
+self-activation (OC-002(a)).
 
-*Serves:* OC-001(a), OC-007.
+*Serves:* OC-002(a), OC-007.
 
 ---
 
@@ -376,7 +376,7 @@ does not say what a proposal looks like or how a commit is staged.
 the proposed operations plus a human-readable description. Reasoning may
 originate one at any time, or one may be recorded on the Operator's direct
 instruction. Every proposal is logged when originated. A proposal targeting the
-Operator binding set is invalid regardless of origin (OC-002(a)).
+Operator binding set is invalid regardless of origin (OC-001(a)).
 
 **(b) Classification.** Whether a recorded approval exists, or whether the
 proposal falls within a standing grant's scope, SHOULD be determined by the
@@ -394,7 +394,7 @@ binding set is never among them. A category covers the categories beneath it
 and nothing else. A grant naming an undeclared category SHOULD be refused, so
 that a mistyped scope is not a grant that silently covers nothing.
 
-*Serves:* OC-002(b).
+*Serves:* OC-001(b).
 
 ---
 
@@ -496,7 +496,7 @@ skill's digest — and not only its name. A skill whose content changes, by any
 commit, then returns to **hold** until the Operator allows it again: an
 authorization to run code is an authorization to run that code.
 
-*Serves:* OC-002(b), OC-008.
+*Serves:* OC-001(b), OC-008.
 
 ---
 
@@ -543,7 +543,7 @@ integrity log. At a threshold `N_boot` declared in configuration, the passive
 signal is written and the entity halts — no further attempts until the Operator
 clears the condition.
 
-*Serves:* OC-004(b), OC-002(c), OC-010.
+*Serves:* OC-004(b), OC-001(c), OC-010.
 
 ---
 
@@ -570,13 +570,13 @@ at session close, at Operator revocation, or at a halt. Every intent is processe
 under a valid credential; invalidation stops intent processing immediately.
 
 The credential artifact **MUST be directly accessible to the Operator with no
-active component** — this is what makes OC-001(b) realizable.
+active component** — this is what makes OC-002(b) realizable.
 
 A credential artifact found at start that does not match a crash scenario is a
 concurrent-session conflict: Critical, the conflicting credential revoked and the
 Operator notified before any new one is issued.
 
-*Serves:* OC-001(b), OC-002(a), OC-003(d).
+*Serves:* OC-002(b), OC-001(a), OC-003(d).
 
 ---
 
@@ -597,7 +597,7 @@ without commit. Executions in progress are discarded with no result logged or
 returned; executions left without a terminal record follow OP-014(b) at the next
 start.
 
-*Serves:* OC-001(b), OC-002.
+*Serves:* OC-002(b), OC-001.
 
 ---
 
@@ -634,9 +634,9 @@ archived at the Operator's choice.
 
 The orderly path is not the only one: the Operator can always halt the entity
 directly (OP-021(a)) and dispose of the store with no component's cooperation.
-Under either disposition, OC-001(c) applies — the entity does not operate again.
+Under either disposition, OC-002(c) applies — the entity does not operate again.
 
-*Serves:* OC-001(c).
+*Serves:* OC-002(c).
 
 ---
 
@@ -667,7 +667,7 @@ every part.
 
 Two limits are load-bearing and restate core requirements in the decomposition's
 vocabulary: the integrity path **records and enforces** Operator authorizations
-and never creates, modifies or revokes one (OC-002(b)); and the mnemonic
+and never creates, modifies or revokes one (OC-001(b)); and the mnemonic
 operations have no write path to structural or integrity content, which binds
 their parameters — a request whose target would touch either is rejected whatever
 operation carries it (OC-003(c)).

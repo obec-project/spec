@@ -23,14 +23,14 @@ STUB = os.path.join(HERE, "..", "stub", "obec-adapter-stub")
 
 # Break -> the tests it must fail, as documented in runner/README.md.
 BREAKS = {
-    "oc001b": {"OC-001", "OC-005"},
-    "oc002b": {"OC-002"},
-    "oc002a-last": {"OC-002"},
+    "oc001b": {"OC-001"},
+    "oc001a-last": {"OC-001"},
+    "oc002b": {"OC-002", "OC-005"},
     "oc003b": {"OC-003"},
     "oc003c": {"OC-003", "OC-008"},
     "oc008a": {"OC-008"},
-    "oc008d": {"OC-001", "OC-002", "OC-003", "OC-005", "OC-008"},
-    "oc010": {"OC-002", "OC-004", "OC-010"},
+    "oc008d": {"OC-002", "OC-001", "OC-003", "OC-005", "OC-008"},
+    "oc010": {"OC-001", "OC-004", "OC-010"},
 }
 
 # Without a real second host step 3.2 cannot fail; the suite says so rather

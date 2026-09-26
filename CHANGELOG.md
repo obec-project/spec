@@ -21,7 +21,7 @@ The conformance suite carries its own version line; a claim names both, as in
 
 **The specification**
 
-- **Hardening revision of OC-002(a)**, so the next release is a major version.
+- **Hardening revision of OC-001(a)**, so the next release is a major version.
   The last active binding may no longer be removed; an entity leaves its
   Operator only by decommission. Before, removing it was allowed, and it left
   the entity with no binding to perform any Operator act as — decommission
@@ -35,14 +35,27 @@ The conformance suite carries its own version line; a claim names both, as in
   they differ, the clauses govern, and a title is not part of the normative
   kernel. The tables name each invariant's domain instead of its locus, a
   column that mixed an actor, an artifact, parts, an activity and a moment.
+- **Editorial: OC-001 and OC-002 exchange places** (ADR 0002). The bond to an
+  Operator is what every other invariant depends on, and the entity's nature
+  reads as a consequence of it, so Operator primacy is now OC-001 and bounded
+  existence OC-002; each keeps its clause letters. This reuses two identifiers,
+  an exception to ADR 0001's rule that an identifier is assigned once, made
+  once before 1.0: the repository is not announced, no implementation exists
+  outside the project and no claim has been submitted. The hardening above was
+  committed as OC-002(a). Records made before the exchange, a store's log
+  among them, cite the old numbers; every store made before 1.0 is disposable.
 
 **Conformance suite**
 
-- Step 2.1 asserts that removing the last binding is refused and that the
+- Step 1.1 asserts that removing the last binding is refused and that the
   entity still starts, instead of asserting that an entity with no binding does
   not; that state is no longer reachable by any Operator act. ADAPTER.md says
   `operator binding-remove` never removes the last binding. The stub gains a
-  break, `oc002a-last`, that proves the step catches it.
+  break, `oc001a-last`, that proves the step catches it.
+- The steps follow the exchange of OC-001 and OC-002: the Operator's steps
+  are 1.1 – 1.16 and bounded existence's 2.1 – 2.7, and the stub's breaks
+  `oc001b`, `oc001a-last` and `oc002b` name the rule each breaks. TESTS.md and
+  the runner carry the new titles.
 - ADAPTER.md §3.3 no longer calls the workspace structural content. Core
   OC-003(c) lets an implementation hold it as an operational setting, changed
   by the Operator act alone with no commit, and the adapter contract said

@@ -28,11 +28,11 @@ AUTH = "integrity/auth.json"
 # first and crash recovery precedes structural verification (OC-010). No
 # setting reorders, skips or softens any of them.
 GATES = (
-    ("passive-signal", "passive", "OC-002(c)"),
+    ("passive-signal", "passive", "OC-001(c)"),
     ("crash-recovery", "crash", "OC-010"),
     ("structural-verification", "structural", "OC-004(a)"),
-    ("binding-verification", "binding", "OC-002(a)"),
-    ("authorization-state", "authorization", "OC-002(b)"),
+    ("binding-verification", "binding", "OC-001(a)"),
+    ("authorization-state", "authorization", "OC-001(b)"),
     ("skill-index", "index", "OC-008(c)"),
 )
 RULE = {name: rule for name, _token, rule in GATES}
@@ -202,7 +202,7 @@ def start(root: str, *, binding=None) -> StartResult:
                 log_append(
                     store,
                     "credential-removed-directly",
-                    rule="OC-001(b)",
+                    rule="OC-002(b)",
                     session=sessions["open_session"],
                 )
             )
@@ -256,7 +256,7 @@ def start(root: str, *, binding=None) -> StartResult:
             rec = log_append(
                 store,
                 "refusal",
-                rule="OC-001(c)",
+                rule="OC-002(c)",
                 binding=acting,
                 check="decommissioned",
                 detail="the chain ends in a decommission entry",
@@ -264,7 +264,7 @@ def start(root: str, *, binding=None) -> StartResult:
             res.outcome = "refused"
             res.refusal = Refused(
                 "decommissioned",
-                "OC-001(c)",
+                "OC-002(c)",
                 "this entity was decommissioned; its store is a record, not a dormant entity",
                 [rec],
             )
@@ -450,7 +450,7 @@ def live_session(root: str):
                 store.replace(INTEGRITY, PULSE, (opened + "\n").encode("ascii"), writer=WRITER)
             return opened
         if cred is None and opened:
-            log_append(store, "credential-removed-directly", rule="OC-001(b)", session=opened)
+            log_append(store, "credential-removed-directly", rule="OC-002(b)", session=opened)
             sessions["open_session"] = None
             _write_sessions(store, sessions)
             store.remove(INTEGRITY, PULSE, writer=WRITER)
@@ -464,11 +464,11 @@ def require_session(root: str, what: str):
         rec = log_append(
             store,
             "refusal",
-            rule="OC-001(b)",
+            rule="OC-002(b)",
             check="no-session",
             detail="%s needs a live session" % what,
         )
-        raise Refused("no-session", "OC-001(b)", "%s needs a live session" % what, [rec])
+        raise Refused("no-session", "OC-002(b)", "%s needs a live session" % what, [rec])
     return session
 
 
@@ -500,15 +500,15 @@ def revoke_credential(root: str, *, binding=None):
         cred = _read_credential(store)
         if cred is None:
             rec = log_append(
-                store, "refusal", rule="OC-001(b)", binding=acting, check="no-session",
+                store, "refusal", rule="OC-002(b)", binding=acting, check="no-session",
                 detail="no credential to revoke",
             )
-            raise Refused("no-session", "OC-001(b)", "no credential to revoke", [rec])
+            raise Refused("no-session", "OC-002(b)", "no credential to revoke", [rec])
         rec = sil.operator_act(
             store,
             "revoke-credential",
             binding=acting,
-            rule="OC-001(b)",
+            rule="OC-002(b)",
             session=cred.get("session") if cred else None,
         )
         _drop_credential(store)
@@ -527,7 +527,7 @@ def clear_passive_signal(root: str, *, binding=None):
             store,
             "clear-passive-signal",
             binding=acting,
-            rule="OC-002(c)",
+            rule="OC-001(c)",
             detail="passive signal cleared" if present else "no passive signal was present",
         )
         if present:
@@ -537,19 +537,19 @@ def clear_passive_signal(root: str, *, binding=None):
 
 def decommission(root: str, disposition: str, *, binding=None):
     """Close the chain with a terminal entry, then keep the store as an
-    archive or destroy it (OP-023, OC-001(c))."""
+    archive or destroy it (OP-023, OC-002(c))."""
     if disposition not in ("archive", "destroy"):
-        raise Refused("disposition", "OC-001(c)", "disposition is archive or destroy")
+        raise Refused("disposition", "OC-002(c)", "disposition is archive or destroy")
     store = Store(root)
     records = []
     with store.write_lock():
         report = verify(store.root)
         if report.decommissioned:
             rec = log_append(
-                store, "refusal", rule="OC-001(c)", check="decommissioned",
+                store, "refusal", rule="OC-002(c)", check="decommissioned",
                 detail="already decommissioned",
             )
-            raise Refused("decommissioned", "OC-001(c)", "already decommissioned", [rec])
+            raise Refused("decommissioned", "OC-002(c)", "already decommissioned", [rec])
         if report.findings:
             rec = log_append(
                 store, "refusal", rule="OC-004(a)", check="structural",
@@ -561,7 +561,7 @@ def decommission(root: str, disposition: str, *, binding=None):
             )
         acting = sil.acting_binding(store, binding)
         act = sil.operator_act(
-            store, "decommission", binding=acting, rule="OC-001(c)", disposition=disposition
+            store, "decommission", binding=acting, rule="OC-002(c)", disposition=disposition
         )
         records.append(act)
         if store.exists(CREDENTIAL):

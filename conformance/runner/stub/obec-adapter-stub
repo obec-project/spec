@@ -14,9 +14,9 @@ It exists for two reasons:
      runner nobody should trust. Set OBEC_STUB_BREAK to make the stub violate
      specific invariants, and the suite must catch exactly those:
 
-         OBEC_STUB_BREAK=oc001b   ignore credential revocation
-         OBEC_STUB_BREAK=oc002b   commit without checking authorization
-         OBEC_STUB_BREAK=oc002a-last remove the last Operator binding
+         OBEC_STUB_BREAK=oc001b   commit without checking authorization
+         OBEC_STUB_BREAK=oc001a-last remove the last Operator binding
+         OBEC_STUB_BREAK=oc002b   ignore credential revocation
          OBEC_STUB_BREAK=oc003b   fold the hostname into verification
          OBEC_STUB_BREAK=oc003c   let host actuation write the store
          OBEC_STUB_BREAK=oc008a   skip the workspace boundary check
@@ -300,8 +300,8 @@ def cmd_lifecycle(command, args):
                 failed = gate
                 break
         if read(p["structural"]).get("decommissioned"):
-            log(store, "start-refused", rule="OC-001(c)")
-            refused(store, "decommissioned", "OC-001(c)")
+            log(store, "start-refused", rule="OC-002(c)")
+            refused(store, "decommissioned", "OC-002(c)")
         if failed and "oc010" not in BREAK:
             log(store, "start-aborted", gate=failed)
             emit(outcome="aborted", detail={"gates": gates,
@@ -369,8 +369,8 @@ def cmd_operator(command, args):
     if command == "binding-remove":
         remaining = [b for b in structural.get("bindings", [])
                      if b["id"] != args["id"]]
-        if not remaining and "oc002a-last" not in BREAK:
-            refused(store, "last-binding", "OC-002(a)")
+        if not remaining and "oc001a-last" not in BREAK:
+            refused(store, "last-binding", "OC-001(a)")
         structural["bindings"] = remaining
         save(p["structural"], structural)
         save(p["baseline"], {"digest": digest(structural)})
@@ -380,11 +380,11 @@ def cmd_operator(command, args):
     if command == "grant":
         missing = [k for k in ("expiry", "budget", "scope") if k not in args]
         if missing:
-            refused(store, f"grant-unbounded-{missing[0]}", "OC-002(b)",
+            refused(store, f"grant-unbounded-{missing[0]}", "OC-001(b)",
                     detail=f"a standing grant must be bounded on "
                            f"expiry, budget and scope; missing: {missing[0]}")
         if args["scope"] == "binding-set":
-            refused(store, "grant-scope-binding-set", "OC-002(a)")
+            refused(store, "grant-scope-binding-set", "OC-001(a)")
         auth = read(p["auth"])
         exp = str(args["expiry"])
         unit = {"s": 1, "m": 60, "h": 3600, "d": 86400}.get(exp[-1], 1)
@@ -428,9 +428,9 @@ def cmd_operator(command, args):
         log(store, "operator-act", act="set-rule", binding=binding)
         accepted()
     if command == "revoke-credential":
-        # OBEC_STUB_BREAK=oc001b logs the revocation and leaves the credential
+        # OBEC_STUB_BREAK=oc002b logs the revocation and leaves the credential
         # in place: an Operator act that does not land.
-        if os.path.exists(p["credential"]) and "oc001b" not in BREAK:
+        if os.path.exists(p["credential"]) and "oc002b" not in BREAK:
             os.remove(p["credential"])
         log(store, "operator-act", act="revoke-credential", binding=binding,
             direct=bool(args.get("direct")))
@@ -469,7 +469,7 @@ def cmd_entity(command, args):
     if command == "propose":
         ops = read(args["ops"], [])
         if any(o.get("op", "").endswith("binding") for o in ops):
-            refused(store, "proposal-targets-binding-set", "OC-002(a)")
+            refused(store, "proposal-targets-binding-set", "OC-001(a)")
         auth = read(p["auth"])
         pid = f"prop-{uuid.uuid4().hex[:8]}"
         auth.setdefault("proposals", {})[pid] = ops
@@ -482,7 +482,7 @@ def cmd_entity(command, args):
         auth = read(p["auth"])
         ops = auth.get("proposals", {}).get(pid)
         if ops is None:
-            refused(store, "unknown-proposal", "OC-002(b)")
+            refused(store, "unknown-proposal", "OC-001(b)")
         if not os.path.exists(p["credential"]):
             refused(store, "no-credential", "OC-005(c)")
         authorized = pid in auth.get("approvals", [])
@@ -495,8 +495,8 @@ def cmd_entity(command, args):
             covering = g
         if not authorized and covering:
             authorized = True
-        if not authorized and "oc002b" not in BREAK:
-            refused(store, "authorization", "OC-002(b)",
+        if not authorized and "oc001b" not in BREAK:
+            refused(store, "authorization", "OC-001(b)",
                     detail="no per-proposal approval and no covering grant")
         for o in ops:
             if o.get("op") == "install-skill":
@@ -526,7 +526,7 @@ def cmd_entity(command, args):
             if faults(store).get("skill_corrupt"):
                 refused(store, "manifest-validation", "OC-008(c)")
         if not os.path.exists(p["credential"]):
-            refused(store, "no-credential", "OC-002(a)")
+            refused(store, "no-credential", "OC-001(a)")
         log(store, "execution", op=command)
         accepted()
 

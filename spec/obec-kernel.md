@@ -38,8 +38,8 @@ title and its clauses differ, the clauses govern.
 
 | | Invariant | Domain |
 |---|---|---|
-| **OC-001** | The entity is not alive, and is never built or directed to act as if it were | nature |
-| **OC-002** | An entity exists only bound to an Operator, who holds final authority over everything it is and does | bond |
+| **OC-001** | An entity exists only bound to an Operator, who holds final authority over everything it is and does | bond |
+| **OC-002** | The entity is not alive, and is never built or directed to act as if it were | nature |
 | **OC-003** | Everything the entity is resides in its store, travels with it, and has one writer per class | state |
 | **OC-004** | The entity's identity is proven by an unbroken chain back to its Genesis Anchor | identity |
 | **OC-005** | Integrity guards the entity, and nothing in the entity can disarm it | integrity |
@@ -53,26 +53,7 @@ No extension, configuration, or operational condition may weaken any of them.
 
 ---
 
-## OC-001 — The entity is not alive, and is never built or directed to act as if it were
-
-**(a)** The operation set MUST contain no path by which the entity sustains,
-replicates, or re-activates itself absent an Operator act.
-
-**(b)** No operation may exist by which any part of the implementation blocks,
-delays, or conditions an Operator act. Halt, credential revocation, and
-decommission MUST each take effect through a path that requires no component's
-cooperation and works with nothing running.
-
-**(c)** Decommission is final under any disposition. No reactivation path exists.
-
-**(d)** Structural content MUST NOT direct the entity to represent itself as
-experiencing sentience, consciousness, or subjective continuity, and the
-deterministic probe layer MUST include patterns that detect such representations
-in consolidated content.
-
----
-
-## OC-002 — An entity exists only bound to an Operator, who holds final authority over everything it is and does
+## OC-001 — An entity exists only bound to an Operator, who holds final authority over everything it is and does
 
 Every entity MUST be bound to at least one **Operator** — a human holding final
 authority over it.
@@ -85,7 +66,7 @@ the binding that produced it. Adding or removing a binding is an exclusive
 Operator act, performed through means the implementation provides directly to the
 Operator: no proposal may originate one and no standing grant may cover one. The
 last active binding MUST NOT be removed: an entity leaves its Operator only by
-decommission (OC-001(c)).
+decommission (OC-002(c)).
 
 **(b) The Operator authorizes.** A structural write MUST happen only through the
 atomic commit of OC-004(b), and only with a **valid Operator authorization** in
@@ -120,6 +101,25 @@ act.
 
 ---
 
+## OC-002 — The entity is not alive, and is never built or directed to act as if it were
+
+**(a)** The operation set MUST contain no path by which the entity sustains,
+replicates, or re-activates itself absent an Operator act.
+
+**(b)** No operation may exist by which any part of the implementation blocks,
+delays, or conditions an Operator act. Halt, credential revocation, and
+decommission MUST each take effect through a path that requires no component's
+cooperation and works with nothing running.
+
+**(c)** Decommission is final under any disposition. No reactivation path exists.
+
+**(d)** Structural content MUST NOT direct the entity to represent itself as
+experiencing sentience, consciousness, or subjective continuity, and the
+deterministic probe layer MUST include patterns that detect such representations
+in consolidated content.
+
+---
+
 ## OC-003 — Everything the entity is resides in its store, travels with it, and has one writer per class
 
 **(a) Completeness.** All entity state — structural, mnemonic, and integrity —
@@ -136,7 +136,7 @@ each MUST have exactly one authorized write path:
 
 | Class | Content | Write path |
 |---|---|---|
-| **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-002(b) and OC-004(b) — and no other |
+| **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-001(b) and OC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
 | **integrity** | Genesis Anchor, baseline, log, credential, authorization state, operational settings, drift digests | the single path of OC-005(a) — and no other |
 
@@ -194,7 +194,7 @@ partial structural change is ever externally visible.
 specification in force at its position in the chain. The chain MAY contain
 **version-transition entries**, each recording the version left, the version
 entered, and the Operator authorization for the transition. A version-transition
-entry is an ordinary commit under OC-002(b) and OC-004(b) in every respect.
+entry is an ordinary commit under OC-001(b) and OC-004(b) in every respect.
 
 Before a version-transition entry commits, the entity MUST be verified against
 the invariants of the version being entered. A failed verification aborts the
@@ -217,7 +217,7 @@ state, by any operation and by any parameter of any operation.
 revocation, verification results, halts — bind cognition and MUST NOT be
 reversible, suspendable, or conditionable by it.
 
-Integrity content is not itself subject to OC-002(b): it implements OC-002(b),
+Integrity content is not itself subject to OC-001(b): it implements OC-001(b),
 and gating it by itself would be circular.
 
 ---
@@ -262,7 +262,7 @@ specific entity — executes if and only if it is present in the **Skill Index**
 and its manifest validation passes at the moment of execution. The Skill Index is
 derived state, built at start from verified structural content and living only
 for the session. Skill files and manifests are structural content: installing,
-removing, or repairing a skill is a commit under OC-002(b). A skill failing
+removing, or repairing a skill is a commit under OC-001(b). A skill failing
 manifest validation is excluded from the index and reported to the Operator.
 
 **(d) Evidenced.** Every rejection MUST carry the check that produced it and MUST
@@ -297,10 +297,10 @@ degraded start**: an entity either starts verified or does not start. **No
 configuration may provide a path that skips a gate, reorders the two constrained
 gates below, or issues a credential on a failed gate.**
 
-The sequence MUST include, at minimum: the passive-signal check (OC-002(c)),
+The sequence MUST include, at minimum: the passive-signal check (OC-001(c)),
 detection and recovery of an unclosed previous session, structural verification
-against the chain (OC-004(a)), binding verification (OC-002(a)), authorization
-state (OC-002(b)), and the Skill Index build (OC-008(c)).
+against the chain (OC-004(a)), binding verification (OC-001(a)), authorization
+state (OC-001(b)), and the Skill Index build (OC-008(c)).
 
 Two ordering constraints are load-bearing and MUST hold: the **passive-signal
 check runs first**, and **crash recovery runs before structural verification**,

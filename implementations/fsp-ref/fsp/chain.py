@@ -54,7 +54,7 @@ COMMIT_KINDS = ("commit", "version-transition", "decommission")
 
 def commit(*, n, predecessor, state_digest, authorization, at, version=None, kind=None):
     """A later chain entry. ``decommission`` closes the chain: nothing may
-    follow it, and no start passes it (OC-001(c))."""
+    follow it, and no start passes it (OC-002(c))."""
     if kind is None:
         kind = "commit" if version is None else "version-transition"
     assert kind in COMMIT_KINDS, kind
