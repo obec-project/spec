@@ -110,13 +110,13 @@ year of it. No implementation has yet passed the conformance suite, which is
 new; the [reference implementation](implementations/fsp-ref/) is partway
 through it.
 
-**0.10.0 — pre-release.** It is a first release rather than a first draft: the
+**0.11.0 — pre-release.** It is a first release rather than a first draft: the
 set is the product of a full restructure, and
 [ADR 0001](design/0001-obec-restructure.md) records how each invariant was
 derived and what was deliberately left out. 1.0 would follow a first
 implementation passing the ten tests, at which point rule identifiers freeze.
 
-Releases are tagged (`v0.10.0`). `main` may be ahead of the latest one, with
+Releases are tagged (`v0.11.0`). `main` may be ahead of the latest one, with
 the difference listed under *Unreleased* in the [CHANGELOG](CHANGELOG.md); a
 conformance claim cites a tagged version of the specification and the suite.
 

@@ -1,7 +1,7 @@
 # fsp-ref — changelog
 
 What changed in fsp-ref, by phase, and why. fsp-ref has no release of its own
-yet; it targets the latest OBEC release, now OBEC-Core 0.10.0. Changes to the specification and the suite
+yet; it targets the latest OBEC release, now OBEC-Core 0.11.0. Changes to the specification and the suite
 that fsp-ref prompted are recorded in the [root CHANGELOG](../../CHANGELOG.md).
 
 Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
@@ -46,6 +46,10 @@ The specification decisions the phase depends on come first.
   Operator primacy is OC-001 and bounded existence OC-002. The start gates,
   the refusals, the log records and the default probes name the new numbers.
   Earlier entries, and the log of any store made before, use the old ones.
+- **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
+  fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
+  in its code. The Genesis records the new version, and development stores
+  made under 0.10.0 are disposable, as every store is before 1.0.
 - **D16 revised, D51 added:** an allow entry for a skill pins its digest, so
   changed skill code returns to `hold`; a skill declares targets relative to the
   workspace, passes the gates on every execution, and its process group ends

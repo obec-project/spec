@@ -10,5 +10,5 @@ exception: step 4.7 corrupts bytes blindly, precisely so that one check
 depends on nothing the implementation says about itself.
 """
 
-SUITE_VERSION = "0.2.0"
-TARGETS = "OBEC-Core 0.10.0"
+SUITE_VERSION = "0.3.0"
+TARGETS = "OBEC-Core 0.11.0"

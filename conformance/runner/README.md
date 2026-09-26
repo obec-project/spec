@@ -34,7 +34,7 @@ speak only the adapter contract.
 | `4` | the adapter errored (crash, timeout, unparseable output); the run is incomplete |
 
 Only `0` is conformant. When more than one applies, `4` outranks `1`, which
-outranks `3`. At OBEC-Core 0.10.0 a correct implementation exits `3`: steps
+outranks `3`. At OBEC-Core 0.11.0 a correct implementation exits `3`: steps
 4.9 – 4.12 need a version to migrate to and are unestablished for everyone. A
 CI job that should pass on that can say so explicitly —
 `python3 run.py … || [ $? -eq 3 ]` — while the claim still records the run as

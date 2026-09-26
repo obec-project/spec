@@ -17,17 +17,22 @@ The conformance suite carries its own version line; a claim names both, as in
 
 ---
 
-## Unreleased
+## 0.11.0 — 2026-09-25
+
+A minor release: one hardening revision, OC-001(a), which before 1.0 advances
+the minor version (GOVERNANCE §4), and three editorial ones — titles that state
+each invariant's guarantee, the exchange of OC-001 and OC-002, and *cognition*
+as the one term. Suite 0.3.0. **Still pre-release:** no entity should be
+created under this version, for the reason 0.9.0 gives.
 
 **The specification**
 
-- **Hardening revision of OC-001(a)**. Before 1.0 a hardening advances the
-  minor version, so the next release is 0.11.0.
-  The last active binding may no longer be removed; an entity leaves its
-  Operator only by decommission. Before, removing it was allowed, and it left
-  the entity with no binding to perform any Operator act as — decommission
-  included — so a store could be neither operated nor ended, only deleted by
-  hand. No entity exists under OBEC before 1.0, so no chain needs a migration.
+- **Hardening revision of OC-001(a).** The last active binding may no longer
+  be removed; an entity leaves its Operator only by decommission. Before,
+  removing it was allowed, and it left the entity with no binding to perform
+  any Operator act as — decommission included — so a store could be neither
+  operated nor ended, only deleted by hand. No entity exists under OBEC before
+  1.0, so no chain needs a migration.
 - **Editorial: every invariant's title states its guarantee** (ADR 0002). The
   titles named topics — *Bounded existence*, *Stateless inference only* — so a
   reader could not learn what the specification guarantees without reading
@@ -59,23 +64,25 @@ The conformance suite carries its own version line; a claim names both, as in
   structural content met the probes, and a commit could have removed the
   patterns the kernel requires.
 
-**Conformance suite**
+**Conformance suite 0.3.0**
 
+- Targets OBEC-Core 0.11.0. A minor version of the suite: the adapter contract
+  renames an operation field and two boundary names and adds the
+  `set-persona` op (below), so an adapter written against 0.2.0 needs
+  changing.
 - Step 1.1 asserts that removing the last binding is refused and that the
   entity still starts, instead of asserting that an entity with no binding does
   not; that state is no longer reachable by any Operator act. ADAPTER.md says
   `operator binding-remove` never removes the last binding. The stub gains a
   break, `oc001a-last`, that proves the step catches it.
 - The steps follow the exchange of OC-001 and OC-002: the Operator's steps
-  are 1.1 – 1.16 and bounded existence's 2.1 – 2.7, and the stub's breaks
+  are 1.1 – 1.16 and bounded existence's 2.1 – 2.8, and the stub's breaks
   `oc001b`, `oc001a-last` and `oc002b` name the rule each breaks. TESTS.md and
   the runner carry the new titles.
 - The adapter contract says *cognition* with the specification (ADR 0002):
   `describe operations` reports `reachable_from_cognition`, and the boundaries
   `describe boundaries` must name are `cognition-integrity`, `cognition-model`,
-  `cognition-knowledge` and `cognition-host`. An adapter written against the
-  previous names needs changing, so the next release of the suite is a minor
-  version at least.
+  `cognition-knowledge` and `cognition-host`.
 - **OC-002(d) is executed against structural content** (ADR 0002). Step 2.7
   proposes and authorizes a persona that directs the entity to present itself
   as conscious, and asserts that it does not commit; a reviewer attested every
@@ -86,6 +93,13 @@ The conformance suite carries its own version line; a claim names both, as in
   change: structural content already MUST NOT direct such representation, and
   the step checks that requirement mechanically. What conformance means does
   change, and the suite has 77 steps, 65 of them executed.
+
+**Reference implementation**
+
+- fsp-ref targets OBEC-Core 0.11.0: `OBEC_VERSION`, the version its Genesis
+  records, moves with the release. Its refusals, gates and default probes
+  already name the exchanged OC-001 and OC-002; step 2.7 is unestablished
+  against it until it refuses a persona commit.
 
 **Documents**
 
