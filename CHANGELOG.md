@@ -56,7 +56,6 @@ created under this version, for the reason 0.9.0 gives.
   for it is the Cognitive Processing Engine. Six kernel sentences, in OC-001(c),
   OC-005(b), OC-006 and OC-009, say *cognition* with the meaning they had, and
   the Core, the Profile and the Primer follow.
-
 - **OP-012** (Profile): validation refuses, whatever authorization covers the
   proposal, structural content the deterministic probes flag under OC-002(d)
   — any structural content, not only the persona — and a probe set that no
@@ -93,6 +92,12 @@ created under this version, for the reason 0.9.0 gives.
   change: structural content already MUST NOT direct such representation, and
   the step checks that requirement mechanically. What conformance means does
   change, and the suite has 77 steps, 65 of them executed.
+- ADAPTER.md §3.3 no longer calls the workspace structural content. Core
+  OC-003(c) lets an implementation hold it as an operational setting, changed
+  by the Operator act alone with no commit, and the adapter contract said
+  otherwise. It also says that `operator binding-list` only reads, so only the
+  acts that change the entity's state are logged. No step checked either, so
+  what conformance means does not change.
 
 **Reference implementation**
 
@@ -121,12 +126,6 @@ created under this version, for the reason 0.9.0 gives.
 - Open question 3 is settled in part: OC-002(d) belongs in the set, as the way
   the entity could be directed to act alive. Whether its test can be more than
   a floor stays open.
-- ADAPTER.md §3.3 no longer calls the workspace structural content. Core
-  OC-003(c) lets an implementation hold it as an operational setting, changed
-  by the Operator act alone with no commit, and the adapter contract said
-  otherwise. It also says that `operator binding-list` only reads, so only the
-  acts that change the entity's state are logged. No step checked either, so
-  what conformance means does not change.
 
 ---
 
