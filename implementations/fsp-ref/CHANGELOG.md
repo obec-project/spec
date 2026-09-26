@@ -72,6 +72,13 @@ The specification decisions the phase depends on come first.
   proposal carries the complete new content and the exact target of every
   change, and the commit never reads the stage, so what the Operator read is
   what commits.
+- **The probabilistic layer joins v0, in Phase 7** (2026-09-25). It was
+  outside v0 because the obvious realization, embeddings, needs a dependency.
+  NCD needs only the standard library, and a judge through the worker
+  mechanism reuses the model endpoint fsp already has. The judge is called
+  by the integrity path, can only add a flag, fails closed, and keeps its
+  instructions in `probes.json`, outside every window. Embeddings leave the
+  plan.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores
