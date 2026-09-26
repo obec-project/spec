@@ -85,6 +85,14 @@ steps go with evidence and review; step 3.2 requires a real second host;
   realization", in `implementations/`, not in `spec/`.
 - **Run step 1.16 partially:** stop cognition, cause an escalation,
   observe the passive signal.
+- **An OBEC-Attest adapter for an existing runtime** — a LangGraph
+  checkpointer, for example — after the reference implementation. Nobody has
+  tried to adopt OBEC-Attest, and a runtime reporting whether the line fell in
+  a useful place is what [open question 7](design/OPEN-QUESTIONS.md) asks for.
+- **A non-normative mapping to regulation** — the EU AI Act's human oversight
+  (Art. 14) and record-keeping (Art. 12) against the invariants that carry
+  them — for readers who must demonstrate oversight to a regulator. It claims
+  no compliance, and it needs legal review before it is published.
 - **A step for the probe set of OC-002(d):** propose and authorize a probe set
   without the patterns OC-002(d) requires, and assert that it does not commit.
   OP-012 describes the check; no step executes it yet, and the adapter
