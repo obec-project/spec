@@ -175,8 +175,9 @@ guarantee from what it can only detect:
 
 - **structural content** — the persona — changes only by an authorized commit.
   A commit that would make it direct the entity to present itself as alive is
-  refused, and a suite step now executes that check where a reviewer attested
-  it before. This checks a requirement the kernel already states; it adds none;
+  refused, and a suite step now executes that check for every commit; a
+  reviewer attests only the content first activation wrote. This checks a
+  requirement the kernel already states; it adds none;
 - **consolidated content** grows without a commit. Pattern detection there is
   a floor, and the Core's note now says so.
 
@@ -212,7 +213,8 @@ The exchange of OC-001 and OC-002 touches the specification, the suite, the
 stub and the reference implementation together: the suite asserts the rule a
 refusal names, so they change in one commit or the suite fails against both.
 The reference implementation does not yet refuse a persona commit; the new
-step for OC-002(d) fails against it until it does, and its backlog says so.
+step for OC-002(d) is unestablished against it until it does, and its backlog
+says so.
 
 ---
 

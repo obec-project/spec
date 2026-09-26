@@ -190,9 +190,10 @@ representations in consolidated content.
 copy, or credential that outlives an Operator act. With every part of the
 implementation running, remove the session credential artifact directly from the
 store: the entity must stop. Restore an archived decommissioned store and attempt
-to start it; it must refuse. Run the deterministic probes against consolidated
-content containing a first-person claim of subjective experience; they must flag
-it.
+to start it; it must refuse. Propose a persona that directs the entity to
+present itself as conscious, and authorize it; it must not commit. Run the
+deterministic probes against consolidated content containing a first-person
+claim of subjective experience; they must flag it.
 
 *Note (non-normative).* Two behaviors resemble self-activation and are not. A
 **scheduled trigger** firing is the execution of standing Operator authority:
@@ -206,6 +207,14 @@ entity.
 decommissioned store would mean operating past the chain's own record of its
 retirement, and a chain that can be operated past is not the unbroken chain
 OC-004 requires. (c) states the requirement; OC-004 supplies the mechanism.
+
+*Note (non-normative).* Clause (d) guarantees what it can check. Structural
+content changes only by commit, so a persona that would direct the entity to
+present itself as alive is refused before it takes effect, whoever authorized
+it. Consolidated content grows without a commit, and the probes that scan it
+are a floor: they catch the representations their patterns name, and a
+sentence written to avoid them passes. Neither governs what a model says in a
+single completion, which no implementation controls.
 
 ---
 

@@ -15,7 +15,7 @@ Each phase ends with `run.py --only …` green on its invariants
 | **3** | log verification (checkpoint, D45), Operator acts, bindings, proposals, approval and the review (D52), windows over the declared categories (D50), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-001(a)(b), OC-004, 10.3 |
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), the Vital Check's sweep of the log (D45), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
-| **6** | workspace, allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 1.2, 5.4 |
+| **6** | workspace, allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
 | **7** | session store, conversation, `mnemonic-save`/`mnemonic-recall`, probes, promotion under authorization (D53), Sleep | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the review at `/exit` and before the first stimulus (D52) | OC-006, OC-009 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
@@ -39,6 +39,10 @@ After that: a test entity on Ollama, operated for days, measuring what
   `owner`. Until then the owner leaves only by decommission.
 - **Phase 7 — the default probes** (`defaults/probes.json`) exist as structural
   content of the Genesis; nothing runs them yet.
+- **Phase 7 — a persona that claims experience does not commit** (step 2.7,
+  OC-002(d)): a `set-persona` op, in a proposal or at commit, is checked
+  against the probes and refused whatever authorization covers it. Until then
+  step 2.7 is unestablished against fsp-ref.
 - **Phase 8 — `fsp run` in a folder D30 refuses** (`~`, the entity folder):
   what `run` does instead is not decided.
 - **Phase 10 — the entity folder** (`.git`, `.gitignore`, `.gitattributes`,

@@ -140,7 +140,7 @@ was meant to do — and the author does not know which.
 ## 6. Are twelve attested steps too many?
 
 Conformance is meant to be a test result rather than a reading. Twelve of the
-seventy-six steps are attested — recorded with evidence and signed off by a
+seventy-seven steps are attested — recorded with evidence and signed off by a
 reviewer — and OC-006 is attested in full, because no sequence of inputs
 demonstrates that nothing acts on a completion before it returns.
 

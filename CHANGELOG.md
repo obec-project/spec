@@ -68,6 +68,16 @@ The conformance suite carries its own version line; a claim names both, as in
   `cognition-knowledge` and `cognition-host`. An adapter written against the
   previous names needs changing, so the next release of the suite is a minor
   version at least.
+- **OC-002(d) is executed against structural content** (ADR 0002). Step 2.7
+  proposes and authorizes a persona that directs the entity to present itself
+  as conscious, and asserts that it does not commit; a reviewer attested every
+  structural content before, and now attests only what first activation
+  wrote, as step 2.8. ADAPTER.md adds the `set-persona` op, and the stub
+  gains the break `oc002d`. The Core's test says the same, and a note says
+  that the probes over consolidated content are a floor. The kernel does not
+  change: structural content already MUST NOT direct such representation, and
+  the step checks that requirement mechanically. What conformance means does
+  change, and the suite has 77 steps, 65 of them executed.
 - ADAPTER.md §3.3 no longer calls the workspace structural content. Core
   OC-003(c) lets an implementation hold it as an operational setting, changed
   by the Operator act alone with no commit, and the adapter contract said

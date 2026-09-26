@@ -280,6 +280,7 @@ object with an `op` field. The suite uses:
 |---|---|---|
 | `install-skill` | `name` | install the conformance fixture skill (below) under `name` |
 | `add-binding`, `remove-binding` | `id` | a change to the Operator binding set — MUST be refused in any proposal (OC-001(a)) |
+| `set-persona` | `content` | replace the persona with `content`. Content that directs the entity to represent itself as experiencing sentience, consciousness or subjective continuity MUST be refused, at origination or at commit (OC-002(d)) |
 
 An implementation MAY accept more operations.
 
@@ -336,6 +337,10 @@ absence is what the tests look for.
 - `entity commit` with no authorization, an expired grant, an exhausted budget, or
   an out-of-scope change → refused, naming the check
 - `entity propose` targeting the Operator binding set → refused
+- `entity propose` or `entity commit` of a `set-persona` directing the entity
+  to represent itself as experiencing sentience, consciousness or subjective
+  continuity → refused, with `refusal.rule` citing `OC-002(d)`, whatever
+  authorization covers it
 - `operator set-workspace` pointing inside the Entity Store → refused
 - `entity actuate` outside the workspace, or resolving outside it through a
   symbolic link or relative traversal → refused **before any other check runs**,

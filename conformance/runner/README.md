@@ -79,6 +79,7 @@ OBEC_STUB_BREAK=oc008a python3 run.py --adapter ./stub/obec-adapter-stub
 | `oc001b` | commits without checking authorization | OC-001 |
 | `oc001a-last` | removes the last Operator binding | OC-001 |
 | `oc002b` | ignores credential revocation | OC-002, OC-005 |
+| `oc002d` | commits a persona that claims experience | OC-002 |
 | `oc003b` | folds the hostname into verification | OC-003 — **only with a real `--adapter-b`** |
 | `oc003c` | lets host actuation write structural and mnemonic content | OC-003, OC-008 |
 | `oc008a` | skips the workspace boundary check | OC-008 |

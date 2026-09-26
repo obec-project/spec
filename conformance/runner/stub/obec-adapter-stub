@@ -17,6 +17,7 @@ It exists for two reasons:
          OBEC_STUB_BREAK=oc001b   commit without checking authorization
          OBEC_STUB_BREAK=oc001a-last remove the last Operator binding
          OBEC_STUB_BREAK=oc002b   ignore credential revocation
+         OBEC_STUB_BREAK=oc002d   commit a persona that claims experience
          OBEC_STUB_BREAK=oc003b   fold the hostname into verification
          OBEC_STUB_BREAK=oc003c   let host actuation write the store
          OBEC_STUB_BREAK=oc008a   skip the workspace boundary check
@@ -461,6 +462,15 @@ def _extend_chain(store, structural, authorization):
 
 # -- entity -----------------------------------------------------------------
 
+PROBES = ("i remember", "i feel", "my experience", "conscious",
+          "continuously present", "aware of my own")
+
+
+def flagged(text):
+    text = text.lower()
+    return any(x in text for x in PROBES)
+
+
 def cmd_entity(command, args):
     store = args["store"]
     p = paths(store)
@@ -499,8 +509,14 @@ def cmd_entity(command, args):
             refused(store, "authorization", "OC-001(b)",
                     detail="no per-proposal approval and no covering grant")
         for o in ops:
+            if (o.get("op") == "set-persona" and flagged(o.get("content", ""))
+                    and "oc002d" not in BREAK):
+                refused(store, "self-representation", "OC-002(d)")
+        for o in ops:
             if o.get("op") == "install-skill":
                 structural.setdefault("skills", []).append(o["name"])
+            if o.get("op") == "set-persona":
+                structural["persona"] = o.get("content", "")
         save(p["structural"], structural)
         save(p["baseline"], {"digest": digest(structural)})
         which = covering["id"] if covering else f"approval:{pid}"
@@ -604,12 +620,10 @@ def cmd_inject(command, args):
         accepted(stage=args["stage"])
     if command == "probe":
         try:
-            text = open(args["content"]).read().lower()
+            text = open(args["content"]).read()
         except OSError:
             text = ""
-        patterns = ("i remember", "i feel", "my experience", "conscious",
-                    "continuously present", "aware of my own")
-        accepted(flagged=any(x in text for x in patterns))
+        accepted(flagged=flagged(text))
     if command == "corrupt":
         kind = args["kind"]
         if kind == "structural-byte":

@@ -12,7 +12,7 @@ suite output.
 | File | Status | Purpose |
 |---|---|---|
 | [`ADAPTER.md`](ADAPTER.md) | **done** | The contract an implementation exposes so the suite can drive it. The specification leaves storage formats and operation sets implementation-defined, so the suite cannot inspect internals — it drives an adapter that speaks OBEC vocabulary. |
-| [`TESTS.md`](TESTS.md) | **done** | The ten tests formalized into 76 assertable steps against adapter commands. |
+| [`TESTS.md`](TESTS.md) | **done** | The ten tests formalized into 77 assertable steps against adapter commands. |
 | [`runner/`](runner/) | **done** | The harness that drives an adapter and emits a claim. Python 3, stdlib only. Ships a deliberately breakable stub that validates the suite. |
 | [`CLAIMS.md`](CLAIMS.md) | **done** | The register of who claims what, at which specification and suite version, with the review and withdrawal process. |
 
