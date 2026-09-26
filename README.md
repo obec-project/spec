@@ -37,6 +37,20 @@ Conformance is a test result, not a reading of the document.
 | **OC-009** | The entity is auditable by design: every boundary crossing leaves a record | audit |
 | **OC-010** | The entity starts verified, or does not start | start |
 
+Read in sequence, the ten titles are OBEC in one paragraph:
+
+> An entity exists only bound to an Operator, who holds final authority over
+> everything it is and does. The entity is not alive, and is never built or
+> directed to act as if it were. Everything the entity is resides in its store,
+> travels with it, and has one writer per class. The entity's identity is proven
+> by an unbroken chain back to its Genesis Anchor. Integrity guards the entity,
+> and nothing in the entity can disarm it. The model is cognition's stateless
+> engine, and it only answers. What the entity has learned comes only from its
+> memory. The entity acts only inside an isolated workspace its Operator
+> declares, through skills its Operator admits. The entity is auditable by
+> design: every boundary crossing leaves a record. The entity starts verified,
+> or does not start.
+
 No extension, configuration, or operational condition may weaken any of them.
 
 **[Read the ten in full →](spec/obec-kernel.md)** (15 KB, the whole normative
