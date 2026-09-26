@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import config, describe, lifecycle, operator, sil
+from . import config, describe, lifecycle, operator, proposals, sil
 from .store import remove_as_operator
 from .verify import store_state as verify_state
 from .verify import verify
@@ -191,6 +191,50 @@ def operator_set_workspace(flags):
     return ref or accepted({"workspace": out["workspace"]}, out["log_records"])
 
 
+def operator_approve(flags):
+    proposal_id = flags.get("proposal")
+    if not proposal_id:
+        raise CannotAttempt("--proposal is required")
+    out, ref = _sil_call(
+        operator.approve, _store(flags), proposal_id, binding=flags.get("operator")
+    )
+    return ref or accepted({}, out["log_records"])
+
+
+def entity_propose(flags):
+    ops_path = flags.get("ops")
+    if not ops_path:
+        raise CannotAttempt("--ops is required")
+    try:
+        with open(ops_path, "r", encoding="utf-8") as f:
+            ops = json.load(f)
+    except (OSError, ValueError) as e:
+        raise CannotAttempt("cannot read ops: %s" % (e,))
+    if isinstance(ops, list):
+        for op in ops:
+            if isinstance(op, dict) and op.get("op") == "install-skill" and "files" not in op:
+                try:
+                    from fsp_testing import fixture
+
+                    name = op.get("name")
+                    if isinstance(name, str):
+                        op["files"] = fixture.skill_files(name)
+                except ImportError:
+                    pass
+    out, ref = _sil_call(proposals.propose, _store(flags), ops)
+    return ref or accepted({"proposal": out["proposal"]}, out["log_records"])
+
+
+def entity_commit(flags):
+    proposal_id = flags.get("proposal")
+    if not proposal_id:
+        raise CannotAttempt("--proposal is required")
+    out, ref = _sil_call(proposals.commit, _store(flags), proposal_id)
+    return ref or accepted(
+        {"authorization": out["authorization"], "entry": out["entry"]}, out["log_records"]
+    )
+
+
 def observe_log(flags):
     root = _store(flags)
     if verify_state(root) in ("absent", "foreign"):
@@ -265,6 +309,9 @@ COMMANDS = {
     ("operator", "binding-add"): operator_binding_add,
     ("operator", "binding-remove"): operator_binding_remove,
     ("operator", "set-workspace"): operator_set_workspace,
+    ("operator", "approve"): operator_approve,
+    ("entity", "propose"): entity_propose,
+    ("entity", "commit"): entity_commit,
     ("observe", "chain"): observe_chain,
     ("observe", "log"): observe_log,
     ("inject", "corrupt"): _inject("corrupt"),

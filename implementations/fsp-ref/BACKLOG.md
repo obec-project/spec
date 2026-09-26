@@ -12,7 +12,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **3** | log verification (checkpoint, D45), proposals, approval and the review (D52), windows over the declared categories (D50), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized`, the `set-persona` op | OC-001(a)(b), OC-002(d) 2.7, OC-004, 10.3 |
+| **3** | log verification (checkpoint, D45), the review (D52), windows over the declared categories (D50), atomic commit + recovery, `inject interrupt`, `inject corrupt --kind commit-unauthorized` | OC-001(b), OC-004, 10.3 |
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), the Vital Check's sweep of the log (D45), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
 | **6** | actuation inside the workspace (declared since Phase 3), allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
@@ -37,11 +37,6 @@ After that: a test entity on Ollama, operated for days, measuring what
 - **Phase 3 — handing ownership over** (D55): the owner offers it to another
   active binding, which accepts by an act of its own, and the commit changes
   `owner`. Until then the owner leaves only by decommission.
-- **Phase 3 — step 2.7** passes once proposals commit a `set-persona`: the
-  commit's validation (D56) already refuses the persona the step proposes.
-- **Phase 3 — a proposal carries what it changes** (D57): the complete new
-  content and the exact structural target of every op. The commit writes that
-  and never reads the stage or the workspace.
 - **Phase 7 — the probes over memory tell the entity's words from others'.**
   Episodic memory records the conversation, and a first-person pattern flags
   an Operator's *I feel* as readily as the entity's. The probes of D12 must

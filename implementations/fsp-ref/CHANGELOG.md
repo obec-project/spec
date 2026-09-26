@@ -96,6 +96,16 @@ The specification decisions the phase depends on come first.
   Portuguese, clear of the default persona and of *conscious of* and
   *consciente de*. `inject probe` exposes the layer, and step 2.6 passes.
   Stores made before keep their six old patterns; they are disposable.
+- **Proposals, approval and the commit of a proposal** (2026-09-26, D58).
+  `fsp/proposals.py` originates a proposal — its ops validated before the
+  session is asked for, any op on the binding set refused, the complete ops
+  and their digest recorded in the log and in `auth.json` — and commits it:
+  the authorization first, an approval naming the proposal's digest, then
+  the changes built from the stored ops, through `commit_generation` and its
+  validation against the probes. `operator approve` records the approval.
+  The ops are `set-persona` and `install-skill`; the test build fills an
+  `install-skill` without files with the conformance fixture skill. Steps
+  1.3, 1.5, 1.12 and 2.7 pass.
 - **The probabilistic layer joins v0, in Phase 7** (2026-09-25). It was
   outside v0 because the obvious realization, embeddings, needs a dependency.
   NCD needs only the standard library, and a judge through the worker

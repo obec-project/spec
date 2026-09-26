@@ -7,7 +7,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from . import lifecycle, sil
+from . import lifecycle, proposals, sil
 from .sil import Refused, log_append
 from .store import Store, canonical
 from .verify import verify
@@ -286,3 +286,49 @@ def set_workspace(root: str, path: str, *, binding=None):
         )
         sil.set_operational(store, "workspace", ws)
         return {"workspace": ws, "log_records": [act]}
+
+
+def approve(root: str, proposal_id: str, *, binding=None):
+    """Record an Operator approval for an evolution proposal (OC-001(b), D58)."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        try:
+            auth = proposals.read_auth(store)
+        except (OSError, ValueError) as e:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="authorization-state",
+                detail="authorization state unreadable: %s" % (e,),
+            )
+            raise Refused(
+                "authorization-state",
+                "OC-001(b)",
+                "authorization state unreadable: %s" % (e,),
+                [rec],
+            )
+        prop = auth.get("proposals", {}).get(proposal_id)
+        if prop is None:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="proposal-unknown",
+                detail="proposal %r is not known" % (proposal_id,),
+            )
+            raise Refused(
+                "proposal-unknown",
+                "OC-001(b)",
+                "proposal %r is not known" % (proposal_id,),
+                [rec],
+            )
+        digest = prop["digest"]
+        act = sil.operator_act(
+            store, "approve", binding=acting, rule="OC-001(b)", proposal=proposal_id, digest=digest
+        )
+        proposals.record_approval(store, proposal_id, digest, act, acting)
+        return {"log_records": [act]}
