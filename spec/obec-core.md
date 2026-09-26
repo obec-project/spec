@@ -628,6 +628,9 @@ last breaks an entity's continuity:
 | **Hardening or addition** | a permission narrows, a requirement is added, an invariant joins the set | **major** | **preserved by migration** (OC-004(c)) |
 | **Weakening or removal** | a guarantee no longer holds | **major** | **broken** |
 
+Before 1.0 the major version stays 0: a revision that would advance it advances
+the minor version instead ([GOVERNANCE §4](../GOVERNANCE.md#4-versioning)).
+
 **Why hardening does not break continuity.** The chain asserts that every
 structural change was authorized under the rules in force when it was made.
 Stricter rules do not falsify that assertion: past entries were authorized within

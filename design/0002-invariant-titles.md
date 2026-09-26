@@ -207,7 +207,8 @@ Titles, normative sentences, and notes state what they mean literally.
 
 No version field changes outside a release commit. The CHANGELOG's
 *Unreleased* already carries a hardening of OC-002(a), now OC-001(a), so the
-next release is a major version whatever these changes are.
+version the next release takes is decided by it, not by these changes; before
+1.0 a hardening advances the minor version (GOVERNANCE §4).
 
 The exchange of OC-001 and OC-002 touches the specification, the suite, the
 stub and the reference implementation together: the suite asserts the rule a

@@ -21,7 +21,8 @@ The conformance suite carries its own version line; a claim names both, as in
 
 **The specification**
 
-- **Hardening revision of OC-001(a)**, so the next release is a major version.
+- **Hardening revision of OC-001(a)**. Before 1.0 a hardening advances the
+  minor version, so the next release is 0.11.0.
   The last active binding may no longer be removed; an entity leaves its
   Operator only by decommission. Before, removing it was allowed, and it left
   the entity with no binding to perform any Operator act as — decommission
@@ -88,6 +89,11 @@ The conformance suite carries its own version line; a claim names both, as in
 
 **Documents**
 
+- GOVERNANCE §4 and Core §4.2 say that the major version stays 0 before 1.0:
+  a hardening or weakening advances the minor version. The taxonomy mapped a
+  hardening to a major version, and before 1.0 that could only be 1.0, which
+  is reserved for the first implementation passing the ten tests. No entity
+  exists under a pre-release version, so nothing the taxonomy protects is lost.
 - ADR 0002 records the titles, the exchange of OC-001 and OC-002, the domain
   column and the one term, and the README lists it.
 - Open question 3 is settled in part: OC-002(d) belongs in the set, as the way

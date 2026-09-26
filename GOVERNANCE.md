@@ -96,6 +96,14 @@ condition may weaken this" would have an obvious hole. A weakening release is
 therefore not migratable, and every entity under the prior version ends its line
 there.
 
+**Before 1.0, the major version stays 0.** 1.0 is reserved for the first
+implementation passing the ten tests, so a hardening or weakening revision made
+before it advances the MINOR version, as a clarifying one does, and an editorial
+revision still advances the PATCH. No entity should exist under a pre-release
+version (§5.2), so there is no chain for a hardening to migrate or a weakening
+to sever, and the numbering loses nothing the taxonomy protects. From 1.0 the
+table applies as written.
+
 ### 4.1 What is version-bound
 
 Only the **normative kernel** — the MUST and MUST NOT sentences of Core §2, and
