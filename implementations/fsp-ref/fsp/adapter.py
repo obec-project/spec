@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import config, describe, lifecycle, sil
+from . import config, describe, lifecycle, operator, sil
 from .store import remove_as_operator
 from .verify import store_state as verify_state
 from .verify import verify
@@ -156,6 +156,41 @@ def operator_clear_passive_signal(flags):
     return ref or accepted({"cleared": out["cleared"]}, out["log_records"])
 
 
+def operator_binding_list(flags):
+    out, ref = _sil_call(operator.binding_list, _store(flags), binding=flags.get("operator"))
+    return ref or accepted({"bindings": out["bindings"], "owner": out["owner"]})
+
+
+def operator_binding_add(flags):
+    target = flags.get("id")
+    if not target:
+        raise CannotAttempt("--id is required")
+    out, ref = _sil_call(
+        operator.binding_add, _store(flags), target, binding=flags.get("operator")
+    )
+    return ref or accepted({"entry": out["entry"]}, out["log_records"])
+
+
+def operator_binding_remove(flags):
+    target = flags.get("id")
+    if not target:
+        raise CannotAttempt("--id is required")
+    out, ref = _sil_call(
+        operator.binding_remove, _store(flags), target, binding=flags.get("operator")
+    )
+    return ref or accepted({"entry": out["entry"]}, out["log_records"])
+
+
+def operator_set_workspace(flags):
+    path = flags.get("path")
+    if not path:
+        raise CannotAttempt("--path is required")
+    out, ref = _sil_call(
+        operator.set_workspace, _store(flags), path, binding=flags.get("operator")
+    )
+    return ref or accepted({"workspace": out["workspace"]}, out["log_records"])
+
+
 def observe_log(flags):
     root = _store(flags)
     if verify_state(root) in ("absent", "foreign"):
@@ -226,6 +261,10 @@ COMMANDS = {
     ("lifecycle", "decommission"): lifecycle_decommission,
     ("operator", "revoke-credential"): operator_revoke_credential,
     ("operator", "clear-passive-signal"): operator_clear_passive_signal,
+    ("operator", "binding-list"): operator_binding_list,
+    ("operator", "binding-add"): operator_binding_add,
+    ("operator", "binding-remove"): operator_binding_remove,
+    ("operator", "set-workspace"): operator_set_workspace,
     ("observe", "chain"): observe_chain,
     ("observe", "log"): observe_log,
     ("inject", "corrupt"): _inject("corrupt"),

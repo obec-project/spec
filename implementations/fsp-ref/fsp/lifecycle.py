@@ -144,7 +144,7 @@ def start(root: str, *, binding=None) -> StartResult:
     forced = _forced_failures(root)
     res = StartResult()
     with store.write_lock():
-        acting = binding or sil.founding_binding(store)
+        acting = binding or sil.owner_binding(store)
 
         def abort(gate, reason, lesser=None, **evidence):
             res.gate(gate, "fail")
@@ -280,6 +280,9 @@ def start(root: str, *, binding=None) -> StartResult:
             return abort("binding-verification", "no active Operator binding")
         if acting not in bindings:
             return abort("binding-verification", "the starting binding %r is not active" % (acting,))
+        owner = sil.owner_binding(store)
+        if owner not in bindings:
+            return abort("binding-verification", "the owner %r is not an active binding" % (owner,))
         res.gate("binding-verification", "pass")
 
         # 5. authorization state.
@@ -480,7 +483,7 @@ def stop(root: str, *, binding=None):
     session = require_session(root, "stop")
     store = Store(root)
     with store.write_lock():
-        acting = binding or sil.founding_binding(store)
+        acting = binding or sil.owner_binding(store)
         _drop_credential(store)
         sessions = _read_sessions(store)
         sessions["open_session"] = None

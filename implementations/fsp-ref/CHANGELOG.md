@@ -72,6 +72,17 @@ The specification decisions the phase depends on come first.
   proposal carries the complete new content and the exact target of every
   change, and the commit never reads the stage, so what the Operator read is
   what commits.
+- **Operator acts on bindings and the workspace** (2026-09-25):
+  `operator binding-list`, `binding-add`, `binding-remove` and
+  `set-workspace`, in `fsp/operator.py` and the adapter. The binding set
+  records its owner from the Genesis; the owner is the default binding of
+  every Operator act and of start and stop (D48, D55), and the binding gate
+  fails when the owner is not active. A binding changes by a commit that the
+  Operator act authorizes, only outside a session; the last binding and the
+  owner stay. The workspace is an operational setting (D28), refused when it
+  is, contains or lies inside the store or `~/.fsp` (D30). Steps 1.1, 1.2,
+  8.5 and 8.11 pass. Stores made before carry no owner and no longer start;
+  they are disposable.
 - **The probabilistic layer joins v0, in Phase 7** (2026-09-25). It was
   outside v0 because the obvious realization, embeddings, needs a dependency.
   NCD needs only the standard library, and a judge through the worker

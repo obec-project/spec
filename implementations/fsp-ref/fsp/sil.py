@@ -13,7 +13,7 @@ import os
 import re
 import secrets
 
-from . import OBEC_MAJOR, OBEC_VERSION, __version__, chain, clock
+from . import OBEC_MAJOR, OBEC_VERSION, __version__, chain, clock, config
 from .digest import canonical, document_digest, integrity_document, sha256
 from .store import (
     INTEGRITY,
@@ -142,7 +142,7 @@ def initial_structure(*, name: str, operator: str, persona: bytes = None):
     return {
         "persona.md": persona if persona is not None else _default("persona.md"),
         "config.json": canonical({"name": name}),
-        "bindings.json": canonical({"bindings": [{"id": operator}]}),
+        "bindings.json": canonical({"bindings": [{"id": operator}], "owner": operator}),
         "rules.json": canonical({"default": "hold", "domains": {}, "skills": {}}),
         "probes.json": _default("probes.json"),
     }
@@ -264,6 +264,19 @@ def active_bindings(store: Store):
     return ids
 
 
+def owner_binding(store: Store):
+    """The owner in the binding set of the committed generation, or None."""
+    try:
+        n = read_head(store)["entry"]
+        data = store.read_json(chain.gen_relpath(n) + "/bindings.json")
+        owner = data["owner"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    if not isinstance(owner, str) or not BINDING_ID.match(owner):
+        return None
+    return owner
+
+
 def founding_binding(store: Store):
     try:
         return store.read_json(chain.entry_relpath(0))["binding"]
@@ -273,8 +286,8 @@ def founding_binding(store: Store):
 
 def acting_binding(store: Store, requested=None):
     """The binding an Operator act is performed as (D48): the one asked
-    for, or the founding one. Refused when it is not in the active set."""
-    binding = requested or founding_binding(store)
+    for, or the owner (D55). Refused when it is not in the active set."""
+    binding = requested or owner_binding(store)
     active = active_bindings(store) or []
     if binding not in active:
         rec = log_append(
@@ -291,6 +304,21 @@ def acting_binding(store: Store, requested=None):
 def operator_act(store: Store, act, *, binding, rule="OC-001(a)", **payload):
     """Log an Operator act, attributed to its binding (OC-001(a))."""
     return log_append(store, "operator-act", rule=rule, binding=binding, act=act, **payload)
+
+
+def set_operational(store: Store, key, value):
+    """Set one operational setting (D28, D33), keeping the others. Integrity
+    content, written here and nowhere else."""
+    data = {}
+    if store.exists(config.OPERATIONAL):
+        try:
+            loaded = store.read_json(config.OPERATIONAL)
+        except (OSError, ValueError):
+            loaded = None
+        if isinstance(loaded, dict):
+            data = loaded
+    data[key] = value
+    store.replace_json(INTEGRITY, config.OPERATIONAL, data, writer=WRITER)
 
 
 # -- the passive signal (OC-001(c)) ------------------------------------------
