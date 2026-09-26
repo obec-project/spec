@@ -28,6 +28,23 @@ The conformance suite carries its own version line; a claim names both, as in
   integrity and the Operator's audit trail. The Profile now says so, and a
   note on OC-003 in the Core states the scope of (b).
 
+**Repository**
+
+- CONTRIBUTING §1 adds *terms before use*: a document introduces a term only
+  after what the reader needs to understand it, and orders its sections, rules
+  and clauses so. A reader does not leave an undefined term blank but fills
+  it with the broadest plausible meaning: the README's *structural state*,
+  used before anything defines it, reads as including memory. The README and
+  the Primer, read in sequence, take the rule without exception; the
+  specification documents, consulted by clause, satisfy it with a reference
+  that names where the term is defined, so their cross-references and the
+  Core's glossary stay where they are.
+- *Vendor neutrality* says what it means. CONTRIBUTING listed it with no
+  text, and GOVERNANCE defined it as no implementation defining the standard,
+  which *specification first* already says. Both now say that no requirement
+  names or presumes a model, provider, runtime or host platform, or can be met
+  by only one, and that products appear only as non-normative examples.
+
 ---
 
 ## 0.11.0 — 2026-09-25

@@ -14,7 +14,10 @@ conformance policy.
 
 ## 1. Principles
 
-- **Vendor neutrality.** No implementation defines the standard.
+- **Vendor neutrality.** No requirement names or presumes a particular model,
+  model provider, runtime or host platform, and none may be satisfiable by only
+  one of them. A product or technology appears only as an example, in
+  non-normative text.
 - **Specification first.** The normative text has authority over any
   implementation.
 - **Minimalism.** Ten invariants. Growth is resisted by default.

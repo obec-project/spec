@@ -23,7 +23,19 @@ Read [GOVERNANCE.md](GOVERNANCE.md) before proposing a normative change.
   it?* A proposed rule that fails either belongs in the Profile or nowhere.
 - **Self-containment.** A normative requirement is stated in the specification
   text, not imported from another document.
-- **Vendor neutrality.**
+- **Terms before use.** A document introduces a term or concept only once
+  what precedes it gives the reader enough to understand it. Sections, rules
+  and clauses are ordered so that each builds only on what came before. The
+  README and the Primer, which a newcomer reads in sequence, admit no
+  exception. The specification documents, consulted by clause, may use a term
+  ahead of its definition by naming where it is defined, as `OC-004(b)` or
+  `§7` does. A term used ahead of what explains it, with nothing pointing to
+  the explanation, is a defect in the text, whatever a careful reader could
+  reconstruct.
+- **Vendor neutrality.** No requirement names or presumes a particular model,
+  model provider, runtime or host platform, and none may be satisfiable by only
+  one of them. A product or technology appears only as an example, in
+  non-normative text.
 
 ---
 

@@ -43,6 +43,14 @@ steps go with evidence and review; step 3.2 requires a real second host;
 - **Open question 5** (portability vs. hardware-backed keys) says there may be
   no construction that satisfies both. If the author already knows there is,
   or is not, the text is weaker than it needs to be.
+- **Editorial revision of the prose** against *terms before use*
+  ([CONTRIBUTING §1](CONTRIBUTING.md#1-guiding-principles)), the README and
+  the Primer first. Known cases in the README: *structural state* in claim 1,
+  and *one writer per class* and *Genesis Anchor* in the invariant table. The
+  titles stay as ADR 0002 fixed them; the prose before the table introduces
+  what they use. The Kernel, the Core and the Profile follow in a second pass,
+  where a reference that names the definition satisfies the rule and a changed
+  Kernel sentence is an editorial revision.
 - **Not verifiable from inside the repository:** whether the repository
   description (153 characters) reads well; whether the "proposal" framing is
   calibrated — it may be too modest, since the architecture has run twice and
