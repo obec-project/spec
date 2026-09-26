@@ -329,27 +329,25 @@ to end; entries on each side must validate under their own version's frame.
 Attempt a transition on an entity that fails an invariant of the target version;
 it must abort with the entity unchanged.
 
-*Note (non-normative).* Identity here is computed from the chain, never inferred
-from behavior. An entity that has run for a year behaves differently from the
-one its Genesis Anchor describes, and that is accumulation, not a change of
-identity: what the chain establishes is that every structural change was
-authorized and that the sequence back to first activation is unbroken. The
-Profile's Identity Drift (OP-004(a)) is structural content diverging from the
-baseline, detected by hash comparison; it is never a change in how the entity
-behaves.
+*Note (non-normative).* Identity here is computed from the chain, never
+asserted, and never inferred from behavior. An entity that has run for a year
+behaves differently from the one its Genesis Anchor describes, and that is
+accumulation, not a change of identity: what the chain establishes is that every
+structural change was authorized and that the sequence back to first activation
+is unbroken. The Profile's Identity Drift (OP-004(a)) is structural content
+diverging from the baseline, detected by hash comparison; it is never a change
+in how the entity behaves.
 
 *Note (non-normative).* (b) is what makes (a) survive a crash: without atomicity
 a crash leaves a chain entry with no matching content, or content with no entry —
-which is precisely the discontinuity (a) forbids. Identity is computed, never
-asserted, and never inferred from behavior.
+which is precisely the discontinuity (a) forbids.
 
 *Note (non-normative).* (c) applies this document's own logic to its own
 revision. Everywhere else, change is handled by making it authorized, recorded
-and traceable; at the version boundary, 0.3.0 K2 instead declared that continuity
-simply breaks. It does not have to: a migration an Operator authorized, recorded
-in the chain, and verified before it commits is a structural change like any
-other. What does not survive is a weakening — see §4, which is where the
-distinction is drawn.
+and traceable, and the version boundary is no exception: continuity need not
+simply break there. A migration an Operator authorized, recorded in the chain,
+and verified before it commits is a structural change like any other. What does
+not survive is a weakening — see §4, which is where the distinction is drawn.
 
 ---
 
@@ -468,8 +466,8 @@ command, it is a skill, with the command fixed in its admitted manifest and only
 typed arguments left to the entity.
 
 *Note (non-normative).* (a) bounds *where* the entity acts; (c) bounds *what* may
-run there. They are one rule because both are checks on a single execution path,
-and separating them in 0.3.0 placed a per-operation check at the same altitude as
+run there. They are one rule because both are checks on a single execution path;
+as separate invariants, a per-operation check would sit at the same altitude as
 a domain boundary.
 
 ---

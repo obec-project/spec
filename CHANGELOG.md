@@ -98,6 +98,10 @@ The conformance suite carries its own version line; a claim names both, as in
   inferred from behavior, and that the Profile's Identity Drift is divergence
   from the baseline, not a change in how the entity behaves. The sentence was
   in open question 1; as a note it explains without adding a requirement.
+- Two notes in the Core, on OC-004(c) and OC-008, no longer cite HACA-Core
+  0.3.0: the specification does not mention its predecessor, and ADR 0001 §2
+  already records both decisions. The note on OC-004(b) no longer repeats
+  that identity is computed, which the new note on identity now says.
 - ADR 0002 records the titles, the exchange of OC-001 and OC-002, the domain
   column and the one term, and the README lists it.
 - Open question 3 is settled in part: OC-002(d) belongs in the set, as the way
