@@ -78,6 +78,14 @@ The conformance suite carries its own version line; a claim names both, as in
   change: structural content already MUST NOT direct such representation, and
   the step checks that requirement mechanically. What conformance means does
   change, and the suite has 77 steps, 65 of them executed.
+
+**Documents**
+
+- ADR 0002 records the titles, the exchange of OC-001 and OC-002, the domain
+  column and the one term, and the README lists it.
+- Open question 3 is settled in part: OC-002(d) belongs in the set, as the way
+  the entity could be directed to act alive. Whether its test can be more than
+  a floor stays open.
 - ADAPTER.md §3.3 no longer calls the workspace structural content. Core
   OC-003(c) lets an implementation hold it as an operational setting, changed
   by the Operator act alone with no commit, and the adapter contract said

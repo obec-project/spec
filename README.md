@@ -53,10 +53,11 @@ requirement)
 | [**obec-core.md**](spec/obec-core.md) | The same ten with their conformance tests, the reference architecture, the extension and revision rules, security considerations, and the glossary. | no |
 | [**obec-profile.md**](spec/obec-profile.md) | The Implementation Profile: 24 rules of operational machinery, stated as SHOULD. Not required for conformance. | no |
 | [design/0001](design/0001-obec-restructure.md) | Why the set is shaped this way. Not needed to implement. | no |
+| [design/0002](design/0002-invariant-titles.md) | Why each invariant's title states its guarantee, and why OC-001 and OC-002 exchanged places. Not needed to implement. | no |
 | [design/OPEN-QUESTIONS](design/OPEN-QUESTIONS.md) | What the author is least sure about, and what would settle each. | no |
 
 Four audiences. Someone new reads the Primer. An implementer reads the Core. A
-reviewer reads the Kernel. Someone asking *why* reads the ADR.
+reviewer reads the Kernel. Someone asking *why* reads the ADRs.
 
 ---
 
@@ -113,9 +114,9 @@ stores until then.
 ### What would help most
 
 [**design/OPEN-QUESTIONS.md**](design/OPEN-QUESTIONS.md) is the list of what
-the author is least sure about — whether ten is the right number, whether
-OC-002(d) is an invariant or a policy, whether portability and hardware-backed
-keys can coexist, and seven more. Each entry says what would settle it.
+the author is least sure about — whether ten is the right number, whether the
+test of OC-002(d) can be more than a floor, whether portability and
+hardware-backed keys can coexist, and seven more. Each entry says what would settle it.
 
 **Arguing that one of the ten is wrong is the most useful thing anyone can do
 with this repository right now.** It does not need a replacement, a migration

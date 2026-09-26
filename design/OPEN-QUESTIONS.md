@@ -100,11 +100,21 @@ Two positions, and the author holds the first only weakly:
 **What would settle it:** a deployment where the clause did real work, or an
 argument that its test can never be more than theater.
 
+**Settled in part: it belongs** ([ADR 0002](0002-invariant-titles.md)). OC-002
+now states that the entity is not alive and is never built or directed to act
+as if it were. Clauses (a) to (c) are how it could be built to act alive, and
+(d) is how it could be directed to; the first position holds. The test half is
+open. Step 2.7 now executes the clause where it can be mechanical, refusing a
+persona commit that directs the entity to present itself as conscious, and the
+Core names the probes over consolidated content a floor. Whether that floor is
+worth more than theater is what still needs settling.
+
 ---
 
 ## 4. Is OC-009 an invariant or an observation?
 
-"Boundaries are crossed only by signal" was promoted to the set late, and it
+OC-009, then titled "Boundaries are crossed only by signal", was promoted to
+the set late, and it
 was immediately necessary to reformulate it so that it binds a monolithic
 implementation — otherwise "there are no parts to isolate" would satisfy it
 vacuously. The current form binds the four boundaries the specification

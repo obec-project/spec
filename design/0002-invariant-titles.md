@@ -1,12 +1,12 @@
 ---
 title: "ADR 0002 — Invariant titles as statements"
-status: "Proposed"
+status: "Accepted"
 date: 2026-09-25
 ---
 
 # ADR 0002 — Invariant titles as statements
 
-**Status:** Proposed · **Date:** 2026-09-25 · **Author:** Jonas Orrico
+**Status:** Accepted · **Date:** 2026-09-25 · **Author:** Jonas Orrico
 
 This record gives the ten invariants titles that state their guarantees, a new
 order for the first two, and three consistency changes that the titles made
