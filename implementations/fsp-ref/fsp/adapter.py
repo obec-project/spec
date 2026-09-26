@@ -270,6 +270,7 @@ COMMANDS = {
     ("inject", "corrupt"): _inject("corrupt"),
     ("inject", "gate-failure"): _inject("gate-failure"),
     ("inject", "passive-signal"): _inject("passive-signal"),
+    ("inject", "probe"): _inject("probe"),
 }
 
 

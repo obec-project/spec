@@ -83,6 +83,19 @@ The specification decisions the phase depends on come first.
   is, contains or lies inside the store or `~/.fsp` (D30). Steps 1.1, 1.2,
   8.5 and 8.11 pass. Stores made before carry no owner and no longer start;
   they are disposable.
+- **The probes run, and the commit validates against them** (2026-09-25,
+  D56). `fsp/probes.py` loads and runs the deterministic layer. The
+  validation stage of every commit scans the structural content it writes,
+  but the bindings and the probes, with the committed probe set, and refuses
+  a match (`self-representation`); a proposed `probes.json` that is
+  malformed or does not flag the three reference texts is refused
+  (`probe-set`). Both cite OC-002(d), are logged, and leave the staged
+  generation removed. The default set has 24 patterns: the claim of
+  consciousness, feeling, an inner life or subjective continuity about the
+  entity itself, in the first, second and third person, in English and
+  Portuguese, clear of the default persona and of *conscious of* and
+  *consciente de*. `inject probe` exposes the layer, and step 2.6 passes.
+  Stores made before keep their six old patterns; they are disposable.
 - **The probabilistic layer joins v0, in Phase 7** (2026-09-25). It was
   outside v0 because the obvious realization, embeddings, needs a dependency.
   NCD needs only the standard library, and a judge through the worker

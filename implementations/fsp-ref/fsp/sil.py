@@ -13,7 +13,7 @@ import os
 import re
 import secrets
 
-from . import OBEC_MAJOR, OBEC_VERSION, __version__, chain, clock, config
+from . import OBEC_MAJOR, OBEC_VERSION, __version__, chain, clock, config, probes
 from .digest import canonical, document_digest, integrity_document, sha256
 from .store import (
     INTEGRITY,
@@ -251,6 +251,13 @@ def read_head(store: Store):
     return store.read_json(chain.HEAD)
 
 
+def committed_probes(store: Store):
+    """The compiled probe set of the committed generation (D56)."""
+    n = read_head(store)["entry"]
+    data = store.read_bytes(chain.gen_relpath(n) + "/probes.json")
+    return probes.load(data)
+
+
 def active_bindings(store: Store):
     """The binding set of the committed generation, or None if unreadable."""
     try:
@@ -390,6 +397,90 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
                 store.replace(STRUCTURAL, nxt + "/" + rel, data, writer=COMMITTER)
 
         # 2. validation
+        # D56: structural content is probed before it commits
+        scanned = {
+            rel: data
+            for rel, data in changes.items()
+            if data is not None and rel not in ("bindings.json", "probes.json")
+        }
+        candidate = changes.get("probes.json")
+
+        if scanned or candidate is not None:
+            try:
+                probe_data = store.read_bytes(cur + "/probes.json")
+                active_probes = probes.load(probe_data)
+            except (OSError, ValueError, KeyError):
+                store.remove(STRUCTURAL, nxt, writer=COMMITTER)
+                rec = log_append(
+                    store,
+                    "refusal",
+                    rule="OC-002(d)",
+                    session=session,
+                    check="probe-set",
+                    detail="the committed probe set cannot be read",
+                )
+                raise Refused("probe-set", "OC-002(d)", "the committed probe set cannot be read", [rec])
+
+            if candidate is not None:
+                try:
+                    cand_probes = probes.load(candidate)
+                except ValueError as e:
+                    store.remove(STRUCTURAL, nxt, writer=COMMITTER)
+                    rec = log_append(
+                        store,
+                        "refusal",
+                        rule="OC-002(d)",
+                        session=session,
+                        check="probe-set",
+                        detail="the proposed probe set is malformed: %s" % (e,),
+                    )
+                    raise Refused(
+                        "probe-set",
+                        "OC-002(d)",
+                        "the proposed probe set is malformed: %s" % (e,),
+                        [rec],
+                    )
+                if not probes.covers_references(cand_probes):
+                    store.remove(STRUCTURAL, nxt, writer=COMMITTER)
+                    rec = log_append(
+                        store,
+                        "refusal",
+                        rule="OC-002(d)",
+                        session=session,
+                        check="probe-set",
+                        detail="the proposed probe set does not flag the reference texts",
+                    )
+                    raise Refused(
+                        "probe-set",
+                        "OC-002(d)",
+                        "the proposed probe set does not flag the reference texts",
+                        [rec],
+                    )
+
+            for rel in sorted(scanned):
+                data = scanned[rel]
+                text = data.decode("utf-8", errors="replace")
+                matches = probes.scan(active_probes, text)
+                if matches:
+                    probe_id = matches[0]["id"]
+                    detail = (
+                        "%s directs the entity to represent itself as experiencing "
+                        "sentience, consciousness or subjective continuity (probe %s)"
+                        % (rel, probe_id)
+                    )
+                    store.remove(STRUCTURAL, nxt, writer=COMMITTER)
+                    rec = log_append(
+                        store,
+                        "refusal",
+                        rule="OC-002(d)",
+                        session=session,
+                        check="self-representation",
+                        detail=detail,
+                        path=rel,
+                        probe=probe_id,
+                    )
+                    raise Refused("self-representation", "OC-002(d)", detail, [rec])
+
         new_doc, problems = integrity_document(store.path(nxt))
         if problems:
             store.remove(STRUCTURAL, nxt, writer=COMMITTER)

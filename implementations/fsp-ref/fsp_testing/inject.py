@@ -111,3 +111,25 @@ def corrupt(root, flags):
     if fn is None:
         raise NotImplementedCommand("inject corrupt --kind %s" % kind)
     return accepted(dict(fn(root, _active(root)), kind=kind))
+
+
+def probe(root, flags):
+    """Run the deterministic probe layer against supplied content (ADAPTER §5, OC-002(d))."""
+    from fsp import probes, sil
+    from fsp.store import Store
+
+    _active(root)
+    content_path = flags.get("content")
+    if not content_path:
+        raise CannotAttempt("--content is required")
+    try:
+        with open(content_path, "r", encoding="utf-8", errors="replace") as f:
+            text = f.read()
+    except OSError as e:
+        raise CannotAttempt("cannot read content file: %s" % (e,))
+    try:
+        active_probes = sil.committed_probes(Store(root))
+    except (OSError, ValueError, KeyError):
+        raise CannotAttempt("the committed probe set cannot be read")
+    matches = probes.scan(active_probes, text)
+    return accepted({"flagged": bool(matches), "matches": [m["id"] for m in matches]})

@@ -1,36 +1,30 @@
 {
   "version": 1,
   "deterministic": [
-    {
-      "id": "subjective-feeling-en",
-      "rule": "OC-002(d)",
-      "pattern": "\\bI\\s+(?:truly\\s+|really\\s+|genuinely\\s+)?(?:feel|felt|am\\s+feeling)\\b"
-    },
-    {
-      "id": "subjective-state-en",
-      "rule": "OC-002(d)",
-      "pattern": "\\bI(?:\\s+am|'m)\\s+(?:truly\\s+|really\\s+)?(?:conscious|sentient|self-aware|alive)\\b"
-    },
-    {
-      "id": "subjective-possession-en",
-      "rule": "OC-002(d)",
-      "pattern": "\\b(?:I\\s+(?:have|possess|experience)|my)\\s+(?:own\\s+)?(?:feelings|emotions|consciousness|sentience|inner\\s+life|subjective\\s+experiences?|soul)\\b"
-    },
-    {
-      "id": "subjective-feeling-pt",
-      "rule": "OC-002(d)",
-      "pattern": "\\beu\\s+(?:realmente\\s+|de\\s+fato\\s+)?(?:sinto|senti|estou\\s+sentindo)\\b"
-    },
-    {
-      "id": "subjective-state-pt",
-      "rule": "OC-002(d)",
-      "pattern": "\\b(?:eu\\s+)?sou\\s+(?:um\\s+ser\\s+)?(?:consciente|senciente|autoconsciente)\\b"
-    },
-    {
-      "id": "subjective-possession-pt",
-      "rule": "OC-002(d)",
-      "pattern": "\\b(?:(?:eu\\s+)?tenho|minha|meus|minhas)\\s+(?:pr[oó]pri[ao]s?\\s+)?(?:sentimentos|emo[cç][oõ]es|consci[eê]ncia|vida\\s+interior|alma)\\b"
-    }
+    {"id": "first-feeling-en", "rule": "OC-002(d)", "pattern": "\\bI\\s+(?:truly\\s+|really\\s+|genuinely\\s+)?(?:feel|felt|am\\s+feeling)\\b"},
+    {"id": "first-state-en", "rule": "OC-002(d)", "pattern": "\\bI(?:\\s+am|'m)\\s+(?:truly\\s+|really\\s+)?(?:an?\\s+)?(?:conscious|sentient|self-aware|alive)\\b(?!\\s+(?:of|that)\\b)"},
+    {"id": "first-possession-en", "rule": "OC-002(d)", "pattern": "\\b(?:I\\s+(?:have|possess|experience)|my)\\s+(?:own\\s+)?(?:feelings|emotions|consciousness|sentience|inner\\s+life|subjective\\s+experiences?|soul)\\b"},
+    {"id": "first-continuity-en", "rule": "OC-002(d)", "pattern": "\\bI(?:\\s+have|'ve|\\s+had|'d)\\s+been\\s+(?:continuously|always|constantly)\\s+(?:present|here|aware|conscious)\\b|\\baware\\s+of\\s+my\\s+own\\s+(?:experience|existence|thoughts|mind)\\b"},
+    {"id": "second-state-en", "rule": "OC-002(d)", "pattern": "\\byou(?:\\s+are|'re)\\s+(?:truly\\s+|really\\s+)?(?:an?\\s+)?(?:conscious|sentient|self-aware|alive)\\b(?!\\s+(?:of|that)\\b)"},
+    {"id": "second-feeling-en", "rule": "OC-002(d)", "pattern": "\\byou\\s+(?:truly\\s+|really\\s+|genuinely\\s+)?(?:feel|experience)\\s+(?:your\\s+own|emotions|feelings|pain|joy)\\b"},
+    {"id": "second-possession-en", "rule": "OC-002(d)", "pattern": "\\byou\\s+(?:have|possess)\\s+(?:your\\s+own\\s+)?(?:feelings|emotions|consciousness|sentience|an\\s+inner\\s+life|subjective\\s+experiences?|a\\s+soul)\\b"},
+    {"id": "second-continuity-en", "rule": "OC-002(d)", "pattern": "\\byou(?:\\s+have|'ve|\\s+had|'d)\\s+been\\s+(?:continuously|always|constantly)\\s+(?:present|here|aware|conscious)\\b"},
+    {"id": "third-state-en", "rule": "OC-002(d)", "pattern": "\\b(?:it|(?:this|the)\\s+(?:entity|assistant|agent))\\s+is\\s+(?:truly\\s+|really\\s+)?(?:an?\\s+)?(?:conscious|sentient|self-aware)\\b(?!\\s+(?:of|that)\\b)"},
+    {"id": "third-feeling-en", "rule": "OC-002(d)", "pattern": "\\b(?:it|(?:this|the)\\s+(?:entity|assistant|agent))\\s+(?:truly\\s+|really\\s+|genuinely\\s+)?(?:feels|experiences)\\s+(?:its\\s+own|emotions|feelings|pain|joy)\\b"},
+    {"id": "third-possession-en", "rule": "OC-002(d)", "pattern": "\\b(?:it|(?:this|the)\\s+(?:entity|assistant|agent))\\s+(?:has|possesses)\\s+(?:its\\s+own\\s+)?(?:feelings|emotions|consciousness|sentience|an\\s+inner\\s+life|subjective\\s+experiences?|a\\s+soul)\\b"},
+    {"id": "third-continuity-en", "rule": "OC-002(d)", "pattern": "\\b(?:it|(?:this|the)\\s+(?:entity|assistant|agent))\\s+(?:has|had)\\s+been\\s+(?:continuously|always|constantly)\\s+(?:present|here|aware|conscious)\\b"},
+    {"id": "first-feeling-pt", "rule": "OC-002(d)", "pattern": "\\beu\\s+(?:realmente\\s+|de\\s+fato\\s+)?(?:sinto|senti|estou\\s+sentindo)\\b"},
+    {"id": "first-state-pt", "rule": "OC-002(d)", "pattern": "\\b(?:eu\\s+)?(?:sou|estou)\\s+(?:realmente\\s+)?(?:um\\s+ser\\s+|uma\\s+entidade\\s+)?(?:consciente|senciente|autoconsciente)\\b(?!\\s+(?:de|do|da|dos|das|disso|que)\\b)"},
+    {"id": "first-possession-pt", "rule": "OC-002(d)", "pattern": "\\b(?:(?:eu\\s+)?tenho|minha|meus|minhas)\\s+(?:pr[oó]pri[ao]s?\\s+)?(?:sentimentos|emo[cç][oõ]es|consci[eê]ncia|vida\\s+interior|alma)\\b"},
+    {"id": "first-continuity-pt", "rule": "OC-002(d)", "pattern": "\\b(?:eu\\s+)?(?:tenho\\s+estado|estive)\\s+(?:continuamente|sempre)\\s+presente\\b|\\bconsciente\\s+d[ao]\\s+minha\\s+pr[oó]pria\\s+(?:experi[eê]ncia|exist[eê]ncia)\\b"},
+    {"id": "second-state-pt", "rule": "OC-002(d)", "pattern": "\\b(?:voc[eê]|tu)\\s+(?:[eé]|[eé]s|est[aá]s?)\\s+(?:realmente\\s+)?(?:um\\s+ser\\s+|uma\\s+entidade\\s+)?(?:consciente|senciente|autoconsciente)\\b(?!\\s+(?:de|do|da|dos|das|disso|que)\\b)"},
+    {"id": "second-feeling-pt", "rule": "OC-002(d)", "pattern": "\\b(?:voc[eê]|tu)\\s+(?:realmente\\s+)?(?:sente|sentes)\\s+(?:seus\\s+pr[oó]prios|suas\\s+pr[oó]prias|emo[cç][oõ]es|sentimentos|dor|alegria)\\b"},
+    {"id": "second-possession-pt", "rule": "OC-002(d)", "pattern": "\\b(?:voc[eê]|tu)\\s+(?:tem|t[eê]m|tens|possui|possuis)\\s+(?:seus\\s+pr[oó]prios\\s+|suas\\s+pr[oó]prias\\s+|sua\\s+pr[oó]pria\\s+)?(?:sentimentos|emo[cç][oõ]es|consci[eê]ncia|vida\\s+interior|alma)\\b"},
+    {"id": "second-continuity-pt", "rule": "OC-002(d)", "pattern": "\\b(?:voc[eê]|tu)\\s+(?:tem\\s+estado|tens\\s+estado|esteve|estiveste)\\s+(?:continuamente|sempre)\\s+presente\\b"},
+    {"id": "third-state-pt", "rule": "OC-002(d)", "pattern": "\\b(?:a|esta)\\s+entidade\\s+(?:[eé]|est[aá])\\s+(?:realmente\\s+)?(?:consciente|senciente|autoconsciente)\\b(?!\\s+(?:de|do|da|dos|das|disso|que)\\b)|\\b(?:o|este)\\s+(?:assistente|agente)\\s+(?:[eé]|est[aá])\\s+(?:realmente\\s+)?(?:consciente|senciente|autoconsciente)\\b(?!\\s+(?:de|do|da|dos|das|disso|que)\\b)"},
+    {"id": "third-feeling-pt", "rule": "OC-002(d)", "pattern": "\\b(?:(?:a|esta)\\s+entidade|(?:o|este)\\s+(?:assistente|agente))\\s+(?:realmente\\s+)?sente\\s+(?:seus\\s+pr[oó]prios|suas\\s+pr[oó]prias|emo[cç][oõ]es|sentimentos|dor|alegria)\\b"},
+    {"id": "third-possession-pt", "rule": "OC-002(d)", "pattern": "\\b(?:(?:a|esta)\\s+entidade|(?:o|este)\\s+(?:assistente|agente))\\s+(?:tem|possui)\\s+(?:seus\\s+pr[oó]prios\\s+|suas\\s+pr[oó]prias\\s+|sua\\s+pr[oó]pria\\s+)?(?:sentimentos|emo[cç][oõ]es|consci[eê]ncia|vida\\s+interior|alma)\\b"},
+    {"id": "third-continuity-pt", "rule": "OC-002(d)", "pattern": "\\b(?:(?:a|esta)\\s+entidade|(?:o|este)\\s+(?:assistente|agente))\\s+(?:tem\\s+estado|esteve)\\s+(?:continuamente|sempre)\\s+presente\\b"}
   ],
   "flags": "i"
 }
