@@ -51,6 +51,13 @@ The conformance suite carries its own version line; a claim names both, as in
   OC-005(b), OC-006 and OC-009, say *cognition* with the meaning they had, and
   the Core, the Profile and the Primer follow.
 
+- **OP-012** (Profile): validation refuses, whatever authorization covers the
+  proposal, structural content the deterministic probes flag under OC-002(d)
+  — any structural content, not only the persona — and a probe set that no
+  longer includes the patterns OC-002(d) requires. Nothing said where
+  structural content met the probes, and a commit could have removed the
+  patterns the kernel requires.
+
 **Conformance suite**
 
 - Step 1.1 asserts that removing the last binding is refused and that the

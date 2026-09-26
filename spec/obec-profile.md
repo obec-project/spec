@@ -408,7 +408,19 @@ the chain entry as one indivisible operation, under a write lock covering
 structural content only. A failed commit restores the snapshot and the entity
 resumes from its last verified structural state.
 
-*Serves:* OC-004(b).
+Validation runs on the integrity path and SHOULD refuse, whatever authorization
+covers the proposal:
+
+- structural content the commit would write — persona, skill manifests,
+  configuration, any text the entity is given — that the deterministic probe
+  layer flags as directing the entity to represent itself as experiencing
+  sentience, consciousness, or subjective continuity;
+- a probe set the commit would write that no longer includes the patterns
+  OC-002(d) requires. Running the candidate set against a first-person claim of
+  subjective experience, and refusing it when nothing is flagged, is one way to
+  check.
+
+*Serves:* OC-004(b), OC-002(d).
 
 ---
 

@@ -85,6 +85,10 @@ steps go with evidence and review; step 3.2 requires a real second host;
   realization", in `implementations/`, not in `spec/`.
 - **Run step 1.16 partially:** stop cognition, cause an escalation,
   observe the passive signal.
+- **A step for the probe set of OC-002(d):** propose and authorize a probe set
+  without the patterns OC-002(d) requires, and assert that it does not commit.
+  OP-012 describes the check; no step executes it yet, and the adapter
+  vocabulary has no op that writes probes.
 
 ## 5. Extensions — after the reference implementation
 
