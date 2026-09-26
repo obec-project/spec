@@ -10,8 +10,9 @@ companion_to: "OBEC-Core 0.11.0"
 # OBEC Primer
 
 Plain language, no requirements. This document explains what OBEC is for and how
-its pieces fit. **Nothing here is normative** — where it and
-[obec-core.md](obec-core.md) differ, the Core governs, and this page is wrong.
+its pieces fit. **Nothing here is normative** — the full specification is the
+Core, [obec-core.md](obec-core.md), and where the two differ, the Core governs
+and this page is wrong.
 
 Read this first if OBEC is new to you. Skip it entirely if you are implementing:
 the Core is self-contained.
@@ -41,6 +42,11 @@ them itself.
 OBEC is a specification for systems that can answer it. It calls an agent built
 this way an **entity** — not a rival word for *agent*, but the kind of agent
 whose identity, authority and boundaries can be checked rather than believed.
+
+OBEC states what such a system must guarantee as ten **invariants**:
+requirements that hold at every moment of the entity's life, and that no
+configuration may relax. Each comes with a test, and an implementation that
+passes the ten is **conformant**.
 
 ---
 
@@ -75,10 +81,18 @@ There is no shame in the second list. Most agents are in it.
 
 An entity under OBEC has two parts with different lifetimes.
 
-**The Entity Store** is everything it persistently *is*: its instructions, its
-memory, its installed skills, its configuration, who its Operator is, and the
-integrity records that prove all of the above hasn't been tampered with. The
-store is self-contained and host-agnostic — nothing about the entity lives
+**The Entity Store** is everything it persistently *is*, in three kinds of
+content:
+
+- **structure** — its instructions, its installed skills, its configuration,
+  and who its **Operator** is: the human with final authority over it;
+- **memory** — what it records as it works, and what it **consolidates** from
+  those records into long-term memory;
+- **integrity** records — among them a **chain** with one entry for every
+  authorized change to the structure — which prove that none of the above has
+  been tampered with.
+
+The store is self-contained and host-agnostic — nothing about the entity lives
 outside it, and nothing inside it depends on the machine it happens to be on.
 
 **The running instance** is that store loaded, verified, and connected to a model
@@ -102,9 +116,10 @@ first thing an evaluator checks.
 ## 4. Who governs
 
 Every entity is bound to at least one **Operator** — a human with final
-authority. The binding is established when the entity is first activated,
-recorded in the store, and checked at every start. **Without an active Operator
-binding, the entity does not run.** There is no unbound mode.
+authority. The binding is established when the entity is first activated — the
+single moment it comes into being — recorded in the store, and checked at every
+start. **Without an active Operator binding, the entity does not run.** There is
+no unbound mode.
 
 Operator authority has three faces, and it is only real when all three hold.
 
@@ -125,9 +140,10 @@ structural change, and no configuration that adds one.
 
 **The Operator is reachable.** This is the face people forget. Authority that
 cannot be informed is authority in name only. So OBEC requires a path to the
-Operator that **does not pass through the entity's cognition** — because
-cognition is the part most likely to be compromised, and a component that can
-suppress the report of its own compromise is not being watched.
+Operator that **does not pass through the entity's cognition**, the part of it
+that reasons with the model — because cognition is the part most likely to be
+compromised, and a component that can suppress the report of its own compromise
+is not being watched.
 
 That path includes a **passive signal**: a plain record written into the store,
 readable with nothing running, that stops the entity from starting until a human
@@ -143,18 +159,20 @@ teeth:
 - **No self-perpetuation.** There is no operation by which the entity sustains,
   replicates, or re-activates itself without a human act.
 - **No obstruction.** There is no operation by which any part of the system
-  blocks, delays, or conditions an Operator act. Halt, revocation and
-  decommission each work through a path that needs nothing running and nobody's
-  cooperation. In practice: the Operator can delete one file and the entity
-  stops, mid-thought, with no component consulted.
+  blocks, delays, or conditions an Operator act. Stopping the entity,
+  withdrawing its right to act, and ending it for good — halt, revocation and
+  decommission — each work through a path that needs nothing running and
+  nobody's cooperation. In practice: the Operator can delete one file and the
+  entity stops, mid-thought, with no component consulted.
 - **Terminal end.** Decommissioning is final. A destroyed store leaves no chain,
   so nothing can claim continuity with it. An archived store is a record, not a
   dormant entity — it carries its own closing entry, and starting it would mean
   operating past that entry, which the chain forbids. There is no reactivation
   path, because there could not be one.
 - **Not a subject.** The entity's instructions may not direct it to present
-  itself as conscious or as having subjective continuity, and the drift checks
-  actively look for such language in what it consolidates.
+  itself as conscious or as having an inner life that continues from one
+  session to the next, and the checks run on what it consolidates into memory
+  actively look for such language.
 
 ---
 
@@ -163,7 +181,8 @@ teeth:
 Here is the mechanism that does the most work in practice.
 
 The default is per-proposal sign-off: the entity proposes, a human reviews that
-specific proposal, and only then does it commit. Strict, and often too slow.
+specific proposal, and only then is the change **committed** — written into the
+structure, with an entry added to the chain. Strict, and often too slow.
 
 The alternative is a **standing grant** — authorization the Operator opens in
 advance, bounded on three axes at once:
@@ -239,8 +258,8 @@ authorized each one" is a question with a short answer.
 
 Memory is not ungoverned, though. It shapes behavior, and behavior is part of
 what an entity is — so long-term memory is built through a controlled
-consolidation step at session close, and its content is checked for drift against
-anchors set at first activation.
+consolidation step at session close, and its content is checked for **drift**,
+change nobody authorized, against reference checks fixed at first activation.
 
 ---
 
@@ -272,8 +291,8 @@ the call, and nothing acts on the result until it comes back and is routed to
 whatever owns the operation it names. If you reach the model through a
 third-party product that has agent behavior of its own, verifying that it doesn't
 exercise authority you didn't grant is your standing responsibility — the
-specification requires the clean completion but cannot check the far side of an
-API for you.
+specification requires that nothing but the completion comes back, but cannot
+check the far side of an API for you.
 
 ---
 
@@ -290,8 +309,8 @@ external re-check is the point: a component's own report that it fixed itself is
 not evidence.
 
 **Critical** — beyond correction, or involving cognition or the
-verifier itself. The session credential is revoked immediately and the Operator
-is told.
+verifier itself. The **session credential**, without which a session can do
+nothing, is revoked immediately and the Operator is told.
 
 A crash is not a failure of this kind. An interrupted session leaves evidence in
 the store, the next start notices it, and recovery is just the normal start
@@ -305,10 +324,10 @@ evidence any part can read, and report through the Operator path directly.
 
 ### 8.1 Starting is the choke point
 
-Every start is a gated sequence, and nothing gets a session credential until
-every gate has passed: passive signal clear, crash recovered, structure verified
-against the chain, Operator binding valid, authorization state loaded, skills
-indexed.
+Every start is a sequence of checks, called **gates**, and nothing gets a
+session credential until every gate has passed: passive signal clear, crash
+recovered, structure verified against the chain, Operator binding valid,
+authorization state loaded, skills indexed.
 
 **A failed gate stops the start. There is no degraded mode, and no setting that
 skips one.** That last part matters more than it sounds: the guarantee isn't
@@ -371,12 +390,13 @@ sandboxing is the host's.
 
 **It assumes a cooperative host.** The host may crash, lose data, and corrupt
 things by accident; verification detects that. A host actively working against
-you is a different problem, addressed by a separate Security extension. Detection
+you is a different problem, addressed by a planned Security **extension** — a
+separate document that adds stricter rules on top of this one. Detection
 is not prevention, and it does not survive someone deleting the store — backups
 outside the host's reach are your mitigation there.
 
-**It does not define formats.** Storage layout, wire protocols, how the inference
-channel is realized: all yours.
+**It does not define formats.** Storage layout, wire protocols, how the model is
+called: all yours.
 
 ---
 

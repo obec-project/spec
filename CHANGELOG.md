@@ -66,6 +66,14 @@ The conformance suite carries its own version line; a claim names both, as in
   suite does. *Autonomy is a dial, not a setting* replaces *not a profile*,
   which read as the Implementation Profile, and *extension* is explained where
   it first appears.
+- The Primer introduces its terms before it uses them. §3 divides the store
+  into structure, memory and integrity, which §4 and §5 relied on and only §6
+  explained, and names the Operator and the chain there. §1 says what an
+  invariant is and what makes an implementation conformant, which the Primer
+  never said. *Committed*, *cognition*, *drift*, the session credential, the
+  gates, halt and revocation, and *extension* are explained where they first
+  appear; *subjective continuity*, the *clean completion*, the *anchors* of
+  drift and the inference channel are said in plain words.
 
 ---
 
