@@ -62,6 +62,13 @@ The conformance suite carries its own version line; a claim names both, as in
   present itself as alive, and its test executes that. Drift detection is
   said to run on memory, not structure, and no longer to wait for the next
   consolidation.
+- The Core says what OC-007 does not govern. The entity can write to the
+  workspace and read it back in a later conversation, outside the Memory
+  Store; a note on OC-007 says the workspace is the Operator's territory, that
+  what cognition reads there is transient input, and that the specification
+  provides the declaration and the record of every write and read, not a rule
+  on its use. §6.2 lists an injected instruction to keep content there as a
+  risk the log detects after the fact. The kernel does not change.
 - The Core's glossary follows: the Memory Store holds the session records
   too, *Conversation* is defined, the Closure Payload and the Resumption
   Record serve conversations and cite OP-009's new clauses, and Sleep

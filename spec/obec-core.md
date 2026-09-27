@@ -425,6 +425,14 @@ failure.
 (CMI) extension enters as a stimulus, never as knowledge: what an entity retains
 from a shared space is its own decision, executed through its own write paths.
 
+*Note (non-normative).* OC-007 governs what the entity keeps in its store. The
+workspace is host territory the Operator declared (OC-008(a)): what cognition
+reads there arrives as an execution result, transient input, even when the
+entity wrote it in an earlier session. What the entity keeps in the workspace is
+between the Operator and the entity; the specification provides the declaration
+that bounds it and the record of every write and read (OC-008(d)), not a rule on
+its use.
+
 ---
 
 ### OC-008 — The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits
@@ -745,6 +753,12 @@ execution result. An adversarial completion is a self-inflicted injection: the
 entity's own pipeline delivers it, and no check inspects results. Deployments
 using such skills on sensitive tasks should validate output at the skill
 implementation level.
+
+**The workspace as memory.** A stimulus can instruct the entity to write
+content to the workspace and read it back in a later conversation, outside the
+recall scope, the probes and the promotion authorization of the Profile. Both
+operations are logged (OC-008(d)); the Operator's reading of the log and of the
+workspace is what detects it, after the fact.
 
 **Skills that exceed their declaration.** OC-008(a) applies the boundary to what
 the execution path can see — a skill's declared targets and the parameters it is
