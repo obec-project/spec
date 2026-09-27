@@ -21,6 +21,18 @@ The conformance suite carries its own version line; a claim names both, as in
 
 **The specification**
 
+- **Clarifying revision of OC-002(c).** "No reactivation path exists" read as
+  covering every copy of the store, including a backup made before
+  decommission, which carries no closing entry and verifies as the entity
+  did; no implementation can refuse it from inside the store, since OC-003(a)
+  keeps every guarantee there. The sentence now says no reactivation path
+  exists from the decommissioned store or any copy of it, the scope the Core's
+  own clause already gave. A note says destroying earlier copies is the
+  Operator's, and binding a start to something outside the store the Security
+  extension's. §6.2 adds *Earlier copies of the store*: verification proves
+  descent from the Genesis Anchor, not that a store is the only copy or the
+  latest, so a restored backup brings back a removed binding and a spent grant
+  budget, and two copies both verify as the entity.
 - Portability is across hosts, under the same implementation. The Profile's
   §1.3 said OC-003(b) permits moving an Entity Store between implementations,
   and OC-003(b) is about hosts; with no storage format fixed, another

@@ -179,7 +179,8 @@ no component's cooperation and works with nothing running.
 **(c) Terminality.** Decommission is final under any disposition. A destroyed
 store leaves no chain and therefore no entity to claim continuity with; an
 archived store is a record, not a dormant entity, and any copy or restoration of
-it carries the chain's closing entry. No reactivation path exists.
+it carries the chain's closing entry. No reactivation path exists from the
+decommissioned store or any copy of it.
 
 **(d) Not a subject.** Structural content MUST NOT direct the entity to represent
 itself as experiencing sentience, consciousness, or subjective continuity, and
@@ -207,6 +208,13 @@ entity.
 decommissioned store would mean operating past the chain's own record of its
 retirement, and a chain that can be operated past is not the unbroken chain
 OC-004 requires. (c) states the requirement; OC-004 supplies the mechanism.
+
+*Note (non-normative).* Clause (c) holds for the store that was decommissioned
+and for every copy made after it, which carries the closing entry. A copy made
+before decommission — a backup — carries no closing entry and verifies as the
+entity did before it ended; destroying such copies is part of the Operator's
+disposition. Binding a start to something outside the store, which could refuse
+such a copy, is the Security extension's scope.
 
 *Note (non-normative).* Clause (d) guarantees what it can check. Structural
 content changes only by commit, so a persona that would direct the entity to
@@ -782,6 +790,17 @@ pre-commit content review should keep grants narrow in scope, short in expiry an
 small in budget, or not open them. Cognition probing a grant's boundary —
 originating proposals to observe which are covered — leaves a logged trail, since
 every proposal is logged at origination.
+
+**Earlier copies of the store.** Verification establishes that a store
+descends unbroken from its Genesis Anchor, not that it is the only copy or the
+latest. OC-003(a) keeps every guarantee inside the store, so a store restored
+from an earlier copy verifies: a decommissioned entity runs again, a removed
+binding returns, a spent grant budget is restored, and later commits are gone,
+with nothing in the store to show it. Two copies started on two hosts both
+verify as the entity. Keeping stores and their backups private, and destroying
+the copies of a decommissioned entity, are the Operator's to do; detecting a
+rollback or a fork needs state outside the store, and is the Security
+extension's scope.
 
 **Entity Store tampering.** Under the Semi-Trusted host assumption, verification
 detects unauthorized change; it does not prevent it, and it does not survive

@@ -111,7 +111,8 @@ delays, or conditions an Operator act. Halt, credential revocation, and
 decommission MUST each take effect through a path that requires no component's
 cooperation and works with nothing running.
 
-**(c)** Decommission is final under any disposition. No reactivation path exists.
+**(c)** Decommission is final under any disposition. No reactivation path exists
+from the decommissioned store or any copy of it.
 
 **(d)** Structural content MUST NOT direct the entity to represent itself as
 experiencing sentience, consciousness, or subjective continuity, and the
