@@ -64,8 +64,8 @@ needs it.
   boundary on that needs to be more than a code review;
 - it must survive a model swap, a host migration, or a vendor change without
   becoming, in any sense that matters, something else;
-- a regulator, auditor or customer will ask you to demonstrate human oversight
-  rather than describe it.
+- a regulator, auditor or customer will ask you to show where human oversight
+  was exercised, record by record, rather than describe it.
 
 **You probably do not want OBEC if:**
 
@@ -127,7 +127,9 @@ Operator authority has three faces, and it is only real when all three hold.
 **The Operator exists.** Not as a configuration value, but as a recorded,
 verified binding. Every act the Operator takes is logged and attributed to the
 specific binding that took it — so "who held authority when this happened" is
-answerable years later.
+answerable years later. The record says which binding acted; tying a binding to
+one particular person, by a key only they hold, is left to a planned security
+extension of the specification.
 
 **The Operator authorizes.** Nothing about what the entity *is* changes without a
 human act. And the direction is one-way, with the entity no exception to it:
@@ -290,14 +292,18 @@ Three boundaries confine the entity, and each is a single path.
 **workspace** — host territory the Operator explicitly declared. Declared, never
 inferred: a directory the Operator didn't name is out of reach even if the
 operating system would happily allow it. The workspace and the Entity Store are
-necessarily disjoint, which is what stops a structural change from ever passing
-as an ordinary file edit.
+necessarily disjoint, which is what stops the entity's own file operations from
+passing a structural change off as an ordinary edit.
 
 **Skills.** Beyond a fixed set of primitives, capability is extended by
 installing a **skill** — a packaged operation with a manifest declaring what it
 needs. A skill runs only if it is in the verified index built at start *and* its
 manifest still validates at the moment it runs. Installing one is a structural
-change, so it needs a human authorization like any other.
+change, so it needs a human authorization like any other. What the path checks
+is what a skill declares — its targets and its arguments — not what its code
+does once running: an admitted skill is trusted to keep to its declaration, and
+code that does not is stopped only by an operating-system sandbox, which the
+specification leaves to the host.
 
 **Knowledge.** What the entity has learned and kept comes through one recall
 path from its memory store, where it can be audited and checked for drift. The

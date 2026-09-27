@@ -189,6 +189,12 @@ The conformance suite carries its own version line; a claim names both, as in
   cover the structure and what the entity has learned, while what it records
   as it works is attributed, not sealed; §6.1 says learned knowledge is never
   edited, only replaced under authorization or retracted by the Operator.
+  §2 asks for oversight shown record by record rather than demonstrated; §4
+  says the record names the binding that acted, and tying it to a person is
+  left to a security extension; §7 says the path checks what a skill
+  declares, not what its code does, and no longer that a structural change
+  can never pass as a file edit, only that the entity's own file operations
+  cannot pass one off.
 - ADR 0003 scopes episodic memory to the conversation that writes
   it: a sequence of sessions an Operator continues as one, across compaction
   restarts, crashes and the terminal closed. The Profile's gate on semantic
