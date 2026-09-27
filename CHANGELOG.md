@@ -141,6 +141,9 @@ The conformance suite carries its own version line; a claim names both, as in
   not end the work: only the Operator ends a conversation. The probes check
   memory as it is written, not after. §11 names the first two invariants in
   their order since ADR 0002: who governs the entity, then what it is not.
+  §7 no longer says there is no side channel for knowledge: what the entity
+  learned and kept comes through recall, and what it reads in the workspace,
+  the Operator's territory, is input, logged like every write there.
 - ADR 0003 scopes episodic memory to the conversation that writes
   it: a sequence of sessions an Operator continues as one, across compaction
   restarts, crashes and the terminal closed. The Profile's gate on semantic

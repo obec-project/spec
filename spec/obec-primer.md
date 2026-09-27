@@ -295,10 +295,10 @@ needs. A skill runs only if it is in the verified index built at start *and* its
 manifest still validates at the moment it runs. Installing one is a structural
 change, so it needs a human authorization like any other.
 
-**Knowledge.** Everything persisted that informs the entity's thinking comes
-through one recall path from its memory store. There is no side channel — no way
-for knowledge to enter without passing the place where it can be audited and
-checked for drift.
+**Knowledge.** What the entity has learned and kept comes through one recall
+path from its memory store, where it can be audited and checked for drift. The
+workspace is the Operator's territory: what the entity reads there is input,
+like anything else it reads, and every write and read there is logged.
 
 And one more boundary, inward: the model is reached only as a **stateless
 inference call**. Context in, one completion out. No tool authority travels with
