@@ -1,12 +1,12 @@
 ---
 title: "ADR 0003 — Episodic memory belongs to its conversation"
-status: "Proposed"
+status: "Accepted"
 date: 2026-09-27
 ---
 
 # ADR 0003 — Episodic memory belongs to its conversation
 
-**Status:** Proposed · **Date:** 2026-09-27 · **Author:** Jonas Orrico
+**Status:** Accepted · **Date:** 2026-09-27 · **Author:** Jonas Orrico
 
 This record introduces the conversation — a sequence of sessions an Operator
 continues as one — scopes episodic memory to it, makes episodic records

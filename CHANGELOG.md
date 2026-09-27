@@ -81,7 +81,7 @@ The conformance suite carries its own version line; a claim names both, as in
   covered only if, at close, the grant is unexpired, the change is in scope and
   budget remains, and otherwise it falls back to per-proposal sign-off
   (OP-011(c)).
-- ADR 0003, proposed, scopes episodic memory to the conversation that writes
+- ADR 0003 scopes episodic memory to the conversation that writes
   it: a sequence of sessions an Operator continues as one, across compaction
   restarts, crashes and the terminal closed. The Profile's gate on semantic
   promotion leaves refused content episodic and recallable by every later
