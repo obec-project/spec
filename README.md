@@ -33,7 +33,7 @@ An entity is bound to an **Operator**: the human who holds final authority over
 it. Everything the entity is lives in its **store**, a set of files in three
 classes — its **structure** (instructions, skills, configuration, and its
 bindings to Operators), its **memory** (what it records and learns), and its
-**integrity** records, which prove the other two untampered and decide whether
+**integrity** records, which prove the structure untampered and decide whether
 the entity may run. Each class has one writer: a single path allowed to change
 it. The **Genesis Anchor** is written once, at first activation, and every
 authorized change to the structure adds an entry to a **chain** that leads back
