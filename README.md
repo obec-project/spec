@@ -11,13 +11,17 @@ things about itself:
 1. **It is the entity that was activated.** Its instructions, skills and
    configuration trace back to its first activation through an unbroken chain
    of authorized changes. What it remembers is kept apart, and changes freely.
-2. **Every one of those changes was authorized by a human.** The entity can
-   propose changing itself. It can never approve one.
+2. **Only a human can authorize a change to it.** The entity can propose
+   changing itself; it can never approve one, and no part of the system can
+   create an approval. Each approval records who gave it; proving that record
+   against a person's key is left to a planned security extension.
 3. **That proof travels with it.** Copy the entity's files to another host and
    every verification returns the same result. Replace the model and the
    identity does not change.
-4. **It cannot exceed its bounds.** What reaches it and what it reaches are each
-   confined to one declared path.
+4. **Its reach is declared and recorded.** What reaches it and what it reaches
+   each pass through one declared path, and every crossing is logged. The code
+   of a skill its human admitted is trusted to keep to what the skill declares;
+   stopping code that does not takes an operating-system sandbox.
 
 Ten invariants — requirements no configuration may relax — carry those four
 claims, and **each one has a test**. The tests form the **conformance suite**:

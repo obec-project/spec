@@ -156,6 +156,11 @@ The conformance suite carries its own version line; a claim names both, as in
 - The README gives the kernel's size as 17 KB, not 15, counts eight open
   questions beyond the three it names, not seven, and calls 0.11.0 a release
   rather than a first release, which 0.9.0, 0.9.1 and 0.10.0 preceded.
+- The README's second and fourth claims say what holds. The entity can never
+  approve a change and nothing can create an approval, while proving who gave
+  one against a person's key is left to a security extension; its reach is
+  declared and recorded, and an admitted skill's code is trusted to keep to
+  its declaration, which only an operating-system sandbox enforces.
 - The README no longer says the integrity records prove memory untampered:
   the chain and the baseline cover the structure.
 - The Primer's §5 says when a standing grant is checked. It said an in-scope
