@@ -86,8 +86,8 @@ content:
 
 - **structure** — its instructions, its installed skills, its configuration,
   and who its **Operator** is: the human with final authority over it;
-- **memory** — what it records as it works, and what it **consolidates** from
-  those records into long-term memory;
+- **memory** — what it records as it works, and what it has **learned** from
+  that;
 - **integrity** records — among them a **chain** with one entry for every
   authorized change to the structure — which prove that none of the above has
   been tampered with.
@@ -171,8 +171,8 @@ teeth:
   path, because there could not be one.
 - **Not a subject.** The entity's instructions may not direct it to present
   itself as conscious or as having an inner life that continues from one
-  session to the next, and the checks run on what it consolidates into memory
-  actively look for such language.
+  session to the next, and the checks run on its memory actively look for such
+  language.
 
 ---
 
@@ -260,9 +260,21 @@ and it is why "show me every structural change in this entity's life and who
 authorized each one" is a question with a short answer.
 
 Memory is not ungoverned, though. It shapes behavior, and behavior is part of
-what an entity is — so long-term memory is built through a controlled
-consolidation step at session close, and its content is checked for **drift**,
-change nobody authorized, against reference checks fixed at first activation.
+what an entity is. So what the entity writes as it works belongs to the
+**conversation** it was written in — the sessions an Operator continues as one,
+across a closed terminal or a crash — and is never edited afterwards, only
+superseded by a newer record that cites it. A later conversation sees it only
+if the one before names it as the work to carry on, or the Operator brings it
+back. What the entity has **learned** is different: it reaches every later
+conversation on its own, so it gets there only with an Operator's
+authorization, like a structural change.
+
+Memory is also checked for **drift**: content pulling the entity away from what
+it was authorized to be. The checks, the **probes**, are exact patterns with no
+model involved, and they are themselves structure: set at first activation and
+changed only by an authorized commit. Among them are the ones for the language
+§4 rules out. They gate what is learned, and check the rest of memory after it
+is written.
 
 ---
 
@@ -356,17 +368,24 @@ acting in the workspace, running skills. The Operator's direct input takes
 precedence over whatever is in flight — it never cuts a thought in half, but it
 is the next thing the entity sees.
 
-**Close** consolidates the session's memory into long-term memory, writes what
-the next session needs to continue, collects garbage, and commits any authorized
-structural changes. **Structural change lands here, at close — never mid-session.**
+**Close** commits any authorized structural changes. **Structural change lands
+here, at close — never mid-session.** A closed session does not end the work:
+the next one continues the same conversation, with its history and its memory
+in reach, whether the session closed cleanly or the terminal was simply shut.
+
+**Only the Operator ends a conversation.** Ending it cleanly, the entity writes
+what the next conversation needs to carry on and what it asks to learn; close
+then records that, holds each request to learn for the Operator's
+authorization, and collects garbage. The Operator can also start a fresh
+conversation, or resume an old one where it stopped.
 
 **Decommission** is the explicit end, and an Operator act like any other. A final
 close, then the chain is sealed with a closing entry and the store is destroyed
 or archived, at the Operator's choice.
 
 Start, session, close repeat for the entity's whole life. Each leaves evidence:
-every start records its verification result, every close records its
-consolidation and its commits.
+every start records its verification result, every close its commits, and every
+conversation ended cleanly what it carried forward.
 
 ---
 

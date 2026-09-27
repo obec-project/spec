@@ -105,6 +105,14 @@ The conformance suite carries its own version line; a claim names both, as in
   covered only if, at close, the grant is unexpired, the change is in scope and
   budget remains, and otherwise it falls back to per-proposal sign-off
   (OP-011(c)).
+- The Primer follows ADR 0003. §6.1 said long-term memory is checked for drift,
+  *change nobody authorized*, right after saying memory is written with no
+  authorization, which made all memory drift. It now says what the entity
+  writes belongs to its conversation and what it learns needs an Operator's
+  authorization, and that drift is content pulling the entity away from what
+  it was authorized to be, found by probes that are themselves structure. §3
+  and §4 no longer speak of consolidation, and §9 says a closed session does
+  not end the work: only the Operator ends a conversation.
 - ADR 0003 scopes episodic memory to the conversation that writes
   it: a sequence of sessions an Operator continues as one, across compaction
   restarts, crashes and the terminal closed. The Profile's gate on semantic
