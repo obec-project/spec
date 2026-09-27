@@ -81,6 +81,22 @@ The conformance suite carries its own version line; a claim names both, as in
   covered only if, at close, the grant is unexpired, the change is in scope and
   budget remains, and otherwise it falls back to per-proposal sign-off
   (OP-011(c)).
+- ADR 0003, proposed, scopes episodic memory to the conversation that writes
+  it: a sequence of sessions an Operator continues as one, across compaction
+  restarts, crashes and the terminal closed. The Profile's gate on semantic
+  promotion leaves refused content episodic and recallable by every later
+  session, so it decides what is labelled semantic, not what reaches
+  cognition; and scoping memory by session would leave an entity one session
+  behind whenever the terminal is closed without a clean close. Under the
+  record, only an Operator ends a conversation, the Closure Payload points the
+  next one at its working set without copying it, episodic records are never
+  edited and a new record names the one it supersedes, only an Operator
+  injects a past conversation's records or resumes a past conversation, and
+  only semantic memory crosses conversations on its own, under an Operator
+  authorization. The transcript sits in the Memory Store and is never
+  recalled, so OC-007 holds as it stands; the Profile keeps only the
+  deterministic probes, and hardening drift detection is the Security
+  extension's scope. The README lists it.
 
 ---
 

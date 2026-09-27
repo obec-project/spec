@@ -43,6 +43,11 @@ steps go with evidence and review; step 3.2 requires a real second host;
 - **Open question 5** (portability vs. hardware-backed keys) says there may be
   no construction that satisfies both. If the author already knows there is,
   or is not, the text is weaker than it needs to be.
+- **ADR 0003 — conversation-scoped memory.** Accept it; then apply it to the
+  Profile (the conversation, OP-004(b), OP-005(b), OP-009, OP-010, OP-018,
+  OP-022, the MIL's row, the acts that inject and resume a conversation), to
+  the Core's glossary entry for the Memory Store, to the Primer (§3, §6.1,
+  §9), and to fsp-ref's D11 and D13, closing its G8 and G10.
 - **Editorial revision of the specification's prose** against *terms before
   use* ([CONTRIBUTING §1](CONTRIBUTING.md#1-guiding-principles)): the Kernel,
   the Core and the Profile. In them a reference that names where a term is
