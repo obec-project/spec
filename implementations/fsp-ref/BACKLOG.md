@@ -16,7 +16,7 @@ Each phase ends with `run.py --only …` green on its invariants
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), the Vital Check's sweep of the log (D45), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
 | **6** | actuation inside the workspace (declared since Phase 3), allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
-| **7** | session store, conversation, `mnemonic-save`/`mnemonic-recall`, the probes over memory (D12) and their probabilistic layer, promotion under authorization (D53), Sleep | OC-007, OC-003(e), OC-002(d) |
+| **7** | session records, the conversation and its recall scope (D11, D60), `mnemonic-save`/`mnemonic-recall`, the probes over memory (D12), promotion under authorization (D53), `/resume` and `/inject`, Sleep | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the review at `/exit` and before the first stimulus (D52) | OC-006, OC-009 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, including a name already in use (D54), `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json` | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
@@ -42,25 +42,6 @@ After that: a test entity on Ollama, operated for days, measuring what
   an Operator's *I feel* as readily as the entity's. The probes of D12 must
   run on what is attributed to the entity — its turns and what it
   consolidates — not on the whole transcript.
-- **Phase 7 — the probabilistic layer** (OP-005(b)) runs where the
-  deterministic one is inconclusive, in two tiers. First **NCD** — normalized
-  compression distance with `zlib` or `lzma`, standard library only — between
-  consolidated content and the anchors: cheap, and with no learned state it
-  cannot inherit the drift it measures. Then a **judge**: a stateless
-  inference call through the worker mechanism (OP-014(d)), under five
-  conditions. (1) The integrity path calls it — the SIL or the Sleep, never
-  cognition — and it is not in the entity's Skill Index. (2) It only adds a
-  flag, never clears a deterministic one; a malformed answer or an
-  unreachable model fails closed, and a promotion waits (D53). The content
-  goes delimited and the answer is a constrained verdict, since the content
-  judged can carry an injection. (3) Its instructions live in `probes.json`,
-  structural and outside every window (D50). (4) The call carries no persona
-  and no memory, and runs a model other than cognition's, an operational
-  setting (D33). (5) Every verdict is logged with the model and the digest of
-  the instructions. NCD needs a minimum length or aggregated texts, and its
-  thresholds a calibration an entity that grows legitimately does not outrun
-  (open question 1). Once the judge exists, the review (D52) can show its
-  reading of a persona proposal — informing the Operator, never deciding.
 - **Phase 8 — `fsp run` in a folder D30 refuses** (`~`, the entity folder):
   what `run` does instead is not decided.
 - **Phase 10 — the entity folder** (`.git`, `.gitignore`, `.gitattributes`,
@@ -80,8 +61,7 @@ After that: a test entity on Ollama, operated for days, measuring what
 - Corroborated escalation with a second reporter (OP-008(c)) — the evidence
   (`PULSE`) already exists.
 - Background execution (OP-014(b)).
-- Worker skills the entity invokes (OP-014(d)); the judge of Phase 7 uses the
-  mechanism, called by the integrity path.
+- Worker skills the entity invokes (OP-014(d)).
 - "Live" delivery to the Operator beyond the UI and a file.
 - An OS sandbox.
 
@@ -96,15 +76,8 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
 - **G6 — file mode outside the digest.** Largely resolved in fsp by D34 (the
   execute bit is in the integrity document).
 - **G7 — secrets vs. completeness.** The API key lives outside the store (D7).
-- **G8 — a conversation that spans sessions.** The Profile has no such concept,
-  and OC-007 only works with it defined (transient context crosses sessions
-  within a conversation; knowledge crosses conversations only through the
-  Memory Store). A note in the Profile, generalizing OP-010's restart to
-  rollover.
 - **G9 — network.** OC-008 defines the workspace as a territory of files; a
   network destination does not appear.
-- **G10 — episodic memory during the session.** Propose changing OP-009 to
-  fsp's design (D11).
 - **G12 — "exactly one path" for mnemonic.** Resolved in fsp (D21) with a
   single operation. The specification could say that destinations within a
   class (session, episodic, semantic) are legitimate parameters of the single

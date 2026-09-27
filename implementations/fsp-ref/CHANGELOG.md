@@ -106,6 +106,19 @@ The specification decisions the phase depends on come first.
   The ops are `set-persona` and `install-skill`; the test build fills an
   `install-skill` without files with the conformance fixture skill. Steps
   1.3, 1.5, 1.12 and 2.7 pass.
+- **G8 and G10 closed** (2026-09-27, ADR 0003). The Profile now has the
+  conversation fsp already had (D8), episodic memory written during the
+  session (D11), and the session records inside the Memory Store, never
+  recalled, which is how the transcript crosses sessions under OC-007. D11
+  scopes episodic memory to its conversation and has a new record name the
+  one it supersedes; D13 splits `/clear`, which keeps the conversation, from
+  `/new`; D10, D24 and D53 follow; D60 adds `/resume` and `/inject` and the
+  pointer map that carries the working set. The deviations from OP-009,
+  OP-010 and OP-018 are gone, since the Profile now says what fsp does.
+- **The probabilistic layer leaves the plan** (2026-09-27, ADR 0003). The
+  Profile keeps only the deterministic probes, and detection beyond them is
+  the Security extension's scope; fsp targets the Profile's simplest form
+  (AGENTS.md rule 4), so NCD and the judge planned for Phase 7 are dropped.
 - **The probabilistic layer joins v0, in Phase 7** (2026-09-25). It was
   outside v0 because the obvious realization, embeddings, needs a dependency.
   NCD needs only the standard library, and a judge through the worker
