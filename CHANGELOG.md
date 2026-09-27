@@ -58,6 +58,18 @@ The conformance suite carries its own version line; a claim names both, as in
   deterministic probes is the Security extension's scope. OP-004(b), OP-005,
   OP-010, OP-018, OP-021, OP-022, OP-024 and Appendix A follow, and OP-009's
   clauses run from (a) to (h).
+- The Profile seals semantic memory. It is what the entity knows from then on,
+  and nothing checked it after promotion: a record changed in the store was
+  recalled as it stood. OP-009(f), now *Semantic memory*, computes each
+  record's digest over a canonical serialization the implementation declares,
+  so the check holds for a file, a row or a document alike; the integrity path
+  appends identifier, digest and authorization to a semantic ledger held as
+  authorization state; a record is checked when recalled and the whole set by
+  a sweep across Vital Checks (OP-003(a)), so the start does not pay for it. A
+  record that diverges is withheld from recall and reported, as Identity
+  Drift, which OP-004(a) now defines as authorized content diverging from what
+  was authorized. A semantic record is never edited: a new promotion
+  supersedes it, or the Operator retracts it.
 - The Profile's Semantic Digest and decommission follow ADR 0003. The digest
   was an aggregate compared against the probes during Sleep, a form made for
   similarity metrics, and Sleep now consolidates only when a conversation

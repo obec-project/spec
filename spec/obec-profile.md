@@ -145,7 +145,9 @@ about a partial failure, or how the report travels. This section does.
 **(a) Cadence.** A **Vital Check** SHOULD run when an activity threshold is
 reached or a time interval has elapsed since the last check, whichever comes
 first, both declared in configuration. The recurring cycle of these checks is the
-**Heartbeat**.
+**Heartbeat**. Each check also sweeps a portion of the semantic ledger
+(OP-009(f)), resuming where the last one stopped, so that the whole of semantic
+memory is checked over successive checks without the start paying for it.
 
 **(b) States.** A Vital Check SHOULD resolve to one of three states:
 
@@ -181,8 +183,12 @@ Drift is unauthorized divergence from the entity's authorized state. It SHOULD b
 classified in three categories, with thresholds and responses declared in
 configuration:
 
-**(a) Identity Drift** — active structural content diverging from the integrity
-baseline; detected per Vital Check by hash comparison.
+**(a) Identity Drift** — authorized content diverging from what was
+authorized: active structural content from the integrity baseline, detected per
+Vital Check by hash comparison, and semantic memory from its ledger
+(OP-009(f)), detected at recall and by the Vital Check's sweep. A semantic
+record that diverges is withheld from recall and reported to the Operator; it
+does not stop the entity.
 
 **(b) Semantic Drift** — memory content the probes flag (OP-005).
 
@@ -380,7 +386,7 @@ next conversation only if the integrity log holds the completion record of the
 Sleep that produced it; otherwise it is discarded and logged, and the
 conversation starts with no working set.
 
-**(f) Semantic promotion.** Semantic memory is refined knowledge, and the only
+**(f) Semantic memory.** Semantic memory is refined knowledge, and the only
 memory that crosses conversations on its own. Promotion of episodic records into
 semantic memory is requested through the payload and **SHOULD require an
 Operator authorization** in the shape of OC-001(b): a per-promotion approval, or
@@ -394,6 +400,24 @@ One refused, or never authorized, leaves the content in its conversation,
 reachable only through a pointer. How many pointer maps have named a lineage
 MAY be used to propose promotions or to order them for review; it never
 replaces the authorization.
+
+What the entity knows is protected against edit, as its structure is. Each
+semantic record SHOULD have a canonical serialization, declared by the
+implementation, over which its digest is computed, so that the check does not
+depend on how the store keeps the record — a file, a row, a document. At
+promotion the integrity path appends to a **semantic ledger**, held as
+authorization state, the record's identifier, its digest and the authorization
+that covered it. A record is checked against the ledger when it is recalled,
+and the whole set by the Vital Check's sweep (OP-003(a)). A record whose digest
+does not match, one the ledger names that is missing, and one present without
+an entry are withheld from recall, logged and reported to the Operator
+(OP-004(a)).
+
+A semantic record is never edited. It is corrected by a new promotion that
+names the record it supersedes, under an authorization like any other, or
+retracted by an Operator act that appends a retraction to the ledger: the
+record leaves recall, and the Operator may have its content removed, the
+ledger keeping its identifier and digest.
 
 **(g) Bringing a conversation back.** Only an Operator brings a past
 conversation back, as a logged act performed through means the implementation
@@ -420,7 +444,8 @@ of origin and supersedes link, so a lineage can still be followed after its
 content is gone; a conversation whose records have partly expired is resumed
 with what remains.
 
-*Serves:* OC-007 (recall remains the only path), OC-003(c), OC-003(e), OC-010.
+*Serves:* OC-007 (recall remains the only path), OC-003(c), OC-003(e), OC-005,
+OC-010.
 
 ---
 
