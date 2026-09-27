@@ -193,10 +193,13 @@ advance, bounded on three axes at once:
 | **commit budget** | a count of changes it will cover, then it is spent |
 | **declared scope** | the categories of change it covers, and no others |
 
-While the grant is open, a change inside its scope commits with no per-proposal
-step — logged under the grant's identity, so the audit trail records which
-authority covered it. A change outside its scope is **never** covered: it waits
-for explicit review like anything else.
+While the grant is open, a change inside its scope needs no per-proposal review.
+The grant is checked when the change commits — at close, like every structural
+change (§9), so the running entity never changes mid-session — and covers it only
+if, at that moment, it is unexpired, the change is in scope, and budget remains.
+The commit is logged under the grant's identity. A change the grant no longer
+covers by then falls back to per-proposal sign-off; a change outside its scope is
+**never** covered, and waits for explicit human review like anything else.
 
 When the grant expires or its budget runs out, the entity reverts to
 per-proposal sign-off **automatically**, with nothing to switch off and no

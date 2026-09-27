@@ -74,6 +74,13 @@ The conformance suite carries its own version line; a claim names both, as in
   gates, halt and revocation, and *extension* are explained where they first
   appear; *subjective continuity*, the *clean completion*, the *anchors* of
   drift and the inference channel are said in plain words.
+- The Primer's §5 says when a standing grant is checked. It said an in-scope
+  change commits with no per-proposal step, and §9 says structural change
+  lands at close, so a reader could take the grant as deciding when the change
+  is proposed. OC-001(b) checks the grant at commit time: the change is
+  covered only if, at close, the grant is unexpired, the change is in scope and
+  budget remains, and otherwise it falls back to per-proposal sign-off
+  (OP-011(c)).
 
 ---
 
