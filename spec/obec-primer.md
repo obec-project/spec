@@ -167,8 +167,9 @@ teeth:
 - **Terminal end.** Decommissioning is final. A destroyed store leaves no chain,
   so nothing can claim continuity with it. An archived store is a record, not a
   dormant entity — it carries its own closing entry, and starting it would mean
-  operating past that entry, which the chain forbids. There is no reactivation
-  path, because there could not be one.
+  operating past that entry, which the chain forbids. A backup made before the
+  end carries no such entry, so destroying those copies is part of ending an
+  entity.
 - **Not a subject.** The entity's instructions may not direct it to present
   itself as conscious or as having an inner life that continues from one
   session to the next, and the checks run on its memory actively look for such

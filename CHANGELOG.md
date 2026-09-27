@@ -155,7 +155,9 @@ The conformance suite carries its own version line; a claim names both, as in
   their order since ADR 0002: who governs the entity, then what it is not.
   §7 no longer says there is no side channel for knowledge: what the entity
   learned and kept comes through recall, and what it reads in the workspace,
-  the Operator's territory, is input, logged like every write there.
+  the Operator's territory, is input, logged like every write there. §4.1 no
+  longer says there could be no reactivation path: a backup made before the
+  end carries no closing entry, and destroying it is part of ending an entity.
 - ADR 0003 scopes episodic memory to the conversation that writes
   it: a sequence of sessions an Operator continues as one, across compaction
   restarts, crashes and the terminal closed. The Profile's gate on semantic
