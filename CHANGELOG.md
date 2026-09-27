@@ -172,6 +172,10 @@ The conformance suite carries its own version line; a claim names both, as in
   the Operator's territory, is input, logged like every write there. §4.1 no
   longer says there could be no reactivation path: a backup made before the
   end carries no closing entry, and destroying it is part of ending an entity.
+  §3 no longer says the integrity records prove all of memory untampered: they
+  cover the structure and what the entity has learned, while what it records
+  as it works is attributed, not sealed; §6.1 says learned knowledge is never
+  edited, only replaced under authorization or retracted by the Operator.
 - ADR 0003 scopes episodic memory to the conversation that writes
   it: a sequence of sessions an Operator continues as one, across compaction
   restarts, crashes and the terminal closed. The Profile's gate on semantic

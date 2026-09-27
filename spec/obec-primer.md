@@ -89,8 +89,9 @@ content:
 - **memory** — what it records as it works, and what it has **learned** from
   that;
 - **integrity** records — among them a **chain** with one entry for every
-  authorized change to the structure — which prove that none of the above has
-  been tampered with.
+  authorized change to the structure — which prove that the structure, and what
+  the entity has learned, have not been tampered with. What it records as it
+  works is attributed to the session that wrote it, not sealed.
 
 The store is self-contained and host-agnostic — nothing about the entity lives
 outside it, and nothing inside it depends on the machine it happens to be on.
@@ -268,7 +269,9 @@ superseded by a newer record that cites it. A later conversation sees it only
 if the one before names it as the work to carry on, or the Operator brings it
 back. What the entity has **learned** is different: it reaches every later
 conversation on its own, so it gets there only with an Operator's
-authorization, like a structural change.
+authorization, like a structural change, and it is sealed like structure: it is
+never edited, and a wrong fact is corrected only by an authorized replacement
+or retracted by the Operator.
 
 Memory is also checked for **drift**: content pulling the entity away from what
 it was authorized to be. The checks, the **probes**, are exact patterns with no
