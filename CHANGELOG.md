@@ -86,6 +86,14 @@ The conformance suite carries its own version line; a claim names both, as in
   present itself as alive, and its test executes that. Drift detection is
   said to run on memory, not structure, and no longer to wait for the next
   consolidation.
+- The Core's opening restates two of its four claims as what the invariants
+  deliver. *Every change was authorized by a human* becomes *only a human can
+  authorize a change*, since neither the entity nor any part of the
+  implementation can create an authorization, while which person stands
+  behind a binding is the Security extension's; *it cannot exceed its bounds*
+  becomes *its reach is declared and recorded*, since an admitted skill's code
+  can exceed its declaration (§6.2). The opening points to §6 for what each
+  claim does not cover.
 - The Core says what OC-007 does not govern. The entity can write to the
   workspace and read it back in a later conversation, outside the Memory
   Store; a note on OC-007 says the workspace is the Operator's territory, that

@@ -16,10 +16,11 @@ identity, authority and boundaries are verifiable from their own portable state.
 
 An entity under this specification is built on a stateless language model. It
 reasons, remembers, and acts on a host, and it can prove four things about
-itself: that it is the entity that was activated; that every change to what it is
-was authorized by a human; that the proof travels with it; and that it cannot
-exceed its bounds. Ten invariants carry those four claims, and each one has a
-test.
+itself: that it is the entity that was activated; that only a human can
+authorize a change to what it is, since neither the entity nor any part of the
+implementation can create an authorization; that the proof travels with it; and
+that its reach is declared and recorded. Ten invariants carry those four claims,
+and each one has a test. What each claim does not cover is in §6.
 
 > **Version status.** This is 0.11.0: the normative content is complete and the
 > conformance suite is not. **No entity should be created under this
