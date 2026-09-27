@@ -273,8 +273,8 @@ Memory is also checked for **drift**: content pulling the entity away from what
 it was authorized to be. The checks, the **probes**, are exact patterns with no
 model involved, and they are themselves structure: set at first activation and
 changed only by an authorized commit. Among them are the ones for the language
-§4 rules out. They gate what is learned, and check the rest of memory after it
-is written.
+§4 rules out. They gate what is learned, and check the rest of memory as it is
+written.
 
 ---
 

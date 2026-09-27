@@ -122,7 +122,8 @@ The conformance suite carries its own version line; a claim names both, as in
   authorization, and that drift is content pulling the entity away from what
   it was authorized to be, found by probes that are themselves structure. §3
   and §4 no longer speak of consolidation, and §9 says a closed session does
-  not end the work: only the Operator ends a conversation.
+  not end the work: only the Operator ends a conversation. The probes check
+  memory as it is written, not after.
 - ADR 0003 scopes episodic memory to the conversation that writes
   it: a sequence of sessions an Operator continues as one, across compaction
   restarts, crashes and the terminal closed. The Profile's gate on semantic
