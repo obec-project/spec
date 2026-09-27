@@ -199,11 +199,17 @@ a direct violation of OC-004.
 
 **(a) Probes and digest.** **Semantic Probes** are structural anchors assembled
 with the initial structural state at first activation and updated only through
-authorized commits. A **Semantic Digest** — an incrementally updated aggregate
-over consolidated content, held as integrity content — SHOULD be compared against
-the probes during Sleep. The probes SHOULD also run on content requested for
-promotion before it is offered for authorization (OP-009(f)): content they flag
-is not offered, and the failure is logged.
+authorized commits. The probes SHOULD run on what the entity writes to memory —
+its episodic records and the consolidation — as it is written, and not on the
+whole transcript: an Operator's words are not the entity's drift. What they
+flag is recorded in the **Semantic Digest**, an incrementally updated record
+held as integrity content, so that cognition cannot alter it (OC-005). The
+digest SHOULD be evaluated against the thresholds of OP-004 in every Sleep, so
+that a conversation never ended is still checked.
+
+The probes SHOULD also run on content requested for promotion before it is
+offered for authorization (OP-009(f)): content they flag is not offered, and
+the failure is logged.
 
 **(b) Deterministic probes.** Probes SHOULD be **deterministic** — required
 keywords, forbidden patterns, content hashes — and confirm drift without
@@ -709,9 +715,9 @@ concurrently:
    the stage is skipped if none are queued.
 
 A Sleep between two sessions of one conversation therefore executes commits
-only. Semantic drift detection (OP-005) runs with consolidation. The credential
-is revoked before Sleep begins; the artifact is removed only at Sleep
-completion, serving as the crash indicator throughout (OP-018(a)).
+only. Semantic drift is evaluated from the digest in every Sleep (OP-005(a)).
+The credential is revoked before Sleep begins; the artifact is removed only at
+Sleep completion, serving as the crash indicator throughout (OP-018(a)).
 
 **(b) Maintenance authority.** During Sleep no intent is generated and no
 stimulus is processed: cognition is inactive. Maintenance operations run under
@@ -725,10 +731,14 @@ executions performed under direct integrity instruction.
 #### OP-023 — Decommission
 
 Decommission requires explicit Operator authorization. A final Sleep SHOULD
-execute first — consolidating pending mnemonic content and committing queued
-authorized proposals — then the credential artifact is removed, the chain is
-closed by a final entry recording the decommission, and the store is destroyed or
-archived at the Operator's choice.
+execute first, committing queued authorized proposals; then the credential
+artifact is removed, the chain is closed by a final entry recording the
+decommission, and the store is destroyed or archived at the Operator's choice.
+
+No Closure Payload is emitted. The current conversation's memory is already in
+the Memory Store, written as the entity worked (OP-009(c)), and no conversation
+follows to carry a working set to. Pending promotions are not processed; an
+archived store keeps them as records.
 
 The orderly path is not the only one: the Operator can always halt the entity
 directly (OP-021(a)) and dispose of the store with no component's cooperation.

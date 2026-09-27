@@ -46,6 +46,16 @@ The conformance suite carries its own version line; a claim names both, as in
   deterministic probes is the Security extension's scope. OP-004(b), OP-005,
   OP-010, OP-018, OP-021, OP-022, OP-024 and Appendix A follow, and OP-009's
   clauses run from (a) to (h).
+- The Profile's Semantic Digest and decommission follow ADR 0003. The digest
+  was an aggregate compared against the probes during Sleep, a form made for
+  similarity metrics, and Sleep now consolidates only when a conversation
+  ends, so a conversation never ended would never be checked. The probes now
+  run on what the entity writes to memory as it is written, not on the whole
+  transcript; the digest records what they flag, as integrity content, which
+  keeps the kernel's *drift digests* meaningful; and it is evaluated against
+  OP-004's thresholds in every Sleep (OP-005(a), OP-022). OP-023's final Sleep
+  no longer consolidates: memory is already in the store, and no conversation
+  follows.
 - The Core's glossary follows: the Memory Store holds the session records
   too, *Conversation* is defined, the Closure Payload and the Resumption
   Record serve conversations and cite OP-009's new clauses, and Sleep
