@@ -1,9 +1,9 @@
 ---
 title: "OBEC Core"
 short_title: "OBEC-Core"
-version: "0.11.0"
+version: "0.12.0"
 status: "Pre-release — normative, pending conformance validation"
-date: 2026-09-25
+date: 2026-09-27
 companions:
   - "obec-kernel.md — the version-bound normative kernel"
   - "obec-profile.md — the Implementation Profile"
@@ -22,7 +22,7 @@ implementation can create an authorization; that the proof travels with it; and
 that its reach is declared and recorded. Ten invariants carry those four claims,
 and each one has a test. What each claim does not cover is in §6.
 
-> **Version status.** This is 0.11.0: the normative content is complete and the
+> **Version status.** This is 0.12.0: the normative content is complete and the
 > conformance suite is not. **No entity should be created under this
 > specification before 1.0**, because OC-004(a) records the major version in the
 > Genesis Anchor and a pre-release version can still change beneath it. 1.0

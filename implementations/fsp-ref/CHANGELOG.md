@@ -1,7 +1,7 @@
 # fsp-ref — changelog
 
 What changed in fsp-ref, by phase, and why. fsp-ref has no release of its own
-yet; it targets the latest OBEC release, now OBEC-Core 0.11.0. Changes to the specification and the suite
+yet; it targets the latest OBEC release, now OBEC-Core 0.12.0. Changes to the specification and the suite
 that fsp-ref prompted are recorded in the [root CHANGELOG](../../CHANGELOG.md).
 
 Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
@@ -133,6 +133,11 @@ The specification decisions the phase depends on come first.
   by the integrity path, can only add a flag, fails closed, and keeps its
   instructions in `probes.json`, outside every window. Embeddings leave the
   plan.
+- **Retargeted to OBEC-Core 0.12.0** (2026-09-27). The release clarifies
+  OC-002(c) and changes the Profile's memory (ADR 0003); fsp-ref's code does
+  not implement memory yet, so it changes what fsp-ref names, not what it
+  does. The Genesis records the new version, and development stores made under
+  0.11.0 are disposable.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores

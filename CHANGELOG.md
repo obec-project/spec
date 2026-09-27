@@ -17,7 +17,16 @@ The conformance suite carries its own version line; a claim names both, as in
 
 ---
 
-## Unreleased
+## 0.12.0 — 2026-09-27
+
+A minor release: one clarifying revision, OC-002(c), which advances the minor
+version (GOVERNANCE §4). Outside the kernel, the Profile's memory is redesigned
+(ADR 0003): a conversation spans sessions, episodic memory belongs to it, and
+semantic memory is promoted only under an Operator authorization and sealed
+against edit; the Core states what OC-007 does not govern in the workspace and
+what verification cannot tell about earlier copies of a store. Suite 0.3.1.
+**Still pre-release:** no entity should be created under this version, for the
+reason 0.9.0 gives.
 
 **The specification**
 
@@ -106,6 +115,19 @@ The conformance suite carries its own version line; a claim names both, as in
   Record serve conversations and cite OP-009's new clauses, and Sleep
   consolidates and collects garbage only when an Operator leaves a
   conversation. The kernel does not change.
+
+**Conformance suite 0.3.1**
+
+- Targets OBEC-Core 0.12.0. A patch version of the suite: no step, contract
+  or assertion changed since 0.3.0, and the version moves only so that a claim
+  names a suite that targets the release it claims against.
+
+**Reference implementation**
+
+- fsp-ref targets OBEC-Core 0.12.0: `OBEC_VERSION`, the version its Genesis
+  records, moves with the release. Its design follows ADR 0003 and the sealed
+  semantic memory (D11, D13, D53, D60, G8 and G10 closed), for Phase 7; its
+  code does not implement memory yet, so no behavior changes.
 
 **Repository**
 
