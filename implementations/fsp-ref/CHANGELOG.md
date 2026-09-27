@@ -115,6 +115,13 @@ The specification decisions the phase depends on come first.
   `/new`; D10, D24 and D53 follow; D60 adds `/resume` and `/inject` and the
   pointer map that carries the working set. The deviations from OP-009,
   OP-010 and OP-018 are gone, since the Profile now says what fsp does.
+- **D53 revised — semantic memory is sealed** (2026-09-27). The Profile
+  protects semantic memory against edit as it protects structure (OP-009(f)):
+  a digest over each record's canonical serialization, a semantic ledger held
+  as authorization state, a check on every recall and a sweep by the Vital
+  Check, correction by a superseding promotion and retraction by the
+  Operator. D53 takes it on, with `integrity/semantic-ledger.jsonl` and
+  `/retract`.
 - **The probabilistic layer leaves the plan** (2026-09-27, ADR 0003). The
   Profile keeps only the deterministic probes, and detection beyond them is
   the Security extension's scope; fsp targets the Profile's simplest form
