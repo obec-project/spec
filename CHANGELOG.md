@@ -27,6 +27,25 @@ The conformance suite carries its own version line; a claim names both, as in
   implementation may not run a store at all, or run it without preserving its
   integrity and the Operator's audit trail. The Profile now says so, and a
   note on OC-003 in the Core states the scope of (b).
+- The Profile applies ADR 0003. Content refused at semantic promotion stayed
+  episodic and recallable by every later session, and a session ends for
+  reasons that do not end the work, a closed terminal among them. OP-009
+  becomes *Conversations and their memory*: a conversation is a sequence of
+  sessions an Operator continues as one, and only an Operator leaves it, by
+  ending it with a Closure Payload, starting a new one, or resuming a past
+  one. The Memory Store holds the session records, episodic and semantic
+  memory; a transcript reaches cognition only in the assembled context, since
+  its last clear, and recall never returns one. Episodic memory is written
+  during the session, belongs to its conversation and is never edited: a new
+  record names the one it supersedes, and recall returns the latest of each
+  lineage. The Resumption Record points the next conversation at its working
+  set, with an optional age limit per lineage, and an Operator can inject a
+  past conversation's records or resume it. Promotion SHOULD require an
+  Operator authorization naming the content's digest, where it was MAY. The
+  probabilistic probe layer leaves the Profile; detection beyond the
+  deterministic probes is the Security extension's scope. OP-004(b), OP-005,
+  OP-010, OP-018, OP-021, OP-022, OP-024 and Appendix A follow, and OP-009's
+  clauses run from (a) to (h).
 
 **Repository**
 

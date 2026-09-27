@@ -184,7 +184,7 @@ configuration:
 **(a) Identity Drift** — active structural content diverging from the integrity
 baseline; detected per Vital Check by hash comparison.
 
-**(b) Semantic Drift** — consolidated memory diverging from the probes (OP-005).
+**(b) Semantic Drift** — memory content the probes flag (OP-005).
 
 **(c) Evolutionary Drift** — a chain discontinuity or authorization gap: a commit
 not referencing its predecessor, a state hash not matching its commit, a commit
@@ -201,18 +201,14 @@ a direct violation of OC-004.
 with the initial structural state at first activation and updated only through
 authorized commits. A **Semantic Digest** — an incrementally updated aggregate
 over consolidated content, held as integrity content — SHOULD be compared against
-the probes during Sleep. The same comparison SHOULD gate semantic promotion
-(OP-009(c)): content failing it is not promoted, and the failure is logged.
+the probes during Sleep. The probes SHOULD also run on content requested for
+promotion before it is offered for authorization (OP-009(f)): content they flag
+is not offered, and the failure is logged.
 
-**(b) Layers and isolation.** Probes SHOULD be defined in two layers. The
-**deterministic** layer — required keywords, forbidden patterns, content hashes —
-runs first and confirms drift without inference. The **probabilistic** layer —
-similarity metrics — runs only when the deterministic layer is inconclusive.
-
-Probabilistic comparison **MUST** run isolated from cognition: a comparison
-mechanism must not inherit the drift it detects.
-
-The deterministic layer MUST include the patterns OC-002(d) requires.
+**(b) Deterministic probes.** Probes SHOULD be **deterministic** — required
+keywords, forbidden patterns, content hashes — and confirm drift without
+inference. They MUST include the patterns OC-002(d) requires. Detection beyond
+them, such as similarity metrics, is the Security extension's scope.
 
 *Serves:* OC-002(d), OC-005(b), OC-007.
 
@@ -290,53 +286,135 @@ read. Reading store content is not a boundary crossing under OC-009.
 ## 4. Memory
 
 The core requires that persisted knowledge come from the Memory Store and that
-every mnemonic record name its session. It does not say how a session's memory
-becomes long-term memory.
+every mnemonic record name its session. It does not say which memory a session
+reaches, or how memory outlives the work it served.
 
 ---
 
-#### OP-009 — The session-close memory flow
+#### OP-009 — Conversations and their memory
 
-**(a) The Closure Payload.** Consolidation SHOULD be a cognitive act. At session
-close, cognition — the only part able to structure memory coherently for its own
-later use — consolidates the session's episodic memory and emits the **Closure
-Payload**, carrying: the session's consolidation; a declaration of the working
-context the next session needs; the message that contextualizes that context and
-sets the next steps; and, when the session produced learnings worth persisting,
-the requested promotion of episodic memories into semantic memory.
+**(a) The conversation.** A **conversation** is a sequence of sessions that an
+Operator continues as one. A new session continues the current conversation
+unless an Operator left it, so a conversation continues across a compaction
+restart (OP-010), a structural change applied at once, a change of model, a
+crash, and a session the Operator stopped without closing it. One conversation
+is current at a time (OC-003(d)).
 
-The payload SHOULD be written to the session store **on emission**, which is what
-makes Sleep re-executable from it after a crash (OP-018).
+Only an Operator leaves the current conversation, in one of three ways:
 
-**(b) Consolidation and collection.** During Sleep, the memory path SHOULD
-process the payload: the Memory Store is written through this path and no other.
-In the same Sleep, garbage collection SHOULD remove expired session-store content
-under retention rules declared in configuration.
+- **ending it with a Closure Payload** (d). The conversation ends when the Sleep
+  that processes the payload completes; a crash before then leaves it open.
+- **starting a new one.** No payload is emitted, and the new conversation starts
+  with no working set.
+- **resuming a past one** (g).
 
-**(c) Semantic promotion.** Semantic memory is refined knowledge. Promotion of
-episodic content into the semantic store is requested through the payload and
-**SHOULD be gated by the drift comparison of OP-005(a)**. Content that fails the
-comparison is not promoted, and the failure is logged.
+Cognition may close a session, and never leaves a conversation. An Operator may
+also **clear the transcript** (b); the conversation, with its memory, continues.
 
-An implementation MAY also require an Operator authorization for promotion, in
-the shape of OC-001(b): a per-promotion approval, or a standing grant bounded by
-expiry, budget and scope. The authorization then names the content it covers,
-and a promotion waiting for one does not hold up the rest of Sleep — the
-content stays episodic, and recallable, until it is authorized or rejected.
+**(b) The Memory Store.** The Memory Store holds three kinds of mnemonic
+content: the **session records** — each session's transcript, intents, results
+and events, and the Closure Payload — episodic memory, and semantic memory. The
+mnemonic operations write all three, and are the one path through which any of
+them reaches cognition.
 
-**(d) The Resumption Record.** A **Resumption Record** SHOULD be produced during
-Sleep as the digest of the payload, carrying three things: a pointer map to the
-working memories the next session needs, resolved to Memory Store addresses after
-consolidation, within a limit declared in configuration; the message that
-contextualizes them and sets the next steps; and the session's consolidation.
+The context assembled for cognition carries the current conversation's
+transcript since its last clear, as much of it as the context budget admits,
+keeping the most recent turns; what does not fit stays in the store. That is the
+only way a transcript reaches cognition: recall never returns one, from before a
+clear or from another conversation. What the entity means to keep beyond a
+clear, it saves as episodic memory.
 
-Retrieval against it at the next session start follows the normal recall path —
-it is a pointer map, not a second source of knowledge. The record SHOULD be
-loaded at start only if the integrity log holds the completion record of the
-Sleep that produced it; otherwise it is discarded and logged, and the session
-starts without resumption context.
+**(c) Episodic memory.** Episodic memory SHOULD be written during the session,
+as cognition works, so that work saved survives a context lost to a compaction
+restart or a crash. A record belongs to the conversation that wrote it. A
+conversation's **recall scope** is the episodic records it wrote and those its
+pointer map names ((e), (g)); a recall that would return a record outside it is
+refused and logged.
 
-*Serves:* OC-007 (recall remains the only path), OC-003(c), OC-010.
+A record is never edited: an authorization that names its digest (f) holds only
+if it stays as written. To update what it knows, cognition writes a new record
+naming the one it **supersedes**. Following those links from any record gives
+its **lineage**, back to its root. Recall returns the latest record of each
+lineage in scope; asking for a lineage returns its earlier records in scope, and
+names, without returning, those outside it.
+
+**(d) The Closure Payload.** Consolidation SHOULD be a cognitive act. When an
+Operator ends a conversation with a Closure Payload, cognition — the only part
+able to structure memory coherently for its own later use — emits the
+**Closure Payload**, carrying: the conversation's consolidation; the working
+set, the records the next conversation needs; the message that contextualizes
+them and sets the next steps; and, when the conversation produced learnings
+worth persisting, the requested promotion of episodic records into semantic
+memory.
+
+The payload SHOULD be written among the session records **on emission**, which
+is what makes Sleep re-executable from it after a crash (OP-018). During that
+Sleep the memory path processes it: it writes the consolidation as an episodic
+record of the conversation, produces the Resumption Record (e), and records the
+promotion requests (f).
+
+**(e) The Resumption Record.** A **Resumption Record** SHOULD be produced during
+the Sleep that processes the payload, carrying three things: a pointer map
+naming the working set — the latest record of each lineage, within a limit
+declared in configuration; the message that contextualizes it and sets the next
+steps; and the conversation's consolidation. Nothing is copied: a record stays
+in the conversation that wrote it, and the map is attributed to the conversation
+that emitted it.
+
+Configuration MAY declare a maximum age for a lineage, counted in conversation
+boundaries — a conversation ended, started or resumed — since its root was
+written. The pointer map does not name a lineage past the limit: it stays where
+it is, reachable by (g), or it is promoted (f). The limit keeps stale records
+from being carried indefinitely; it does not bound a cognition that restates
+content without naming the record it supersedes.
+
+Retrieval against the record follows the normal recall path — it is a pointer
+map, not a second source of knowledge. It SHOULD be loaded at the start of the
+next conversation only if the integrity log holds the completion record of the
+Sleep that produced it; otherwise it is discarded and logged, and the
+conversation starts with no working set.
+
+**(f) Semantic promotion.** Semantic memory is refined knowledge, and the only
+memory that crosses conversations on its own. Promotion of episodic records into
+semantic memory is requested through the payload and **SHOULD require an
+Operator authorization** in the shape of OC-001(b): a per-promotion approval, or
+a standing grant over a scope that covers promotion (OP-011(d)). The
+authorization names the digest of the content it covers, so what is promoted is
+exactly what was authorized. The probes of OP-005 run first: content they flag
+is not offered for authorization, and the failure is logged.
+
+A promotion waiting for its authorization does not hold up the rest of Sleep.
+One refused, or never authorized, leaves the content in its conversation,
+reachable only through a pointer. How many pointer maps have named a lineage
+MAY be used to propose promotions or to order them for review; it never
+replaces the authorization.
+
+**(g) Bringing a conversation back.** Only an Operator brings a past
+conversation back, as a logged act performed through means the implementation
+provides directly to the Operator, in one of two ways:
+
+- **injecting its records.** Episodic records of a past conversation, all of
+  them or those the Operator selects, are added to the current conversation's
+  pointer map, attributed to the Operator's binding. The current conversation
+  continues, without their transcript.
+- **resuming it.** The past conversation, named by its identifier, becomes the
+  current one (a): its transcript since its last clear enters the context again
+  (b), and its recall scope is what it was when it was left. Records written by
+  later conversations, including those that supersede its own, are not in it.
+
+Nothing cognition writes adds to its scope except its own records.
+
+**(h) Retention and collection.** The session records and episodic memory of
+conversations other than the current one SHOULD be kept under retention rules
+declared in configuration, which may differ for the two. Garbage collection
+removes what the rules have expired, and logs it. A record is kept while the
+current conversation's pointer map names it or a pending promotion refers to
+it. An expired episodic record leaves its identifier, content digest, session
+of origin and supersedes link, so a lineage can still be followed after its
+content is gone; a conversation whose records have partly expired is resumed
+with what remains.
+
+*Serves:* OC-007 (recall remains the only path), OC-003(c), OC-003(e), OC-010.
 
 ---
 
@@ -346,18 +424,18 @@ Cognition SHOULD report its context-window utilization as a health signal,
 evaluated against two thresholds declared in configuration:
 
 - past the **soft** threshold, cognition SHOULD close the session itself;
-- past the **hard** threshold, it is signaled to stop current processing, persist
-  the working context worth keeping through normal mnemonic writes, and emit the
-  Closure Payload.
+- past the **hard** threshold, it is signaled to stop current processing and
+  persist the working context worth keeping as episodic memory (OP-009(c)).
 
 The headroom above the hard threshold is the reserve that guarantees this
 sequence still fits the window; it SHOULD be sized together with the Vital Check
 cadence, so that a breach is detected while the guarantee still holds.
 
 A threshold breach is a **capacity condition, not an anomaly**: OP-003(b)'s state
-is unaffected. Either way the session closes normally, Sleep follows, and the
-start sequence runs immediately after, delivering the Resumption Record so
-cognition continues from where it stopped.
+is unaffected. Either way the session closes normally, a Sleep that executes
+commits only follows (OP-022), and the start sequence runs immediately after.
+The new session continues the conversation (OP-009(a)): no Closure Payload is
+emitted, and cognition recovers its working context through recall.
 
 This restart continues the same Operator-initiated operation and is not
 self-activation (OC-002(a)).
@@ -547,11 +625,12 @@ exists.**
 If the integrity log holds a Sleep completion record, the entity resumes from
 that boundary. If not, the pre-commit snapshot is restored, discarding any
 partial commit, and Sleep re-executes from the start, from the Closure Payload
-held in the session store (OP-009(a)).
+held among the session records if one was emitted (OP-009(d)).
 
-A crash before the payload was emitted leaves nothing to consolidate: that
-session's progress never reaches the Memory Store, is invisible to recall, and
-its session-store residue is removed by garbage collection.
+A crash leaves the conversation open (OP-009(a)), and the next start continues
+it: the transcript and the episodic records the crashed session wrote are in
+scope, and only what it had not yet written is lost. A conversation whose
+ending Sleep did not complete ends when the re-executed Sleep does.
 
 **(b) Attempt threshold.** Consecutive recovery attempts SHOULD be counted in the
 integrity log. At a threshold `N_boot` declared in configuration, the passive
@@ -600,8 +679,9 @@ Operator notified before any new one is issued.
 **(a) Close modes.** A session ends one of three ways:
 
 - **Normal close** — an Operator signal, a close intent from cognition, or a
-  condition declared in configuration (OP-010's thresholds are one such). The
-  Closure Payload is emitted and Sleep follows.
+  condition declared in configuration (OP-010's thresholds are one such). Sleep
+  follows, preceded by the Closure Payload when the close ends the conversation
+  with one (OP-009(a)).
 - **Critical** — escalation happens before any Sleep may run.
 - **Direct intervention** — the Operator removes the credential artifact from the
   store, with no component involved. The entity halts immediately, with no
@@ -621,14 +701,17 @@ start.
 **(a) Stages.** Sleep SHOULD run after every normal close, in three stages, never
 concurrently:
 
-1. **consolidation** — the Closure Payload is processed (OP-009);
-2. **garbage collection** (OP-009(b));
+1. **consolidation** — the Closure Payload is processed (OP-009(d)), in a Sleep
+   that follows one;
+2. **garbage collection** (OP-009(h)), in a Sleep that follows the Operator
+   leaving a conversation;
 3. **commit execution** — queued authorized proposals commit through OP-012, or
    the stage is skipped if none are queued.
 
-Semantic drift detection (OP-005) runs in this window. The credential is revoked
-before Sleep begins; the artifact is removed only at Sleep completion, serving as
-the crash indicator throughout (OP-018(a)).
+A Sleep between two sessions of one conversation therefore executes commits
+only. Semantic drift detection (OP-005) runs with consolidation. The credential
+is revoked before Sleep begins; the artifact is removed only at Sleep
+completion, serving as the crash indicator throughout (OP-018(a)).
 
 **(b) Maintenance authority.** During Sleep no intent is generated and no
 stimulus is processed: cognition is inactive. Maintenance operations run under
@@ -672,7 +755,7 @@ implementation; skills are the only per-entity extension of capability.
 | Part | Owns |
 |---|---|
 | **CPE** | cognition: turns stimuli into intents. Owns no operation on the store or the host |
-| **MIL** | the mnemonic operations — recall, session writes, consolidation, garbage collection — over the Session Store and the Memory Store |
+| **MIL** | the mnemonic operations — session writes, episodic writes, recall, consolidation, promotion, garbage collection — over the Memory Store |
 | **EXEC** | the host operations: native primitives and skill execution |
 | **SIL** | the integrity operations: store verification, skill admission, the Heartbeat, the commit pipeline, the standing-grant lifecycle, credential issuance and revocation |
 
@@ -704,8 +787,9 @@ implementation SHOULD document its default and its permitted range for each.
 | `N_ckpt` | commits between chain checkpoints | OP-007(c) |
 | log compaction policy | retention of routine operational records | OP-007(b) |
 | `N_channel` | live delivery attempts before the passive signal | OP-008(b) |
-| retention rules | session-store garbage collection | OP-009(b) |
-| pointer-map limit | size of the Resumption Record's working set | OP-009(d) |
+| retention rules | collection of session records and episodic memory of conversations other than the current one | OP-009(h) |
+| pointer-map limit | size of the Resumption Record's working set | OP-009(e) |
+| lineage age limit | conversation boundaries a lineage may be carried across; optional | OP-009(e) |
 | soft / hard context thresholds | session self-close and forced close | OP-010 |
 | watchdog deadlines | per-execution timeout | OP-014(a) |
 | `N_boot` | consecutive recovery attempts before halt | OP-018(b) |
