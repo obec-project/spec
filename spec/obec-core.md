@@ -815,8 +815,8 @@ their mechanism is not required for conformance.
 **Action Ledger** *(Profile)* — the write-ahead record covering irreversible
 operations; entries append before execution and resolve after (OP-015).
 
-**Closure Payload** *(Profile)* — cognition's session-close output, and its
-instrument of coherence across sessions (OP-009(a)).
+**Closure Payload** *(Profile)* — cognition's output when an Operator ends a
+conversation, and its instrument of coherence across conversations (OP-009(d)).
 
 **Cognitive cycle** *(Profile)* — the atomic unit of cognition: one stimulus
 assembled into context, one stateless inference, the resulting intents dispatched
@@ -829,6 +829,9 @@ nothing about how it works.
 **Configuration** — structural content that shapes or bounds the entity: its
 operational rules, its probes, the parameters that shape its memory. Distinct
 from operational settings.
+
+**Conversation** *(Profile)* — a sequence of sessions an Operator continues as
+one; episodic memory belongs to the conversation that wrote it (OP-009(a)).
 
 **Core Invariant** — a rule of §2. No extension, configuration, or operational
 condition may weaken one, and the set is closed (§4).
@@ -865,9 +868,9 @@ through the single path of OC-005(a).
 **Intent** — a request emitted by cognition naming one operation of one owner. An
 intent has no effect until its owner accepts it.
 
-**Memory Store** — episodic records of past sessions and accumulated semantic
-knowledge; the sole origin of persisted knowledge that informs cognition
-(OC-007).
+**Memory Store** — session records, episodic records of past sessions and
+accumulated semantic knowledge; the sole origin of persisted knowledge that
+informs cognition (OC-007).
 
 **Mnemonic content** — session records and consolidated memory. One of the three
 content classes; written only through the mnemonic operations (OC-003(c)).
@@ -892,8 +895,8 @@ a session credential until an Operator act clears it (OC-001(c)).
 proposal; one of the two forms of valid authorization (OC-001(b)).
 
 **Resumption Record** *(Profile)* — the digest of the Closure Payload, carrying
-the pointer map, contextualizing message and consolidation the next session needs
-(OP-009(d)).
+the pointer map, contextualizing message and consolidation the next conversation
+needs (OP-009(e)).
 
 **Semi-Trusted host** — the host-trust assumption of this specification: the host
 runs the implementation faithfully but can crash, lose data, restart processes,
@@ -911,8 +914,9 @@ manifest-valid (OC-008(c)).
 content; admission to it is what makes a skill executable (OC-008(c)).
 
 **Sleep** *(Profile)* — the maintenance stage between session close and removal
-of the credential artifact: consolidation, garbage collection, and commit
-execution (OP-022).
+of the credential artifact: commit execution, garbage collection when an
+Operator leaves a conversation, and consolidation when the conversation ends
+with a Closure Payload (OP-022).
 
 **Standing grant** — an Operator authorization bounded simultaneously by expiry,
 commit budget and declared scope, under which in-scope proposals commit with no
@@ -961,7 +965,7 @@ and RECOMMENDED, describing mechanism rather than guarantee, in eight sections:
 |---|---|---|
 | 2 | **Cognition** — the cognitive cycle, chains, Operator preemption, stimulus routing | OP-001 – OP-002 |
 | 3 | **Integrity, drift and escalation** — Vital Checks, drift categories, probes, index pruning, record retention, escalation | OP-003 – OP-008 |
-| 4 | **Memory** — the session-close flow, context-window thresholds | OP-009 – OP-010 |
+| 4 | **Memory** — conversations and their memory, context-window thresholds | OP-009 – OP-010 |
 | 5 | **Evolution** — the proposal, the staged commit pipeline | OP-011 – OP-012 |
 | 6 | **Execution** — gate order, execution modes, the Action Ledger, operational rules | OP-013 – OP-016 |
 | 7 | **Lifecycle** — first activation, crash recovery, start cost, the credential, session close, Sleep, decommission | OP-017 – OP-023 |
