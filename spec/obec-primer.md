@@ -432,7 +432,7 @@ called: all yours.
 | asking why it is shaped this way | [design/0001](../design/0001-obec-restructure.md). |
 
 One orientation note for the Core: its ten invariants are ordered as an argument,
-not by importance. The first two say what the entity is not and who governs it;
+not by importance. The first two say who governs the entity and what it is not;
 the next three say what it is and how that is verified; the next four bound what
 reaches it and what it reaches; the last governs the transition into operation.
 Reading them in order is the shortest path to the whole design.
