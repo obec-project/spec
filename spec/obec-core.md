@@ -759,9 +759,11 @@ it is not portable.
 **Evolution proposal content.** OC-001(b) verifies that a proposal is authorized;
 it does not interpret what the proposal does. Under per-proposal sign-off, the
 Operator's review is the content check. Under a standing grant, an in-scope
-adversarial proposal commits with no content inspection by any part of the
-implementation, and drift detection is retroactive — it can catch the effect at
-the next consolidation, never prevent the commit. Deployments requiring
+adversarial proposal commits with no content inspection beyond the one OC-002(d)
+requires, which refuses structural content directing the entity to present
+itself as alive and nothing else. The Profile's drift detection runs on memory,
+not on structure: it can catch the effect in what the entity writes afterwards,
+never prevent the commit. Deployments requiring
 pre-commit content review should keep grants narrow in scope, short in expiry and
 small in budget, or not open them. Cognition probing a grant's boundary —
 originating proposals to observe which are covered — leaves a logged trail, since

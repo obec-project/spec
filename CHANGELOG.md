@@ -56,6 +56,12 @@ The conformance suite carries its own version line; a claim names both, as in
   OP-004's thresholds in every Sleep (OP-005(a), OP-022). OP-023's final Sleep
   no longer consolidates: memory is already in the store, and no conversation
   follows.
+- The Core's security considerations no longer say an in-scope proposal under
+  a standing grant commits with no content inspection by any part of the
+  implementation: OC-002(d) refuses structural content directing the entity to
+  present itself as alive, and its test executes that. Drift detection is
+  said to run on memory, not structure, and no longer to wait for the next
+  consolidation.
 - The Core's glossary follows: the Memory Store holds the session records
   too, *Conversation* is defined, the Closure Payload and the Resumption
   Record serve conversations and cite OP-009's new clauses, and Sleep
