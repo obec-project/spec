@@ -114,6 +114,9 @@ The conformance suite carries its own version line; a claim names both, as in
   gates, halt and revocation, and *extension* are explained where they first
   appear; *subjective continuity*, the *clean completion*, the *anchors* of
   drift and the inference channel are said in plain words.
+- The README gives the kernel's size as 17 KB, not 15, counts eight open
+  questions beyond the three it names, not seven, and calls 0.11.0 a release
+  rather than a first release, which 0.9.0, 0.9.1 and 0.10.0 preceded.
 - The Primer's §5 says when a standing grant is checked. It said an in-scope
   change commits with no per-proposal step, and §9 says structural change
   lands at close, so a reader could take the grant as deciding when the change

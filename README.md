@@ -75,7 +75,7 @@ No configuration, operational condition, or extension — a document that adds
 operations or stricter rules on top of the specification — may weaken any of
 them.
 
-**[Read the ten in full →](spec/obec-kernel.md)** (15 KB, the whole normative
+**[Read the ten in full →](spec/obec-kernel.md)** (17 KB, the whole normative
 requirement)
 
 ---
@@ -138,10 +138,9 @@ year of it. No implementation has yet passed the conformance suite, which is
 new; the [reference implementation](implementations/fsp-ref/) is partway
 through it.
 
-**0.11.0 — pre-release.** It is a first release rather than a first draft: the
-set is the product of a full restructure, and
-[ADR 0001](design/0001-obec-restructure.md) records how each invariant was
-derived and what was deliberately left out. 1.0 would follow a first
+**0.11.0 — pre-release.** It is a release, not a draft: the set is the product
+of a full restructure, and [ADR 0001](design/0001-obec-restructure.md) records
+how each invariant was derived and what was deliberately left out. 1.0 would follow a first
 implementation passing the ten tests, at which point rule identifiers freeze.
 
 Releases are tagged (`v0.11.0`). `main` may be ahead of the latest one, with
@@ -158,7 +157,7 @@ stores until then.
 [**design/OPEN-QUESTIONS.md**](design/OPEN-QUESTIONS.md) is the list of what
 the author is least sure about — whether ten is the right number, whether the
 test of OC-002(d) can be more than a floor, whether portability and
-hardware-backed keys can coexist, and seven more. Each entry says what would settle it.
+hardware-backed keys can coexist, and eight more. Each entry says what would settle it.
 
 **Arguing that one of the ten is wrong is the most useful thing anyone can do
 with this repository right now.** It does not need a replacement, a migration
