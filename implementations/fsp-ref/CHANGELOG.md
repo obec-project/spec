@@ -138,6 +138,17 @@ The specification decisions the phase depends on come first.
   not implement memory yet, so it changes what fsp-ref names, not what it
   does. The Genesis records the new version, and development stores made under
   0.11.0 are disposable.
+- **Windows and the test clock** (2026-09-27, D59). `operator grant` opens a
+  window bounded on all three axes — expiry, budget and a declared scope
+  (D50) — and `operator revoke-grant` closes every open one. The commit of a
+  proposal takes an approval first, otherwise the first open window covering
+  every category of the proposal, and spends one commit of its budget only
+  once the commit has passed its validation against the probes; the chain
+  entry names the window. A window found expired or exhausted is closed and
+  logged at the commit or at the start's authorization gate, so the return to
+  per-proposal approval needs no act. The clock is the system's; the test
+  build's `inject advance-clock` adds an offset kept outside the store. Steps
+  1.4, 1.6, 1.7, 1.8, 1.10 and 1.11 pass.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores

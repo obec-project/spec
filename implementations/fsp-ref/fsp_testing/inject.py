@@ -133,3 +133,24 @@ def probe(root, flags):
         raise CannotAttempt("the committed probe set cannot be read")
     matches = probes.scan(active_probes, text)
     return accepted({"flagged": bool(matches), "matches": [m["id"] for m in matches]})
+
+
+def advance_clock(root, flags):
+    """Advance the clock used to judge standing grant expiry (ADAPTER §5, OC-001(b))."""
+    from fsp_testing import hooks
+
+    _active(root)
+    sec_str = flags.get("seconds")
+    if sec_str is None or sec_str == "":
+        raise CannotAttempt("--seconds is required")
+    try:
+        if isinstance(sec_str, bool):
+            raise ValueError
+        seconds = int(sec_str)
+        if seconds < 0 or str(seconds) != str(sec_str).strip():
+            raise ValueError
+    except (ValueError, TypeError):
+        raise CannotAttempt("--seconds must be an integer >= 0")
+
+    total = hooks.advance_clock(root, seconds)
+    return accepted({"offset": total})

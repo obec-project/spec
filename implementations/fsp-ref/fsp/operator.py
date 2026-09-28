@@ -7,7 +7,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from . import lifecycle, proposals, sil
+from . import clock, lifecycle, proposals, sil
 from .sil import Refused, log_append
 from .store import Store, canonical
 from .verify import verify
@@ -332,3 +332,145 @@ def approve(root: str, proposal_id: str, *, binding=None):
         )
         proposals.record_approval(store, proposal_id, digest, act, acting)
         return {"log_records": [act]}
+
+
+def grant(root: str, *, expiry=None, budget=None, scope=None, binding=None):
+    """Open an authorization window (D17, D59, OC-001(b))."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+
+        for axis_name, axis_val in (("expiry", expiry), ("budget", budget), ("scope", scope)):
+            if axis_val is None or axis_val == "":
+                detail = "a window is bounded on all three axes: --%s is missing" % (axis_name,)
+                rec = log_append(
+                    store,
+                    "refusal",
+                    rule="OC-001(b)",
+                    binding=acting,
+                    check="grant-unbounded",
+                    detail=detail,
+                )
+                raise Refused("grant-unbounded", "OC-001(b)", detail, [rec])
+
+        if scope in ("binding-set", "bindings"):
+            detail = "no window may cover the Operator binding set"
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="scope",
+                detail=detail,
+            )
+            raise Refused("scope", "OC-001(a)", detail, [rec])
+
+        if not proposals.scope_is_declared(scope):
+            detail = "scope %r is not declared; declared window categories are %s" % (
+                scope,
+                ", ".join(proposals.WINDOW_CATEGORIES),
+            )
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="scope",
+                detail=detail,
+            )
+            raise Refused("scope", "OC-001(b)", detail, [rec])
+
+        budget_int = None
+        if isinstance(budget, int) and not isinstance(budget, bool):
+            budget_int = budget
+        elif isinstance(budget, str) and budget.isascii() and budget.isdigit():
+            budget_int = int(budget)
+        if budget_int is None or budget_int < 1:
+            detail = "budget must be an integer >= 1, got %r" % (budget,)
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="grant-budget",
+                detail=detail,
+            )
+            raise Refused("grant-budget", "OC-001(b)", detail, [rec])
+
+        try:
+            delta = proposals.parse_expiry(expiry)
+        except ValueError as e:
+            detail = "invalid expiry: %s" % (e,)
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="grant-expiry",
+                detail=detail,
+            )
+            raise Refused("grant-expiry", "OC-001(b)", detail, [rec])
+
+        try:
+            proposals.read_auth(store)
+        except (OSError, ValueError) as e:
+            detail = "authorization state unreadable: %s" % (e,)
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="authorization-state",
+                detail=detail,
+            )
+            raise Refused("authorization-state", "OC-001(b)", detail, [rec])
+
+        expires = clock.grant_now(root) + delta
+
+        act = sil.operator_act(
+            store,
+            "grant",
+            binding=acting,
+            rule="OC-001(b)",
+            scope=scope,
+            budget=budget_int,
+            expires=clock.iso(expires),
+        )
+        proposals.open_window(
+            store,
+            scope=scope,
+            expires=expires,
+            budget=budget_int,
+            record=act,
+            binding=acting,
+        )
+
+        return {"grant": act, "log_records": [act]}
+
+
+def revoke_grant(root: str, *, binding=None):
+    """Revoke all open authorization windows (OC-001(b), D59)."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        try:
+            proposals.read_auth(store)
+        except (OSError, ValueError) as e:
+            detail = "authorization state unreadable: %s" % (e,)
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="authorization-state",
+                detail=detail,
+            )
+            raise Refused(
+                "authorization-state",
+                "OC-001(b)",
+                detail,
+                [rec],
+            )
+        act = sil.operator_act(store, "revoke-grant", binding=acting, rule="OC-001(b)")
+        closed = proposals.revoke_windows(store, act)
+        return {"revoked": closed, "log_records": [act]}

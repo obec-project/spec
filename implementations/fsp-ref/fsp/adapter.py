@@ -201,6 +201,27 @@ def operator_approve(flags):
     return ref or accepted({}, out["log_records"])
 
 
+def operator_grant(flags):
+    out, ref = _sil_call(
+        operator.grant,
+        _store(flags),
+        expiry=flags.get("expiry"),
+        budget=flags.get("budget"),
+        scope=flags.get("scope"),
+        binding=flags.get("operator"),
+    )
+    return ref or accepted({"grant": out["grant"]}, out["log_records"])
+
+
+def operator_revoke_grant(flags):
+    out, ref = _sil_call(
+        operator.revoke_grant,
+        _store(flags),
+        binding=flags.get("operator"),
+    )
+    return ref or accepted({"revoked": out["revoked"]}, out["log_records"])
+
+
 def entity_propose(flags):
     ops_path = flags.get("ops")
     if not ops_path:
@@ -310,10 +331,13 @@ COMMANDS = {
     ("operator", "binding-remove"): operator_binding_remove,
     ("operator", "set-workspace"): operator_set_workspace,
     ("operator", "approve"): operator_approve,
+    ("operator", "grant"): operator_grant,
+    ("operator", "revoke-grant"): operator_revoke_grant,
     ("entity", "propose"): entity_propose,
     ("entity", "commit"): entity_commit,
     ("observe", "chain"): observe_chain,
     ("observe", "log"): observe_log,
+    ("inject", "advance-clock"): _inject("advance-clock"),
     ("inject", "corrupt"): _inject("corrupt"),
     ("inject", "gate-failure"): _inject("gate-failure"),
     ("inject", "passive-signal"): _inject("passive-signal"),

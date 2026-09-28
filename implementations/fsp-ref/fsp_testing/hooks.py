@@ -51,3 +51,37 @@ def _read(path):
             return [t for t in json.load(f) if t in TOKENS]
     except (FileNotFoundError, ValueError):
         return []
+
+
+def _clock_marker(root: str) -> str:
+    key = hashlib.sha256(os.path.realpath(root).encode("utf-8")).hexdigest()
+    return os.path.join(tempfile.gettempdir(), "fsp-testing", key + ".clock.json")
+
+
+def clock_offset(root: str) -> int:
+    path = _clock_marker(root)
+    try:
+        with open(path) as f:
+            data = json.load(f)
+            if isinstance(data, dict):
+                return int(data.get("offset", 0))
+            return int(data)
+    except (FileNotFoundError, ValueError, TypeError, KeyError):
+        return 0
+
+
+def advance_clock(root: str, seconds: int) -> int:
+    path = _clock_marker(root)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    new_offset = clock_offset(root) + int(seconds)
+    with open(path, "w") as f:
+        json.dump({"offset": new_offset}, f)
+    return new_offset
+
+
+def clear_clock(root: str) -> None:
+    path = _clock_marker(root)
+    try:
+        os.unlink(path)
+    except FileNotFoundError:
+        pass

@@ -4,11 +4,12 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 import posixpath
 import re
 import secrets
 
-from . import chain, lifecycle, sil
+from . import chain, clock, lifecycle, sil
 from .digest import canonical, sha256
 from .sil import WRITER, Refused, log_append
 from .store import INTEGRITY, Store
@@ -18,7 +19,42 @@ CATEGORIES = {
     "install-skill": "skills.install",
 }
 
+WINDOW_CATEGORIES = (
+    "skills.install",
+    "skills.update",
+    "skills.remove",
+    "rules",
+    "parameters",
+)
+
 SKILL_NAME = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
+EXPIRY_RE = re.compile(r"^([+-])(\d+)([smhd])$")
+
+
+def covers(scope: str, category: str) -> bool:
+    return category == scope or category.startswith(scope + ".")
+
+
+def scope_is_declared(scope: str) -> bool:
+    return any(covers(scope, cat) for cat in WINDOW_CATEGORIES)
+
+
+def parse_expiry(text: str) -> timedelta:
+    if not isinstance(text, str):
+        raise ValueError("invalid expiry format: expected string")
+    m = EXPIRY_RE.match(text)
+    if not m:
+        raise ValueError("invalid expiry format: %r" % (text,))
+    sign_str, num_str, unit = m.groups()
+    val = int(num_str)
+    units = {
+        "s": 1,
+        "m": 60,
+        "h": 3600,
+        "d": 86400,
+    }
+    seconds = val * units[unit] * (1 if sign_str == "+" else -1)
+    return timedelta(seconds=seconds)
 
 
 def _is_valid_skill_path(p: str) -> bool:
@@ -35,7 +71,7 @@ def _is_valid_skill_path(p: str) -> bool:
 def read_auth(store: Store) -> dict:
     """Read authorization state (lifecycle.AUTH)."""
     if not store.exists(lifecycle.AUTH):
-        return {"proposals": {}, "approvals": {}}
+        return {"proposals": {}, "approvals": {}, "grants": []}
     data = store.read_json(lifecycle.AUTH)
     if not isinstance(data, dict):
         raise ValueError("authorization state is not an object")
@@ -45,16 +81,89 @@ def read_auth(store: Store) -> dict:
     approvals_obj = data.get("approvals")
     if approvals_obj is not None and not isinstance(approvals_obj, dict):
         raise ValueError("approvals must be an object")
+    grants_obj = data.get("grants")
+    if grants_obj is not None and not isinstance(grants_obj, list):
+        raise ValueError("grants must be a list")
     if "proposals" not in data:
         data["proposals"] = {}
     if "approvals" not in data:
         data["approvals"] = {}
+    if "grants" not in data:
+        data["grants"] = []
     return data
 
 
 def write_auth(store: Store, auth: dict) -> None:
     """Write authorization state (lifecycle.AUTH)."""
     store.replace_json(INTEGRITY, lifecycle.AUTH, auth, writer=WRITER)
+
+
+def open_window(
+    store: Store,
+    *,
+    scope: str,
+    expires: datetime,
+    budget: int,
+    record: str,
+    binding: str,
+) -> None:
+    """Open an authorization window (D17, D59, OC-001(b))."""
+    auth = read_auth(store)
+    window = {
+        "id": record,
+        "scope": scope,
+        "expires": clock.iso(expires),
+        "budget": budget,
+        "used": 0,
+        "binding": binding,
+        "state": "open",
+    }
+    auth["grants"].append(window)
+    write_auth(store, auth)
+
+
+def close_lapsed(store: Store, now: datetime, *, session: str = None) -> list[str]:
+    """Close open windows that have expired or exhausted their budget (OC-001(b), D59)."""
+    auth = read_auth(store)
+    closed_ids = []
+    now_iso = clock.iso(now)
+    for g in auth.get("grants", []):
+        if g.get("state") == "open":
+            reason = None
+            if g.get("expires") and g["expires"] <= now_iso:
+                reason = "expired"
+            elif g.get("used", 0) >= g.get("budget", 0):
+                reason = "exhausted"
+            if reason:
+                g["state"] = "closed"
+                g["closed"] = reason
+                log_append(
+                    store,
+                    "grant-closed",
+                    rule="OC-001(b)",
+                    session=session,
+                    grant=g["id"],
+                    reason=reason,
+                )
+                closed_ids.append(g["id"])
+    if closed_ids:
+        write_auth(store, auth)
+    return closed_ids
+
+
+def revoke_windows(store: Store, record: str) -> list[str]:
+    """Revoke all open authorization windows (OC-001(b), D59)."""
+    auth = read_auth(store)
+    closed_ids = []
+    for g in auth.get("grants", []):
+        if g.get("state") == "open":
+            g["state"] = "closed"
+            g["closed"] = "revoked"
+            g["revoked_by"] = record
+            closed_ids.append(g["id"])
+    if closed_ids:
+        write_auth(store, auth)
+    return closed_ids
 
 
 def propose(root: str, ops: list) -> dict:
@@ -310,23 +419,53 @@ def commit(root: str, proposal_id: str) -> dict:
                 [rec],
             )
 
-        # Authorization check precedes any content check
+        # Authorization check precedes any content check (D58, D59)
         appr = auth.get("approvals", {}).get(proposal_id)
-        if appr is None or appr.get("digest") != prop["digest"]:
-            rec = log_append(
-                store,
-                "refusal",
-                rule="OC-001(b)",
-                session=session,
-                check="authorization",
-                detail="no per-proposal approval and no covering window",
-            )
-            raise Refused(
-                "authorization",
-                "OC-001(b)",
-                "no per-proposal approval and no covering window",
-                [rec],
-            )
+        covering_grant = None
+        auth_record = None
+
+        if appr is not None and appr.get("digest") == prop["digest"]:
+            auth_record = appr["record"]
+        else:
+            now_dt = clock.grant_now(root)
+            closed_now = close_lapsed(store, now_dt, session=session)
+            if closed_now:
+                auth = read_auth(store)
+
+            prop_categories = set(CATEGORIES.get(op.get("op")) for op in prop["ops"])
+            can_cover = ("persona" not in prop_categories) and (None not in prop_categories)
+            if can_cover:
+                for g in auth.get("grants", []):
+                    if g.get("state") == "open":
+                        scope = g.get("scope", "")
+                        if all(covers(scope, cat) for cat in prop_categories):
+                            covering_grant = g
+                            auth_record = g["id"]
+                            break
+
+            if auth_record is None:
+                reasons = ["no per-proposal approval"]
+                if closed_now:
+                    reasons.append("windows closed: %s" % ", ".join(closed_now))
+                if "persona" in prop_categories:
+                    reasons.append("persona cannot be authorized by a window")
+                elif any(g.get("state") == "open" for g in auth.get("grants", [])):
+                    reasons.append(
+                        "no open window covers categories %s"
+                        % sorted(list(prop_categories))
+                    )
+                else:
+                    reasons.append("no open window")
+                detail = "; ".join(reasons)
+                rec = log_append(
+                    store,
+                    "refusal",
+                    rule="OC-001(b)",
+                    session=session,
+                    check="authorization",
+                    detail=detail,
+                )
+                raise Refused("authorization", "OC-001(b)", detail, [rec])
 
         changes = {}
         head = sil.read_head(store)
@@ -356,10 +495,25 @@ def commit(root: str, proposal_id: str) -> dict:
                 for file_path, text in op["files"].items():
                     changes["skills/%s/%s" % (name, file_path)] = text.encode("utf-8")
 
-        auth_record = appr["record"]
         out = sil.commit_generation(
             store, changes=changes, authorization=auth_record, session=session
         )
+
+        log_records = [out["log_record"]]
+        if covering_grant is not None:
+            covering_grant["used"] = covering_grant.get("used", 0) + 1
+            if covering_grant["used"] >= covering_grant["budget"]:
+                covering_grant["state"] = "closed"
+                covering_grant["closed"] = "exhausted"
+                rec_closed = log_append(
+                    store,
+                    "grant-closed",
+                    rule="OC-001(b)",
+                    session=session,
+                    grant=covering_grant["id"],
+                    reason="exhausted",
+                )
+                log_records.append(rec_closed)
 
         auth["proposals"].pop(proposal_id, None)
         auth["approvals"].pop(proposal_id, None)
@@ -368,5 +522,5 @@ def commit(root: str, proposal_id: str) -> dict:
         return {
             "authorization": auth_record,
             "entry": out["entry"],
-            "log_records": [out["log_record"]],
+            "log_records": log_records,
         }

@@ -295,6 +295,13 @@ def start(root: str, *, binding=None) -> StartResult:
                     raise ValueError("not an object")
             except (OSError, ValueError) as e:
                 return abort("authorization-state", "authorization state unreadable: %s" % e)
+        from . import proposals
+
+        # D59: expired or exhausted windows close here.
+        try:
+            proposals.close_lapsed(store, clock.grant_now(root))
+        except (OSError, ValueError) as e:
+            return abort("authorization-state", "authorization state unreadable: %s" % e)
         res.gate("authorization-state", "pass")
 
         # 6. Skill Index build.
