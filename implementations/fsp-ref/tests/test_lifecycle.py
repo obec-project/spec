@@ -257,7 +257,8 @@ class Decommission(Base):
 
     def test_nothing_may_follow_a_decommission_entry(self):
         lifecycle.decommission(self.S, "archive")
-        sil.commit_generation(self.store, changes={}, authorization="L-x")
+        auth = sil.operator_act_located(self.store, "approve", binding="op-1", rule="OC-001(b)")
+        sil.commit_generation(self.store, changes={}, authorization=auth)
         r = verify(self.S)
         self.assertFalse(r.chain_intact)
         self.assertIn("after-decommission", [f.evidence.get("problem") for f in r.findings])

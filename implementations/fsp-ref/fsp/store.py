@@ -29,7 +29,7 @@ import re
 import shutil
 import threading
 
-from .digest import canonical
+from .digest import canonical, sha256
 
 STRUCTURAL = "structural"
 MNEMONIC = "mnemonic"
@@ -304,9 +304,14 @@ class Store:
             directory = os.path.dirname(target)
             self._makedirs(directory)
             created = not os.path.exists(target)
-            fd = os.open(target, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
+            fd = os.open(target, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o644)
             try:
                 offset = os.fstat(fd).st_size
+                if offset > 0 and os.pread(fd, 1, offset - 1) != b"\n":
+                    raise GuardError(
+                        "torn-append",
+                        "%s ends in a torn append; cut it first (D61)" % relpath,
+                    )
                 view = memoryview(line)
                 while view:
                     view = view[os.write(fd, view):]
@@ -316,6 +321,45 @@ class Store:
             if created:
                 _fsync_dir(directory)
             return offset
+
+    def cut_torn_tail(self, cls, relpath: str, *, writer) -> dict | None:
+        """Cut any incomplete trailing fragment from an append-only file (D61)."""
+        self._guard(cls, relpath, writer, "append")
+        target = self.path(relpath)
+        with self.write_lock():
+            try:
+                fd = os.open(target, os.O_RDWR)
+            except FileNotFoundError:
+                return None
+            try:
+                size = os.fstat(fd).st_size
+                if size == 0:
+                    return None
+                if os.pread(fd, 1, size - 1) == b"\n":
+                    return None
+                chunk_size = 65536
+                pos = size
+                cut_at = 0
+                found = False
+                while pos > 0 and not found:
+                    read_len = min(chunk_size, pos)
+                    pos -= read_len
+                    chunk = os.pread(fd, read_len, pos)
+                    idx = chunk.rfind(b"\n")
+                    if idx != -1:
+                        cut_at = pos + idx + 1
+                        found = True
+                fragment_size = size - cut_at
+                fragment = os.pread(fd, fragment_size, cut_at)
+                os.ftruncate(fd, cut_at)
+                os.fsync(fd)
+                return {
+                    "offset": cut_at,
+                    "bytes": fragment_size,
+                    "sha256": sha256(fragment),
+                }
+            finally:
+                os.close(fd)
 
     def create_exclusive(self, cls, relpath, data: bytes, *, writer) -> bool:
         """Create a file that must not exist (``O_EXCL``). False if it did."""

@@ -25,6 +25,7 @@ from .store import (
     create_store_dir,
     is_empty_dir,
 )
+from .verify import authorization_resolves
 
 WRITER = "sil"
 COMMITTER = "sil.commit"
@@ -83,6 +84,9 @@ def log_append_located(
 ) -> dict:
     """Append one record to the integrity log and return its locator dict (D41)."""
     with store.write_lock():
+        cut = store.cut_torn_tail(INTEGRITY, LOG, writer=WRITER)
+        if cut is not None:
+            log_append_located(store, "torn-append", rule="OC-004(a)", **cut)
         last = store.read_last_jsonl(LOG)
         seq = int(last["id"].split("-")[1]) + 1 if last else 1
         record = dict(payload)
@@ -392,10 +396,24 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
     atomic point is the rename of ``HEAD``; everything before it is residue
     until then, and the recovery gate removes it (G5).
 
-    Phase 2 uses it for decommission only; proposals and authorizations
-    come in Phase 3."""
+    The authorization is resolved in the log before anything is staged (D45)."""
     with store.write_lock():
         head = read_head(store)
+        if not authorization_resolves(store, {"kind": kind, "authorization": authorization}):
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                session=session,
+                check="authorization",
+                detail="the authorization names no authorizing act in the log",
+            )
+            raise Refused(
+                "authorization",
+                "OC-001(b)",
+                "the authorization names no authorizing act in the log",
+                [rec],
+            )
         n = head["entry"]
         cur = chain.gen_relpath(n)
         nxt = chain.gen_relpath(n + 1)

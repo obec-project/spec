@@ -106,7 +106,7 @@ def open_window(
     budget: int,
     record: str,
     binding: str,
-    authorization: dict = None,
+    authorization: dict,
 ) -> None:
     """Open an authorization window (D17, D59, OC-001(b))."""
     auth = read_auth(store)
@@ -118,9 +118,8 @@ def open_window(
         "used": 0,
         "binding": binding,
         "state": "open",
+        "authorization": authorization,
     }
-    if authorization is not None:
-        window["authorization"] = authorization
     auth["grants"].append(window)
     write_auth(store, auth)
 
@@ -376,13 +375,16 @@ def propose(root: str, ops: list) -> dict:
 
 
 def record_approval(
-    store: Store, pid: str, digest: str, record: str, binding: str, *, authorization: dict = None
+    store: Store, pid: str, digest: str, record: str, binding: str, *, authorization: dict
 ) -> None:
     """Record an Operator approval for a proposal."""
     auth = read_auth(store)
-    entry = {"digest": digest, "record": record, "binding": binding}
-    if authorization is not None:
-        entry["authorization"] = authorization
+    entry = {
+        "digest": digest,
+        "record": record,
+        "binding": binding,
+        "authorization": authorization,
+    }
     auth["approvals"][pid] = entry
     write_auth(store, auth)
 

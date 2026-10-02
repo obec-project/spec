@@ -189,7 +189,14 @@ class ProposalsTests(Base):
         out_p = proposals.propose(self.S, [{"op": "set-persona", "content": "Valid content"}])
         pid = out_p["proposal"]
 
-        proposals.record_approval(self.store, pid, "sha256:tampered_digest", "fake-rec", "op-1")
+        proposals.record_approval(
+            self.store,
+            pid,
+            "sha256:tampered_digest",
+            "fake-rec",
+            "op-1",
+            authorization={"id": "L-999999", "sha256": "sha256:" + "0" * 64, "offset": 0},
+        )
         with self.assertRaises(Refused) as ctx:
             proposals.commit(self.S, pid)
         self.assertEqual(ctx.exception.check, "authorization")

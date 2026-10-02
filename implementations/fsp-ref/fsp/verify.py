@@ -208,7 +208,7 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
                 why = "predecessor"
             elif not body.get("state_digest"):
                 why = "state-digest"
-            elif not _resolve_authorization(store, body):
+            elif not authorization_resolves(store, body):
                 why = "authorization-unresolved"
         if why:
             r.findings.append(Finding("chain-entry", rel, "sil", {"entry": k, "problem": why}))
@@ -243,7 +243,7 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
     return ok
 
 
-def _resolve_authorization(store: Store, body: dict) -> bool:
+def authorization_resolves(store: Store, body: dict) -> bool:
     """Resolve an entry's authorization against the log (D45 (1))."""
     auth = body.get("authorization")
     if not isinstance(auth, dict) or set(auth.keys()) != {"id", "sha256", "offset"}:

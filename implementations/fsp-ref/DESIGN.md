@@ -222,6 +222,9 @@ to name the exact file in an Identity Drift, prune only the affected skill
 
 A single point of atomicity: the `rename` of `HEAD`.
 
+0. **authorization** — resolves the authorization in the log as the start
+   does (D45); one that names no authorizing act is refused, and nothing is
+   written but the refusal.
 1. **staging** — builds `structural/gen/<n+1>/` complete; `fsync` files and dir.
 2. **validation** — validates the ops and the result, and probes the structural
    content the commit writes (D56).

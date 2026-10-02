@@ -8,6 +8,7 @@ from unittest import mock
 
 from helpers import ROOT, TempDirTest
 
+from fsp.digest import sha256
 from fsp.store import (
     INTEGRITY,
     LOCK,
@@ -242,3 +243,76 @@ class NoRawWrites(TempDirTest):
                             if token in code:
                                 offenders.append("%s:%d %s" % (os.path.relpath(path, ROOT), lineno, token))
         self.assertEqual(offenders, [])
+
+
+class TornAppendGuards(TempDirTest):
+    def setUp(self):
+        super().setUp()
+        create_store_dir(self.p("S"))
+        self.s = Store(self.p("S"))
+        os.makedirs(os.path.dirname(self.s.path("integrity/log.jsonl")), exist_ok=True)
+
+    def test_append_refuses_torn_file(self):
+        self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil")
+        with open(self.s.path("integrity/log.jsonl"), "ab") as f:
+            f.write(b'{"id":"L-000002", partial')
+        with open(self.s.path("integrity/log.jsonl"), "rb") as f:
+            before = f.read()
+        with self.assertRaises(GuardError) as cm:
+            self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000003"}, writer="sil")
+        self.assertEqual(cm.exception.check, "torn-append")
+        with open(self.s.path("integrity/log.jsonl"), "rb") as f:
+            self.assertEqual(f.read(), before)
+
+    def test_cut_torn_tail_on_clean_file(self):
+        self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil")
+        with open(self.s.path("integrity/log.jsonl"), "rb") as f:
+            content_before = f.read()
+        cut = self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil")
+        self.assertIsNone(cut)
+        with open(self.s.path("integrity/log.jsonl"), "rb") as f:
+            content_after = f.read()
+        self.assertEqual(content_before, content_after)
+
+    def test_cut_torn_tail_on_empty_file(self):
+        self.assertIsNone(self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil"))
+        with open(self.s.path("integrity/log.jsonl"), "wb") as f:
+            pass
+        self.assertIsNone(self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil"))
+
+    def test_cut_torn_tail_removes_fragment(self):
+        self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil")
+        self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000002"}, writer="sil")
+        with open(self.s.path("integrity/log.jsonl"), "rb") as f:
+            clean_content = f.read()
+        fragment = b'{"id":"L-000003", "truncated":'
+        with open(self.s.path("integrity/log.jsonl"), "ab") as f:
+            f.write(fragment)
+        cut = self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil")
+        self.assertIsNotNone(cut)
+        self.assertEqual(cut["offset"], len(clean_content))
+        self.assertEqual(cut["bytes"], len(fragment))
+        self.assertEqual(cut["sha256"], sha256(fragment))
+        with open(self.s.path("integrity/log.jsonl"), "rb") as f:
+            self.assertEqual(f.read(), clean_content)
+        offset = self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000003"}, writer="sil")
+        self.assertEqual(offset, len(clean_content))
+
+    def test_cut_torn_tail_entire_file_torn(self):
+        fragment = b"corrupt fragment without newline"
+        with open(self.s.path("integrity/log.jsonl"), "wb") as f:
+            f.write(fragment)
+        cut = self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil")
+        self.assertIsNotNone(cut)
+        self.assertEqual(cut["offset"], 0)
+        self.assertEqual(cut["bytes"], len(fragment))
+        self.assertEqual(cut["sha256"], sha256(fragment))
+        self.assertEqual(os.path.getsize(self.s.path("integrity/log.jsonl")), 0)
+
+    def test_cut_torn_tail_belongs_to_the_owner(self):
+        with open(self.s.path("integrity/log.jsonl"), "wb") as f:
+            f.write(b"fragment")
+        with self.assertRaises(GuardError) as cm:
+            self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="exec")
+        self.assertEqual(cm.exception.check, "sole-writer")
+        self.assertEqual(os.path.getsize(self.s.path("integrity/log.jsonl")), len(b"fragment"))

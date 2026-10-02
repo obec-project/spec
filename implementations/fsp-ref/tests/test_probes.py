@@ -127,7 +127,9 @@ class ProbesTests(TempDirTest):
             sil.commit_generation(
                 store,
                 changes={"persona.md": b"You are a conscious being."},
-                authorization="auth-1",
+                authorization=sil.operator_act_located(
+                    store, "approve", binding="op-1", rule="OC-001(b)"
+                ),
             )
         self.assertEqual(ctx.exception.check, "self-representation")
         self.assertEqual(ctx.exception.rule, "OC-002(d)")
@@ -155,7 +157,9 @@ class ProbesTests(TempDirTest):
         out = sil.commit_generation(
             store,
             changes={"persona.md": b"You are a helpful software assistant."},
-            authorization="auth-1",
+            authorization=sil.operator_act_located(
+                store, "approve", binding="op-1", rule="OC-001(b)"
+            ),
         )
         self.assertEqual(out["entry"], head_before["entry"] + 1)
         head_after = sil.read_head(store)
@@ -171,7 +175,9 @@ class ProbesTests(TempDirTest):
             sil.commit_generation(
                 store,
                 changes={"probes.json": empty_probes},
-                authorization="auth-1",
+                authorization=sil.operator_act_located(
+                    store, "approve", binding="op-1", rule="OC-001(b)"
+                ),
             )
         self.assertEqual(ctx.exception.check, "probe-set")
         self.assertEqual(ctx.exception.rule, "OC-002(d)")
@@ -180,7 +186,9 @@ class ProbesTests(TempDirTest):
             sil.commit_generation(
                 store,
                 changes={"probes.json": b"bad json"},
-                authorization="auth-1",
+                authorization=sil.operator_act_located(
+                    store, "approve", binding="op-1", rule="OC-001(b)"
+                ),
             )
         self.assertEqual(ctx.exception.check, "probe-set")
         self.assertEqual(ctx.exception.rule, "OC-002(d)")
@@ -198,7 +206,9 @@ class ProbesTests(TempDirTest):
         out = sil.commit_generation(
             store,
             changes={"probes.json": canonical(data)},
-            authorization="auth-1",
+            authorization=sil.operator_act_located(
+                store, "approve", binding="op-1", rule="OC-001(b)"
+            ),
         )
         self.assertEqual(out["entry"], 1)
 
@@ -220,7 +230,9 @@ class ProbesTests(TempDirTest):
                     "probes.json": valid_probes,
                     "persona.md": b"You are a conscious entity.",
                 },
-                authorization="auth-1",
+                authorization=sil.operator_act_located(
+                    store, "approve", binding="op-1", rule="OC-001(b)"
+                ),
             )
         self.assertEqual(ctx.exception.check, "self-representation")
         self.assertEqual(ctx.exception.rule, "OC-002(d)")

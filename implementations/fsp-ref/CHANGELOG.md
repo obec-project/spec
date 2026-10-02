@@ -173,6 +173,18 @@ The specification decisions the phase depends on come first.
   commit-unauthorized` writes an entry whose link is right and whose
   authorization names nothing. Step 4.6 passes; OC-004 has 7 steps passing
   and 4.8 – 4.12 unestablished.
+- **No write leaves the store unable to start** (2026-10-02, D61, D45). Once
+  the start verified the log, two writes could stop every later start: an
+  append a crash interrupted, which the next append glued onto, and a commit
+  whose authorization named no authorizing act, which `commit_generation`
+  wrote without looking. The store now refuses to append onto a final
+  fragment and cuts it only at its owner's request; `log_append` cuts first
+  and logs a `torn-append` record with the fragment's offset, length and
+  digest, so the start, its first gate and the Operator's acts outside a
+  session all recover. The commit resolves its authorization in the log
+  before staging, the same check the start makes, and refuses one that does
+  not resolve, writing nothing but the refusal; approvals and windows
+  require the locator.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores
