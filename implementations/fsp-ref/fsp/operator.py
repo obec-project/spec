@@ -116,7 +116,7 @@ def binding_add(root: str, target: str, *, binding=None):
                 detail="the store does not verify",
             )
             raise Refused("structural", "OC-004(a)", "the store does not verify", [rec])
-        act = sil.operator_act(
+        loc = sil.operator_act_located(
             store, "binding-add", binding=acting, rule="OC-001(a)", target=target
         )
         new_bindings = [{"id": b} for b in active] + [{"id": target}]
@@ -124,9 +124,9 @@ def binding_add(root: str, target: str, *, binding=None):
         out = sil.commit_generation(
             store,
             changes={"bindings.json": canonical(new_content)},
-            authorization=act,
+            authorization=loc,
         )
-        return {"entry": out["entry"], "log_records": [act, out["log_record"]]}
+        return {"entry": out["entry"], "log_records": [loc["id"], out["log_record"]]}
 
 
 def binding_remove(root: str, target: str, *, binding=None):
@@ -242,7 +242,7 @@ def binding_remove(root: str, target: str, *, binding=None):
                 detail="the store does not verify",
             )
             raise Refused("structural", "OC-004(a)", "the store does not verify", [rec])
-        act = sil.operator_act(
+        loc = sil.operator_act_located(
             store, "binding-remove", binding=acting, rule="OC-001(a)", target=target
         )
         new_bindings = [{"id": b} for b in active if b != target]
@@ -250,9 +250,9 @@ def binding_remove(root: str, target: str, *, binding=None):
         out = sil.commit_generation(
             store,
             changes={"bindings.json": canonical(new_content)},
-            authorization=act,
+            authorization=loc,
         )
-        return {"entry": out["entry"], "log_records": [act, out["log_record"]]}
+        return {"entry": out["entry"], "log_records": [loc["id"], out["log_record"]]}
 
 
 def set_workspace(root: str, path: str, *, binding=None):
@@ -327,11 +327,11 @@ def approve(root: str, proposal_id: str, *, binding=None):
                 [rec],
             )
         digest = prop["digest"]
-        act = sil.operator_act(
+        loc = sil.operator_act_located(
             store, "approve", binding=acting, rule="OC-001(b)", proposal=proposal_id, digest=digest
         )
-        proposals.record_approval(store, proposal_id, digest, act, acting)
-        return {"log_records": [act]}
+        proposals.record_approval(store, proposal_id, digest, loc["id"], acting, authorization=loc)
+        return {"log_records": [loc["id"]]}
 
 
 def grant(root: str, *, expiry=None, budget=None, scope=None, binding=None):
@@ -427,7 +427,7 @@ def grant(root: str, *, expiry=None, budget=None, scope=None, binding=None):
 
         expires = clock.grant_now(root) + delta
 
-        act = sil.operator_act(
+        loc = sil.operator_act_located(
             store,
             "grant",
             binding=acting,
@@ -441,11 +441,12 @@ def grant(root: str, *, expiry=None, budget=None, scope=None, binding=None):
             scope=scope,
             expires=expires,
             budget=budget_int,
-            record=act,
+            record=loc["id"],
             binding=acting,
+            authorization=loc,
         )
 
-        return {"grant": act, "log_records": [act]}
+        return {"grant": loc["id"], "log_records": [loc["id"]]}
 
 
 def revoke_grant(root: str, *, binding=None):

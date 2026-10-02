@@ -161,6 +161,18 @@ The specification decisions the phase depends on come first.
   record, so the writer cuts it before appending and logs what it cut;
   waiting for the recovery gate would not do, since the start's first gate
   and the Operator's acts outside a session log without passing it.
+- **The log is verified** (2026-10-02, D41, D45). A chain entry's
+  `authorization` is now the locator `{id, sha256, offset}` of the Operator
+  act that covered it, as D41 always said; only the id was recorded, and the
+  start required nothing but its presence. The start resolves each one with a
+  single read and accepts only an act of the right kind — an approval, a
+  window or a binding change for a commit, a decommission for a decommission —
+  then verifies the log from the checkpoint `lifecycle stop` writes, or all
+  of it, logged, when the checkpoint is missing or unreadable. The adapter's
+  `lifecycle verify` walks the whole log. `inject corrupt --kind
+  commit-unauthorized` writes an entry whose link is right and whose
+  authorization names nothing. Step 4.6 passes; OC-004 has 7 steps passing
+  and 4.8 – 4.12 unestablished.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores

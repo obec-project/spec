@@ -9,8 +9,8 @@ The store, the chain back to the Genesis Anchor, first activation, the gated
 start, sessions, revocation, the passive signal and decommission are in
 place, and so are the Operator's acts on bindings and the workspace,
 proposals, approvals, authorization windows and the commit of a proposal,
-validated against the deterministic probes. Verification of the integrity
-log, host actuation and everything cognitive are not.
+validated against the deterministic probes, and the verification of the
+integrity log. Host actuation and everything cognitive are not.
 
 Python 3.10+, standard library only, Linux or macOS.
 

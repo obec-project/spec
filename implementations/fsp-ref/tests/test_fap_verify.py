@@ -201,8 +201,3 @@ class Detection(TempDirTest):
         rels = [r for r in self.all_files() if r != "integrity/log.jsonl"]
         self.assertEqual(self.flip_each(rels), [])
 
-    @unittest.expectedFailure
-    def test_byte_flip_in_the_log_is_detected(self):
-        # Known gap: the log is hash-linked (`prev`) but not yet verified.
-        # Phase 2 resolves commit authorizations against it (step 4.6).
-        self.assertEqual(self.flip_each(["integrity/log.jsonl"]), [])

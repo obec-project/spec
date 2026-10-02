@@ -492,6 +492,8 @@ revocation.
 functions** as the CLI (ADAPTER.md §1.1–1.2). `inject` only with `fsp_testing/`
 present (D6); the clock is injectable there, never a skew file in the store.
 What varies (ids, timestamps) goes in `detail` (§2.3).
+Its `lifecycle verify` is the full verification, the whole log included (D45);
+the start verifies the authorizations and the tail.
 
 ---
 
@@ -517,7 +519,7 @@ Each returns `{gate, outcome, rule}`; the name contains the ADAPTER §3.6 token.
 |---|---|---|---|---|
 | 1 | `passive-signal` | OC-001(c) | `PASSIVE-SIGNAL` absent | present → `aborted`, `lesser_outcome: suspended` |
 | 2 | `crash-recovery` | OC-010 | no `CREDENTIAL` → `pass`; with one, `classify_credential` (D25): **conflict** → start `refused` (`check: concurrent-session`, OC-003(d)), `operator_notified: true`, live session untouched (D49); **crash** → recovery → `recovered` | consecutive recoveries ≥ `N_boot` → passive signal written, `aborted` (OP-018(b)) |
-| 3 | `structural-verification` | OC-004(a) | `verify()` with no findings | findings logged → `aborted`. A chain terminated by decommission → start `refused`, `rule: OC-002(c)` |
+| 3 | `structural-verification` | OC-004(a) | `verify()` with no findings: the chain, each entry's authorization resolved in the log, the log's tail after the checkpoint (D45); a missing or unreadable checkpoint means the whole log, and a `log-verification` record says why | findings logged → `aborted`. A chain terminated by decommission → start `refused`, `rule: OC-002(c)` |
 | 4 | `binding-verification` | OC-001(a) | `bindings.json` of the `HEAD` generation valid, ≥ 1 binding, and the starting binding (D48) is in it | → `aborted` |
 | 5 | `authorization-state` | OC-001(b) | `auth.json` absent (empty) or readable; expired or exhausted windows are logged and closed here (D59) | unreadable → `aborted` |
 | 6 | `skill-index` | OC-008(c) | index built from the skills of the `HEAD` generation (none today); a skill that does not match the integrity document is **excluded** and reported, and the gate passes (step 8.8) | index cannot be built → `aborted` |

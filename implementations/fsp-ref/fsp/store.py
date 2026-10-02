@@ -73,6 +73,7 @@ LAYOUT = (
     Datum("integrity-chain", "integrity/chain/<nnnnnn>.json", INTEGRITY, "replace"),
     Datum("integrity-documents", "integrity/documents/<n>.json", INTEGRITY, "replace"),
     Datum("integrity-log", "integrity/log.jsonl", INTEGRITY, "append"),
+    Datum("log-checkpoint", "integrity/log-checkpoint.json", INTEGRITY, "replace"),
     Datum("authorization-state", "integrity/auth.json", INTEGRITY, "replace"),
     Datum("operational-settings", "integrity/operational.json", INTEGRITY, "replace"),
     # Empty, holds no content: only its flock matters. Never written, never
@@ -294,7 +295,7 @@ class Store:
     def replace_json(self, cls, relpath, obj, *, writer):
         self.replace(cls, relpath, canonical(obj), writer=writer)
 
-    def append(self, cls, relpath, record: dict, *, writer) -> None:
+    def append(self, cls, relpath, record: dict, *, writer) -> int:
         """Append one record as a canonical JSON line."""
         self._guard(cls, relpath, writer, "append")
         line = canonical(record) + b"\n"
@@ -305,6 +306,7 @@ class Store:
             created = not os.path.exists(target)
             fd = os.open(target, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
             try:
+                offset = os.fstat(fd).st_size
                 view = memoryview(line)
                 while view:
                     view = view[os.write(fd, view):]
@@ -313,6 +315,7 @@ class Store:
                 os.close(fd)
             if created:
                 _fsync_dir(directory)
+            return offset
 
     def create_exclusive(self, cls, relpath, data: bytes, *, writer) -> bool:
         """Create a file that must not exist (``O_EXCL``). False if it did."""
@@ -442,6 +445,52 @@ class Store:
     def read_bytes(self, relpath: str) -> bytes:
         with open(self.path(relpath), "rb") as f:
             return f.read()
+
+    def read_line_at(self, relpath: str, offset: int) -> bytes | None:
+        """Return the bytes of the line starting at offset, without the trailing newline."""
+        if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0:
+            return None
+        target = self.path(relpath)
+        try:
+            fd = os.open(target, os.O_RDONLY)
+        except OSError:
+            return None
+        try:
+            size = os.fstat(fd).st_size
+            if offset >= size:
+                return None
+            if offset > 0:
+                prev_byte = os.pread(fd, 1, offset - 1)
+                if prev_byte != b"\n":
+                    return None
+            buf = bytearray()
+            pos = offset
+            chunk_size = 65536
+            while pos < size:
+                chunk = os.pread(fd, min(chunk_size, size - pos), pos)
+                if not chunk:
+                    break
+                nl = chunk.find(b"\n")
+                if nl != -1:
+                    buf.extend(chunk[:nl])
+                    return bytes(buf)
+                buf.extend(chunk)
+                pos += len(chunk)
+            return None
+        finally:
+            os.close(fd)
+
+    def read_from(self, relpath: str, offset: int) -> bytes:
+        """Return bytes from offset to EOF, or b"" if the file does not exist."""
+        if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0:
+            return b""
+        target = self.path(relpath)
+        try:
+            with open(target, "rb") as f:
+                f.seek(offset)
+                return f.read()
+        except OSError:
+            return b""
 
     def read_json(self, relpath: str):
         return json.loads(self.read_bytes(relpath).decode("utf-8"))

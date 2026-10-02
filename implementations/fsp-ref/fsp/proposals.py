@@ -106,6 +106,7 @@ def open_window(
     budget: int,
     record: str,
     binding: str,
+    authorization: dict = None,
 ) -> None:
     """Open an authorization window (D17, D59, OC-001(b))."""
     auth = read_auth(store)
@@ -118,6 +119,8 @@ def open_window(
         "binding": binding,
         "state": "open",
     }
+    if authorization is not None:
+        window["authorization"] = authorization
     auth["grants"].append(window)
     write_auth(store, auth)
 
@@ -372,10 +375,15 @@ def propose(root: str, ops: list) -> dict:
         return {"proposal": pid, "log_records": [rec]}
 
 
-def record_approval(store: Store, pid: str, digest: str, record: str, binding: str) -> None:
+def record_approval(
+    store: Store, pid: str, digest: str, record: str, binding: str, *, authorization: dict = None
+) -> None:
     """Record an Operator approval for a proposal."""
     auth = read_auth(store)
-    auth["approvals"][pid] = {"digest": digest, "record": record, "binding": binding}
+    entry = {"digest": digest, "record": record, "binding": binding}
+    if authorization is not None:
+        entry["authorization"] = authorization
+    auth["approvals"][pid] = entry
     write_auth(store, auth)
 
 
@@ -423,9 +431,11 @@ def commit(root: str, proposal_id: str) -> dict:
         appr = auth.get("approvals", {}).get(proposal_id)
         covering_grant = None
         auth_record = None
+        auth_loc = None
 
         if appr is not None and appr.get("digest") == prop["digest"]:
             auth_record = appr["record"]
+            auth_loc = appr.get("authorization")
         else:
             now_dt = clock.grant_now(root)
             closed_now = close_lapsed(store, now_dt, session=session)
@@ -441,6 +451,7 @@ def commit(root: str, proposal_id: str) -> dict:
                         if all(covers(scope, cat) for cat in prop_categories):
                             covering_grant = g
                             auth_record = g["id"]
+                            auth_loc = g.get("authorization")
                             break
 
             if auth_record is None:
@@ -496,7 +507,7 @@ def commit(root: str, proposal_id: str) -> dict:
                     changes["skills/%s/%s" % (name, file_path)] = text.encode("utf-8")
 
         out = sil.commit_generation(
-            store, changes=changes, authorization=auth_record, session=session
+            store, changes=changes, authorization=auth_loc, session=session
         )
 
         log_records = [out["log_record"]]

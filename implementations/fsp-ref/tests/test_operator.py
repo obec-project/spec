@@ -121,7 +121,9 @@ class OperatorActs(Base):
         self.assertEqual(ctx.exception.rule, "OC-002(c)")
 
     def test_binding_gate_owner_not_in_active_set(self):
-        act = sil.operator_act(self.store, "tamper-bindings", binding="op-1")
+        act = sil.operator_act_located(
+            self.store, "binding-remove", binding="op-1", target="op-1"
+        )
         tampered = {"bindings": [{"id": "op-2"}], "owner": "op-1"}
         sil.commit_generation(
             self.store,

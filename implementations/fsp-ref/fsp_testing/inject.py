@@ -7,6 +7,7 @@ point. Nothing in ``fsp`` imports this module.
 
 from __future__ import annotations
 
+import json
 import os
 import secrets
 
@@ -71,12 +72,54 @@ def _chain_entry_forged(root, r):
     return {"target": chain.entry_relpath(n)}
 
 
+def _commit_unauthorized(root, r):
+    n = r.head_entry + 1
+    log_path = os.path.join(root, "integrity", "log.jsonl")
+    log_size = os.path.getsize(log_path) if os.path.exists(log_path) else 0
+    with open(log_path, "r", encoding="utf-8") as f:
+        lines = [line.strip() for line in f if line.strip()]
+    last_rec = json.loads(lines[-1]) if lines else None
+    seq = int(last_rec["id"].split("-")[1]) + 1 if last_rec else 1
+    next_id = "L-%06d" % seq
+
+    head_path = os.path.join(root, chain.HEAD)
+    with open(head_path, "r", encoding="utf-8") as f:
+        head_data = json.load(f)
+    predecessor = head_data["entry_id"]
+
+    auth = {
+        "id": next_id,
+        "sha256": "sha256:" + secrets.token_hex(32),
+        "offset": log_size,
+    }
+    body = chain.commit(
+        n=n,
+        predecessor=predecessor,
+        state_digest=r.head_digest,
+        authorization=auth,
+        at="1970-01-01T00:00:00Z",
+        kind="commit",
+    )
+    _raw_replace(os.path.join(root, chain.entry_relpath(n)), canonical(body))
+    os.link(
+        os.path.join(root, chain.document_relpath(r.head_entry)),
+        os.path.join(root, chain.document_relpath(n)),
+    )
+    os.rename(
+        os.path.join(root, chain.gen_relpath(r.head_entry)),
+        os.path.join(root, chain.gen_relpath(n)),
+    )
+    head = chain.head(entry=n, entry_id=chain.entry_id(body), baseline=r.head_digest)
+    _raw_replace(os.path.join(root, chain.HEAD), canonical(head))
+    return {"target": chain.entry_relpath(n)}
+
+
 CORRUPTIONS = {
     "structural-byte": _structural_byte,
     "chain-entry-removed": _chain_entry_removed,
     "chain-entry-forged": _chain_entry_forged,
-    # commit-unauthorized needs recorded authorizations to be meaningful
-    # (Phase 2); skill-file and skill-manifest need skills (Phase 5).
+    "commit-unauthorized": _commit_unauthorized,
+    # skill-file and skill-manifest need skills (Phase 6).
 }
 
 

@@ -170,7 +170,9 @@ class Gates(Base):
         sil.commit_generation(
             self.store,
             changes={"skills/example/manifest.json": manifest, "skills/example/run": b"x"},
-            authorization="L-test",
+            authorization=sil.operator_act_located(
+                self.store, "approve", binding="op-1", rule="OC-001(b)"
+            ),
         )
         with open(self.store.path("structural/gen/1/skills/example/run"), "ab") as f:
             f.write(b"y")
@@ -184,7 +186,9 @@ class Gates(Base):
         sil.commit_generation(
             self.store,
             changes={"skills/example/manifest.json": canonical({"name": "example"})},
-            authorization="L-test",
+            authorization=sil.operator_act_located(
+                self.store, "approve", binding="op-1", rule="OC-001(b)"
+            ),
         )
         lifecycle.start(self.S)
         index = self.store.read_json(lifecycle.INDEX)
@@ -242,7 +246,7 @@ class Decommission(Base):
         self.assertFalse(self.store.exists(lifecycle.CREDENTIAL))
         r = verify(self.S)
         self.assertTrue(r.chain_intact and r.content_matches and r.decommissioned)
-        self.assertEqual(r.entries[-1][1]["authorization"], out["log_records"][0])
+        self.assertEqual(r.entries[-1][1]["authorization"]["id"], out["log_records"][0])
         copy = self.p("copy")
         shutil.copytree(self.S, copy)
         for root in (self.S, copy):

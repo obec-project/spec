@@ -78,10 +78,10 @@ def classify_credential(lock, *, residue, pulse_fresh):
 # -- the integrity log (DESIGN.md §3.4) -------------------------------------
 
 
-def log_append(store: Store, kind, *, rule=None, binding=None, session=None, **payload):
-    """Append one record to the integrity log and return its id. Each record
-    carries the digest of the one before it, so an edit to history breaks
-    the sequence where it happened."""
+def log_append_located(
+    store: Store, kind, *, rule=None, binding=None, session=None, **payload
+) -> dict:
+    """Append one record to the integrity log and return its locator dict (D41)."""
     with store.write_lock():
         last = store.read_last_jsonl(LOG)
         seq = int(last["id"].split("-")[1]) + 1 if last else 1
@@ -100,8 +100,21 @@ def log_append(store: Store, kind, *, rule=None, binding=None, session=None, **p
             record["binding"] = binding
         if session is not None:
             record["session"] = session
-        store.append(INTEGRITY, LOG, record, writer=WRITER)
-        return record["id"]
+        offset = store.append(INTEGRITY, LOG, record, writer=WRITER)
+        return {
+            "id": record["id"],
+            "sha256": sha256(canonical(record)),
+            "offset": offset,
+        }
+
+
+def log_append(store: Store, kind, *, rule=None, binding=None, session=None, **payload):
+    """Append one record to the integrity log and return its id. Each record
+    carries the digest of the one before it, so an edit to history breaks
+    the sequence where it happened."""
+    return log_append_located(
+        store, kind, rule=rule, binding=binding, session=session, **payload
+    )["id"]
 
 
 # -- scaffolding (D27) and First Activation (D29) ---------------------------
@@ -306,6 +319,14 @@ def acting_binding(store: Store, requested=None):
         )
         raise Refused("binding", "OC-001(a)", "%r is not an active binding" % (binding,), [rec])
     return binding
+
+
+def operator_act_located(
+    store: Store, act, *, binding, rule="OC-001(a)", **payload
+) -> dict:
+    return log_append_located(
+        store, "operator-act", rule=rule, binding=binding, act=act, **payload
+    )
 
 
 def operator_act(store: Store, act, *, binding, rule="OC-001(a)", **payload):

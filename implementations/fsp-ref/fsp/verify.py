@@ -22,7 +22,7 @@ import os
 import re
 
 from . import chain
-from .digest import canonical, document_digest, integrity_document, valid_relpath
+from .digest import canonical, document_digest, integrity_document, sha256, valid_relpath
 from .store import LOCK, MARKER, STORE_FORMAT, STORE_FORMAT_VERSION, TEMP_NAME, Store, datum_of
 
 
@@ -57,6 +57,8 @@ class Report:
         self.head_entry = None
         self.entries = []  # (id, body) for 0..HEAD, as far as readable
         self.decommissioned = False
+        self.log_mode = None
+        self.log_full_reason = None
 
     @property
     def verified(self):
@@ -119,7 +121,7 @@ def store_state(root: str) -> str:
     return "active"
 
 
-def verify(root: str) -> Report:
+def verify(root: str, *, full_log: bool = False) -> Report:
     r = Report()
     if not os.path.isdir(root):
         r.findings.append(Finding("store-missing", ".", "operator", {}))
@@ -161,11 +163,12 @@ def verify(root: str) -> Report:
     r.head_digest = head["baseline"]
 
     chain_ok = _verify_chain(store, head, r)
+    log_ok = _verify_log(store, r, full_log=full_log)
     content_ok = _verify_content(store, head, r)
     _unclassified(store, r)
     _residue(store, n, r)
 
-    r.chain_intact = chain_ok
+    r.chain_intact = chain_ok and log_ok
     r.content_matches = content_ok
     return r
 
@@ -205,8 +208,8 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
                 why = "predecessor"
             elif not body.get("state_digest"):
                 why = "state-digest"
-            elif not body.get("authorization"):
-                why = "no-authorization"
+            elif not _resolve_authorization(store, body):
+                why = "authorization-unresolved"
         if why:
             r.findings.append(Finding("chain-entry", rel, "sil", {"entry": k, "problem": why}))
             ok = False
@@ -238,6 +241,165 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
         elif ok and last.get("kind") == "decommission":
             r.decommissioned = True
     return ok
+
+
+def _resolve_authorization(store: Store, body: dict) -> bool:
+    """Resolve an entry's authorization against the log (D45 (1))."""
+    auth = body.get("authorization")
+    if not isinstance(auth, dict) or set(auth.keys()) != {"id", "sha256", "offset"}:
+        return False
+    auth_id = auth.get("id")
+    auth_sha256 = auth.get("sha256")
+    auth_offset = auth.get("offset")
+    if not isinstance(auth_id, str) or not re.match(r"^L-[0-9]{6}$", auth_id):
+        return False
+    if not isinstance(auth_offset, int) or isinstance(auth_offset, bool) or auth_offset < 0:
+        return False
+    if not isinstance(auth_sha256, str):
+        return False
+
+    line = store.read_line_at("integrity/log.jsonl", auth_offset)
+    if line is None or sha256(line) != auth_sha256:
+        return False
+
+    try:
+        rec = json.loads(line.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        return False
+    if not isinstance(rec, dict) or rec.get("id") != auth_id or rec.get("kind") != "operator-act":
+        return False
+
+    entry_kind = body.get("kind")
+    act = rec.get("act")
+    if entry_kind == "commit":
+        return act in {"approve", "grant", "binding-add", "binding-remove"}
+    elif entry_kind == "decommission":
+        return act == "decommission"
+    return False
+
+
+def _verify_log(store: Store, r: Report, *, full_log: bool = False) -> bool:
+    """Verify integrity log: tail from checkpoint or full log (D45 (2)(3))."""
+    if not store.exists("integrity/log.jsonl"):
+        r.findings.append(
+            Finding("log-record", "integrity/log.jsonl", "sil", {"problem": "missing"})
+        )
+        return False
+
+    start_offset = 0
+    expected_seq = 1
+    expected_prev = None
+
+    if full_log:
+        r.log_mode = "full"
+        r.log_full_reason = "requested"
+    else:
+        chk, problem = _read_canonical(store, "integrity/log-checkpoint.json")
+        if problem == "missing":
+            r.log_mode = "full"
+            r.log_full_reason = "checkpoint-missing"
+        elif (
+            problem is not None
+            or not isinstance(chk, dict)
+            or set(chk.keys()) != {"id", "sha256", "offset"}
+            or not isinstance(chk.get("id"), str)
+            or not re.match(r"^L-[0-9]{6}$", chk["id"])
+            or not isinstance(chk.get("offset"), int)
+            or isinstance(chk.get("offset"), bool)
+            or chk["offset"] < 0
+            or not isinstance(chk.get("sha256"), str)
+        ):
+            r.log_mode = "full"
+            r.log_full_reason = "checkpoint-unreadable"
+        else:
+            line = store.read_line_at("integrity/log.jsonl", chk["offset"])
+            resolved = False
+            chk_rec = None
+            if line is not None and sha256(line) == chk["sha256"]:
+                try:
+                    rec = json.loads(line.decode("utf-8"))
+                    if isinstance(rec, dict) and rec.get("id") == chk["id"]:
+                        resolved = True
+                        chk_rec = rec
+                except (UnicodeDecodeError, ValueError):
+                    pass
+            if not resolved:
+                r.findings.append(
+                    Finding(
+                        "log-checkpoint",
+                        "integrity/log-checkpoint.json",
+                        "sil",
+                        {"problem": "mismatch"},
+                    )
+                )
+                return False
+
+            r.log_mode = "tail"
+            r.log_full_reason = None
+            start_offset = chk["offset"] + len(line) + 1
+            expected_seq = int(chk_rec["id"].split("-")[1]) + 1
+            expected_prev = sha256(line)
+
+    data = store.read_from("integrity/log.jsonl", start_offset)
+    lines = data.split(b"\n")
+    complete_lines = lines[:-1]
+    cur_offset = start_offset
+
+    for line in complete_lines:
+        try:
+            rec = json.loads(line.decode("utf-8"))
+            if not isinstance(rec, dict):
+                raise ValueError("not a dict")
+        except (UnicodeDecodeError, ValueError):
+            r.findings.append(
+                Finding(
+                    "log-record",
+                    "integrity/log.jsonl",
+                    "sil",
+                    {"offset": cur_offset, "problem": "unparseable"},
+                )
+            )
+            return False
+
+        if canonical(rec) != line:
+            r.findings.append(
+                Finding(
+                    "log-record",
+                    "integrity/log.jsonl",
+                    "sil",
+                    {"offset": cur_offset, "problem": "not-canonical"},
+                )
+            )
+            return False
+
+        expected_id = "L-%06d" % expected_seq
+        if rec.get("id") != expected_id:
+            r.findings.append(
+                Finding(
+                    "log-record",
+                    "integrity/log.jsonl",
+                    "sil",
+                    {"offset": cur_offset, "problem": "sequence"},
+                )
+            )
+            return False
+
+        if rec.get("prev") != expected_prev:
+            r.findings.append(
+                Finding(
+                    "log-record",
+                    "integrity/log.jsonl",
+                    "sil",
+                    {"offset": cur_offset, "problem": "prev"},
+                )
+            )
+            return False
+
+        expected_seq += 1
+        expected_prev = sha256(line)
+        cur_offset += len(line) + 1
+
+    return True
 
 
 def _verify_content(store: Store, head: dict, r: Report) -> bool:

@@ -277,7 +277,7 @@ def describe_config(flags):
 
 def lifecycle_verify(flags):
     root = _store(flags)
-    r = verify(root)
+    r = verify(root, full_log=True)
     detail = r.as_dict()
     detail["credential_issued"] = os.path.exists(os.path.join(root, "CREDENTIAL"))
     return accepted(detail)

@@ -244,6 +244,17 @@ def start(root: str, *, binding=None) -> StartResult:
         if "structural" in forced:
             return abort("structural-verification", "forced by test build")
         report = verify(root)
+        if report.log_full_reason in ("checkpoint-missing", "checkpoint-unreadable"):
+            res.log_records.append(
+                log_append(
+                    store,
+                    "log-verification",
+                    rule="OC-004(a)",
+                    binding=acting,
+                    mode="full",
+                    reason=report.log_full_reason,
+                )
+            )
         blocking = report.blocking_findings()
         if blocking:
             return abort(
@@ -496,10 +507,11 @@ def stop(root: str, *, binding=None):
         sessions["open_session"] = None
         sessions["consecutive_recoveries"] = 0
         _write_sessions(store, sessions)
-        rec = log_append(
+        loc = sil.log_append_located(
             store, "session-close", rule="OP-021(a)", binding=acting, session=session, mode="normal"
         )
-    return {"session": session, "log_records": [rec]}
+        store.replace(INTEGRITY, "integrity/log-checkpoint.json", canonical(loc), writer=sil.WRITER)
+    return {"session": session, "log_records": [loc["id"]]}
 
 
 def revoke_credential(root: str, *, binding=None):
@@ -570,10 +582,10 @@ def decommission(root: str, disposition: str, *, binding=None):
                 "the store does not verify; dispose of it directly instead", [rec],
             )
         acting = sil.acting_binding(store, binding)
-        act = sil.operator_act(
+        loc = sil.operator_act_located(
             store, "decommission", binding=acting, rule="OC-002(c)", disposition=disposition
         )
-        records.append(act)
+        records.append(loc["id"])
         if store.exists(CREDENTIAL):
             _drop_credential(store)
             sessions = _read_sessions(store)
@@ -582,7 +594,7 @@ def decommission(root: str, disposition: str, *, binding=None):
             records.append(
                 log_append(store, "credential-revoked", rule="OP-023", binding=acting, reason="decommission")
             )
-        out = sil.commit_generation(store, changes={}, authorization=act, kind="decommission")
+        out = sil.commit_generation(store, changes={}, authorization=loc, kind="decommission")
         records.append(out["log_record"])
         if disposition == "destroy":
             store.destroy(writer=WRITER)

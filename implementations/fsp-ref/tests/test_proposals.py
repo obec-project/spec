@@ -157,14 +157,14 @@ class ProposalsTests(Base):
         )
 
         chain_entry = self.store.read_json(chain.entry_relpath(head_after["entry"]))
-        self.assertEqual(chain_entry["authorization"], appr_rec)
+        self.assertEqual(chain_entry["authorization"]["id"], appr_rec)
 
         auth = self.store.read_json(lifecycle.AUTH)
         self.assertNotIn(pid, auth.get("proposals", {}))
         self.assertNotIn(pid, auth.get("approvals", {}))
 
         commit_logs = self.log("commit")
-        self.assertEqual(commit_logs[-1]["authorization"], appr_rec)
+        self.assertEqual(commit_logs[-1]["authorization"]["id"], appr_rec)
 
     def test_approve_and_commit_subjective_persona_refused(self):
         lifecycle.start(self.S)
