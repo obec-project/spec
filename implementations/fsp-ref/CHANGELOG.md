@@ -149,6 +149,11 @@ The specification decisions the phase depends on come first.
   per-proposal approval needs no act. The clock is the system's; the test
   build's `inject advance-clock` adds an offset kept outside the store. Steps
   1.4, 1.6, 1.7, 1.8, 1.10 and 1.11 pass.
+- **D1 revised — the floor is Python 3.10** (2026-10-02). Python 3.9 has been
+  end-of-life since October 2025, and the CI image that still builds it leaves
+  `ubuntu-latest` on 2026-10-19. Pinning the job to an older image would have
+  kept the floor only until that image is retired too. The code needs nothing
+  3.10 adds; the floor is what CI checks.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores

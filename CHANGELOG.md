@@ -30,6 +30,15 @@ The conformance suite carries its own version line; a claim names both, as in
   stopped by a failed gate ends `aborted`. No step, contract or runner check
   changes, so the suite's version does not move.
 
+**Repository**
+
+- CI keeps every job alive past 2026-10-19, when `ubuntu-latest` moves to
+  Ubuntu 26 ([runner-images#14748](https://github.com/actions/runner-images/issues/14748))
+  and `setup-python` is unlikely to ship Python 3.9, end-of-life since October
+  2025, for it. The suite's 3.9 job moves to `ubuntu-22.04` beside its 3.8
+  job, since the runner still promises 3.8+; fsp-ref's floor rises to 3.10
+  and its 3.9 job goes (fsp-ref D1).
+
 ## 0.12.0 — 2026-09-27
 
 A minor release: one clarifying revision, OC-002(c), which advances the minor

@@ -23,7 +23,7 @@ not built yet; the [README](README.md) says what is.
 
 | # | Decision |
 |---|---|
-| D1 | **Python, standard library only**, POSIX (Linux/macOS). Floor 3.9. No Windows. |
+| D1 | **Python, standard library only**, POSIX (Linux/macOS). Floor 3.10. No Windows. |
 | D2 | **Skill confinement comes from admission and monitoring**: a commit authorized by the Operator, the Skill Index, manifest validation at execution time, typed arguments, declared targets checked against the workspace, execution logged and observed. No confinement by the OS. The revision of OC-008(a) this requires is **clarifying** (G1). |
 | D3 | **The model through the Ollama API** (local `gemma4` or Ollama Cloud) + a **deterministic fake model** for the suite and the tests. |
 | D4 | Name **`fsp-ref`**, in `implementations/fsp-ref/`. |

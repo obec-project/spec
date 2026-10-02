@@ -72,7 +72,7 @@ specification's shape that changed.
   into that release's entry. Between releases, `main` keeps the last release's
   numbers and every change goes under *Unreleased*.
 - **A push to `main` runs CI**: the verbatim test, the suite against the stub
-  on Python 3.8 – 3.14, and fsp-ref's unit tests on 3.9 – 3.14. It deploys
+  on Python 3.8 – 3.14, and fsp-ref's unit tests on 3.10 – 3.14. It deploys
   nothing.
 - The runner writes `claim.md` and `claim.json` to the working directory
   unless given `--out`. Both are git-ignored; submitted claims live in

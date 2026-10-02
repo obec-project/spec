@@ -10,7 +10,7 @@ start, sessions, revocation, the passive signal and decommission are in
 place. Proposals, authorizations, commits by the entity, host actuation and
 everything cognitive are not.
 
-Python 3.9+, standard library only, Linux or macOS.
+Python 3.10+, standard library only, Linux or macOS.
 
 ```sh
 python3 -m unittest discover -s tests          # the implementation's own tests

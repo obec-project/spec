@@ -26,11 +26,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         os: [ubuntu-latest]
         include:
-          # The runner README promises 3.8+; 3.8 builds live on the older image.
+          # The runner README promises 3.8+; 3.8 and 3.9 builds live on the older image.
           - python: "3.8"
+            os: ubuntu-22.04
+          - python: "3.9"
             os: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
