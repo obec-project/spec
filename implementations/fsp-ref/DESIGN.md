@@ -82,6 +82,7 @@ not built yet; the [README](README.md) says what is.
 | D58 | **A proposal is recorded whole, an approval names its digest, and a proposal commits through one operation.** Proposing validates the ops, refuses any on the binding set whatever else the proposal holds (OC-001(a)), needs a live session, and records the proposal — its complete ops (D57) and their digest — in an origination record in the log and in `auth.json`, where it waits. An approval is an Operator act naming the proposal and that digest. The commit of a proposal is one operation, the one `entity commit`, the review (D52) and the Sleep call: it checks the authorization before anything about the content — an approval with the proposal's digest, or a window over every category the proposal touches (D50) — builds the changes from the ops and goes through `commit_generation` and its validation (D56). The chain entry names the approval or window that covered it, and the proposal and its approval leave `auth.json`. The ops are `set-persona` (category `persona`) and `install-skill` (`skills.install`: a new skill, its files carried whole); any other is refused. |
 | D59 | **Windows, and the clock they are judged by.** `operator grant` opens a window (D17) as an Operator act, with or without a live session. Its scope is a category fsp declares for windows (D50) or a dotted prefix of one; its budget a positive integer; its expiry a signed offset on the implementation's clock. A grant missing an axis is refused naming it, and one on the binding set cites OC-001(a). The commit of a proposal (D58) takes an approval first, otherwise the first open window whose scope covers every category of the proposal, and spends one commit of its budget; the chain entry names the window. A window found expired or exhausted — at a commit, or at the authorization gate of the start (§8.2) — is closed and logged there, so the return to per-proposal approval needs no act from anyone (OC-001(b)). `operator revoke-grant` closes every open window. The clock is the implementation's; in a test build `inject advance-clock` adds an offset kept outside the store, keyed by the store as a forced gate failure is (§8.2), and never a file in the store. |
 | D60 | **Only the Operator leaves or brings back a conversation** (ADR 0003, OP-009(a)(g)). `/exit` ends it with a Closure Payload: the Sleep writes the Resumption Record, whose pointer map names the working set — record ids, the latest of each lineage, nothing copied — and the next conversation's recall scope is its own records and those. `/new` leaves it with none. `/resume <id>` makes a past conversation current, with its transcript since its last clear and its scope as it was left. `/inject <id> [record…]` adds a past conversation's records to the current pointer map, attributed to the Operator's binding. Each is an Operator act in the log, never a stimulus (D14). A `mnemonic-recall` that would return a record outside the scope is refused (`check: recall-scope`). |
+| D61 | **A torn append is cut, and the cut logged.** A final fragment without its newline is an append a crash interrupted: it never formed a record, no authorization names it (D41) and no checkpoint reaches past it (D45). Left in place, the next append glues onto it and makes the record after it unreadable, and the start would abort from then on. The recovery gate cannot be what removes it: the start's first gate logs before it runs, and the Operator's acts outside a session log without a start. So the writer cuts it: `store.py` refuses to append to an append-only file that does not end in a newline, and offers one operation that cuts such a file back to its last newline, under the write lock, and returns the offset, length and `sha256` of what it cut. `log_append` cuts first and, when it cut something, writes a `torn-append {offset, bytes, sha256}` record before the one it was asked for; the writer of any other append-only file asks the SIL to log the same, naming the file. Only bytes after the last newline are ever cut. (§3.1, §3.4) |
 
 ---
 
@@ -196,9 +197,11 @@ S/
 - Only paths relative to the store; nothing of the host in verified content
   (OC-003(b)).
 - **Two write forms, and only two** (in `store.py`): an *append-only* file
-  (`O_APPEND`, `fsync` per record, a truncated final line detected on read) or
-  a file *replaced whole* (tmp in the same directory → `fsync` → `rename` →
-  `fsync` of the directory). No file in the store is rewritten in place.
+  (`O_APPEND`, `fsync` per record, a truncated final line detected on read and
+  cut by its writer before the next append, D61) or a file *replaced whole*
+  (tmp in the same directory → `fsync` → `rename` → `fsync` of the directory).
+  No file in the store is rewritten in place, and no complete record is ever
+  removed.
 - `PASSIVE-SIGNAL` and `CREDENTIAL` at the root: the Operator acts without
   knowing the layout.
 - Proposals are not written by the CPE: the `propose` intent is a signal to the
@@ -235,7 +238,8 @@ not complete is not a chain record (OC-004(a); G5). `inject interrupt
 ### 3.4 Integrity log
 
 `integrity/log.jsonl`, `O_APPEND`, `fsync` per record, hash-chained (D45). A
-truncated final line is detected and logged, never silently repaired. Fields:
+truncated final line is an append a crash interrupted and never a record: the
+next append cuts it and logs its offset, length and digest first (D61). Fields:
 `id`, `kind`, `rule`, `at`, `binding` (Operator act), `session`, payload. The
 start verifies the authorizations the chain names and the tail after the
 checkpoint; the Vital Check and `lifecycle verify --full` verify the rest (D45).

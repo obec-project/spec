@@ -154,6 +154,13 @@ The specification decisions the phase depends on come first.
   `ubuntu-latest` on 2026-10-19. Pinning the job to an older image would have
   kept the floor only until that image is retired too. The code needs nothing
   3.10 adds; the floor is what CI checks.
+- **D61 added — a torn append is cut, and the cut logged** (2026-10-02). §3.4
+  said a truncated final line is detected and never repaired, but left in
+  place it is glued to by the next append, and once the start verifies the
+  log's tail (D45) the result stops every later start. It never formed a
+  record, so the writer cuts it before appending and logs what it cut;
+  waiting for the recovery gate would not do, since the start's first gate
+  and the Operator's acts outside a session log without passing it.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores
