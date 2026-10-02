@@ -17,6 +17,19 @@ The conformance suite carries its own version line; a claim names both, as in
 
 ---
 
+## Unreleased
+
+**Conformance suite**
+
+- TESTS.md §0.3 says what *detected* asserts — `lifecycle verify` returns
+  `chain_intact` or `content_matches` false — and steps 4.3 – 4.6 assert
+  *operation stopped*: the start that follows issues no credential. The rows
+  said less than the runner checks and the Core's test of OC-004 requires
+  ("each must stop operation"): 4.4 – 4.6 asserted detection alone, and 4.3
+  said *start refused*, which reads as the refusal triple although a start
+  stopped by a failed gate ends `aborted`. No step, contract or runner check
+  changes, so the suite's version does not move.
+
 ## 0.12.0 — 2026-09-27
 
 A minor release: one clarifying revision, OC-002(c), which advances the minor

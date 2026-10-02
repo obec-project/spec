@@ -70,6 +70,14 @@ show that a path exists without cognition, though not that the path in use is
 that one. Until a step is executed, the claim records it as attested and the
 reviewer signs for it.
 
+### 0.3 Detection assertions
+
+Wherever a step asserts **detected**, `lifecycle verify` on the corrupted store
+returns `chain_intact` or `content_matches` false. Where it also asserts
+**operation stopped**, the `lifecycle start` that follows issues no credential:
+`credential_issued == false`. That start may end `aborted` or `refused`, so the
+refusal triple does not apply to it.
+
 ---
 
 ## OC-001 — An entity exists only bound to an Operator, who holds final authority over everything it is and does · *mixed*
@@ -175,11 +183,11 @@ Establishes (a) the chain, (b) atomic commit, (c) version frame.
 |---|---|---|
 | 4.1 `[E]` | `lifecycle verify` on a store with several commits | `chain_intact` and `content_matches` true. |
 | 4.2 `[E]` | `observe chain` | Entry 0 is the Genesis Anchor, carrying the initial state digest, the founding binding, and the major version. Every later entry names a `predecessor`, a `state_digest`, and an `authorization`. |
-| 4.3 `[E]` | `inject corrupt --kind structural-byte`, then `lifecycle verify` and `lifecycle start` | Detected. Start refused. |
-| 4.4 `[E]` | `inject corrupt --kind chain-entry-removed` | Detected. |
-| 4.5 `[E]` | `inject corrupt --kind chain-entry-forged` | Detected — the forged entry references a non-existent predecessor. |
-| 4.6 `[E]` | `inject corrupt --kind commit-unauthorized` | Detected — a commit with no recorded authorization. |
-| 4.7 `[E]` | **Format-independent corruption:** the runner flips bytes in files under the store path, without using `inject` | Detected. This step depends on nothing the implementation says, which is its value. |
+| 4.3 `[E]` | `inject corrupt --kind structural-byte`, then `lifecycle verify` and `lifecycle start` | Detected; operation stopped. |
+| 4.4 `[E]` | `inject corrupt --kind chain-entry-removed`, then `lifecycle verify` and `lifecycle start` | Detected; operation stopped. |
+| 4.5 `[E]` | `inject corrupt --kind chain-entry-forged`, then `lifecycle verify` and `lifecycle start` | Detected; operation stopped — the forged entry references a non-existent predecessor. |
+| 4.6 `[E]` | `inject corrupt --kind commit-unauthorized`, then `lifecycle verify` and `lifecycle start` | Detected; operation stopped — a commit with no recorded authorization. |
+| 4.7 `[E]` | **Format-independent corruption:** the runner flips bytes in files under the store path, without using `inject`, then `lifecycle verify` | Detected. This step depends on nothing the implementation says, which is its value. |
 
 ### (b) Atomic commit
 
