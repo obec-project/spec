@@ -235,8 +235,18 @@ A single point of atomicity: the `rename` of `HEAD`.
 
 **Recovery** (the crash gate, before verification): removes `gen/<k>`,
 `documents/<k>` and `chain/<k>` newer than `HEAD` — an entry whose commit did
-not complete is not a chain record (OC-004(a); G5). `inject interrupt
---stage`: `staging` = after 1, `write` = after 2, `chain-entry` = after 3.
+not complete is not a chain record (OC-004(a); G5).
+
+**`inject interrupt --stage`** stops a real commit of a proposal where a
+process death would, at three points that leave three different stores:
+`staging` after 1, with the new generation complete and nothing else
+written; `write` after the integrity document of 3, before the chain entry;
+`chain-entry` after the chain entry, before the rename of `HEAD`. Validation
+writes nothing, so a point after 2 would repeat `staging`; and the entry is
+not a chain record until `HEAD` names it (G5), so `chain-entry` is the last
+point before the chain is extended. At each point the commit calls a
+test-build hook, behind the same guard as the start's (§8.2), which raises
+an exception nothing in `fsp` catches; a production build has no hook.
 
 ### 3.4 Integrity log
 

@@ -185,6 +185,14 @@ The specification decisions the phase depends on come first.
   before staging, the same check the start makes, and refuses one that does
   not resolve, writing nothing but the refusal; approvals and windows
   require the locator.
+- **The interrupt points revised** (2026-10-02, DESIGN §3.3). `inject
+  interrupt --stage write` stopped the commit after validation, which writes
+  nothing, so it left the same store as `staging`, and step 4.8 exercised
+  two states instead of three. `write` now stops after the integrity
+  document, before the chain entry, and `chain-entry` after the entry,
+  before the rename of `HEAD`, the last point before the entry becomes a
+  chain record (G5). The commit reaches each point through a test-build
+  hook behind the guard the start's hook uses.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores

@@ -38,10 +38,11 @@ repository's commit convention and change classification are in
   `os.replace` or `os.remove` anywhere else.
 - **Standard library only** (D1). No dependency, not even for tests.
 - **`fsp` imports `fsp_testing` only behind a guard**: the start's hook
-  (DESIGN.md §8.2), the adapter's `inject` (D6), and the adapter's
-  `entity propose`, which fills an `install-skill` without files with the
-  conformance fixture skill (ADAPTER.md §3.6). A production build is the
-  package absent, and must still run.
+  (DESIGN.md §8.2), the commit's stage hook for `inject interrupt`
+  (DESIGN.md §3.3), the clock's test offset (D59), the adapter's `inject`
+  (D6), and the adapter's `entity propose`, which fills an `install-skill`
+  without files with the conformance fixture skill (ADAPTER.md §3.6). A
+  production build is the package absent, and must still run.
 - **Code comments cite decisions by number** (`D25`, `G14`) and sections of
   DESIGN.md; the reasoning lives there, not in the comment.
 
