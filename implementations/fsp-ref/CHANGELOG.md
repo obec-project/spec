@@ -201,6 +201,14 @@ The specification decisions the phase depends on come first.
   4.8 and 10.3 pass. Every executable step of OC-004 passes, with 4.9 – 4.12
   unestablished until a second major version exists, and every executed step
   of OC-010, with 10.5 attested.
+- **D55 revised — handing ownership over takes two acts** (2026-10-02).
+  D55 said the owner leaves only by handing ownership to a binding that
+  accepts it, and left how to this phase. The owner offers it with an act
+  that waits in `auth.json` and can be replaced or withdrawn; the named
+  binding accepts it with an act of its own, which authorizes the commit
+  changing `owner`. Removing the named binding clears the offer, so a binding
+  added again under the same id inherits nothing. The acts follow every
+  binding change: outside a session and over a store that verifies.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores
