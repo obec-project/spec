@@ -12,7 +12,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **3** | the review (D52), `inject interrupt` over the atomic commit and its recovery | OC-001(b), OC-004, 10.3 |
+| **3** | the review (D52), handing ownership over (D55) | OC-001(b) |
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), the Vital Check's sweep of the log (D45), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
 | **6** | actuation inside the workspace (declared since Phase 3), allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
@@ -26,7 +26,6 @@ After that: a test entity on Ollama, operated for days, measuring what
 
 ### Carried into the phases
 
-- **Phase 3 — step 10.3** comes with the commit.
 - **Phase 3 — handing ownership over** (D55): the owner offers it to another
   active binding, which accepts by an act of its own, and the commit changes
   `owner`. Until then the owner leaves only by decommission.

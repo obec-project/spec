@@ -340,6 +340,7 @@ COMMANDS = {
     ("inject", "advance-clock"): _inject("advance-clock"),
     ("inject", "corrupt"): _inject("corrupt"),
     ("inject", "gate-failure"): _inject("gate-failure"),
+    ("inject", "interrupt"): _inject("interrupt"),
     ("inject", "passive-signal"): _inject("passive-signal"),
     ("inject", "probe"): _inject("probe"),
 }

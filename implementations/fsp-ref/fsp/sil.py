@@ -390,6 +390,14 @@ def raise_passive_signal(store: Store, condition, detail, *, session=None):
 # -- the commit pipeline (OC-004(b), OP-012; DESIGN.md §3.3) -----------------
 
 
+def _commit_stage(stage: str) -> None:
+    try:
+        from fsp_testing import hooks
+    except ImportError:
+        return
+    hooks.commit_stage(stage)
+
+
 def commit_generation(store: Store, *, changes, authorization, kind="commit", session=None):
     """Write generation ``n+1`` and extend the chain. ``changes`` maps a
     structural path to its new bytes, or to None to remove it. The single
@@ -434,6 +442,8 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
         for rel, data in sorted(changes.items()):
             if data is not None and rel not in files:
                 store.replace(STRUCTURAL, nxt + "/" + rel, data, writer=COMMITTER)
+
+        _commit_stage("staging")
 
         # 2. validation
         # D56: structural content is probed before it commits
@@ -528,6 +538,7 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
 
         # 3. integrity document and chain entry
         store.replace(INTEGRITY, chain.document_relpath(n + 1), canonical(new_doc), writer=WRITER)
+        _commit_stage("write")
         body = chain.commit(
             n=n + 1,
             predecessor=head["entry_id"],
@@ -537,6 +548,7 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
             kind=kind,
         )
         store.replace(INTEGRITY, chain.entry_relpath(n + 1), canonical(body), writer=WRITER)
+        _commit_stage("chain-entry")
         entry_id = chain.entry_id(body)
 
         # 4. commit: the atomic point

@@ -11,10 +11,11 @@ import json
 import os
 import secrets
 
-from fsp import chain
-from fsp.adapter import CannotAttempt, NotImplementedCommand, accepted
+from fsp import chain, proposals, sil
+from fsp.adapter import CannotAttempt, NotImplementedCommand, accepted, refused
 from fsp.digest import canonical
 from fsp.verify import verify
+from fsp_testing import hooks
 
 
 def _active(root):
@@ -197,3 +198,28 @@ def advance_clock(root, flags):
 
     total = hooks.advance_clock(root, seconds)
     return accepted({"offset": total})
+
+
+def interrupt(root, flags):
+    """Attempt to commit an authorized proposal and terminate at stage (ADAPTER §5, OC-004(b), OC-010)."""
+    stage = flags.get("stage")
+    if stage not in hooks.STAGES:
+        raise CannotAttempt("--stage is staging, write or chain-entry")
+    proposal = flags.get("proposal")
+    if not proposal:
+        raise CannotAttempt("--proposal is required")
+
+    hooks.arm_interrupt(stage)
+    try:
+        try:
+            proposals.commit(root, proposal)
+        except hooks.Interrupted:
+            return accepted({"stage": stage, "proposal": proposal})
+        except sil.Refused as e:
+            if not e.log_records:
+                raise CannotAttempt(e.detail)
+            return refused(e)
+    finally:
+        hooks.disarm_interrupt()
+
+    raise CannotAttempt("the commit completed before %s" % stage)

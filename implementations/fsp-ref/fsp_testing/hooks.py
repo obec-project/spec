@@ -1,12 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Jonas Orrico
-"""Test-build hooks the start consults (DESIGN.md §8.2).
+"""Test-build hooks the start and commit consult (DESIGN.md §3.3, §8.2).
 
 ``inject gate-failure`` has to reach the *next* start, which runs in another
 process. The marker lives **outside** the store — never in it, where it would
 be entity state — keyed by the store's real path, and a start consumes it.
 A production build has no ``fsp_testing``, so nothing here exists there; and
 the only thing a marker can do is make a gate fail.
+
+It also holds the hook for commit stages (DESIGN.md §3.3), which acts only
+in the process that armed it.
 """
 
 from __future__ import annotations
@@ -85,3 +88,34 @@ def clear_clock(root: str) -> None:
         os.unlink(path)
     except FileNotFoundError:
         pass
+
+
+# -- commit interrupt (DESIGN.md §3.3) ----------------------------------------
+
+STAGES = ("staging", "write", "chain-entry")
+
+
+class Interrupted(BaseException):
+    def __init__(self, stage: str):
+        super().__init__(stage)
+        self.stage = stage
+
+
+_armed = None
+
+
+def arm_interrupt(stage: str) -> None:
+    if stage not in STAGES:
+        raise ValueError("unknown commit stage %r" % (stage,))
+    global _armed
+    _armed = stage
+
+
+def disarm_interrupt() -> None:
+    global _armed
+    _armed = None
+
+
+def commit_stage(stage: str) -> None:
+    if _armed == stage:
+        raise Interrupted(stage)

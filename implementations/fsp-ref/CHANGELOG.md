@@ -193,6 +193,14 @@ The specification decisions the phase depends on come first.
   before the rename of `HEAD`, the last point before the entry becomes a
   chain record (G5). The commit reaches each point through a test-build
   hook behind the guard the start's hook uses.
+- **`inject interrupt`** (2026-10-02, DESIGN §3.3). It commits an approved
+  proposal and stops it at `staging`, `write` or `chain-entry` with an
+  exception nothing in `fsp` catches, leaving the store a process death
+  there would; an unauthorized proposal is a refusal. The atomic commit and
+  the recovery gate were already built, and now the suite proves them: steps
+  4.8 and 10.3 pass. Every executable step of OC-004 passes, with 4.9 – 4.12
+  unestablished until a second major version exists, and every executed step
+  of OC-010, with 10.5 attested.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores
