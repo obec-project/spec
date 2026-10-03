@@ -209,6 +209,13 @@ The specification decisions the phase depends on come first.
   changing `owner`. Removing the named binding clears the offer, so a binding
   added again under the same id inherits nothing. The acts follow every
   binding change: outside a session and over a store that verifies.
+- **Handing ownership over** (2026-10-02, D55). `ownership_offer`,
+  `ownership_accept` and `ownership_withdraw` in `operator.py` do what D55
+  says, every refusal logged; the commit that changes `owner` is authorized
+  by the accepting binding's act, which the start's resolution of
+  authorizations now accepts for a commit. The owner can leave the binding
+  set at last: hand ownership over, then remove itself. Not in the adapter
+  contract, so the suite's results do not change.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores

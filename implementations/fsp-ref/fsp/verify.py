@@ -272,7 +272,7 @@ def authorization_resolves(store: Store, body: dict) -> bool:
     entry_kind = body.get("kind")
     act = rec.get("act")
     if entry_kind == "commit":
-        return act in {"approve", "grant", "binding-add", "binding-remove"}
+        return act in {"approve", "grant", "binding-add", "binding-remove", "ownership-accept"}
     elif entry_kind == "decommission":
         return act == "decommission"
     return False

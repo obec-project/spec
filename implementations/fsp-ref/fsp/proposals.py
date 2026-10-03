@@ -84,6 +84,14 @@ def read_auth(store: Store) -> dict:
     grants_obj = data.get("grants")
     if grants_obj is not None and not isinstance(grants_obj, list):
         raise ValueError("grants must be a list")
+    if "ownership_offer" in data and data["ownership_offer"] is not None:
+        offer = data["ownership_offer"]
+        if (
+            not isinstance(offer, dict)
+            or set(offer.keys()) != {"to", "record", "binding"}
+            or not all(isinstance(v, str) for v in offer.values())
+        ):
+            raise ValueError("ownership offer is malformed")
     if "proposals" not in data:
         data["proposals"] = {}
     if "approvals" not in data:

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Jonas Orrico
-"""Operator acts on bindings and workspace (D28, D30, D48, D55)."""
+"""Operator acts on bindings, ownership handover, and workspace (D28, D30, D48, D55)."""
 
 from __future__ import annotations
 
@@ -252,7 +252,252 @@ def binding_remove(root: str, target: str, *, binding=None):
             changes={"bindings.json": canonical(new_content)},
             authorization=loc,
         )
+        auth = proposals.read_auth(store)
+        offer = auth.get("ownership_offer")
+        if offer and offer.get("to") == target:
+            auth.pop("ownership_offer", None)
+            proposals.write_auth(store, auth)
         return {"entry": out["entry"], "log_records": [loc["id"], out["log_record"]]}
+
+
+def ownership_offer(root: str, target: str, *, binding=None):
+    """Offer ownership of the Operator binding set to another active binding (OC-001(a), D55)."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        if store.exists(lifecycle.CREDENTIAL):
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="session-live",
+                detail="bindings change only outside a session; stop or revoke it first",
+            )
+            raise Refused(
+                "session-live",
+                "OC-001(a)",
+                "bindings change only outside a session; stop or revoke it first",
+                [rec],
+            )
+        if not (isinstance(target, str) and sil.BINDING_ID.match(target)):
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="binding-id",
+                detail="invalid binding id %r" % (target,),
+            )
+            raise Refused("binding-id", "OC-001(a)", "invalid binding id %r" % (target,), [rec])
+        owner = sil.owner_binding(store)
+        if acting != owner:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="owner-only",
+                detail="only the owner can offer ownership",
+            )
+            raise Refused("owner-only", "OC-001(a)", "only the owner can offer ownership", [rec])
+        if target == owner:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="ownership-self",
+                detail="cannot offer ownership to oneself",
+            )
+            raise Refused(
+                "ownership-self", "OC-001(a)", "cannot offer ownership to oneself", [rec]
+            )
+        active = sil.active_bindings(store) or []
+        if target not in active:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="binding-unknown",
+                detail="binding %r is not in the active set" % (target,),
+            )
+            raise Refused(
+                "binding-unknown",
+                "OC-001(a)",
+                "binding %r is not in the active set" % (target,),
+                [rec],
+            )
+        report = verify(store.root)
+        if report.decommissioned:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-002(c)",
+                binding=acting,
+                check="decommissioned",
+                detail="already decommissioned",
+            )
+            raise Refused("decommissioned", "OC-002(c)", "already decommissioned", [rec])
+        if report.findings:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-004(a)",
+                binding=acting,
+                check="structural",
+                detail="the store does not verify",
+            )
+            raise Refused("structural", "OC-004(a)", "the store does not verify", [rec])
+        loc = sil.operator_act_located(
+            store, "ownership-offer", binding=acting, rule="OC-001(a)", target=target
+        )
+        auth = proposals.read_auth(store)
+        auth["ownership_offer"] = {"to": target, "record": loc["id"], "binding": acting}
+        proposals.write_auth(store, auth)
+        return {"offer": target, "log_records": [loc["id"]]}
+
+
+def ownership_accept(root: str, *, binding=None):
+    """Accept an ownership offer and commit the new owner (OC-001(a), D55)."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        if store.exists(lifecycle.CREDENTIAL):
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="session-live",
+                detail="bindings change only outside a session; stop or revoke it first",
+            )
+            raise Refused(
+                "session-live",
+                "OC-001(a)",
+                "bindings change only outside a session; stop or revoke it first",
+                [rec],
+            )
+        auth = proposals.read_auth(store)
+        offer = auth.get("ownership_offer")
+        if not offer:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="no-offer",
+                detail="there is no pending ownership offer",
+            )
+            raise Refused(
+                "no-offer", "OC-001(a)", "there is no pending ownership offer", [rec]
+            )
+        if offer.get("to") != acting:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="not-offered",
+                detail="ownership was not offered to %r" % (acting,),
+            )
+            raise Refused(
+                "not-offered",
+                "OC-001(a)",
+                "ownership was not offered to %r" % (acting,),
+                [rec],
+            )
+        report = verify(store.root)
+        if report.decommissioned:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-002(c)",
+                binding=acting,
+                check="decommissioned",
+                detail="already decommissioned",
+            )
+            raise Refused("decommissioned", "OC-002(c)", "already decommissioned", [rec])
+        if report.findings:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-004(a)",
+                binding=acting,
+                check="structural",
+                detail="the store does not verify",
+            )
+            raise Refused("structural", "OC-004(a)", "the store does not verify", [rec])
+        loc = sil.operator_act_located(
+            store, "ownership-accept", binding=acting, rule="OC-001(a)", offer=offer["record"]
+        )
+        active = sil.active_bindings(store) or []
+        new_content = {"bindings": [{"id": b} for b in active], "owner": acting}
+        out = sil.commit_generation(
+            store,
+            changes={"bindings.json": canonical(new_content)},
+            authorization=loc,
+        )
+        auth = proposals.read_auth(store)
+        auth.pop("ownership_offer", None)
+        proposals.write_auth(store, auth)
+        return {"entry": out["entry"], "owner": acting, "log_records": [loc["id"], out["log_record"]]}
+
+
+def ownership_withdraw(root: str, *, binding=None):
+    """Withdraw a pending ownership offer (OC-001(a), D55). Owner-only, outside session."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        if store.exists(lifecycle.CREDENTIAL):
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="session-live",
+                detail="bindings change only outside a session; stop or revoke it first",
+            )
+            raise Refused(
+                "session-live",
+                "OC-001(a)",
+                "bindings change only outside a session; stop or revoke it first",
+                [rec],
+            )
+        owner = sil.owner_binding(store)
+        if acting != owner:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="owner-only",
+                detail="only the owner can withdraw an ownership offer",
+            )
+            raise Refused(
+                "owner-only", "OC-001(a)", "only the owner can withdraw an ownership offer", [rec]
+            )
+        auth = proposals.read_auth(store)
+        offer = auth.get("ownership_offer")
+        if not offer:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="no-offer",
+                detail="there is no pending ownership offer",
+            )
+            raise Refused(
+                "no-offer", "OC-001(a)", "there is no pending ownership offer", [rec]
+            )
+        loc = sil.operator_act_located(
+            store, "ownership-withdraw", binding=acting, rule="OC-001(a)", offer=offer["record"]
+        )
+        auth.pop("ownership_offer", None)
+        proposals.write_auth(store, auth)
+        return {"log_records": [loc["id"]]}
 
 
 def set_workspace(root: str, path: str, *, binding=None):
