@@ -19,6 +19,30 @@ The conformance suite carries its own version line; a claim names both, as in
 
 ## Unreleased
 
+**The specification**
+
+- The Profile drops four rules the reference implementation had to deviate
+  from, each because following it broke something. **OP-017**: first
+  activation issued the first credential with no gate passed, against
+  OC-010's requirement that every start pass every gate before a credential
+  is issued; a fault in the activation itself would have entered the first
+  session unverified. First activation now issues none, and the first
+  session begins with a start like any other. **OP-003(a)**: a check due by
+  time may run before the next act instead, provided every act, background
+  executions included, passes that test — the interval bounds how long the
+  entity acts on unverified state, and while nothing acts there is nothing
+  to bound. **OP-008(c)**: an old check is evidence of an unresponsive
+  verifier only where the verifier runs apart from the acts it guards;
+  where it runs before them, a stalled verifier stalls the act and the
+  execution's watchdog bounds it. **OP-020**: a concurrent-session conflict
+  was Critical and revoked the conflicting credential, so any mistaken
+  second start — a repeated command, a scheduled trigger firing during the
+  Operator's session — brought down a legitimate session; the start is now
+  refused and the Operator notified, as OC-003(d) requires, and the
+  Operator revokes the live session directly if it should not be running.
+  Prompted by fsp-ref (D49, D65), whose deviations from the Profile are
+  now none.
+
 **Conformance suite**
 
 - TESTS.md §0.3 says what *detected* asserts — `lifecycle verify` returns

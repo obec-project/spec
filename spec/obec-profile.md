@@ -144,10 +144,14 @@ about a partial failure, or how the report travels. This section does.
 
 **(a) Cadence.** A **Vital Check** SHOULD run when an activity threshold is
 reached or a time interval has elapsed since the last check, whichever comes
-first, both declared in configuration. The recurring cycle of these checks is the
-**Heartbeat**. Each check also sweeps a portion of the semantic ledger
-(OP-009(f)), resuming where the last one stopped, so that the whole of semantic
-memory is checked over successive checks without the start paying for it.
+first, both declared in configuration. A check that falls due by time MAY instead
+run before the next act, provided every act the implementation performs — the
+operations of background executions (OP-014(b)) included — is preceded by that
+test: state nothing acts on cannot be harmed by acting. The recurring cycle of
+these checks is the **Heartbeat**. Each check also sweeps a portion of the
+semantic ledger (OP-009(f)), resuming where the last one stopped, so that the
+whole of semantic memory is checked over successive checks without the start
+paying for it.
 
 **(b) States.** A Vital Check SHOULD resolve to one of three states:
 
@@ -276,10 +280,13 @@ attempts — `N_channel` declared in configuration — the passive signal of
 OC-001(c) is written instead.
 
 **(c) Corroborated escalation of a failed verifier.** Failure of the integrity
-path is escalatable like any other condition, and its detection needs no
-dedicated mechanism: the Heartbeat cadence is declared in configuration and every
-Vital Check leaves a record, so **a newest check older than the declared cadence
-is mechanical evidence of an unresponsive verifier**.
+path is escalatable like any other condition. Where the Vital Check runs apart
+from the acts it guards, its detection needs no dedicated mechanism: the
+Heartbeat cadence is declared in configuration and every Vital Check leaves a
+record, so **a newest check older than the declared cadence is mechanical
+evidence of an unresponsive verifier**. Where checks run before the act they
+guard (OP-003(a)), an old check means only that nothing acted; a verifier that
+stalls stalls the act, and the execution's watchdog (OP-014(a)) bounds it.
 
 Any part MAY act on that evidence — or on the verifier's failure to answer a
 signal — and report directly. A peer escalation of this kind SHOULD fire on the
@@ -632,7 +639,8 @@ authorization to run code is an authorization to run that code.
 
 First activation runs exactly once, on an empty store: it establishes the
 Operator binding, assembles the initial structural state, generates the integrity
-baseline, writes the Genesis Anchor, and issues the first session credential.
+baseline, and writes the Genesis Anchor. It issues no credential: the first
+session, like every other, begins with a start that passes every gate (OC-010).
 
 It SHOULD be atomic with respect to its own outputs — it either completes fully
 or reverts every write it made, leaving the store uninitialized. A failed first
@@ -698,8 +706,10 @@ The credential artifact **MUST be directly accessible to the Operator with no
 active component** — this is what makes OC-002(b) realizable.
 
 A credential artifact found at start that does not match a crash scenario is a
-concurrent-session conflict: Critical, the conflicting credential revoked and the
-Operator notified before any new one is issued.
+concurrent-session conflict: the start is refused and the Operator notified
+before any new credential is issued. The session holding the credential is not
+revoked by the start that found it; the Operator, told, revokes it directly if
+it should not be running.
 
 *Serves:* OC-002(b), OC-001(a), OC-003(d).
 
