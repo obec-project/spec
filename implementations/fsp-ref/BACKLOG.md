@@ -12,12 +12,12 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **3** | the review (D52), Operator acts over an unreadable `auth.json` | OC-001(b) |
+| **3** | the review's Operator acts (D52): the list of pending proposals, rejection, the pending cap | OC-001(b) but 1.9 |
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), the Vital Check's sweep of the log (D45), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
-| **5** | operations table, class guard, a real `attempt-write` (G12) | OC-003(c), OC-005 |
+| **5** | operations table, class guard, a real `attempt-write` (G12) | OC-001 1.9, OC-002 2.1, OC-003(c), OC-005 |
 | **6** | actuation inside the workspace (declared since Phase 3), allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
 | **7** | session records, the conversation and its recall scope (D11, D60), `mnemonic-save`/`mnemonic-recall`, the probes over memory (D12), promotion under authorization and the semantic ledger (D53), `/resume`, `/inject` and `/retract`, Sleep | OC-007, OC-003(e), OC-002(d) |
-| **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the review at `/exit` and before the first stimulus (D52) | OC-006, OC-009 (attested) |
+| **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, including a name already in use (D54), `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json` | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
 
@@ -26,12 +26,6 @@ After that: a test entity on Ollama, operated for days, measuring what
 
 ### Carried into the phases
 
-- **Phase 3 — Operator acts over an unreadable `auth.json`.** `approve` and
-  `grant` refuse with `check: authorization-state`, logged, before they act.
-  `binding_remove` and the ownership acts (D55) read it with `read_auth` and
-  let its `ValueError` escape: `ownership_offer` after logging its act,
-  `binding_remove` after its commit. The start already aborts on such a store
-  (gate 5); these acts should read it first and refuse the same way.
 - **Phase 7 — the probes over memory tell the entity's words from others'.**
   Episodic memory records the conversation, and a first-person pattern flags
   an Operator's *I feel* as readily as the entity's. The probes of D12 must

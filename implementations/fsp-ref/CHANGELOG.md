@@ -216,6 +216,14 @@ The specification decisions the phase depends on come first.
   authorizations now accepts for a commit. The owner can leave the binding
   set at last: hand ownership over, then remove itself. Not in the adapter
   contract, so the suite's results do not change.
+- **Binding acts refuse an unreadable `auth.json` first** (2026-10-10).
+  `binding_remove` and the three ownership acts read the authorization state
+  with no guard, the first two only after logging their act or committing,
+  so an unreadable `auth.json` left a commit made, or an act logged with no
+  offer behind it, and an exception instead of a refusal. They now read it
+  right after the session check and refuse with `check:
+  authorization-state`, logged, as `approve` and `grant` do, and reuse what
+  they read: nothing between the read and the write touches the file.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores

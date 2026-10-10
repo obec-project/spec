@@ -276,3 +276,93 @@ class OwnershipTest(TempDirTest):
         failed_gates = [g for g in res.gates if g.get("gate") == "authorization-state"]
         self.assertTrue(failed_gates)
         self.assertEqual(failed_gates[0]["outcome"], "fail")
+
+    def test_removing_a_binding_over_unreadable_authorization_is_refused(self):
+        S = self.p("S-unreadable-remove")
+        sil.first_activation(S, "op-1")
+        operator.binding_add(S, "op-2")
+        Store(S).replace_json(INTEGRITY, lifecycle.AUTH, [], writer=sil.WRITER)
+        head_before = sil.read_head(Store(S))
+        acts_before = len(lifecycle.observe_log(S, kind="operator-act")["records"])
+
+        with self.assertRaises(sil.Refused) as ctx:
+            operator.binding_remove(S, "op-2")
+
+        self.assertEqual(ctx.exception.check, "authorization-state")
+        self.assertEqual(ctx.exception.rule, "OC-001(a)")
+        self.assertTrue(ctx.exception.log_records)
+        refusals = lifecycle.observe_log(S, kind="refusal")["records"]
+        self.assertEqual(refusals[-1]["check"], "authorization-state")
+        self.assertEqual(sil.read_head(Store(S)), head_before)
+        self.assertEqual(
+            len(lifecycle.observe_log(S, kind="operator-act")["records"]), acts_before
+        )
+        self.assertEqual(
+            [b["id"] for b in operator.binding_list(S)["bindings"]], ["op-1", "op-2"]
+        )
+
+    def test_offering_over_unreadable_authorization_is_refused(self):
+        S = self.p("S-unreadable-offer")
+        sil.first_activation(S, "op-1")
+        operator.binding_add(S, "op-2")
+        Store(S).replace_json(INTEGRITY, lifecycle.AUTH, [], writer=sil.WRITER)
+        head_before = sil.read_head(Store(S))
+        acts_before = len(lifecycle.observe_log(S, kind="operator-act")["records"])
+
+        with self.assertRaises(sil.Refused) as ctx:
+            operator.ownership_offer(S, "op-2")
+
+        self.assertEqual(ctx.exception.check, "authorization-state")
+        self.assertEqual(ctx.exception.rule, "OC-001(a)")
+        self.assertTrue(ctx.exception.log_records)
+        refusals = lifecycle.observe_log(S, kind="refusal")["records"]
+        self.assertEqual(refusals[-1]["check"], "authorization-state")
+        self.assertEqual(sil.read_head(Store(S)), head_before)
+        self.assertEqual(
+            len(lifecycle.observe_log(S, kind="operator-act")["records"]), acts_before
+        )
+
+    def test_accepting_over_unreadable_authorization_is_refused(self):
+        S = self.p("S-unreadable-accept")
+        sil.first_activation(S, "op-1")
+        operator.binding_add(S, "op-2")
+        operator.ownership_offer(S, "op-2")
+        Store(S).replace_json(INTEGRITY, lifecycle.AUTH, [], writer=sil.WRITER)
+        head_before = sil.read_head(Store(S))
+        acts_before = len(lifecycle.observe_log(S, kind="operator-act")["records"])
+
+        with self.assertRaises(sil.Refused) as ctx:
+            operator.ownership_accept(S, binding="op-2")
+
+        self.assertEqual(ctx.exception.check, "authorization-state")
+        self.assertEqual(ctx.exception.rule, "OC-001(a)")
+        self.assertTrue(ctx.exception.log_records)
+        refusals = lifecycle.observe_log(S, kind="refusal")["records"]
+        self.assertEqual(refusals[-1]["check"], "authorization-state")
+        self.assertEqual(sil.read_head(Store(S)), head_before)
+        self.assertEqual(
+            len(lifecycle.observe_log(S, kind="operator-act")["records"]), acts_before
+        )
+        self.assertEqual(operator.binding_list(S)["owner"], "op-1")
+
+    def test_withdrawing_over_unreadable_authorization_is_refused(self):
+        S = self.p("S-unreadable-withdraw")
+        sil.first_activation(S, "op-1")
+        operator.binding_add(S, "op-2")
+        operator.ownership_offer(S, "op-2")
+        Store(S).replace_json(INTEGRITY, lifecycle.AUTH, [], writer=sil.WRITER)
+        head_before = sil.read_head(Store(S))
+        acts_before = len(lifecycle.observe_log(S, kind="operator-act")["records"])
+
+        with self.assertRaises(sil.Refused) as ctx:
+            operator.ownership_withdraw(S)
+
+        self.assertEqual(ctx.exception.check, "authorization-state")
+        self.assertEqual(ctx.exception.rule, "OC-001(a)")
+        self.assertTrue(ctx.exception.log_records)
+        refusals = lifecycle.observe_log(S, kind="refusal")["records"]
+        self.assertEqual(refusals[-1]["check"], "authorization-state")
+        self.assertEqual(sil.read_head(Store(S)), head_before)
+        self.assertEqual(
+            len(lifecycle.observe_log(S, kind="operator-act")["records"]), acts_before
+        )

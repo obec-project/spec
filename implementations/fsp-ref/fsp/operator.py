@@ -149,6 +149,23 @@ def binding_remove(root: str, target: str, *, binding=None):
                 "bindings change only outside a session; stop or revoke it first",
                 [rec],
             )
+        try:
+            auth = proposals.read_auth(store)
+        except (OSError, ValueError) as e:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="authorization-state",
+                detail="authorization state unreadable: %s" % (e,),
+            )
+            raise Refused(
+                "authorization-state",
+                "OC-001(a)",
+                "authorization state unreadable: %s" % (e,),
+                [rec],
+            )
         if not (isinstance(target, str) and sil.BINDING_ID.match(target)):
             rec = log_append(
                 store,
@@ -252,7 +269,6 @@ def binding_remove(root: str, target: str, *, binding=None):
             changes={"bindings.json": canonical(new_content)},
             authorization=loc,
         )
-        auth = proposals.read_auth(store)
         offer = auth.get("ownership_offer")
         if offer and offer.get("to") == target:
             auth.pop("ownership_offer", None)
@@ -278,6 +294,23 @@ def ownership_offer(root: str, target: str, *, binding=None):
                 "session-live",
                 "OC-001(a)",
                 "bindings change only outside a session; stop or revoke it first",
+                [rec],
+            )
+        try:
+            auth = proposals.read_auth(store)
+        except (OSError, ValueError) as e:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="authorization-state",
+                detail="authorization state unreadable: %s" % (e,),
+            )
+            raise Refused(
+                "authorization-state",
+                "OC-001(a)",
+                "authorization state unreadable: %s" % (e,),
                 [rec],
             )
         if not (isinstance(target, str) and sil.BINDING_ID.match(target)):
@@ -353,7 +386,6 @@ def ownership_offer(root: str, target: str, *, binding=None):
         loc = sil.operator_act_located(
             store, "ownership-offer", binding=acting, rule="OC-001(a)", target=target
         )
-        auth = proposals.read_auth(store)
         auth["ownership_offer"] = {"to": target, "record": loc["id"], "binding": acting}
         proposals.write_auth(store, auth)
         return {"offer": target, "log_records": [loc["id"]]}
@@ -379,7 +411,23 @@ def ownership_accept(root: str, *, binding=None):
                 "bindings change only outside a session; stop or revoke it first",
                 [rec],
             )
-        auth = proposals.read_auth(store)
+        try:
+            auth = proposals.read_auth(store)
+        except (OSError, ValueError) as e:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="authorization-state",
+                detail="authorization state unreadable: %s" % (e,),
+            )
+            raise Refused(
+                "authorization-state",
+                "OC-001(a)",
+                "authorization state unreadable: %s" % (e,),
+                [rec],
+            )
         offer = auth.get("ownership_offer")
         if not offer:
             rec = log_append(
@@ -439,7 +487,6 @@ def ownership_accept(root: str, *, binding=None):
             changes={"bindings.json": canonical(new_content)},
             authorization=loc,
         )
-        auth = proposals.read_auth(store)
         auth.pop("ownership_offer", None)
         proposals.write_auth(store, auth)
         return {"entry": out["entry"], "owner": acting, "log_records": [loc["id"], out["log_record"]]}
@@ -465,6 +512,23 @@ def ownership_withdraw(root: str, *, binding=None):
                 "bindings change only outside a session; stop or revoke it first",
                 [rec],
             )
+        try:
+            auth = proposals.read_auth(store)
+        except (OSError, ValueError) as e:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(a)",
+                binding=acting,
+                check="authorization-state",
+                detail="authorization state unreadable: %s" % (e,),
+            )
+            raise Refused(
+                "authorization-state",
+                "OC-001(a)",
+                "authorization state unreadable: %s" % (e,),
+                [rec],
+            )
         owner = sil.owner_binding(store)
         if acting != owner:
             rec = log_append(
@@ -478,7 +542,6 @@ def ownership_withdraw(root: str, *, binding=None):
             raise Refused(
                 "owner-only", "OC-001(a)", "only the owner can withdraw an ownership offer", [rec]
             )
-        auth = proposals.read_auth(store)
         offer = auth.get("ownership_offer")
         if not offer:
             rec = log_append(
