@@ -62,6 +62,11 @@ The conformance suite carries its own version line; a claim names both, as in
   2025, for it. The suite's 3.9 job moves to `ubuntu-22.04` beside its 3.8
   job, since the runner still promises 3.8+; fsp-ref's floor rises to 3.10
   and its 3.9 job goes (fsp-ref D1).
+- CI moves to `actions/checkout@v7` and `actions/setup-python@v7`, which run
+  on Node.js 24: the v4 and v5 it used target Node.js 20, which GitHub has
+  deprecated and already forces onto Node.js 24. Nothing the workflow uses
+  changed between those majors. The jobs left on `ubuntu-latest` need no
+  change for Ubuntu 26: Python 3.10 – 3.14 all have builds for it.
 
 ## 0.12.0 — 2026-09-27
 
