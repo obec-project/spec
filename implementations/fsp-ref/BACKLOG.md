@@ -8,11 +8,10 @@ done is in [CHANGELOG.md](CHANGELOG.md).
 ## 1. Phases
 
 Each phase ends with `run.py --only …` green on its invariants
-([AGENTS.md](AGENTS.md)). Phases 0–2 are done.
+([AGENTS.md](AGENTS.md)). Phases 0–3 are done.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **3** | the review's Operator acts (D52): the list of pending proposals, rejection, the pending cap | OC-001(b) but 1.9 |
 | **4** | heartbeat and the Vital Check skeleton (D37–D40), the Vital Check's sweep of the log (D45), `PULSE` from the Vital Check, the `CREDENTIAL` `flock` in a real run, suspend (D19) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-001 1.9, OC-002 2.1, OC-003(c), OC-005 |
 | **6** | actuation inside the workspace (declared since Phase 3), allowlist with digest-pinned skills (D16), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |

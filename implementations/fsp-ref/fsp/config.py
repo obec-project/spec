@@ -55,6 +55,13 @@ SETTINGS = (
         "live delivery attempts to the Operator before the passive signal is "
         "written (OP-008(b))",
     ),
+    Setting(
+        "pending_cap",
+        10,
+        (1, 100),
+        "evolution proposals pending at once, approved or not, past which a "
+        "new proposal is refused (D52)",
+    ),
 )
 
 _BY_NAME = {s.name: s for s in SETTINGS}

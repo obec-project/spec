@@ -783,3 +783,85 @@ def revoke_grant(root: str, *, binding=None):
         act = sil.operator_act(store, "revoke-grant", binding=acting, rule="OC-001(b)")
         closed = proposals.revoke_windows(store, act)
         return {"revoked": closed, "log_records": [act]}
+
+
+def review_list(root: str, *, binding=None):
+    """Pending evolution proposals, approved or not, in order of origination (D52). Read-only."""
+    store = Store(root)
+    with store.write_lock():
+        try:
+            auth = proposals.read_auth(store)
+        except (OSError, ValueError) as e:
+            raise Refused(
+                "authorization-state",
+                "OC-001(b)",
+                "authorization state unreadable: %s" % (e,),
+            )
+        items = []
+        for pid, entry in auth["proposals"].items():
+            items.append(
+                {
+                    "proposal": pid,
+                    "digest": entry["digest"],
+                    "session": entry["session"],
+                    "record": entry["record"],
+                    "categories": sorted(
+                        set(proposals.CATEGORIES[op["op"]] for op in entry["ops"])
+                    ),
+                    "approved": pid in auth["approvals"],
+                }
+            )
+        items.sort(key=lambda it: it["record"])
+        return {"proposals": items}
+
+
+def reject(root: str, proposal_id: str, *, binding=None):
+    """Reject a pending evolution proposal and withdraw its approval, if any (OC-001(b), D52)."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        try:
+            auth = proposals.read_auth(store)
+        except (OSError, ValueError) as e:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="authorization-state",
+                detail="authorization state unreadable: %s" % (e,),
+            )
+            raise Refused(
+                "authorization-state",
+                "OC-001(b)",
+                "authorization state unreadable: %s" % (e,),
+                [rec],
+            )
+        prop = auth.get("proposals", {}).get(proposal_id)
+        if prop is None:
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="proposal-unknown",
+                detail="proposal %r is not known" % (proposal_id,),
+            )
+            raise Refused(
+                "proposal-unknown",
+                "OC-001(b)",
+                "proposal %r is not known" % (proposal_id,),
+                [rec],
+            )
+        act = sil.operator_act(
+            store,
+            "reject",
+            binding=acting,
+            rule="OC-001(b)",
+            proposal=proposal_id,
+            digest=prop["digest"],
+        )
+        auth["proposals"].pop(proposal_id, None)
+        auth["approvals"].pop(proposal_id, None)
+        proposals.write_auth(store, auth)
+        return {"log_records": [act]}

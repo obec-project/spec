@@ -8,7 +8,8 @@ append-only files, `fsync`, `flock`.
 The store, the chain back to the Genesis Anchor, first activation, the gated
 start, sessions, revocation, the passive signal and decommission are in
 place, and so are the Operator's acts on bindings and the workspace,
-proposals, approvals, authorization windows and the commit of a proposal,
+proposals, their review and the cap on pending ones, approvals,
+authorization windows and the commit of a proposal,
 validated against the deterministic probes, and the verification of the
 integrity log. Host actuation and everything cognitive are not.
 

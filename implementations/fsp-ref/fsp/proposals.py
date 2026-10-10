@@ -9,7 +9,7 @@ import posixpath
 import re
 import secrets
 
-from . import chain, clock, lifecycle, sil
+from . import chain, clock, config, lifecycle, sil
 from .digest import canonical, sha256
 from .sil import WRITER, Refused, log_append
 from .store import INTEGRITY, Store
@@ -341,6 +341,20 @@ def propose(root: str, ops: list) -> dict:
                 "authorization state unreadable: %s" % (e,),
                 [rec],
             )
+
+        # 6b. pending cap (D52)
+        cap = config.value(store, "pending_cap")
+        if len(auth["proposals"]) >= cap:
+            detail = "%d proposals pending; the cap is %d" % (len(auth["proposals"]), cap)
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                session=session,
+                check="pending-cap",
+                detail=detail,
+            )
+            raise Refused("pending-cap", "OC-001(b)", detail, [rec])
 
         # 7. normalize ops
         normalized = []

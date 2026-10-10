@@ -9,7 +9,7 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
-## Phase 3 — the commit (in progress)
+## Phase 3 — the commit (2026-10-10)
 
 The specification decisions the phase depends on come first.
 
@@ -224,6 +224,18 @@ The specification decisions the phase depends on come first.
   right after the session check and refuse with `check:
   authorization-state`, logged, as `approve` and `grant` do, and reuse what
   they read: nothing between the read and the write touches the file.
+- **The review's Operator acts** (2026-10-10, D52). `review_list` shows the
+  pending proposals in order of origination, approved or not; `reject` is a
+  logged Operator act that drops a proposal and its approval, so the
+  Operator can still turn down what they approved before it commits. A
+  proposal is pending until it commits or is rejected, and the runtime
+  setting `pending_cap` (10; 1–100) bounds how many: past it `propose` is
+  refused with `check: pending-cap`, logged, so an entity cannot bury the
+  Operator in proposals. The cap is runtime (D33), out of every window's
+  reach. Neither act is in the adapter contract. The phase closes here:
+  every executed step of OC-001(b) passes but 1.9, which waits for the
+  operations table of Phase 5. The rest of D52 — `review` in the CLI and
+  the chat, the rollover on approval, the review at `/exit` — is Phase 8.
 - **Retargeted to OBEC-Core 0.11.0** (2026-09-25). The release changes what
   fsp-ref names, not what it does: the exchanged OC-001 and OC-002 are already
   in its code. The Genesis records the new version, and development stores
