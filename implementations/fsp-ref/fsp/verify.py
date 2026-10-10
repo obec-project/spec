@@ -402,6 +402,89 @@ def _verify_log(store: Store, r: Report, *, full_log: bool = False) -> bool:
     return True
 
 
+def sweep_log(store: Store, position, max_bytes: int):
+    """Scan one block of the integrity log for the Vital Check (D45 (3)).
+
+    The block starts after ``position`` — ``{id, offset, sha256}`` of the last
+    record the previous sweep verified — when that position still matches the
+    log; otherwise the sweep starts at the first record and reports
+    ``"position-mismatch"``. Only complete lines are records (D61); each one
+    gets the four checks of ``_verify_log``, and the block ends once at least
+    ``max_bytes`` of lines have passed. Returns ``(finding, new_position,
+    reset)``: the first finding or ``None``, the position of the last record
+    verified or ``None`` when the log was swept to its end, and the reset
+    reason or ``None``. It repairs nothing; it only returns the finding.
+    """
+    relpath = "integrity/log.jsonl"
+    reset = None
+    offset, seq, prev, last = 0, 1, None, None
+    if position is not None:
+        line = None
+        conforms = False
+        if (
+            isinstance(position, dict)
+            and set(position) == {"id", "offset", "sha256"}
+            and isinstance(position["id"], str)
+            and re.match(r"^L-[0-9]{6}$", position["id"])
+            and isinstance(position["offset"], int)
+            and not isinstance(position["offset"], bool)
+            and position["offset"] >= 0
+            and isinstance(position["sha256"], str)
+        ):
+            line = store.read_line_at(relpath, position["offset"])
+            if line is not None and sha256(line) == position["sha256"]:
+                try:
+                    rec = json.loads(line.decode("utf-8"))
+                except (UnicodeDecodeError, ValueError):
+                    rec = None
+                conforms = isinstance(rec, dict) and rec.get("id") == position["id"]
+        if conforms:
+            offset = position["offset"] + len(line) + 1
+            seq = int(position["id"][2:]) + 1
+            prev = sha256(line)
+            last = position
+        else:
+            reset = "position-mismatch"
+
+    data = store.read_from(relpath, offset)
+    consumed = 0
+    cur = offset
+    for line in data.split(b"\n")[:-1]:
+        try:
+            rec = json.loads(line.decode("utf-8"))
+            if not isinstance(rec, dict):
+                raise ValueError("not a dict")
+        except (UnicodeDecodeError, ValueError):
+            return Finding(
+                "log-record", relpath, "sil", {"offset": cur, "problem": "unparseable"}
+            ), last, reset
+
+        if canonical(rec) != line:
+            return Finding(
+                "log-record", relpath, "sil", {"offset": cur, "problem": "not-canonical"}
+            ), last, reset
+
+        if rec.get("id") != "L-%06d" % seq:
+            return Finding(
+                "log-record", relpath, "sil", {"offset": cur, "problem": "sequence"}
+            ), last, reset
+
+        if rec.get("prev") != prev:
+            return Finding(
+                "log-record", relpath, "sil", {"offset": cur, "problem": "prev"}
+            ), last, reset
+
+        last = {"id": rec["id"], "offset": cur, "sha256": sha256(line)}
+        seq += 1
+        prev = sha256(line)
+        consumed += len(line) + 1
+        cur += len(line) + 1
+        if consumed >= max_bytes:
+            return None, last, reset
+
+    return None, None, reset
+
+
 def _verify_content(store: Store, head: dict, r: Report) -> bool:
     n = head["entry"]
     doc_rel = chain.document_relpath(n)

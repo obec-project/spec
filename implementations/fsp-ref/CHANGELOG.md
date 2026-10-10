@@ -107,6 +107,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   D49 and D65 no longer cite a deviation. D64 gains what the corrected
   OP-003(a) asks of a worker skill in the background: each of its tool
   calls is an act and passes the Vital Check's test first.
+- **The Vital Check sweeps the log** (2026-10-10, D45 (3)). `sweep_log` in
+  `verify.py` checks a block of records with the four checks the start's
+  tail verification makes, from the position the last check left in
+  `integrity/vital.json` to at least 1 MiB further, and starts over at the
+  first record when it reaches the end. A position whose record no longer
+  matches restarts the sweep, logged, so a position moved forward costs a
+  repeated pass and never skips a region. A finding is read twice like any
+  other (D40), and a confirmed one is Critical: a broken record before the
+  last checkpoint, which no start reads, is now found within a pass. Two
+  defects the work surfaced are carried in the backlog: the sweep reads to
+  the end of the log though it verifies a block, and a value `canonical`
+  refuses, such as `NaN`, makes verification raise instead of reporting.
 
 ## Phase 3 — the commit (2026-10-10)
 

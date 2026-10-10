@@ -7,7 +7,7 @@ from unittest import mock
 from helpers import TempDirTest
 
 from fsp import config, lifecycle, operator, proposals, sil, vital
-from fsp.digest import canonical
+from fsp.digest import canonical, sha256
 from fsp.sil import Refused
 from fsp.store import LAYOUT, Store
 from fsp.verify import Finding, verify
@@ -160,3 +160,68 @@ class VitalTest(TempDirTest):
         self.assertIsNone(vital.before_act(self.S, res.session))
         self.assertEqual(self.state()["session"], "s-1")
         self.assertEqual(self.state()["acts_since"], 1)
+
+    def test_the_sweep_advances_and_starts_over(self):
+        res = lifecycle.start(self.S)
+        with mock.patch.object(vital, "SWEEP_BLOCK", 1):
+            hooks.advance_clock(self.S, 60)
+            self.assertEqual(vital.before_act(self.S, res.session), "nominal")
+            self.assertEqual(
+                self.state()["sweep"]["log"],
+                {
+                    "id": "L-000001",
+                    "offset": 0,
+                    "sha256": sha256(self.store.read_line_at("integrity/log.jsonl", 0)),
+                },
+            )
+            hooks.advance_clock(self.S, 60)
+            self.assertEqual(vital.before_act(self.S, res.session), "nominal")
+            self.assertEqual(self.state()["sweep"]["log"]["id"], "L-000002")
+        hooks.advance_clock(self.S, 60)
+        self.assertEqual(vital.before_act(self.S, res.session), "nominal")
+        self.assertIsNone(self.state()["sweep"]["log"])
+
+    def test_a_broken_record_found_by_the_sweep_is_critical(self):
+        lifecycle.start(self.S)
+        lifecycle.stop(self.S)
+        lifecycle.start(self.S)
+        path = self.store.path("integrity/log.jsonl")
+        with open(path, "rb") as f:
+            data = bytearray(f.read())
+        i = data.index(b'Z"')
+        data[i - 1] = ord("1") if data[i - 1] == ord("0") else ord("0")
+        with open(path, "wb") as f:
+            f.write(bytes(data))
+        hooks.advance_clock(self.S, 60)
+        with self.assertRaises(Refused) as cm:
+            proposals.propose(self.S, PERSONA)
+        self.assertEqual(cm.exception.check, "vital-critical")
+        critical = self.log("vital-critical")[-1]
+        self.assertEqual(critical["findings"][0]["type"], "log-record")
+        self.assertEqual(critical["findings"][0]["evidence"]["problem"], "prev")
+        self.assertTrue(self.store.exists(sil.PASSIVE_SIGNAL))
+
+    def test_a_moved_position_restarts_the_sweep(self):
+        res = lifecycle.start(self.S)
+        self.assertIsNone(vital.before_act(self.S, res.session))
+        st = self.state()
+        st["sweep"]["log"] = {"id": "L-000001", "offset": 0, "sha256": "sha256:" + "0" * 64}
+        with open(self.store.path(vital.STATE), "wb") as f:
+            f.write(canonical(st))
+        hooks.advance_clock(self.S, 60)
+        self.assertEqual(vital.before_act(self.S, res.session), "nominal")
+        resets = self.log("vital-sweep-reset")
+        self.assertEqual(len(resets), 1)
+        self.assertEqual(resets[0]["reason"], "position-mismatch")
+        self.assertIsNone(self.state()["sweep"]["log"])
+
+    def test_a_sweep_finding_gone_on_the_second_read_is_noise(self):
+        res = lifecycle.start(self.S)
+        bad = Finding("log-record", "integrity/log.jsonl", "sil", {"offset": 0, "problem": "prev"})
+        hooks.advance_clock(self.S, 60)
+        with mock.patch.object(
+            vital, "sweep_log", side_effect=[(bad, None, None), (None, None, None)]
+        ):
+            self.assertEqual(vital.before_act(self.S, res.session), "nominal")
+        self.assertEqual(len(self.log("vital-noise")), 1)
+        self.assertTrue(self.store.exists(lifecycle.CREDENTIAL))

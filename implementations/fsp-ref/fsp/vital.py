@@ -11,6 +11,10 @@ by pruning its skill from the Skill Index, up to ``n_corrections`` attempts
 (D40); any other confirmed finding, or an uncorrected one, is Critical: the
 credential is revoked, the session closed, and the passive signal written
 (D66). Operator acts neither count nor trigger a check.
+
+Each check also scans one block of the integrity log (D45 (3)), from the
+position the previous check left in the state. A finding of that scan must
+survive a second read, as above; a confirmed one is Critical.
 """
 
 from __future__ import annotations
@@ -20,9 +24,10 @@ from datetime import datetime, timezone
 from . import clock, config, lifecycle, sil
 from .sil import Refused, log_append
 from .store import INTEGRITY, Store
-from .verify import verify
+from .verify import sweep_log, verify
 
 STATE = "integrity/vital.json"
+SWEEP_BLOCK = 1 << 20
 
 
 def _default_state():
@@ -94,10 +99,45 @@ def before_act(root: str, session: str):
             _write_state(store, state)
             return None
         result = check(store, root, session)
+        _sweep(store, session, state)
         state["last_check"] = clock.iso(now)
         state["acts_since"] = 0
         _write_state(store, state)
         return result
+
+
+def _sweep(store: Store, session, state):
+    """Scan the next block of the integrity log (D45 (3)). A finding is
+    confirmed by a second read (D40); a confirmed one is Critical."""
+    sweep = state["sweep"]
+    position = sweep.get("log")
+    finding, new_position, reset = sweep_log(store, position, SWEEP_BLOCK)
+    if reset is not None:
+        log_append(
+            store,
+            "vital-sweep-reset",
+            rule="OP-003(b)",
+            session=session,
+            file="integrity/log.jsonl",
+            reason=reset,
+        )
+    if finding is not None:
+        again, _, _ = sweep_log(store, position, SWEEP_BLOCK)
+        if again is None or (again.type, again.target, again.evidence.get("offset")) != (
+            finding.type,
+            finding.target,
+            finding.evidence.get("offset"),
+        ):
+            log_append(
+                store,
+                "vital-noise",
+                rule="OP-003(b)",
+                session=session,
+                findings=[finding.as_dict()],
+            )
+            return
+        _critical(store, session, [finding])
+    sweep["log"] = new_position
 
 
 def check(store: Store, root: str, session: str):
