@@ -9,6 +9,73 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
+## Phase 4 — the Vital Check (in progress)
+
+- **D62, D63 and D64 added — the agenda, how it fires, worker skills**
+  (2026-10-10). An entity that acts only while its Operator talks to it does
+  not act fully within what the Operator authorized; the agenda lets it run
+  tasks on its own, each one authorized as an item. The specification places
+  schedules in structural content and says no more (G20), so fsp decides the
+  rest. An item is its own authorization — this task, at this periodicity —
+  and carries the authorizations its runs need, scoped to them, so approving
+  an item never widens what anything else may do; a window enters only by
+  the Operator's act, bounded as every window is, because no part of the
+  implementation may originate an authorization. `agenda` is not a window
+  category, so the entity never schedules its own runs unread. A `cpe` item
+  carries no persona: one per task would change the entity's persona without
+  a commit and past the probes. One host entry per store runs `fsp tick`,
+  instead of one per item, so the agenda has one owner and no commit touches
+  the host; a firing is a stimulus with the item's id alone. Main and auto
+  sessions are modes of the one session a store admits, and a main start
+  suspends an auto session rather than waiting for it, since nothing may
+  delay an Operator act. Worker skills and background execution leave
+  *Outside v0* together: a worker is a read-only agent on the CPE's adapter
+  and model, and run synchronously it would hold the Operator's chat for as
+  long as its tool loop lasts. Its fetches are bounded by the allowlist's
+  destinations, because reading files and fetching URLs together is a way
+  out (G9). A task that writes is the CPE's, never a worker's. Planned as
+  Phase 11.
+- **D65 added — the Vital Check runs before an act, not on a timer; D37
+  revised** (2026-10-10). Nothing in v0 acts without an interaction, the
+  agenda's runs included, so a state no one acts on harms nothing until the
+  next act: the check runs first when `vital_interval_s` (60) or
+  `vital_activity_n` (20) acts have passed. No thread, no daemon and no host
+  timer are needed, and the tests advance a clock instead of waiting; the
+  heartbeat per thread D37 planned goes, since no thread exists to beat. Its
+  state, the log sweep's position included, lives in `integrity/vital.json`
+  so short sessions add up to a whole pass (D45). Two deviations from the
+  Profile are recorded: a check runs at the first act after its interval,
+  and an old check says only that no one acted. The `flock` in a real run
+  and suspend (D19) leave Phase 4 for Phase 8: both need a process that
+  lives the whole session, and none exists before `fsp run`.
+- **D66 added — the Operator Channel** (2026-10-10). Everything the Operator
+  must decide or see goes through it, never through cognition. A hold
+  outside the allowlist becomes a prompt the UI draws from what the
+  execution path held — allow once, for the session, into the allowlist, or
+  deny — that the entity can neither imitate nor answer; where no one can
+  answer, in an auto session or a background worker, nothing is asked and
+  the operation is refused. Notices are the log's `operator-notification`
+  records since the Operator's last acknowledgement, so the mailbox needs no
+  file of its own. A notice file was rejected as the channel: writing it
+  always succeeds, so a Critical in an auto session would never reach the
+  passive signal and the next `tick` would run the entity again. Live
+  delivery is only what something confirms — the UI, or a `notify_command`
+  the Operator configures — and a Critical without it writes the passive
+  signal.
+- **D39 and D47 removed — `PULSE` goes; D25 revised** (2026-10-10). With
+  the Vital Check run before an act, a stale `PULSE` means only that no one
+  acted, so it was no longer evidence about the verifier (D39). It decided
+  only a credential with a free lock and no residue, and decided it wrong
+  for a session a process holds: the operating system frees the lock of a
+  process that dies, so a free lock is a crash at once, while a fresh `PULSE`
+  called it a conflict for up to `pulse_interval_s`. The credential now
+  records whether a process holds it. For the adapter's sessions, which
+  have none (D47), the contract only asks to tell `inject interrupt`'s
+  crash, which always leaves residue, from a second start over a live
+  session, which leaves none; a session without a process stays live until
+  it closes or the Operator revokes it, as ADAPTER.md §2.5 allows.
+  `pulse_interval_s` leaves the configuration surface.
+
 ## Phase 3 — the commit (2026-10-10)
 
 The specification decisions the phase depends on come first.
