@@ -74,6 +74,7 @@ LAYOUT = (
     Datum("integrity-log", "integrity/log.jsonl", INTEGRITY, "append"),
     Datum("vital-state", "integrity/vital.json", INTEGRITY, "replace"),
     Datum("log-checkpoint", "integrity/log-checkpoint.json", INTEGRITY, "replace"),
+    Datum("notices-pointer", "integrity/notices.json", INTEGRITY, "replace"),
     Datum("authorization-state", "integrity/auth.json", INTEGRITY, "replace"),
     Datum("operational-settings", "integrity/operational.json", INTEGRITY, "replace"),
     # Empty, holds no content: only its flock matters. Never written, never

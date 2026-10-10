@@ -1,16 +1,22 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Jonas Orrico
-"""Operator acts on bindings, ownership handover, and workspace (D28, D30, D48, D55)."""
+"""Operator acts on bindings, ownership handover, workspace, and operator
+notices (D28, D30, D48, D55, D66)."""
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
 from . import clock, lifecycle, proposals, sil
+from .digest import sha256
 from .sil import Refused, log_append
-from .store import Store, canonical
+from .store import INTEGRITY, Store, canonical
 from .verify import verify
+
+NOTICES = "integrity/notices.json"
+_LOG = "integrity/log.jsonl"
 
 
 def _crosses_boundary(ws: str, limit: str) -> bool:
@@ -865,3 +871,91 @@ def reject(root: str, proposal_id: str, *, binding=None):
         auth["approvals"].pop(proposal_id, None)
         proposals.write_auth(store, auth)
         return {"log_records": [act]}
+
+
+def _notice_start(store: Store):
+    """Where the notice listing starts reading the log, and whether the stored
+    pointer was discarded (D66). A pointer that does not match the log, or that
+    is malformed or unreadable, restarts the listing at the beginning."""
+    if not store.exists(NOTICES):
+        return 0, False
+    try:
+        ptr = store.read_json(NOTICES)
+    except (OSError, ValueError):
+        return 0, True
+    if not (
+        isinstance(ptr, dict)
+        and set(ptr) == {"id", "offset", "sha256"}
+        and isinstance(ptr["offset"], int)
+        and not isinstance(ptr["offset"], bool)
+        and ptr["offset"] >= 0
+        and isinstance(ptr["id"], str)
+        and isinstance(ptr["sha256"], str)
+    ):
+        return 0, True
+    line = store.read_line_at(_LOG, ptr["offset"])
+    if line is None or sha256(line) != ptr["sha256"]:
+        return 0, True
+    try:
+        rec = json.loads(line.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        return 0, True
+    if not (isinstance(rec, dict) and rec.get("id") == ptr["id"]):
+        return 0, True
+    return ptr["offset"] + len(line) + 1, False
+
+
+def _pending(store: Store):
+    """The operator notices logged after the last acknowledgement, as
+    ``(rec, offset, line)`` tuples, and whether the pointer was discarded (D66).
+    A log line that does not decode is skipped, so damage elsewhere in the log
+    hides no notice."""
+    start, reset = _notice_start(store)
+    data = store.read_from(_LOG, start)
+    pending = []
+    cur = start
+    for line in data.split(b"\n")[:-1]:
+        try:
+            rec = json.loads(line.decode("utf-8"))
+        except (UnicodeDecodeError, ValueError):
+            rec = None
+        if isinstance(rec, dict) and rec.get("kind") == "operator-notification":
+            pending.append((rec, cur, line))
+        cur += len(line) + 1
+    return pending, reset
+
+
+def notifications(root: str, *, binding=None):
+    """The operator notices pending, logged after the Operator's last
+    acknowledgement (D66). Read-only."""
+    store = Store(root)
+    with store.write_lock():
+        pending, reset = _pending(store)
+        return {"notifications": [rec for rec, _, _ in pending], "pointer_reset": reset}
+
+
+def acknowledge_notifications(root: str, *, binding=None):
+    """Acknowledge every pending operator notice, as a recorded Operator act
+    (D66). Writes nothing when no notice is pending."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        pending, _ = _pending(store)
+        if not pending:
+            return {"acknowledged": [], "log_records": []}
+        rec, offset, line = pending[-1]
+        act = sil.operator_act(
+            store,
+            "notifications-acknowledged",
+            binding=acting,
+            rule="OP-008(a)",
+            through=rec["id"],
+            count=len(pending),
+        )
+        store.replace_json(
+            INTEGRITY,
+            NOTICES,
+            {"id": rec["id"], "offset": offset, "sha256": sha256(line)},
+            writer=sil.WRITER,
+        )
+        return {"acknowledged": [r["id"] for r, _, _ in pending], "log_records": [act]}

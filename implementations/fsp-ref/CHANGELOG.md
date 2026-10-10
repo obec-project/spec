@@ -9,7 +9,7 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
-## Phase 4 — the Vital Check (in progress)
+## Phase 4 — the Vital Check (2026-10-10)
 
 - **D62, D63 and D64 added — the agenda, how it fires, worker skills**
   (2026-10-10). An entity that acts only while its Operator talks to it does
@@ -137,6 +137,19 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   line is longer than the block, and starts over at the first record only
   when the read reached the end of the file; a block that ends mid-line
   leaves the sweep at the last complete record.
+- **The Operator's mailbox** (2026-10-10, D66). `operator.notifications`
+  lists the `operator-notification` records logged since the Operator's
+  last acknowledgement — a session conflict, an excluded skill, a Critical —
+  and `operator.acknowledge_notifications` acknowledges them in a logged
+  Operator act. The acknowledgement leaves the position of the last notice
+  it covered in `integrity/notices.json`, so a listing reads only the log
+  after it instead of the whole log; a position that no longer matches
+  lists every notice, since one wrongly shown costs less than one hidden,
+  and a line that does not parse is skipped, so damage elsewhere hides no
+  notice. The CLI, `/notifications` and `notify_command` come with Phases 8
+  and 10. The phase closes here: the Vital Check runs before an act, sweeps
+  the log, corrects what it can and escalates the rest, and what it
+  escalates reaches the Operator.
 
 ## Phase 3 — the commit (2026-10-10)
 

@@ -11,8 +11,9 @@ place, and so are the Operator's acts on bindings and the workspace,
 proposals, their review and the cap on pending ones, approvals,
 authorization windows and the commit of a proposal,
 validated against the deterministic probes, the verification of the
-integrity log, and the Vital Check before an act of the entity. Host
-actuation and everything cognitive are not.
+integrity log, the Vital Check before an act of the entity, and the
+Operator's mailbox of notices. Host actuation and everything cognitive are
+not.
 
 Python 3.10+, standard library only, Linux or macOS.
 
