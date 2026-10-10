@@ -9,6 +9,24 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
+## Phase 5 — the operations (in progress)
+
+- **D67, D68 and D69 added — the operations, the attempted write, the
+  writers** (2026-10-10). `describe operations` reports only the operations
+  the code has, generated from the table they run on: one listed with no
+  code behind it could only be answered by the adapter, which the contract
+  calls a failure. Since every class must keep one write path, the MIL's
+  `mnemonic-save` brings its write path into this phase. `entity
+  attempt-write` resolves its target through the `LAYOUT` and runs the
+  operation's own check, then stops before the first byte, since an attempt
+  carries no content; the contract is silent on that (G21). Working it out
+  found that `commit_generation` took any change path, so a change named
+  `integrity/auth.json` would have become a structural file of the
+  generation; `commit` is held to the structural data the store declares.
+  The class guard trusts the writer a call names, so a static scan checks
+  that only a component's modules name its writer. DESIGN §2 now shows
+  `operator.py` and `vital.py` as what they are, the SIL's.
+
 ## Phase 4 — the Vital Check (2026-10-10)
 
 - **D62, D63 and D64 added — the agenda, how it fires, worker skills**

@@ -12,7 +12,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **5** | operations table, class guard, a real `attempt-write` (G12) | OC-001 1.9, OC-002 2.1, OC-003(c), OC-005 |
+| **5** | `describe operations` from the operations the code has (D67); `mnemonic-save`'s write path (D21, D67); `entity attempt-write` through each operation's own check, the target resolved through the `LAYOUT`, `commit` held to the declared structural data (D68); the static scan of writer identities (D69) | OC-001 1.9, OC-002 2.1, OC-003(c), OC-005 but 5.4 |
 | **6** | actuation inside the workspace (declared since Phase 3), allowlist with digest-pinned skills (D16), a hold and the Operator's four answers to it (D66), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
 | **7** | session records, the conversation and its recall scope (D11, D60), `mnemonic-save`/`mnemonic-recall`, the probes over memory (D12), promotion under authorization and the semantic ledger (D53), `/resume`, `/inject` and `/retract`, Sleep | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the process holding the session: `holder` and the `flock` on `CREDENTIAL` (D25), suspend (D19); the prompts and `/notifications` (D66), the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |
@@ -90,6 +90,11 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
   OP-001 could recommend it (D36): it is what makes it possible, when a model
   turns out to be problematic, to find everything it did — including the
   memories it saved.
+- **G21 — what `attempt-write` writes.** ADAPTER.md §3.4 says the command
+  routes through the named operation as a real request would, and not what
+  it writes when the operation admits the attempt: the command carries no
+  content, and writing any would corrupt the store. fsp writes nothing and
+  reports what would be written (D68); the contract should say so.
 - **G20 — scheduled triggers have a home and no mechanism.** The Core says,
   in a note to OC-002 and in the glossary's *Stimulus*, that schedules are
   structural content and a trigger firing executes standing Operator
