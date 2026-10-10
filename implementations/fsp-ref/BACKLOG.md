@@ -12,7 +12,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **4** | the Vital Check before an act of the entity, by interval and by activity (D65), with `integrity/vital.json`; the check, its states and self-repair (D37, D40), the sweep of the log (D45); the mailbox of notices and its acknowledgement as functions, and a Critical writing the passive signal (D66) | — (unit tests) |
+| **4** | the Vital Check's sweep of the log, its position in `integrity/vital.json` (D45); the mailbox of notices and its acknowledgement as functions (D66) | — (unit tests) |
 | **5** | operations table, class guard, a real `attempt-write` (G12) | OC-001 1.9, OC-002 2.1, OC-003(c), OC-005 |
 | **6** | actuation inside the workspace (declared since Phase 3), allowlist with digest-pinned skills (D16), a hold and the Operator's four answers to it (D66), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
 | **7** | session records, the conversation and its recall scope (D11, D60), `mnemonic-save`/`mnemonic-recall`, the probes over memory (D12), promotion under authorization and the semantic ledger (D53), `/resume`, `/inject` and `/retract`, Sleep | OC-007, OC-003(e), OC-002(d) |

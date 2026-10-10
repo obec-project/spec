@@ -9,7 +9,7 @@ import posixpath
 import re
 import secrets
 
-from . import chain, clock, config, lifecycle, sil
+from . import chain, clock, config, lifecycle, sil, vital
 from .digest import canonical, sha256
 from .sil import WRITER, Refused, log_append
 from .store import INTEGRITY, Store
@@ -321,7 +321,7 @@ def propose(root: str, ops: list) -> dict:
                     targets.add(target)
 
         # 5. require live session
-        session = lifecycle.require_session(root, "propose")
+        session = vital.require_entity_session(root, "propose")
 
         # 6. read auth state
         try:
@@ -413,7 +413,7 @@ def record_approval(
 
 def commit(root: str, proposal_id: str) -> dict:
     """Commit an authorized proposal (D57, D58, OC-001(b))."""
-    session = lifecycle.require_session(root, "commit")
+    session = vital.require_entity_session(root, "commit")
     store = Store(root)
     with store.write_lock():
         try:

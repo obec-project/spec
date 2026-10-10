@@ -84,6 +84,20 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   Phase 8 — so every session today is one without a process, and the tests
   that stood a crash on an aged `PULSE` stand it on a credential naming a
   process whose lock no one holds. The suite's results do not change.
+- **The Vital Check before an act** (2026-10-10, D65, D40, D66).
+  `fsp/vital.py`: before `propose` and `commit`, the entity's acts today, a
+  check runs when `vital_interval_s` has passed or `vital_activity_n` acts
+  have, counted in `integrity/vital.json`; the start that opened the
+  session counts as a check, since it verified the store, and Operator acts
+  neither count nor trigger one. A check is `verify()` read twice, and a
+  finding gone on the second read is logged as noise. A drifted skill is
+  pruned from the Skill Index, re-verified there and reported, and the
+  session goes on; any other finding is Critical: the credential is
+  revoked, the session closed, the Operator told and the passive signal
+  written, since nothing confirms live delivery yet, and the act is refused.
+  `vital_interval_s`, `vital_activity_n` and `n_corrections` join the
+  configuration surface. The suite's results do not change: none of its
+  steps acts long or often enough within one session to make a check due.
 
 ## Phase 3 — the commit (2026-10-10)
 

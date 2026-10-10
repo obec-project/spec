@@ -72,6 +72,7 @@ LAYOUT = (
     Datum("integrity-chain", "integrity/chain/<nnnnnn>.json", INTEGRITY, "replace"),
     Datum("integrity-documents", "integrity/documents/<n>.json", INTEGRITY, "replace"),
     Datum("integrity-log", "integrity/log.jsonl", INTEGRITY, "append"),
+    Datum("vital-state", "integrity/vital.json", INTEGRITY, "replace"),
     Datum("log-checkpoint", "integrity/log-checkpoint.json", INTEGRITY, "replace"),
     Datum("authorization-state", "integrity/auth.json", INTEGRITY, "replace"),
     Datum("operational-settings", "integrity/operational.json", INTEGRITY, "replace"),

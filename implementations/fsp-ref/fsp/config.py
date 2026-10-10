@@ -54,6 +54,27 @@ SETTINGS = (
         "evolution proposals pending at once, approved or not, past which a "
         "new proposal is refused (D52)",
     ),
+    Setting(
+        "vital_interval_s",
+        60,
+        (10, 3600),
+        "seconds after which the next act of the entity runs a Vital Check "
+        "first (OP-003(a), D65)",
+    ),
+    Setting(
+        "vital_activity_n",
+        20,
+        (1, 1000),
+        "acts of the entity after which the next one runs a Vital Check first "
+        "(OP-003(a), D65)",
+    ),
+    Setting(
+        "n_corrections",
+        1,
+        (1, 2),
+        "corrections the owner of a finding may attempt before it escalates to "
+        "Critical (D40)",
+    ),
 )
 
 _BY_NAME = {s.name: s for s in SETTINGS}
