@@ -26,6 +26,13 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   The class guard trusts the writer a call names, so a static scan checks
   that only a component's modules name its writer. DESIGN §2 now shows
   `operator.py` and `vital.py` as what they are, the SIL's.
+- **The writer scan** (2026-10-10, D69). `tests/test_writers.py` reads the
+  syntax tree of every module in `fsp/`, resolves each `writer=` a call
+  passes — a name of the module, an attribute such as `sil.WRITER`, or a
+  string — and fails when the identity is not one the module's component
+  may name, or cannot be resolved at all. Today only the SIL's five modules
+  name a writer, all within bounds; the MIL's `mil.py` is the first module
+  a later task adds under it.
 
 ## Phase 4 — the Vital Check (2026-10-10)
 
