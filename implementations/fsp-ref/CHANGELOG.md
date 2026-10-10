@@ -98,6 +98,15 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   `vital_interval_s`, `vital_activity_n` and `n_corrections` join the
   configuration surface. The suite's results do not change: none of its
   steps acts long or often enough within one session to make a check due.
+- **No deviations from the Profile** (2026-10-10). The four DESIGN §9
+  recorded — first activation issuing no credential (OP-017), a check due
+  by time run before the next act (OP-003(a)), an old check not read as an
+  unresponsive verifier (OP-008(c)), a conflict refused without revoking
+  the live session (OP-020) — were each a case where following the Profile
+  broke something, so the Profile was corrected instead (root CHANGELOG).
+  D49 and D65 no longer cite a deviation. D64 gains what the corrected
+  OP-003(a) asks of a worker skill in the background: each of its tool
+  calls is an act and passes the Vital Check's test first.
 
 ## Phase 3 — the commit (2026-10-10)
 
