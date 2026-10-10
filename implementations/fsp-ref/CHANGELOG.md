@@ -130,6 +130,13 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   cannot be read. Verification compares through `is_canonical`, so a value
   `canonical` refuses is a `not-canonical` finding instead of a raise. Seven
   tests; five of them fail against the previous code.
+- **The log sweep reads its block, not the rest of the log** (2026-10-10,
+  D45). `sweep_log` verified a block of 1 MiB but read from its position to
+  the end of the file, so every check cost the rest of the log. It now reads
+  the block with `store.read_range`, doubling the read only when a single
+  line is longer than the block, and starts over at the first record only
+  when the read reached the end of the file; a block that ends mid-line
+  leaves the sweep at the last complete record.
 
 ## Phase 3 — the commit (2026-10-10)
 

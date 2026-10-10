@@ -410,10 +410,13 @@ def sweep_log(store: Store, position, max_bytes: int):
     log; otherwise the sweep starts at the first record and reports
     ``"position-mismatch"``. Only complete lines are records (D61); each one
     gets the four checks of ``_verify_log``, and the block ends once at least
-    ``max_bytes`` of lines have passed. Returns ``(finding, new_position,
-    reset)``: the first finding or ``None``, the position of the last record
-    verified or ``None`` when the log was swept to its end, and the reset
-    reason or ``None``. It repairs nothing; it only returns the finding.
+    ``max_bytes`` of lines have passed. The bytes are read by ``read_range``,
+    a block of ``max_bytes`` (doubled only when a single line is longer than
+    the block), so a sweep costs its block, not the rest of the log. Returns
+    ``(finding, new_position, reset)``: the first finding or ``None``, the
+    position of the last record verified or ``None`` when the read reached the
+    end of the file, and the reset reason or ``None``. It repairs nothing; it
+    only returns the finding.
     """
     relpath = "integrity/log.jsonl"
     reset = None
@@ -446,7 +449,13 @@ def sweep_log(store: Store, position, max_bytes: int):
         else:
             reset = "position-mismatch"
 
-    data = store.read_from(relpath, offset)
+    want = max_bytes
+    while True:
+        data = store.read_range(relpath, offset, want)
+        eof = len(data) < want
+        if b"\n" in data or eof:
+            break
+        want *= 2  # a single line longer than the block is read whole
     consumed = 0
     cur = offset
     for line in data.split(b"\n")[:-1]:
@@ -482,7 +491,9 @@ def sweep_log(store: Store, position, max_bytes: int):
         if consumed >= max_bytes:
             return None, last, reset
 
-    return None, None, reset
+    if eof:
+        return None, None, reset
+    return None, last, reset
 
 
 def _verify_content(store: Store, head: dict, r: Report) -> bool:

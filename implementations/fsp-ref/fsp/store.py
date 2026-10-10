@@ -531,6 +531,21 @@ class Store:
         except OSError:
             return b""
 
+    def read_range(self, relpath: str, offset: int, length: int) -> bytes:
+        """Up to ``length`` bytes from ``offset``: fewer at the end of the file,
+        and b"" when the file does not exist."""
+        if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0:
+            return b""
+        if not isinstance(length, int) or isinstance(length, bool) or length <= 0:
+            return b""
+        target = self.path(relpath)
+        try:
+            with open(target, "rb") as f:
+                f.seek(offset)
+                return f.read(length)
+        except OSError:
+            return b""
+
     def read_json(self, relpath: str):
         return json.loads(self.read_bytes(relpath).decode("utf-8"))
 
