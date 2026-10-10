@@ -67,7 +67,6 @@ LAYOUT = (
     Datum("store-marker", "OBEC-STORE", INTEGRITY, "replace"),
     Datum("passive-signal", "PASSIVE-SIGNAL", INTEGRITY, "replace"),
     Datum("session-credential", "CREDENTIAL", INTEGRITY, "exclusive"),
-    Datum("pulse", "PULSE", INTEGRITY, "replace"),
     Datum("head", "HEAD", INTEGRITY, "replace"),
     Datum("structural-content", "structural/gen/<n>/<path>", STRUCTURAL, "tree"),
     Datum("integrity-chain", "integrity/chain/<nnnnnn>.json", INTEGRITY, "replace"),
@@ -420,11 +419,6 @@ class Store:
                 return False
             _fsync_dir(os.path.dirname(self.path(relpath)))
             return True
-
-    def touch(self, cls, relpath, *, writer) -> None:
-        """Refresh a file's mtime, its only content that changes (``PULSE``)."""
-        self._guard(cls, relpath, writer, "replace")
-        os.utime(self.path(relpath))
 
     def probe_lock(self, relpath):
         """Whether another process holds the flock on ``relpath``: ``"held"``,

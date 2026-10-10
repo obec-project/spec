@@ -10,7 +10,6 @@ one store serialize and the second sees the first one's credential.
 from __future__ import annotations
 
 import os
-import time
 
 from . import chain, clock, config, sil
 from .digest import canonical
@@ -19,7 +18,6 @@ from .store import INTEGRITY, STRUCTURAL, Store
 from .verify import store_state, verify
 
 CREDENTIAL = "CREDENTIAL"
-PULSE = "PULSE"
 SESSIONS = "integrity/sessions.json"
 INDEX = "integrity/index.json"
 AUTH = "integrity/auth.json"
@@ -106,17 +104,8 @@ def _write_sessions(store: Store, s):
     store.replace_json(INTEGRITY, SESSIONS, s, writer=WRITER)
 
 
-def _pulse_fresh(store: Store) -> bool:
-    try:
-        age = time.time() - os.stat(store.path(PULSE)).st_mtime
-    except FileNotFoundError:
-        return False
-    return age <= config.value(store, "pulse_interval_s")
-
-
 def _drop_credential(store: Store):
     store.remove(INTEGRITY, CREDENTIAL, writer=WRITER)
-    store.remove(INTEGRITY, PULSE, writer=WRITER)
 
 
 def _read_credential(store: Store):
@@ -183,13 +172,16 @@ def start(root: str, *, binding=None) -> StartResult:
         evidence = {"residue": [r["path"] for r in residue]}
         if store.exists(CREDENTIAL):
             lock = store.probe_lock(CREDENTIAL) or sil.LOCK_FREE
-            fresh = _pulse_fresh(store)
-            verdict = sil.classify_credential(lock, residue=bool(residue), pulse_fresh=fresh)
+            holder = cred.get("holder") if isinstance(cred, dict) else None
+            process_holder = isinstance(holder, dict) and type(holder.get("pid")) is int
+            verdict = sil.classify_credential(
+                lock, residue=bool(residue), process_holder=process_holder
+            )
             evidence.update(
                 {
                     "credential_session": cred.get("session") if cred else None,
                     "lock": lock,
-                    "pulse_fresh": fresh,
+                    "process_holder": process_holder,
                 }
             )
             if verdict == "conflict":
@@ -207,7 +199,6 @@ def start(root: str, *, binding=None) -> StartResult:
                 )
             )
             sessions["open_session"] = None
-            store.remove(INTEGRITY, PULSE, writer=WRITER)
             _write_sessions(store, sessions)
         if recover:
             attempts = sessions["consecutive_recoveries"]
@@ -338,7 +329,6 @@ def start(root: str, *, binding=None) -> StartResult:
         cred = {"session": session, "issued_at": clock.iso(), "binding": acting}
         if not store.create_exclusive(INTEGRITY, CREDENTIAL, canonical(cred), writer=WRITER):
             return abort("crash-recovery", "a credential appeared during the start")
-        store.replace(INTEGRITY, PULSE, (session + "\n").encode("ascii"), writer=WRITER)
         sessions["open_session"] = session
         _write_sessions(store, sessions)
         res.log_records.append(
@@ -452,8 +442,8 @@ def _build_index(store: Store, report):
 def live_session(root: str):
     """The id of the live session, or None. A session is live while
     ``CREDENTIAL`` exists, is readable and names the session that was opened
-    (D46). Acting within it refreshes the ``PULSE`` (D47). A credential
-    found missing is recorded here, the first time anyone notices."""
+    (D46). A credential found missing is recorded here, the first time
+    anyone notices."""
     store = Store(root)
     if store_state(store.root) != "active":
         return None
@@ -465,16 +455,11 @@ def live_session(root: str):
         cred = _read_credential(store)
         opened = sessions["open_session"]
         if cred and opened and cred["session"] == opened:
-            if store.exists(PULSE):
-                store.touch(INTEGRITY, PULSE, writer=WRITER)
-            else:
-                store.replace(INTEGRITY, PULSE, (opened + "\n").encode("ascii"), writer=WRITER)
             return opened
         if cred is None and opened:
             log_append(store, "credential-removed-directly", rule="OC-002(b)", session=opened)
             sessions["open_session"] = None
             _write_sessions(store, sessions)
-            store.remove(INTEGRITY, PULSE, writer=WRITER)
         return None
 
 

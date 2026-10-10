@@ -140,9 +140,12 @@ class LogVerificationTests(TempDirTest):
         self.assertFalse(r.chain_intact)
         self.assertTrue(any(f.type == "log-record" for f in r.findings))
 
-        pulse_path = store.path(lifecycle.PULSE)
-        st = os.stat(pulse_path)
-        os.utime(pulse_path, (st.st_atime - 10000, st.st_mtime - 10000))
+        cred_path = store.path(lifecycle.CREDENTIAL)
+        with open(cred_path, "rb") as f:
+            cred = json.loads(f.read())
+        cred["holder"] = {"pid": 4194304}
+        with open(cred_path, "wb") as f:
+            f.write(canonical(cred))
         res = lifecycle.start(root)
         self.assertEqual(res.outcome, "aborted")
 

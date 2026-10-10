@@ -34,14 +34,6 @@ class Setting:
 
 SETTINGS = (
     Setting(
-        "pulse_interval_s",
-        600,
-        (60, 86400),
-        "how long a session stays live without activity: a credential with no "
-        "lock holder, no residue and an older PULSE is a crash, not a live "
-        "session (D25, D47; ADAPTER.md 2.5)",
-    ),
-    Setting(
         "n_boot",
         3,
         (1, 10),

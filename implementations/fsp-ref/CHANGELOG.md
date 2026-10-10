@@ -75,6 +75,15 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   session, which leaves none; a session without a process stays live until
   it closes or the Operator revokes it, as ADAPTER.md §2.5 allows.
   `pulse_interval_s` leaves the configuration surface.
+- **`PULSE` out of the code** (2026-10-10, D25). `classify_credential`
+  decides by lock, `holder` and residue, and the start records
+  `process_holder` in its evidence in place of `pulse_fresh`; the start,
+  `live_session`, close and revocation no longer write, touch or remove
+  `PULSE`, which leaves the `LAYOUT` and `describe state` with `store.touch`.
+  Nothing writes `holder` yet — the process that holds a session comes in
+  Phase 8 — so every session today is one without a process, and the tests
+  that stood a crash on an aged `PULSE` stand it on a credential naming a
+  process whose lock no one holds. The suite's results do not change.
 
 ## Phase 3 — the commit (2026-10-10)
 

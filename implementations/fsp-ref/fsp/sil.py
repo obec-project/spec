@@ -56,24 +56,22 @@ LOCK_FREE = "free"  # we took it: no process holds it
 LOCK_UNKNOWN = "unknown"  # the filesystem would not say
 
 
-def classify_credential(lock, *, residue, pulse_fresh):
-    """``"conflict"`` or ``"crash"`` for a credential present at start.
+def classify_credential(lock, *, residue, process_holder):
+    """``"conflict"`` or ``"crash"`` for a credential present at start (D25).
 
-    The operating system's lock takes absolute precedence: while a process
-    holds it, or while its state cannot be established, the session is live
-    and nothing else is consulted — not residue (a live session mid-commit
-    has some) and not the ``PULSE`` (a live process can be slow to touch
-    it). Only a free lock lets the rest decide: residue of interrupted work
-    means a crash; otherwise a fresh ``PULSE`` means a session live without
-    a process (ADAPTER.md §2.5), and a stale one a crash.
+    A held or undeterminable lock is a conflict, and nothing else is
+    consulted. With the lock free, a credential that names a process as its
+    ``holder`` is a crash: the operating system released the lock of a dead
+    process. Without a holder, residue of interrupted work is a crash, and
+    no residue is a conflict (a session without a process stays live).
     """
     if lock not in (LOCK_HELD, LOCK_FREE, LOCK_UNKNOWN):
         raise ValueError("lock state %r" % (lock,))
     if lock != LOCK_FREE:
         return "conflict"
-    if residue:
+    if process_holder:
         return "crash"
-    return "conflict" if pulse_fresh else "crash"
+    return "crash" if residue else "conflict"
 
 
 # -- the integrity log (DESIGN.md §3.4) -------------------------------------

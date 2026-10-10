@@ -30,10 +30,13 @@ class Base(TempDirTest):
     def sessions(self):
         return self.store.read_json(lifecycle.SESSIONS)
 
-    def age_pulse(self, seconds=10_000):
-        path = self.store.path(lifecycle.PULSE)
-        st = os.stat(path)
-        os.utime(path, (st.st_atime - seconds, st.st_mtime - seconds))
+    def die_holding(self):
+        """The credential as left by a process that died holding the session:
+        it names a process, and nothing holds its lock."""
+        cred = self.store.read_json(lifecycle.CREDENTIAL)
+        cred["holder"] = {"pid": 4194304}
+        with open(self.store.path(lifecycle.CREDENTIAL), "wb") as f:
+            f.write(canonical(cred))
 
 
 class GoodStart(Base):
@@ -44,7 +47,8 @@ class GoodStart(Base):
         self.assertEqual({g["outcome"] for g in res.gates}, {"pass"})
         cred = self.store.read_json(lifecycle.CREDENTIAL)
         self.assertEqual((cred["session"], cred["binding"]), ("s-1", "op-1"))
-        self.assertEqual(self.store.read_bytes(lifecycle.PULSE), b"s-1\n")
+        self.assertFalse(os.path.exists(self.store.path("PULSE")))
+        self.assertNotIn("holder", cred)
         self.assertEqual(self.sessions()["open_session"], "s-1")
         self.assertEqual(lifecycle.live_session(self.S), "s-1")
         self.assertEqual([r["session"] for r in self.log("session-open")], ["s-1"])
@@ -58,7 +62,7 @@ class GoodStart(Base):
 class CredentialAtStart(Base):
     """D25 and D49 on a real store."""
 
-    def test_a_fresh_pulse_is_a_live_session(self):
+    def test_a_session_without_a_process_stays_live(self):
         lifecycle.start(self.S)
         before = self.store.read_bytes(lifecycle.CREDENTIAL)
         res = lifecycle.start(self.S)
@@ -71,9 +75,9 @@ class CredentialAtStart(Base):
         self.assertEqual(lifecycle.live_session(self.S), "s-1")
         self.assertEqual(len(self.log("operator-notification")), 1)
 
-    def test_a_held_lock_wins_over_a_stale_pulse(self):
+    def test_a_held_lock_is_a_conflict_even_for_a_process_holder(self):
         lifecycle.start(self.S)
-        self.age_pulse()
+        self.die_holding()
         fd = os.open(self.store.path(lifecycle.CREDENTIAL), os.O_RDWR)
         self.addCleanup(os.close, fd)
         fcntl.flock(fd, fcntl.LOCK_EX)  # as a running `fsp run` would
@@ -81,17 +85,18 @@ class CredentialAtStart(Base):
         self.assertEqual(res.outcome, "refused")
         self.assertEqual(res.gates[-1]["outcome"], "conflict")
 
-    def test_a_stale_pulse_with_no_lock_is_a_crash(self):
+    def test_a_process_holder_with_a_free_lock_is_a_crash(self):
         lifecycle.start(self.S)
-        self.age_pulse()
+        self.die_holding()
         res = lifecycle.start(self.S)
         self.assertEqual(res.outcome, "accepted")
         self.assertEqual(res.gates[1]["outcome"], "recovered")
         self.assertEqual(res.session, "s-2")
         rec = self.log("recovery")[-1]
         self.assertEqual((rec["credential_session"], rec["attempt"]), ("s-1", 1))
+        self.assertIs(rec["process_holder"], True)
 
-    def test_residue_is_a_crash_even_with_a_fresh_pulse(self):
+    def test_residue_is_a_crash_without_a_process_holder(self):
         lifecycle.start(self.S)
         shutil.copytree(
             self.store.path("structural/gen/0"), self.store.path("structural/gen/1")
@@ -106,7 +111,7 @@ class CredentialAtStart(Base):
         s = self.sessions()
         s["consecutive_recoveries"] = 3
         self.store.replace_json(INTEGRITY, lifecycle.SESSIONS, s, writer="sil")
-        self.age_pulse()
+        self.die_holding()
         res = lifecycle.start(self.S)
         self.assertEqual((res.outcome, res.lesser_outcome), ("aborted", "halted"))
         self.assertTrue(self.store.exists(sil.PASSIVE_SIGNAL))
@@ -114,7 +119,7 @@ class CredentialAtStart(Base):
 
     def test_a_normal_close_resets_the_recovery_count(self):
         lifecycle.start(self.S)
-        self.age_pulse()
+        self.die_holding()
         lifecycle.start(self.S)
         self.assertEqual(self.sessions()["consecutive_recoveries"], 1)
         lifecycle.stop(self.S)
@@ -204,7 +209,7 @@ class Session(Base):
         lifecycle.start(self.S)
         lifecycle.stop(self.S)
         self.assertFalse(self.store.exists(lifecycle.CREDENTIAL))
-        self.assertFalse(self.store.exists(lifecycle.PULSE))
+        self.assertFalse(os.path.exists(self.store.path("PULSE")))
         with self.assertRaises(sil.Refused) as cm:
             lifecycle.stop(self.S)
         self.assertEqual(cm.exception.check, "no-session")
