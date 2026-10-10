@@ -22,7 +22,7 @@ import os
 import re
 
 from . import chain
-from .digest import canonical, document_digest, integrity_document, sha256, valid_relpath
+from .digest import document_digest, integrity_document, is_canonical, sha256, valid_relpath
 from .store import LOCK, MARKER, STORE_FORMAT, STORE_FORMAT_VERSION, TEMP_NAME, Store, datum_of
 
 
@@ -104,7 +104,7 @@ def _read_canonical(store: Store, relpath: str):
         obj = json.loads(data.decode("utf-8"))
     except (UnicodeDecodeError, ValueError):
         return None, "unparseable"
-    if canonical(obj) != data:
+    if not is_canonical(obj, data):
         return None, "not-canonical"
     return obj, None
 
@@ -361,7 +361,7 @@ def _verify_log(store: Store, r: Report, *, full_log: bool = False) -> bool:
             )
             return False
 
-        if canonical(rec) != line:
+        if not is_canonical(rec, line):
             r.findings.append(
                 Finding(
                     "log-record",
@@ -459,7 +459,7 @@ def sweep_log(store: Store, position, max_bytes: int):
                 "log-record", relpath, "sil", {"offset": cur, "problem": "unparseable"}
             ), last, reset
 
-        if canonical(rec) != line:
+        if not is_canonical(rec, line):
             return Finding(
                 "log-record", relpath, "sil", {"offset": cur, "problem": "not-canonical"}
             ), last, reset

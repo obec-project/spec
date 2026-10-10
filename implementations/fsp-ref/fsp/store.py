@@ -546,9 +546,11 @@ class Store:
         lines = lines[:-1]  # the fragment after the last newline, or ""
         return [json.loads(line.decode("utf-8")) for line in lines], truncated
 
-    def read_last_jsonl(self, relpath: str):
-        """The last complete record, reading from the end (OP-019: cost does
-        not grow with the log)."""
+    def read_last_line(self, relpath: str):
+        """The last complete line as written, without its newline, read from
+        the end (OP-019: cost does not grow with the log). A fragment left by
+        an interrupted append is not a line (D61); ``None`` when the file does
+        not exist or has no complete line."""
         try:
             fd = os.open(self.path(relpath), os.O_RDONLY)
         except FileNotFoundError:
@@ -565,10 +567,17 @@ class Store:
                     continue
                 start = buf.rfind(b"\n", 0, end)
                 if start != -1 or pos == 0:
-                    return json.loads(buf[start + 1 : end].decode("utf-8"))
+                    return buf[start + 1 : end]
             return None
         finally:
             os.close(fd)
+
+    def read_last_jsonl(self, relpath: str):
+        """The last complete record, parsed (see ``read_last_line``)."""
+        line = self.read_last_line(relpath)
+        if line is None:
+            return None
+        return json.loads(line.decode("utf-8"))
 
 
 def write_host_file(path: str, data: bytes, *, stores=()) -> None:

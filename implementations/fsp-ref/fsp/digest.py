@@ -27,6 +27,15 @@ def canonical(obj) -> bytes:
     ).encode("utf-8")
 
 
+def is_canonical(obj, data: bytes) -> bool:
+    """Whether ``data`` is the canonical serialization of ``obj``. A value
+    canonical JSON cannot carry, such as ``NaN``, makes it false."""
+    try:
+        return canonical(obj) == data
+    except ValueError:
+        return False
+
+
 def sha256(data: bytes) -> str:
     return "sha256:" + hashlib.sha256(data).hexdigest()
 

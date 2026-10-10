@@ -9,6 +9,7 @@ gates, credential and the Vital Check come in later phases, here.
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import secrets
@@ -77,6 +78,21 @@ def classify_credential(lock, *, residue, process_holder):
 # -- the integrity log (DESIGN.md §3.4) -------------------------------------
 
 
+def _next_seq(store, last_line):
+    """The number of the next log record: one past the last record's id, or,
+    when the last line is damaged, one past the count of complete lines (D45)."""
+    if last_line is None:
+        return 1
+    try:
+        rec = json.loads(last_line.decode("utf-8"))
+        rid = rec["id"] if isinstance(rec, dict) else None
+    except (UnicodeDecodeError, ValueError, KeyError):
+        rid = None
+    if isinstance(rid, str) and re.match(r"^L-[0-9]{6}$", rid):
+        return int(rid[2:]) + 1
+    return store.read_from(LOG, 0).count(b"\n") + 1
+
+
 def log_append_located(
     store: Store, kind, *, rule=None, binding=None, session=None, **payload
 ) -> dict:
@@ -85,15 +101,15 @@ def log_append_located(
         cut = store.cut_torn_tail(INTEGRITY, LOG, writer=WRITER)
         if cut is not None:
             log_append_located(store, "torn-append", rule="OC-004(a)", **cut)
-        last = store.read_last_jsonl(LOG)
-        seq = int(last["id"].split("-")[1]) + 1 if last else 1
+        last_line = store.read_last_line(LOG)
+        seq = _next_seq(store, last_line)
         record = dict(payload)
         record.update(
             {
                 "id": "L-%06d" % seq,
                 "kind": kind,
                 "at": clock.iso(),
-                "prev": sha256(canonical(last)) if last else None,
+                "prev": sha256(last_line) if last_line is not None else None,
             }
         )
         if rule is not None:
@@ -112,8 +128,8 @@ def log_append_located(
 
 def log_append(store: Store, kind, *, rule=None, binding=None, session=None, **payload):
     """Append one record to the integrity log and return its id. Each record
-    carries the digest of the one before it, so an edit to history breaks
-    the sequence where it happened."""
+    carries the digest of the line before it, as written (D45), so an edit to
+    history breaks the sequence where it happened."""
     return log_append_located(
         store, kind, rule=rule, binding=binding, session=session, **payload
     )["id"]

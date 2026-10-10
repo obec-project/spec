@@ -119,6 +119,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   defects the work surfaced are carried in the backlog: the sweep reads to
   the end of the log though it verifies a block, and a value `canonical`
   refuses, such as `NaN`, makes verification raise instead of reporting.
+- **D45 revised — a damaged log no longer stops the log** (2026-10-10). A
+  damaged last record, unreadable or holding a value such as `NaN`, made
+  every write to the log raise: `log_append` parsed the last record to
+  number the next and chained it by `canonical` of what it parsed. The start
+  that found the damage could not record its own abort, which is when the
+  log matters most. A record now chains to the previous line as written —
+  for an intact record, its canonical form, so no log changes — and takes
+  its number from the last id, or from the count of lines when that id
+  cannot be read. Verification compares through `is_canonical`, so a value
+  `canonical` refuses is a `not-canonical` finding instead of a raise. Seven
+  tests; five of them fail against the previous code.
 
 ## Phase 3 — the commit (2026-10-10)
 
