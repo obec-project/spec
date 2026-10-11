@@ -9,8 +9,23 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
-## Phase 6a — actuation (in progress)
+## Phase 6a — actuation (2026-10-11)
 
+- **Invoking a skill** (2026-10-11, OC-008, D51, D16). `exec.invoke_skill`
+  checks, in order, the invocation's target against the workspace boundary,
+  the session, the index, the skill's copy file by file against the index
+  and its manifest, the targets it declares, and the Operator's rule:
+  `allow` only at the current digest, `deny` refuses, and anything else
+  holds, which with no one to answer is a refusal logged with its reason.
+  The skill then runs without a shell from the copy, in the workspace, with
+  a minimal environment and its own process group, ended with it at
+  completion and at its timeout; an irreversible skill goes through the
+  Action Ledger, and the copy is removed whatever happens. The process runs
+  outside the store's lock, so it never holds up a revocation. `entity
+  invoke-skill` returns the outcome and exit code, never the output. Over
+  OC-010, OC-001 – OC-005 and OC-008 the suite gives 54 pass, 0 fail,
+  5 attested, 7 unestablished: OC-008's eleven steps all pass, and the seven
+  left wait on Phases 7 and 8, a second host or a second version.
 - **A skill's manifest, its digest and its copy** (2026-10-11, D51, D16).
   `fsp/manifest.py` checks a manifest against DESIGN §5 — a command name
   first in `argv` and only the placeholders `{skill}`, `{workspace}` and

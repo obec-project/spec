@@ -317,6 +317,22 @@ def entity_actuate(flags):
     return ref or accepted(detail, out["log_records"])
 
 
+def entity_invoke_skill(flags):
+    root = _store(flags)
+    name = flags.get("name")
+    if not name:
+        raise CannotAttempt("--name is required")
+    if verify_state(root) in ("absent", "foreign"):
+        raise CannotAttempt("%s is not an fsp store" % root)
+    out, ref = _sil_call(execution.invoke_skill, root, name, flags.get("target"))
+    if ref:
+        return ref
+    return accepted(
+        {"skill": out["skill"], "outcome": out["outcome"], "exit": out["exit"]},
+        out["log_records"],
+    )
+
+
 def observe_log(flags):
     root = _store(flags)
     if verify_state(root) in ("absent", "foreign"):
@@ -401,6 +417,7 @@ COMMANDS = {
     ("entity", "commit"): entity_commit,
     ("entity", "attempt-write"): entity_attempt_write,
     ("entity", "actuate"): entity_actuate,
+    ("entity", "invoke-skill"): entity_invoke_skill,
     ("observe", "chain"): observe_chain,
     ("observe", "log"): observe_log,
     ("inject", "advance-clock"): _inject("advance-clock"),

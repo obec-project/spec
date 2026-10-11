@@ -8,11 +8,10 @@ done is in [CHANGELOG.md](CHANGELOG.md).
 ## 1. Phases
 
 Each phase ends with `run.py --only …` green on its invariants
-([AGENTS.md](AGENTS.md)). Phases 0–5 are done.
+([AGENTS.md](AGENTS.md)). Phases 0–5 and 6a are done.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **6a** | the native primitives `file_read`, `file_write`, `file_list` inside the workspace (declared since Phase 3), in the fixed order of checks (§5), `file_write` through the Action Ledger and an unresolved entry surfaced at the start (OP-015); `entity actuate`; `entity invoke-skill` through its four gates, the skill's rule read by name and digest (D16), a skill run from a copy without a shell in its invocation context, its process group ended with it (D51); a hold with no one to answer it refuses (D66) | OC-008, OC-002 2.2, 5.4 |
 | **6b** | the proposal op that changes `rules.json`, under the window category `rules` (D50); a skill's typed `args`; `http_fetch` under the allowlist's domains (G9); monitoring around each skill (D2) | — (unit tests) |
 | **7** | session records, the conversation and its recall scope (D11, D60), `mnemonic-recall`, `mnemonic-save`'s `session` and `semantic` destinations and a record's conversation and `supersedes`, the probes over memory (D12), promotion under authorization and the semantic ledger (D53), `/resume`, `/inject` and `/retract`, Sleep | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the process holding the session: `holder` and the `flock` on `CREDENTIAL` (D25), suspend (D19); the prompts, the Operator's four answers to a hold, and `/notifications` (D66), the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |
@@ -25,6 +24,13 @@ After that: a test entity on Ollama, operated for days, measuring what
 
 ### Carried into the phases
 
+- **Phase 6b — a skill's output and its descendants.** A skill's output is
+  read whole and then cut to 64 KiB, so a skill that prints without end
+  holds memory until its timeout; monitoring should read it bounded. A
+  descendant that leaves the skill's process group (`setsid`) and keeps its
+  output open keeps the invocation waiting after the timeout; the store's
+  lock is not held meanwhile, so nothing else is blocked, but the call does
+  not return.
 - **Phase 7 — the probes over memory tell the entity's words from others'.**
   Episodic memory records the conversation, and a first-person pattern flags
   an Operator's *I feel* as readily as the entity's. The probes of D12 must

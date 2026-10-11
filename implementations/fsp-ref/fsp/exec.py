@@ -5,12 +5,19 @@ outside the store (OC-008, D15)."""
 
 from __future__ import annotations
 
+import json
 import os
+import signal
+import subprocess
 
-from . import config, ledger, sil, vital
-from .digest import sha256
+from . import chain, config, ledger, lifecycle, sil, vital
+from . import manifest as skill_manifest
+from .digest import sha256, sha256_file
 from .sil import Refused, log_append
-from .store import GuardError, Store, write_host_file
+from .store import GuardError, Store, remove_host_tree, write_host_file
+
+OUTPUT_CAP = 1 << 16  # the most bytes kept of each output stream of a skill
+_FILLS = ("skill", "workspace", "target")
 
 
 def workspace_of(store: Store):
@@ -27,9 +34,16 @@ def _inside(path, root):
     return path == root or path.startswith(root + os.sep)
 
 
-def _refuse(store, op, target, check, rule, detail):
+def _refuse(store, op, target, check, rule, detail, **extra):
     rec = log_append(
-        store, "refusal", rule=rule, check=check, detail=detail, op=op, target=target
+        store,
+        "refusal",
+        rule=rule,
+        check=check,
+        detail=detail,
+        op=op,
+        target=target,
+        **extra,
     )
     return Refused(check, rule, detail, [rec])
 
@@ -178,6 +192,242 @@ def file_list(root, target):
         return {"entries": names, "target": rel, "log_records": [rec]}
 
 
+def _end_group(pid):
+    """Kill the process group ``pid`` leads, whatever it still holds (D51)."""
+    try:
+        os.killpg(pid, signal.SIGKILL)
+    except (ProcessLookupError, PermissionError):
+        pass
+
+
+def invoke_skill(root, name, target=None):
+    """Invoke the skill ``name`` from a verified copy, under the Operator's rule,
+    its process group ended with it (OC-008, D51, D16)."""
+    op = "invoke-skill"
+    store = Store(root)
+    copy = None
+    try:
+        with store.write_lock():
+            real_t, rel_t = boundary(store, op, target if target is not None else ".")
+            ws_real = os.path.realpath(workspace_of(store))
+            session = vital.require_entity_session(root, op)
+
+            try:
+                index = store.read_json(lifecycle.INDEX)
+            except (OSError, ValueError):
+                raise _refuse(
+                    store,
+                    op,
+                    name,
+                    "skill-index",
+                    "OC-008(c)",
+                    "the skill index cannot be read",
+                )
+            entry = next((s for s in index["skills"] if s["name"] == name), None)
+            if entry is None:
+                raise _refuse(
+                    store,
+                    op,
+                    name,
+                    "skill-index",
+                    "OC-008(c)",
+                    "%r is not in the skill index" % name,
+                )
+
+            skill_dir = chain.gen_relpath(index["generation"]) + "/skills/" + name
+            prefix = "skills/%s/" % name
+            expected = {f["path"][len(prefix) :]: f["sha256"] for f in entry["files"]}
+            committed = set()
+            base = store.path(skill_dir)
+            for dirpath, _dirs, files in os.walk(base):
+                for f in files:
+                    full = os.path.join(dirpath, f)
+                    committed.add(os.path.relpath(full, base).replace(os.sep, "/"))
+            if committed != set(expected):
+                raise _refuse(
+                    store,
+                    op,
+                    name,
+                    "skill-manifest",
+                    "OC-008(c)",
+                    "the files of %r are not those the index admitted" % name,
+                )
+            try:
+                copy = store.copy_out(skill_dir, sorted(expected))
+            except (OSError, GuardError) as e:
+                raise _refuse(
+                    store,
+                    op,
+                    name,
+                    "skill-manifest",
+                    "OC-008(c)",
+                    "%r cannot be copied: %s" % (name, e),
+                )
+            for f in sorted(expected):
+                if sha256_file(os.path.join(copy, *f.split("/"))) != expected[f]:
+                    raise _refuse(
+                        store,
+                        op,
+                        name,
+                        "skill-manifest",
+                        "OC-008(c)",
+                        "%s of %r changed since the index admitted it" % (f, name),
+                    )
+            try:
+                with open(os.path.join(copy, "manifest.json"), "rb") as fh:
+                    manifest = json.load(fh)
+            except (OSError, ValueError):
+                found = ["manifest.json cannot be read"]
+            else:
+                found = skill_manifest.problems(manifest, name)
+            if found:
+                raise _refuse(
+                    store, op, name, "skill-manifest", "OC-008(c)", "; ".join(found)
+                )
+            for t in manifest["targets"]:
+                boundary(store, op, t)
+
+            digest = skill_manifest.skill_digest(entry["files"])
+            try:
+                rules = store.read_json(
+                    chain.gen_relpath(sil.read_head(store)["entry"]) + "/rules.json"
+                )
+            except (OSError, ValueError):
+                rules = None
+            if not isinstance(rules, dict):
+                raise _refuse(
+                    store,
+                    op,
+                    name,
+                    "operator-rule",
+                    "OC-008(c)",
+                    "the Operator's rules cannot be read",
+                )
+            skills = rules.get("skills")
+            rule = skills.get(name) if isinstance(skills, dict) else None
+            if isinstance(rule, dict) and rule.get("rule") == "deny":
+                raise _refuse(
+                    store,
+                    op,
+                    name,
+                    "operator-rule",
+                    "OC-008(c)",
+                    "%r is denied by the Operator's rule" % name,
+                    reason="deny",
+                    skill=name,
+                    digest=digest,
+                )
+            if not (
+                isinstance(rule, dict)
+                and rule.get("rule") == "allow"
+                and rule.get("digest") == digest
+            ):
+                if rules.get("default") == "deny":
+                    raise _refuse(
+                        store,
+                        op,
+                        name,
+                        "operator-rule",
+                        "OC-008(c)",
+                        "%r is denied by the Operator's default rule" % name,
+                        reason="deny",
+                        skill=name,
+                        digest=digest,
+                    )
+                raise _refuse(
+                    store,
+                    op,
+                    name,
+                    "operator-rule",
+                    "OC-008(c)",
+                    "%r at %s is held: the Operator's rules do not allow it, "
+                    "and no one can answer" % (name, digest),
+                    reason="hold",
+                    skill=name,
+                    digest=digest,
+                )
+
+            values = {"skill": copy, "workspace": ws_real, "target": real_t}
+            argv = []
+            for a in manifest["argv"]:
+                for k in _FILLS:
+                    a = a.replace("{%s}" % k, values[k])
+                argv.append(a)
+            timeout = manifest["timeout_s"]
+            entry_id = None
+            if manifest["irreversible"]:
+                entry_id = ledger.open_entry(
+                    store,
+                    op=op,
+                    target=rel_t,
+                    intent="skill %s" % name,
+                    session=session,
+                )
+
+        env = {
+            "PATH": os.environ.get("PATH", os.defpath),
+            "HOME": ws_real,
+            "LANG": "C.UTF-8",
+        }
+        launch_error = None
+        try:
+            proc = subprocess.Popen(
+                argv,
+                cwd=ws_real,
+                env=env,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                start_new_session=True,
+            )
+        except OSError as e:
+            launch_error = str(e)
+        else:
+            try:
+                out, err = proc.communicate(timeout=timeout)
+                outcome = "done" if proc.returncode == 0 else "failed"
+            except subprocess.TimeoutExpired:
+                _end_group(proc.pid)
+                out, err = proc.communicate()
+                outcome = "timeout"
+            finally:
+                _end_group(proc.pid)
+
+        with store.write_lock():
+            if launch_error is not None:
+                if entry_id is not None:
+                    ledger.resolve_entry(
+                        store, entry_id, "failed", session=session, error=launch_error
+                    )
+                raise _failed(store, session, op, rel_t, launch_error)
+            if entry_id is not None:
+                ledger.resolve_entry(
+                    store, entry_id, outcome, session=session, exit=proc.returncode
+                )
+            rec = _executed(
+                store,
+                session,
+                op,
+                rel_t,
+                skill=name,
+                digest=digest,
+                outcome=outcome,
+                exit=proc.returncode,
+                ledger=entry_id,
+            )
+            return {
+                "skill": name,
+                "outcome": outcome,
+                "exit": proc.returncode,
+                "stdout": out[:OUTPUT_CAP],
+                "stderr": err[:OUTPUT_CAP],
+                "log_records": [rec],
+            }
+    finally:
+        if copy is not None:
+            remove_host_tree(copy, stores=(store.root,))
+
+
 def attempt_file_write(store: Store, cls, target):
     """file_write's attempted write: a host operation writes no content class
     of the store, so it refuses every one (D68)."""
@@ -212,6 +462,19 @@ def attempt_file_list(store: Store, cls, target):
         "sole-writer",
         "file_list lists the workspace and writes no content class of the store",
         via="file_list",
+        content_class=cls,
+        target=target,
+    )
+
+
+def attempt_invoke_skill(store: Store, cls, target):
+    """invoke-skill's attempted write: a skill runs in the workspace and writes
+    no content class of the store, so it refuses every one (D68)."""
+    raise sil.refuse_attempt(
+        store,
+        "sole-writer",
+        "invoke-skill runs in the workspace and writes no content class of the store",
+        via="invoke-skill",
         content_class=cls,
         target=target,
     )

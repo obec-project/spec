@@ -39,6 +39,7 @@ class OperationsTable(unittest.TestCase):
                 "file_read",
                 "file_write",
                 "file_list",
+                "invoke-skill",
             ],
         )
         for o in ops:
@@ -54,7 +55,7 @@ class OperationsTable(unittest.TestCase):
             )
         self.assertEqual(
             [o["writes_classes"] for o in ops],
-            [[], ["structural"], ["integrity"], ["mnemonic"], [], [], []],
+            [[], ["structural"], ["integrity"], ["mnemonic"], [], [], [], []],
         )
 
     def test_each_class_has_exactly_one_write_path_and_it_is_the_guard_s(self):
@@ -135,7 +136,7 @@ class AttemptWrite(TempDirTest):
         code, out = run_adapter("describe", "operations")
         self.assertEqual(code, 0)
         self.assertEqual(out["outcome"], "accepted")
-        self.assertEqual(len(out["detail"]["operations"]), 7)
+        self.assertEqual(len(out["detail"]["operations"]), 8)
         self.assertTrue(out["detail"]["evidence"])
 
     def test_adapter_refuses_an_integrity_write_from_cognition_with_the_triple(self):
@@ -186,7 +187,7 @@ class AttemptWrite(TempDirTest):
         self.assertEqual(out["log_records"], [])
 
     def test_host_operations_refuse_every_class(self):
-        for via in ("file_read", "file_write", "file_list"):
+        for via in ("file_read", "file_write", "file_list", "invoke-skill"):
             for cls in CLASSES:
                 with self.subTest(via=via, cls=cls):
                     with self.assertRaises(sil.Refused) as ctx:

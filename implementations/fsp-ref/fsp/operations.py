@@ -70,6 +70,14 @@ OPERATIONS = (
         execution.attempt_file_list,
         ("fsp/exec.py", "file_list"),
     ),
+    Operation(
+        "invoke-skill",
+        True,
+        True,
+        True,
+        execution.attempt_invoke_skill,
+        ("fsp/exec.py", "invoke_skill"),
+    ),
 )
 
 

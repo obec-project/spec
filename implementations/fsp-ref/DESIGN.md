@@ -363,7 +363,13 @@ minimal environment (the host's `PATH`, `HOME` = the workspace,
 digest on every execution (D16). The result is logged (OC-008(d)). A skill
 depends on the host's tools: one moved to a host without them fails when it
 runs, not when it is verified, and what its admitted code does is trusted to
-the Operator who allowed it (D51).
+the Operator who allowed it (D51). The checks and the preparation run under
+the store's lock and the process runs outside it, so a long skill never holds
+up a revocation (OC-002(b)). A non-zero exit and a timeout are results, logged;
+only a process that cannot be launched is a refusal (`execution`). A child the
+skill leaves behind holding its output keeps the run going until `timeout_s`,
+and is then ended with the group. The adapter's `invoke-skill` returns the
+outcome and the exit code, never the skill's output.
 
 **`file_write` and the Action Ledger** (OP-015, D23). The ledger is integrity:
 EXEC does not write it, it signals the SIL.

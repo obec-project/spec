@@ -15,7 +15,8 @@ the same probes, the verification of the
 integrity log, the Vital Check before an act of the entity, the
 Operator's mailbox of notices, the operations table with its attempted
 writes, the Action Ledger, and reading, writing and listing files inside the
-workspace. Skills and everything cognitive are not.
+workspace, and skills run from a verified copy under the Operator's rule.
+The rest of the allowlist, `http_fetch` and everything cognitive are not.
 
 Python 3.10+, standard library only, Linux or macOS.
 
