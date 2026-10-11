@@ -15,6 +15,15 @@ from fsp_testing import hooks
 
 GATE_NAMES = [g[0] for g in lifecycle.GATES]
 
+VALID = {
+    "name": "example",
+    "description": "a test skill",
+    "argv": ["sh", "{skill}/run"],
+    "timeout_s": 10,
+    "targets": [],
+    "irreversible": False,
+}
+
 
 class Base(TempDirTest):
     def setUp(self):
@@ -200,7 +209,7 @@ class Gates(Base):
     def test_an_intact_skill_is_indexed(self):
         sil.commit_generation(
             self.store,
-            changes={"skills/example/manifest.json": canonical({"name": "example"})},
+            changes={"skills/example/manifest.json": canonical(VALID)},
             authorization=sil.operator_act_located(
                 self.store, "approve", binding="op-1", rule="OC-001(b)"
             ),

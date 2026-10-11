@@ -12,6 +12,7 @@ from __future__ import annotations
 import os
 
 from . import chain, clock, config, ledger, sil
+from . import manifest as skill_manifest
 from .digest import canonical
 from .sil import WRITER, COMMITTER, Refused, log_append
 from .store import INTEGRITY, STRUCTURAL, Store
@@ -488,8 +489,9 @@ def _build_index(store: Store, report):
             continue
         try:
             manifest = store.read_json(gen + "/skills/%s/manifest.json" % name)
-            if not (isinstance(manifest, dict) and manifest.get("name") == name):
-                raise ValueError("manifest does not name the skill")
+            found = skill_manifest.problems(manifest, name)
+            if found:
+                raise ValueError("; ".join(found))
         except (OSError, ValueError) as e:
             excluded.append({"name": name, "reason": "manifest: %s" % e})
             continue

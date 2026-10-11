@@ -15,6 +15,15 @@ from fsp_testing import hooks
 
 PERSONA = [{"op": "set-persona", "content": "You are a helpful assistant."}]
 
+VALID = {
+    "name": "example",
+    "description": "a test skill",
+    "argv": ["sh", "{skill}/run"],
+    "timeout_s": 10,
+    "targets": [],
+    "irreversible": False,
+}
+
 
 class VitalTest(TempDirTest):
     def setUp(self):
@@ -34,7 +43,7 @@ class VitalTest(TempDirTest):
         sil.commit_generation(
             self.store,
             changes={
-                "skills/example/manifest.json": canonical({"name": "example"}),
+                "skills/example/manifest.json": canonical(VALID),
                 "skills/example/run": b"x",
             },
             authorization=sil.operator_act_located(

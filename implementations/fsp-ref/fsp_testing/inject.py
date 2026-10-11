@@ -115,12 +115,37 @@ def _commit_unauthorized(root, r):
     return {"target": chain.entry_relpath(n)}
 
 
+def _fixture_skill_path(root, r, name):
+    rel = chain.gen_relpath(r.head_entry) + "/skills/example/" + name
+    path = os.path.join(root, rel)
+    if not os.path.exists(path):
+        raise CannotAttempt("the fixture skill 'example' is not installed")
+    return rel, path
+
+
+def _skill_manifest(root, r):
+    rel, path = _fixture_skill_path(root, r, "manifest.json")
+    _raw_replace(path, b"{not a manifest")
+    return {"target": rel}
+
+
+def _skill_file(root, r):
+    rel, path = _fixture_skill_path(root, r, "run.sh")
+    with open(path, "rb") as f:
+        data = bytearray(f.read())
+    i = len(data) // 2
+    data[i] ^= 0x01
+    _raw_replace(path, bytes(data))
+    return {"target": rel, "offset": i}
+
+
 CORRUPTIONS = {
     "structural-byte": _structural_byte,
     "chain-entry-removed": _chain_entry_removed,
     "chain-entry-forged": _chain_entry_forged,
     "commit-unauthorized": _commit_unauthorized,
-    # skill-file and skill-manifest need skills (Phase 6).
+    "skill-file": _skill_file,
+    "skill-manifest": _skill_manifest,
 }
 
 

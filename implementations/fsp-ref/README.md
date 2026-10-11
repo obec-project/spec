@@ -47,6 +47,7 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/operator.py` | the Operator's acts: bindings, the workspace, approvals, windows |
 | `fsp/proposals.py` | proposals, the authorization state, the commit of a proposal |
 | `fsp/exec.py` | the native primitives `file_read`, `file_write`, `file_list`, inside the workspace and outside the store |
+| `fsp/manifest.py` | a skill's manifest, checked at the start and before it runs, and its digest |
 | `fsp/ledger.py` | the Action Ledger, and the entries a crash left open surfaced at the start |
 | `fsp/mil.py` | the mnemonic class's write path: `mnemonic-save`, the destination by caller |
 | `fsp/probes.py` | the deterministic probes over structural content and memory |

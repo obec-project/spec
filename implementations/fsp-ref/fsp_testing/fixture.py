@@ -14,10 +14,13 @@ def skill_files(name: str) -> dict[str, str]:
             {
                 "name": name,
                 "description": "The conformance fixture skill. It does nothing.",
+                "argv": ["sh", "{skill}/run.sh"],
+                "timeout_s": 10,
                 "targets": [],
+                "irreversible": False,
             },
             sort_keys=True,
         )
         + "\n"
     )
-    return {"manifest.json": text}
+    return {"manifest.json": text, "run.sh": "exit 0\n"}

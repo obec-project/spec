@@ -11,6 +11,16 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6a — actuation (in progress)
 
+- **A skill's manifest, its digest and its copy** (2026-10-11, D51, D16).
+  `fsp/manifest.py` checks a manifest against DESIGN §5 — a command name
+  first in `argv` and only the placeholders `{skill}`, `{workspace}` and
+  `{target}`, a bounded `timeout_s`, targets relative to the workspace — and
+  the start's index excludes a skill that fails it, the start going on.
+  `manifest.skill_digest` is the digest an allow rule pins. `Store.copy_out`
+  copies a skill's files to a fresh directory outside the store and
+  `remove_host_tree` removes it, never inside a store. The conformance
+  fixture becomes a valid skill, a manifest and a `run.sh` that exits 0, and
+  `inject corrupt` acts on it.
 - **The native primitives and `entity actuate`** (2026-10-11, OC-008, D15).
   `fsp/exec.py` reads, writes and lists files inside the workspace. The
   workspace boundary is checked first, before the session: the target is

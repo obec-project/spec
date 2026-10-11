@@ -27,6 +27,7 @@ import json
 import os
 import re
 import shutil
+import tempfile
 import threading
 
 from .digest import canonical, sha256, valid_relpath
@@ -579,6 +580,28 @@ class Store:
         with open(self.path(relpath), "rb") as f:
             return f.read()
 
+    def copy_out(self, reldir: str, names) -> str:
+        """Copy the files ``names``, relative to ``reldir`` in the store, into a
+        fresh temporary directory outside the store, and return its path. A
+        skill runs from such a copy (DESIGN §5)."""
+        real = os.path.realpath(tempfile.mkdtemp(prefix="fsp-skill-"))
+        store = os.path.realpath(self.root)
+        if real == store or real.startswith(store + os.sep):
+            shutil.rmtree(real, ignore_errors=True)
+            raise GuardError("store-boundary", "%s is inside the Entity Store" % real)
+        try:
+            for name in names:
+                _check_relpath(name)
+                data = self.read_bytes(reldir + "/" + name)
+                dest = os.path.join(real, *name.split("/"))
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                with open(dest, "wb") as f:
+                    f.write(data)
+        except Exception:
+            shutil.rmtree(real, ignore_errors=True)
+            raise
+        return real
+
     def read_line_at(self, relpath: str, offset: int) -> bytes | None:
         """Return the bytes of the line starting at offset, without the trailing
         newline."""
@@ -709,6 +732,16 @@ def write_host_file(path: str, data: bytes, *, stores=()) -> None:
         os.close(fd)
     os.rename(tmp, real)
     _fsync_dir(directory)
+
+
+def remove_host_tree(path: str, *, stores=()) -> None:
+    """Remove a directory tree outside every Entity Store in ``stores``."""
+    real = os.path.realpath(path)
+    for s in stores:
+        root = os.path.realpath(s)
+        if real == root or real.startswith(root + os.sep):
+            raise GuardError("store-boundary", "%s is inside an Entity Store" % path)
+    shutil.rmtree(real)
 
 
 def remove_as_operator(root: str, relpath: str) -> bool:
