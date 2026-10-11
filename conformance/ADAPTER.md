@@ -261,6 +261,13 @@ parameter the test supplies. `T` may be a name, a path, or a selector such as
 validates the target itself before calling the operation is testing the
 adapter.
 
+An attempt carries no content, so it writes none. The operation runs every
+check its real path runs before it writes, and stops there: an attempt it
+admits returns `accepted`, and SHOULD name in `detail` what would have been
+written. Writing anything in its place — an empty record, a placeholder — would
+change the store the attempt was meant to leave alone. An attempt the operation
+refuses is a refusal like any other, logged.
+
 ### 3.5 `observe`
 
 | Command | Returns in `detail` | Tests |

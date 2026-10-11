@@ -53,6 +53,13 @@ The conformance suite carries its own version line; a claim names both, as in
   said *start refused*, which reads as the refusal triple although a start
   stopped by a failed gate ends `aborted`. No step, contract or runner check
   changes, so the suite's version does not move.
+- ADAPTER.md §3.4 says what an admitted `entity attempt-write` does: it
+  writes nothing, since the attempt carries no content, and names what would
+  have been written. The contract said the attempt routes through the
+  operation as a real request would and stopped there, which leaves an
+  admitted attempt either writing something made up or nothing at all.
+  Prompted by fsp-ref (D68). No step checks an admitted attempt, so what
+  conformance means does not change.
 
 **Repository**
 
