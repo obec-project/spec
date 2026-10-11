@@ -11,6 +11,16 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6a — actuation (in progress)
 
+- **The Action Ledger** (2026-10-11, OP-015). `fsp/ledger.py`, a module of
+  the SIL, writes the entry before an irreversible act and its resolution
+  after it, cutting a torn fragment first (D61). The start's crash-recovery
+  gate surfaces every entry left open as an `operator-notification`
+  (`ledger-unresolved`) and closes it `interrupted`, naming the notice; a
+  line that does not parse becomes a `ledger-damaged` notice; the start goes
+  on. The gate reads from the position the session state keeps, the end of
+  the last complete line it read: the task first kept the file's size, which
+  counts a torn fragment, so the entry written over that fragment fell
+  before the position and would never have surfaced. A test reproduces it.
 - **Phase 6 split, and actuation designed** (2026-10-11). Phase 6 is split:
   6a is what the suite asks of OC-008 — the native file primitives, the
   Action Ledger, `entity actuate`, `entity invoke-skill` and running a

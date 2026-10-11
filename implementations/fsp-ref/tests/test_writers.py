@@ -21,7 +21,7 @@ from helpers import ROOT
 
 # Writer identity -> the fsp/ modules that may name it (D69).
 ALLOWED = {
-    "sil": {"sil", "lifecycle", "proposals", "operator", "vital"},
+    "sil": {"sil", "lifecycle", "proposals", "operator", "vital", "ledger"},
     "sil.commit": {"sil", "lifecycle"},
     "mil": {"mil"},
 }

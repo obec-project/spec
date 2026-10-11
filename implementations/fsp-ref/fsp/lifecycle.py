@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import os
 
-from . import chain, clock, config, sil
+from . import chain, clock, config, ledger, sil
 from .digest import canonical
 from .sil import WRITER, COMMITTER, Refused, log_append
 from .store import INTEGRITY, STRUCTURAL, Store
@@ -81,7 +81,12 @@ def _forced_failures(root):
 
 # -- session state ------------------------------------------------------------
 
-_NO_SESSIONS = {"last_session": 0, "open_session": None, "consecutive_recoveries": 0}
+_NO_SESSIONS = {
+    "last_session": 0,
+    "open_session": None,
+    "consecutive_recoveries": 0,
+    "ledger_offset": 0,
+}
 
 
 def _read_sessions(store: Store):
@@ -95,6 +100,9 @@ def _read_sessions(store: Store):
         and isinstance(s["last_session"], int)
         and isinstance(s["consecutive_recoveries"], int)
         and (s["open_session"] is None or isinstance(s["open_session"], str))
+        and isinstance(s["ledger_offset"], int)
+        and not isinstance(s["ledger_offset"], bool)
+        and s["ledger_offset"] >= 0
     ):
         raise ValueError("session state has the wrong shape")
     return s
@@ -236,9 +244,12 @@ def start(root: str, *, binding=None) -> StartResult:
                     **evidence,
                 )
             )
-            res.gate("crash-recovery", "recovered")
+            outcome = "recovered"
         else:
-            res.gate("crash-recovery", "pass")
+            outcome = "pass"
+        surfaced = _surface_ledger(store, sessions, acting, res)
+        extra = {"ledger_surfaced": surfaced} if surfaced else {}
+        res.gate("crash-recovery", outcome, **extra)
 
         # 3. structural verification against the chain.
         if "structural" in forced:
@@ -415,6 +426,37 @@ def _notify(store, binding, condition, detail):
         condition=condition,
         detail=detail,
     )
+
+
+def _surface_ledger(store, sessions, acting, res):
+    """Surface each Action Ledger entry left open, as a notice, and close it
+    ``interrupted`` (OP-015). Returns the ids of the entries surfaced."""
+    pending, damaged, end = ledger.unresolved(store, sessions["ledger_offset"])
+    for off in damaged:
+        rec = _notify(
+            store,
+            acting,
+            "ledger-damaged",
+            "the action ledger line at offset %d does not parse" % off,
+        )
+        res.log_records.append(rec)
+    surfaced = []
+    for e in pending:
+        rec = _notify(
+            store,
+            acting,
+            "ledger-unresolved",
+            "%s on %s, entry %s, did not resolve: %s"
+            % (e.get("op"), e.get("target"), e.get("id"), e.get("intent")),
+        )
+        ledger.resolve_entry(store, e["id"], "interrupted", notice=rec)
+        res.log_records.append(rec)
+        surfaced.append(e["id"])
+    if damaged or pending:
+        res.operator_notified = True
+    sessions["ledger_offset"] = end
+    _write_sessions(store, sessions)
+    return surfaced
 
 
 def _remove_residue(store: Store, item):

@@ -46,6 +46,7 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/lifecycle.py` | the gated start, the live session, close, revocation, decommission |
 | `fsp/operator.py` | the Operator's acts: bindings, the workspace, approvals, windows |
 | `fsp/proposals.py` | proposals, the authorization state, the commit of a proposal |
+| `fsp/ledger.py` | the Action Ledger, and the entries a crash left open surfaced at the start |
 | `fsp/mil.py` | the mnemonic class's write path: `mnemonic-save`, the destination by caller |
 | `fsp/probes.py` | the deterministic probes over structural content and memory |
 | `fsp/defaults/` | the persona and probes first activation writes |
