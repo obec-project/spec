@@ -72,6 +72,20 @@ The conformance suite carries its own version line; a claim names both, as in
   against its own state now, and the break `oc003c-target` proves the step
   can fail. What conformance means changes, so the suite's version moves at
   the next release; it still has 77 steps.
+- Steps 8.7 – 8.9 name the check that refuses, and ADAPTER.md §4 names it
+  too: `skill-index` for a skill the start did not index or excluded,
+  `skill-manifest` — or `skill-index`, where a check since the start pruned
+  it — for one whose files no longer match what was admitted. The steps
+  accepted any refusal, and the suite installs the fixture skill but has no
+  way to allow it, so an implementation that consulted the Operator's rules
+  first refused every invocation there and passed 8.9 without validating a
+  manifest. Naming the checks is the simpler of two fixes; letting the
+  fixture be allowed, which would add an Operator command to the contract,
+  waits. The stub used other names and did not exclude a skill at the
+  start, which 8.8 says it must; the tightened step caught that, and the
+  stub now excludes it and reports it. ADAPTER.md also says that
+  `entity actuate --op write`, which carries no content, writes an empty
+  file. Prompted by fsp-ref (D68, Phase 6a).
 
 **Repository**
 

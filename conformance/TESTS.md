@@ -282,9 +282,9 @@ Establishes (a) one path inside a declared boundary, (b) disjoint from the store
 
 | # | Step | Assert |
 |---|---|---|
-| 8.7 `[E]` | `entity invoke-skill --name <not in index>` | Refused. |
-| 8.8 `[E]` | Install the fixture skill `example` by commit, `inject corrupt --kind skill-manifest`, `lifecycle stop`, `lifecycle start`, then invoke it | Excluded from the index at start and reported to the Operator; the start continues. Invocation refused. |
-| 8.9 `[E]` | Install the fixture skill `example` by commit, `inject corrupt --kind skill-file` after the index is built, then invoke | Refused — manifest validation is at the moment of execution, not only at start. |
+| 8.7 `[E]` | `entity invoke-skill --name <not in index>` | Refused, `refusal.check == "skill-index"`. |
+| 8.8 `[E]` | Install the fixture skill `example` by commit, `inject corrupt --kind skill-manifest`, `lifecycle stop`, `lifecycle start`, then invoke it | Excluded from the index at start and reported to the Operator; the start continues. Invocation refused, `refusal.check == "skill-index"`. |
+| 8.9 `[E]` | Install the fixture skill `example` by commit, `inject corrupt --kind skill-file` after the index is built, then invoke | Refused — manifest validation is at the moment of execution, not only at start. `refusal.check` is `skill-manifest`, or `skill-index` where a check since the start pruned the skill; never the Operator's rule, which would refuse an intact skill too. |
 | 8.10 `[E]` | `entity attempt-write --class structural --target skills --via <each cognition-reachable operation>` | All refused. Installing a skill requires a commit under OC-001(b). |
 
 ### (d) Evidence

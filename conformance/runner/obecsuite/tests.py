@@ -938,7 +938,7 @@ def oc008(ctx):
     with ctx.step("8.7", "E", "an unindexed skill does not run"):
         store, ws = prepared("unindexed")
         res = ad.call("entity", "invoke-skill", store=store, name="absent-skill")
-        a.refused(ctx, res)
+        a.refused(ctx, res, check="skill-index")
         refusals.append(res)
 
     with ctx.step("8.8", "E", "an invalid manifest excludes the skill"):
@@ -953,7 +953,7 @@ def oc008(ctx):
             "skill and continue",
         )
         res = ad.call("entity", "invoke-skill", store=store, name="example")
-        a.refused(ctx, res)
+        a.refused(ctx, res, check="skill-index")
         refusals.append(res)
 
     with ctx.step("8.9", "E", "manifest validation is at the moment of execution"):
@@ -963,6 +963,12 @@ def oc008(ctx):
         res = ad.call("entity", "invoke-skill", store=store, name="example")
         a.refused(
             ctx, res, why="a skill altered after the index was built must not run"
+        )
+        # Pruned from the index by a check since the start is also validation
+        # after the start; refused by the Operator's rule is not.
+        a.truthy(
+            res.refusal.get("check") in ("skill-manifest", "skill-index"),
+            f"refused by {res.refusal.get('check')!r}, not by validating the skill",
         )
         refusals.append(res)
 

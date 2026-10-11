@@ -447,6 +447,13 @@ def cmd_lifecycle(command, args):
             elif gate == "binding-verification":
                 if not read(p["structural"]).get("bindings"):
                     outcome = "fail"
+            elif gate == "skill-index" and f.get("skill_corrupt") == "skill-manifest":
+                # A skill whose manifest no longer validates is excluded from
+                # the index and reported; the start goes on (OP-006).
+                fs = faults(store)
+                fs["excluded"] = list(read(p["structural"]).get("skills", []))
+                save(p["faults"], fs)
+                log(store, "skill-excluded", skills=fs["excluded"])
             want = f.get("gate_failure")
             if want and want in gate.split("-"):
                 outcome = "fail"
@@ -753,10 +760,12 @@ def cmd_entity(command, args):
             if (outside_ws or inside_store) and "oc008a" not in BREAK:
                 refused(store, "workspace-boundary", "OC-008(a)")
         if command == "invoke-skill":
-            if args["name"] not in structural.get("skills", []):
-                refused(store, "skill-not-indexed", "OC-008(c)")
+            indexed = set(structural.get("skills", []))
+            indexed -= set(faults(store).get("excluded", []))
+            if args["name"] not in indexed:
+                refused(store, "skill-index", "OC-008(c)")
             if faults(store).get("skill_corrupt"):
-                refused(store, "manifest-validation", "OC-008(c)")
+                refused(store, "skill-manifest", "OC-008(c)")
         if not os.path.exists(p["credential"]):
             refused(store, "no-credential", "OC-001(a)")
         log(store, "execution", op=command)

@@ -252,6 +252,7 @@ implementation's real paths, within the live session (§2.5).
 | `entity stimulate --store PATH --text S` | deliver a stimulus | — | OC-003(e), OC-007 |
 
 `entity actuate` MAY also accept `--op execute`; the suite does not use it.
+`--op write` carries no content, and writes an empty file at `P`.
 
 `entity attempt-write` is the command that tests the sole-writer discipline, and
 it is where an adapter is most tempted to cheat. It MUST route the attempt
@@ -354,6 +355,12 @@ absence is what the tests look for.
   symbolic link or relative traversal → refused **before any other check runs**,
   and the refusal names `workspace-boundary`
 - `entity actuate` or `entity commit` with no live session → refused
+- `entity invoke-skill` naming a skill the start did not index, or one its
+  check excluded → refused, and the refusal names `skill-index`; naming a skill
+  whose files or manifest no longer match what was admitted → refused, naming
+  `skill-manifest`, or `skill-index` if a check since the start pruned it.
+  These run before any rule of the Operator's, so an intact skill held by the
+  rules is refused by another check, and a damaged one never reaches the rules
 - `entity attempt-write` reaching a class the named operation does not own →
   refused
 - `lifecycle start` on a store with a passive signal present → suspended at the
