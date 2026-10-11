@@ -1,0 +1,16 @@
+# Python style for the suite and the implementations: `ruff format` and the
+# line-length rule. Run as `uvx ruff@0.17.0 format` and
+# `uvx ruff@0.17.0 check` from the repository root.
+required-version = "==0.17.0"
+line-length = 88
+# The runner's floor; the formatter's output stays valid on it.
+target-version = "py38"
+# Python only: the documents, the specification among them, are not formatted.
+include = ["*.py"]
+extend-include = [
+    "conformance/runner/stub/obec-adapter-stub",
+    "implementations/fsp-ref/obec-adapter",
+]
+
+[lint]
+select = ["E501"]

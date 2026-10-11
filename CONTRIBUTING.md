@@ -210,6 +210,12 @@ A pull request that changes an invariant's requirement MUST update that
 invariant's conformance test in the same change. A guarantee whose test did not
 move is a guarantee nobody can check.
 
+Python code — the suite and the implementations — is formatted by `ruff format`
+and kept within 88 columns, with the ruff version and settings
+[ruff.toml](ruff.toml) pins. A string or comment the formatter cannot break is
+broken by hand. A reformat goes in a commit of its own, never mixed with a
+change of behaviour.
+
 ---
 
 ## 6. Proposing a new invariant

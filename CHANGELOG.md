@@ -67,6 +67,14 @@ The conformance suite carries its own version line; a claim names both, as in
   deprecated and already forces onto Node.js 24. Nothing the workflow uses
   changed between those majors. The jobs left on `ubuntu-latest` need no
   change for Ubuntu 26: Python 3.10 – 3.14 all have builds for it.
+- Python code follows one style: `ruff format` within 88 columns, with the
+  version pinned in `ruff.toml`. The code already wrapped its calls at 88,
+  the formatter's default, but nothing held it there, and 267 lines had
+  drifted past it. The formatter decides what a reviewer otherwise would,
+  and the length rule catches the strings and comments it does not break.
+  Ruff is a tool of the repository, not a dependency: the suite and fsp-ref
+  still run on the standard library alone. Only Python is formatted; the
+  documents are not.
 
 ## 0.12.0 — 2026-09-27
 

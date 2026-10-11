@@ -57,6 +57,9 @@ specification's shape that changed.
 - **Licensing:** a new code file starts with the SPDX header the others carry
   (`Apache-2.0`, `Copyright 2026 Jonas Orrico`). A new document at the root is
   added to the list in [LICENSE](LICENSE).
+- **Python is formatted by ruff, within 88 columns** ([ruff.toml](ruff.toml)
+  pins the version). The formatter does not break strings or comments: those
+  are broken by hand, never with a `noqa`.
 - **Everything is written in English.**
 
 ## Operational facts
@@ -87,6 +90,9 @@ python3 -m unittest -v tests/test_stub.py              # the suite against the s
 
 # from implementations/fsp-ref
 python3 -m unittest discover -s tests                  # the reference implementation
+
+# from the repository root
+uvx ruff@0.17.0 format --check && uvx ruff@0.17.0 check   # Python style
 ```
 
 A change to `spec/` runs the verbatim test; a change to `conformance/` runs
