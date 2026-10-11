@@ -11,6 +11,9 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6a — actuation (2026-10-11)
 
+- **G23 closed** (2026-10-11). The suite's steps 8.7 – 8.9 name the check
+  that refuses, `skill-index` or `skill-manifest`, the names fsp already
+  uses, so a refusal by the Operator's rule no longer passes them.
 - **Invoking a skill** (2026-10-11, OC-008, D51, D16). `exec.invoke_skill`
   checks, in order, the invocation's target against the workspace boundary,
   the session, the index, the skill's copy file by file against the index

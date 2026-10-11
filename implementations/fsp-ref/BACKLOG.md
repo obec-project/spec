@@ -96,14 +96,6 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
   OP-001 could recommend it (D36): it is what makes it possible, when a model
   turns out to be problematic, to find everything it did — including the
   memories it saved.
-- **G23 — the suite's skill steps accept any refusal.** Steps 8.7 – 8.9 assert
-  a refusal without naming the check, and the suite installs the fixture
-  skill by commit but has no way to allow it. An implementation whose
-  allowlist holds by default and is checked first refuses every invocation
-  there, and passes 8.9 without validating a manifest. fsp checks the skill
-  before the rule (§5), so its manifest check is reached; the suite should
-  name the checks, or let the fixture be allowed, which moves the suite's
-  version.
 - **G20 — scheduled triggers have a home and no mechanism.** The Core says,
   in a note to OC-002 and in the glossary's *Stimulus*, that schedules are
   structural content and a trigger firing executes standing Operator
