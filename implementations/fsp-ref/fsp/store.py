@@ -524,7 +524,8 @@ class Store:
             return f.read()
 
     def read_line_at(self, relpath: str, offset: int) -> bytes | None:
-        """Return the bytes of the line starting at offset, without the trailing newline."""
+        """Return the bytes of the line starting at offset, without the trailing
+        newline."""
         if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0:
             return None
         target = self.path(relpath)

@@ -206,7 +206,10 @@ def start(root: str, *, binding=None) -> StartResult:
                 rec = sil.raise_passive_signal(
                     store,
                     "recovery-threshold",
-                    "%d consecutive crash recoveries (N_boot); halted until the Operator acts"
+                    (
+                        "%d consecutive crash recoveries (N_boot); "
+                        "halted until the Operator acts"
+                    )
                     % attempts,
                 )
                 res.log_records.append(rec)
@@ -273,7 +276,8 @@ def start(root: str, *, binding=None) -> StartResult:
             res.refusal = Refused(
                 "decommissioned",
                 "OC-002(c)",
-                "this entity was decommissioned; its store is a record, not a dormant entity",
+                "this entity was decommissioned; "
+                "its store is a record, not a dormant entity",
                 [rec],
             )
             res.log_records.append(rec)

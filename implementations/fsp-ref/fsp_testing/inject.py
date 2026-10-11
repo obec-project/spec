@@ -158,7 +158,8 @@ def corrupt(root, flags):
 
 
 def probe(root, flags):
-    """Run the deterministic probe layer against supplied content (ADAPTER §5, OC-002(d))."""
+    """Run the deterministic probe layer against supplied content
+    (ADAPTER §5, OC-002(d))."""
     from fsp import probes, sil
     from fsp.store import Store
 
@@ -201,7 +202,8 @@ def advance_clock(root, flags):
 
 
 def interrupt(root, flags):
-    """Attempt to commit an authorized proposal and terminate at stage (ADAPTER §5, OC-004(b), OC-010)."""
+    """Attempt to commit an authorized proposal and terminate at stage
+    (ADAPTER §5, OC-004(b), OC-010)."""
     stage = flags.get("stage")
     if stage not in hooks.STAGES:
         raise CannotAttempt("--stage is staging, write or chain-entry")

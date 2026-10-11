@@ -51,7 +51,9 @@ def binding_add(root: str, target: str, *, binding=None):
                 rule="OC-001(a)",
                 binding=acting,
                 check="session-live",
-                detail="bindings change only outside a session; stop or revoke it first",
+                detail=(
+                    "bindings change only outside a session; stop or revoke it first"
+                ),
             )
             raise Refused(
                 "session-live",
@@ -151,7 +153,9 @@ def binding_remove(root: str, target: str, *, binding=None):
                 rule="OC-001(a)",
                 binding=acting,
                 check="session-live",
-                detail="bindings change only outside a session; stop or revoke it first",
+                detail=(
+                    "bindings change only outside a session; stop or revoke it first"
+                ),
             )
             raise Refused(
                 "session-live",
@@ -291,7 +295,8 @@ def binding_remove(root: str, target: str, *, binding=None):
 
 
 def ownership_offer(root: str, target: str, *, binding=None):
-    """Offer ownership of the Operator binding set to another active binding (OC-001(a), D55)."""
+    """Offer ownership of the Operator binding set to another active binding
+    (OC-001(a), D55)."""
     store = Store(root)
     with store.write_lock():
         acting = sil.acting_binding(store, binding)
@@ -302,7 +307,9 @@ def ownership_offer(root: str, target: str, *, binding=None):
                 rule="OC-001(a)",
                 binding=acting,
                 check="session-live",
-                detail="bindings change only outside a session; stop or revoke it first",
+                detail=(
+                    "bindings change only outside a session; stop or revoke it first"
+                ),
             )
             raise Refused(
                 "session-live",
@@ -426,7 +433,9 @@ def ownership_accept(root: str, *, binding=None):
                 rule="OC-001(a)",
                 binding=acting,
                 check="session-live",
-                detail="bindings change only outside a session; stop or revoke it first",
+                detail=(
+                    "bindings change only outside a session; stop or revoke it first"
+                ),
             )
             raise Refused(
                 "session-live",
@@ -526,7 +535,8 @@ def ownership_accept(root: str, *, binding=None):
 
 
 def ownership_withdraw(root: str, *, binding=None):
-    """Withdraw a pending ownership offer (OC-001(a), D55). Owner-only, outside session."""
+    """Withdraw a pending ownership offer (OC-001(a), D55). Owner-only, outside
+    session."""
     store = Store(root)
     with store.write_lock():
         acting = sil.acting_binding(store, binding)
@@ -537,7 +547,9 @@ def ownership_withdraw(root: str, *, binding=None):
                 rule="OC-001(a)",
                 binding=acting,
                 check="session-live",
-                detail="bindings change only outside a session; stop or revoke it first",
+                detail=(
+                    "bindings change only outside a session; stop or revoke it first"
+                ),
             )
             raise Refused(
                 "session-live",
@@ -839,7 +851,8 @@ def revoke_grant(root: str, *, binding=None):
 
 
 def review_list(root: str, *, binding=None):
-    """Pending evolution proposals, approved or not, in order of origination (D52). Read-only."""
+    """Pending evolution proposals, approved or not, in order of origination
+    (D52). Read-only."""
     store = Store(root)
     with store.write_lock():
         try:
@@ -869,7 +882,8 @@ def review_list(root: str, *, binding=None):
 
 
 def reject(root: str, proposal_id: str, *, binding=None):
-    """Reject a pending evolution proposal and withdraw its approval, if any (OC-001(b), D52)."""
+    """Reject a pending evolution proposal and withdraw its approval, if any
+    (OC-001(b), D52)."""
     store = Store(root)
     with store.write_lock():
         acting = sil.acting_binding(store, binding)

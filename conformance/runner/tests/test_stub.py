@@ -66,7 +66,8 @@ class SuiteAgainstStub(unittest.TestCase):
         path = os.path.join(self.tmp.name, "adapter-b")
         with open(path, "w") as f:
             f.write(
-                f'#!/bin/sh\nOBEC_STUB_HOSTNAME=host-b exec "{sys.executable}" "{STUB}" "$@"\n'
+                "#!/bin/sh\nOBEC_STUB_HOSTNAME=host-b "
+                f'exec "{sys.executable}" "{STUB}" "$@"\n'
             )
         os.chmod(path, os.stat(path).st_mode | stat.S_IXUSR)
         return path

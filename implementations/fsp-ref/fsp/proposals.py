@@ -132,7 +132,8 @@ def open_window(
 
 
 def close_lapsed(store: Store, now: datetime, *, session: str = None) -> list[str]:
-    """Close open windows that have expired or exhausted their budget (OC-001(b), D59)."""
+    """Close open windows that have expired or exhausted their budget
+    (OC-001(b), D59)."""
     auth = read_auth(store)
     closed_ids = []
     now_iso = clock.iso(now)
@@ -275,7 +276,9 @@ def propose(root: str, ops: list) -> dict:
                         "refusal",
                         rule="OC-001(b)",
                         check="ops",
-                        detail="install-skill requires a non-empty files dict of strings",
+                        detail=(
+                            "install-skill requires a non-empty files dict of strings"
+                        ),
                     )
                     raise Refused(
                         "ops",

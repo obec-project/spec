@@ -209,7 +209,8 @@ def first_activation(
             raise Refused(
                 "first-activation",
                 "OP-017",
-                "first activation already ran; re-initializing would create a new entity",
+                "first activation already ran; "
+                "re-initializing would create a new entity",
                 [rec],
             )
         store.remove_fap_residue(writer=WRITER)
@@ -558,7 +559,9 @@ def commit_generation(
                         rule="OC-002(d)",
                         session=session,
                         check="probe-set",
-                        detail="the proposed probe set does not flag the reference texts",
+                        detail=(
+                            "the proposed probe set does not flag the reference texts"
+                        ),
                     )
                     raise Refused(
                         "probe-set",

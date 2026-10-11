@@ -44,7 +44,8 @@ class WindowsTests(Base):
                 self.assertIn(omit, ctx.exception.detail)
 
     def test_grant_scope_checks(self):
-        """grant with binding-set -> scope (OC-001(a)); undeclared -> scope (OC-001(b)); valid -> accepted."""
+        """grant with binding-set -> scope (OC-001(a)); undeclared -> scope
+        (OC-001(b)); valid -> accepted."""
         for bad_scope, rule in (
             ("binding-set", "OC-001(a)"),
             ("bindings", "OC-001(a)"),
@@ -65,7 +66,8 @@ class WindowsTests(Base):
         self.assertTrue(out2["grant"].startswith("L-"))
 
     def test_grant_budget_and_expiry_validation(self):
-        """grant with budget 0 or 'x' -> grant-budget; expiry '1h' or '+1y' -> grant-expiry."""
+        """grant with budget 0 or 'x' -> grant-budget; expiry '1h' or '+1y'
+        -> grant-expiry."""
         for bad_budget in (0, "0", "x", "\u00b2"):
             with self.subTest(budget=bad_budget):
                 with self.assertRaises(Refused) as ctx:
@@ -83,7 +85,8 @@ class WindowsTests(Base):
                 self.assertEqual(ctx.exception.rule, "OC-001(b)")
 
     def test_grant_without_live_session_accepted(self):
-        """grant without a live session is accepted, recorded in auth.json and logged."""
+        """grant without a live session is accepted, recorded in auth.json
+        and logged."""
         out = operator.grant(self.S, expiry="+1h", budget=5, scope="skills")
         gid = out["grant"]
         auth = proposals.read_auth(self.store)
@@ -101,7 +104,8 @@ class WindowsTests(Base):
         self.assertEqual(acts[-1]["rule"], "OC-001(b)")
 
     def test_install_skill_under_covering_window(self):
-        """install-skill under a skills window with budget 5 -> commit accepted, authorization is grant id, used==1."""
+        """install-skill under a skills window with budget 5 -> commit accepted,
+        authorization is grant id, used==1."""
         lifecycle.start(self.S)
         out_g = operator.grant(self.S, expiry="+1h", budget=5, scope="skills")
         gid = out_g["grant"]
@@ -125,7 +129,8 @@ class WindowsTests(Base):
         self.assertEqual(g["state"], "open")
 
     def test_budget_exhaustion_closes_window(self):
-        """budget 1: first commit accepted and window closes (exhausted); second commit refused with authorization."""
+        """budget 1: first commit accepted and window closes (exhausted); second
+        commit refused with authorization."""
         lifecycle.start(self.S)
         out_g = operator.grant(self.S, expiry="+1h", budget=1, scope="skills")
         gid = out_g["grant"]
@@ -153,7 +158,8 @@ class WindowsTests(Base):
         self.assertEqual(ctx.exception.rule, "OC-001(b)")
 
     def test_expired_window_refuses_commit(self):
-        """window opened with -1h -> commit refused with authorization, window marked closed/expired."""
+        """window opened with -1h -> commit refused with authorization, window
+        marked closed/expired."""
         lifecycle.start(self.S)
         out_g = operator.grant(self.S, expiry="-1h", budget=5, scope="skills")
         gid = out_g["grant"]
@@ -197,7 +203,8 @@ class WindowsTests(Base):
         self.assertEqual(ctx.exception.rule, "OC-001(b)")
 
     def test_persona_proposal_never_covered_by_window(self):
-        """set-persona proposal with open skills window -> authorization refusal (persona only by approval)."""
+        """set-persona proposal with open skills window -> authorization refusal
+        (persona only by approval)."""
         lifecycle.start(self.S)
         operator.grant(self.S, expiry="+1h", budget=5, scope="skills")
 
@@ -210,7 +217,8 @@ class WindowsTests(Base):
         self.assertEqual(ctx.exception.rule, "OC-001(b)")
 
     def test_approval_takes_precedence_over_window(self):
-        """with approval and open window, commit uses approval and does not spend window budget."""
+        """with approval and open window, commit uses approval and does not spend
+        window budget."""
         lifecycle.start(self.S)
         out_g = operator.grant(self.S, expiry="+1h", budget=5, scope="skills")
         gid = out_g["grant"]
@@ -235,7 +243,8 @@ class WindowsTests(Base):
         self.assertEqual(g["used"], 0)
 
     def test_clock_advance_and_expiry(self):
-        """window +1s, hooks.advance_clock(root, 5) -> commit refused, window expired, clock.grant_now advanced."""
+        """window +1s, hooks.advance_clock(root, 5) -> commit refused, window
+        expired, clock.grant_now advanced."""
         lifecycle.start(self.S)
         out_g = operator.grant(self.S, expiry="+1s", budget=5, scope="skills")
         gid = out_g["grant"]
@@ -263,7 +272,8 @@ class WindowsTests(Base):
         self.assertEqual(g["closed"], "expired")
 
     def test_gate_5_closes_lapsed_window(self):
-        """gate 5 closes expired window on start (open with -1h, lifecycle.start -> closed and grant-closed logged)."""
+        """gate 5 closes expired window on start (open with -1h, lifecycle.start
+        -> closed and grant-closed logged)."""
         out_g = operator.grant(self.S, expiry="-1h", budget=5, scope="skills")
         gid = out_g["grant"]
 
@@ -314,7 +324,8 @@ class WindowsTests(Base):
         self.assertEqual(rev2["revoked"], [])
 
     def test_adapter_windows_commands(self):
-        """adapter commands for operator grant, revoke-grant, and inject advance-clock."""
+        """adapter commands for operator grant, revoke-grant, and inject
+        advance-clock."""
         # operator grant accepted with grant in detail
         code, out = run_adapter(
             "operator",

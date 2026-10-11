@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Jonas Orrico
-"""Unit tests for inject interrupt and crash recovery (DESIGN.md §3.3, OC-004(b), OC-010)."""
+"""Unit tests for inject interrupt and crash recovery
+(DESIGN.md §3.3, OC-004(b), OC-010)."""
 
 from __future__ import annotations
 

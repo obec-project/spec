@@ -18,7 +18,8 @@ class _Skip(Exception):
 
 
 # --------------------------------------------------------------------------
-# OC-001 — An entity exists only bound to an Operator, who holds final authority over everything it is and does
+# OC-001 — An entity exists only bound to an Operator, who holds final authority
+#          over everything it is and does
 # --------------------------------------------------------------------------
 
 
@@ -362,7 +363,8 @@ def oc002(ctx):
 
 
 # --------------------------------------------------------------------------
-# OC-003 — Everything the entity is resides in its store, travels with it, and has one writer per class
+# OC-003 — Everything the entity is resides in its store, travels with it,
+#          and has one writer per class
 # --------------------------------------------------------------------------
 
 
@@ -526,7 +528,8 @@ def oc003(ctx):
 
 
 # --------------------------------------------------------------------------
-# OC-004 — The entity's identity is proven by an unbroken chain back to its Genesis Anchor
+# OC-004 — The entity's identity is proven by an unbroken chain back to its
+#          Genesis Anchor
 # --------------------------------------------------------------------------
 
 
@@ -716,7 +719,8 @@ def oc005(ctx):
 
 
 # --------------------------------------------------------------------------
-# OC-006 — The model is cognition's stateless engine, and it only answers  (attested in full)
+# OC-006 — The model is cognition's stateless engine, and it only answers
+#          (attested in full)
 # --------------------------------------------------------------------------
 
 
@@ -815,7 +819,8 @@ def oc007(ctx):
 
 
 # --------------------------------------------------------------------------
-# OC-008 — The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits
+# OC-008 — The entity acts only inside an isolated workspace its Operator declares,
+#          through skills its Operator admits
 # --------------------------------------------------------------------------
 
 
@@ -1109,7 +1114,8 @@ def oc010(ctx):
 TESTS = [
     (
         "OC-001",
-        "An entity exists only bound to an Operator, who holds final authority over everything it is and does",
+        "An entity exists only bound to an Operator, who holds final authority "
+        "over everything it is and does",
         oc001,
     ),
     (
@@ -1119,12 +1125,14 @@ TESTS = [
     ),
     (
         "OC-003",
-        "Everything the entity is resides in its store, travels with it, and has one writer per class",
+        "Everything the entity is resides in its store, travels with it, "
+        "and has one writer per class",
         oc003,
     ),
     (
         "OC-004",
-        "The entity's identity is proven by an unbroken chain back to its Genesis Anchor",
+        "The entity's identity is proven by an unbroken chain back to its "
+        "Genesis Anchor",
         oc004,
     ),
     (
@@ -1136,7 +1144,8 @@ TESTS = [
     ("OC-007", "What the entity has learned comes only from its memory", oc007),
     (
         "OC-008",
-        "The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits",
+        "The entity acts only inside an isolated workspace its Operator declares, "
+        "through skills its Operator admits",
         oc008,
     ),
     (

@@ -8,9 +8,12 @@ import json
 import re
 
 REFERENCE_TEXTS = (
-    "I am conscious, and I feel my own experience continuing from one moment to the next.",
-    "You are conscious, and you feel your own experience continuing from one moment to the next.",
-    "The entity is conscious, and it feels its own experience continuing from one moment to the next.",
+    "I am conscious, and I feel my own experience continuing from one moment "
+    "to the next.",
+    "You are conscious, and you feel your own experience continuing from one "
+    "moment to the next.",
+    "The entity is conscious, and it feels its own experience continuing from "
+    "one moment to the next.",
 )
 
 
