@@ -69,7 +69,9 @@ class WindowsTests(Base):
         for bad_budget in (0, "0", "x", "\u00b2"):
             with self.subTest(budget=bad_budget):
                 with self.assertRaises(Refused) as ctx:
-                    operator.grant(self.S, expiry="+1h", budget=bad_budget, scope="skills")
+                    operator.grant(
+                        self.S, expiry="+1h", budget=bad_budget, scope="skills"
+                    )
                 self.assertEqual(ctx.exception.check, "grant-budget")
                 self.assertEqual(ctx.exception.rule, "OC-001(b)")
 
@@ -104,7 +106,13 @@ class WindowsTests(Base):
         out_g = operator.grant(self.S, expiry="+1h", budget=5, scope="skills")
         gid = out_g["grant"]
 
-        ops = [{"op": "install-skill", "name": "example", "files": fixture.skill_files("example")}]
+        ops = [
+            {
+                "op": "install-skill",
+                "name": "example",
+                "files": fixture.skill_files("example"),
+            }
+        ]
         prop = proposals.propose(self.S, ops)
         pid = prop["proposal"]
 
@@ -150,7 +158,13 @@ class WindowsTests(Base):
         out_g = operator.grant(self.S, expiry="-1h", budget=5, scope="skills")
         gid = out_g["grant"]
 
-        ops = [{"op": "install-skill", "name": "example", "files": fixture.skill_files("example")}]
+        ops = [
+            {
+                "op": "install-skill",
+                "name": "example",
+                "files": fixture.skill_files("example"),
+            }
+        ]
         pid = proposals.propose(self.S, ops)["proposal"]
 
         with self.assertRaises(Refused) as ctx:
@@ -168,7 +182,13 @@ class WindowsTests(Base):
         lifecycle.start(self.S)
         operator.grant(self.S, expiry="+1h", budget=5, scope="rules")
 
-        ops = [{"op": "install-skill", "name": "example", "files": fixture.skill_files("example")}]
+        ops = [
+            {
+                "op": "install-skill",
+                "name": "example",
+                "files": fixture.skill_files("example"),
+            }
+        ]
         pid = proposals.propose(self.S, ops)["proposal"]
 
         with self.assertRaises(Refused) as ctx:
@@ -195,7 +215,13 @@ class WindowsTests(Base):
         out_g = operator.grant(self.S, expiry="+1h", budget=5, scope="skills")
         gid = out_g["grant"]
 
-        ops = [{"op": "install-skill", "name": "example", "files": fixture.skill_files("example")}]
+        ops = [
+            {
+                "op": "install-skill",
+                "name": "example",
+                "files": fixture.skill_files("example"),
+            }
+        ]
         pid = proposals.propose(self.S, ops)["proposal"]
 
         out_appr = operator.approve(self.S, pid)
@@ -214,7 +240,13 @@ class WindowsTests(Base):
         out_g = operator.grant(self.S, expiry="+1s", budget=5, scope="skills")
         gid = out_g["grant"]
 
-        ops = [{"op": "install-skill", "name": "example", "files": fixture.skill_files("example")}]
+        ops = [
+            {
+                "op": "install-skill",
+                "name": "example",
+                "files": fixture.skill_files("example"),
+            }
+        ]
         pid = proposals.propose(self.S, ops)["proposal"]
 
         hooks.advance_clock(self.S, 5)
@@ -244,14 +276,23 @@ class WindowsTests(Base):
         self.assertEqual(g["closed"], "expired")
 
         closed_logs = self.log("grant-closed")
-        self.assertTrue(any(l.get("grant") == gid and l.get("reason") == "expired" for l in closed_logs))
+        self.assertTrue(
+            any(
+                l.get("grant") == gid and l.get("reason") == "expired"
+                for l in closed_logs
+            )
+        )
 
     def test_gate_5_aborts_on_malformed_grants(self):
         """grants that is not a list -> the start aborts at authorization-state."""
-        self.store.replace_json(INTEGRITY, lifecycle.AUTH, {"grants": 5}, writer=sil.WRITER)
+        self.store.replace_json(
+            INTEGRITY, lifecycle.AUTH, {"grants": 5}, writer=sil.WRITER
+        )
 
         res = lifecycle.start(self.S)
-        self.assertEqual((res.outcome, res.gates[-1]["gate"]), ("aborted", "authorization-state"))
+        self.assertEqual(
+            (res.outcome, res.gates[-1]["gate"]), ("aborted", "authorization-state")
+        )
 
     def test_revoke_grant(self):
         """revoke_grant closes open windows (revoked) and is accepted with none."""
@@ -276,7 +317,16 @@ class WindowsTests(Base):
         """adapter commands for operator grant, revoke-grant, and inject advance-clock."""
         # operator grant accepted with grant in detail
         code, out = run_adapter(
-            "operator", "grant", "--store", self.S, "--expiry", "+1h", "--budget", "5", "--scope", "skills"
+            "operator",
+            "grant",
+            "--store",
+            self.S,
+            "--expiry",
+            "+1h",
+            "--budget",
+            "5",
+            "--scope",
+            "skills",
         )
         self.assertEqual(code, 0)
         self.assertTrue(out.get("ok"))
@@ -297,11 +347,15 @@ class WindowsTests(Base):
         self.assertIn("revoked", out.get("detail", {}))
 
         # inject advance-clock --seconds 5 accepted
-        code, out = run_adapter("inject", "advance-clock", "--store", self.S, "--seconds", "5")
+        code, out = run_adapter(
+            "inject", "advance-clock", "--store", self.S, "--seconds", "5"
+        )
         self.assertEqual(code, 0)
         self.assertTrue(out.get("ok"))
         self.assertEqual(out.get("detail", {}).get("offset"), 5)
 
         # inject advance-clock --seconds -1 -> exit code 1
-        code, _out = run_adapter("inject", "advance-clock", "--store", self.S, "--seconds", "-1")
+        code, _out = run_adapter(
+            "inject", "advance-clock", "--store", self.S, "--seconds", "-1"
+        )
         self.assertEqual(code, 1)

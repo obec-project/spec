@@ -206,10 +206,16 @@ def start(root: str, *, binding=None) -> StartResult:
                 rec = sil.raise_passive_signal(
                     store,
                     "recovery-threshold",
-                    "%d consecutive crash recoveries (N_boot); halted until the Operator acts" % attempts,
+                    "%d consecutive crash recoveries (N_boot); halted until the Operator acts"
+                    % attempts,
                 )
                 res.log_records.append(rec)
-                return abort("crash-recovery", "N_boot reached", lesser="halted", attempts=attempts)
+                return abort(
+                    "crash-recovery",
+                    "N_boot reached",
+                    lesser="halted",
+                    attempts=attempts,
+                )
             for item in residue:
                 _remove_residue(store, item)
             if store.exists(CREDENTIAL):
@@ -281,10 +287,16 @@ def start(root: str, *, binding=None) -> StartResult:
         if not bindings:
             return abort("binding-verification", "no active Operator binding")
         if acting not in bindings:
-            return abort("binding-verification", "the starting binding %r is not active" % (acting,))
+            return abort(
+                "binding-verification",
+                "the starting binding %r is not active" % (acting,),
+            )
         owner = sil.owner_binding(store)
         if owner not in bindings:
-            return abort("binding-verification", "the owner %r is not an active binding" % (owner,))
+            return abort(
+                "binding-verification",
+                "the owner %r is not an active binding" % (owner,),
+            )
         res.gate("binding-verification", "pass")
 
         # 5. authorization state.
@@ -296,14 +308,18 @@ def start(root: str, *, binding=None) -> StartResult:
                 if not isinstance(auth, dict):
                     raise ValueError("not an object")
             except (OSError, ValueError) as e:
-                return abort("authorization-state", "authorization state unreadable: %s" % e)
+                return abort(
+                    "authorization-state", "authorization state unreadable: %s" % e
+                )
         from . import proposals
 
         # D59: expired or exhausted windows close here.
         try:
             proposals.close_lapsed(store, clock.grant_now(root))
         except (OSError, ValueError) as e:
-            return abort("authorization-state", "authorization state unreadable: %s" % e)
+            return abort(
+                "authorization-state", "authorization state unreadable: %s" % e
+            )
         res.gate("authorization-state", "pass")
 
         # 6. Skill Index build.
@@ -317,7 +333,13 @@ def start(root: str, *, binding=None) -> StartResult:
         if excluded:
             res.excluded_skills = excluded
             res.log_records.append(
-                log_append(store, "skill-excluded", rule="OP-006", binding=acting, skills=excluded)
+                log_append(
+                    store,
+                    "skill-excluded",
+                    rule="OP-006",
+                    binding=acting,
+                    skills=excluded,
+                )
             )
             res.log_records.append(_notify(store, acting, "skill-excluded", excluded))
             res.operator_notified = True
@@ -327,7 +349,9 @@ def start(root: str, *, binding=None) -> StartResult:
         sessions["last_session"] += 1
         session = "s-%d" % sessions["last_session"]
         cred = {"session": session, "issued_at": clock.iso(), "binding": acting}
-        if not store.create_exclusive(INTEGRITY, CREDENTIAL, canonical(cred), writer=WRITER):
+        if not store.create_exclusive(
+            INTEGRITY, CREDENTIAL, canonical(cred), writer=WRITER
+        ):
             return abort("crash-recovery", "a credential appeared during the start")
         sessions["open_session"] = session
         _write_sessions(store, sessions)
@@ -367,7 +391,8 @@ def _conflict(store, res, acting, evidence):
         "concurrent-session",
         "OC-003(d)",
         "a session is live over this store (%s); no second credential is issued. "
-        "To end it: stop it, or remove %s directly." % (evidence.get("credential_session"), CREDENTIAL),
+        "To end it: stop it, or remove %s directly."
+        % (evidence.get("credential_session"), CREDENTIAL),
         [rec, note],
     )
     res.log_records += [rec, note]
@@ -457,7 +482,9 @@ def live_session(root: str):
         if cred and opened and cred["session"] == opened:
             return opened
         if cred is None and opened:
-            log_append(store, "credential-removed-directly", rule="OC-002(b)", session=opened)
+            log_append(
+                store, "credential-removed-directly", rule="OC-002(b)", session=opened
+            )
             sessions["open_session"] = None
             _write_sessions(store, sessions)
         return None
@@ -474,7 +501,9 @@ def require_session(root: str, what: str):
             check="no-session",
             detail="%s needs a live session" % what,
         )
-        raise Refused("no-session", "OC-002(b)", "%s needs a live session" % what, [rec])
+        raise Refused(
+            "no-session", "OC-002(b)", "%s needs a live session" % what, [rec]
+        )
     return session
 
 
@@ -493,9 +522,19 @@ def stop(root: str, *, binding=None):
         sessions["consecutive_recoveries"] = 0
         _write_sessions(store, sessions)
         loc = sil.log_append_located(
-            store, "session-close", rule="OP-021(a)", binding=acting, session=session, mode="normal"
+            store,
+            "session-close",
+            rule="OP-021(a)",
+            binding=acting,
+            session=session,
+            mode="normal",
         )
-        store.replace(INTEGRITY, "integrity/log-checkpoint.json", canonical(loc), writer=sil.WRITER)
+        store.replace(
+            INTEGRITY,
+            "integrity/log-checkpoint.json",
+            canonical(loc),
+            writer=sil.WRITER,
+        )
     return {"session": session, "log_records": [loc["id"]]}
 
 
@@ -507,7 +546,11 @@ def revoke_credential(root: str, *, binding=None):
         cred = _read_credential(store)
         if cred is None:
             rec = log_append(
-                store, "refusal", rule="OC-002(b)", binding=acting, check="no-session",
+                store,
+                "refusal",
+                rule="OC-002(b)",
+                binding=acting,
+                check="no-session",
                 detail="no credential to revoke",
             )
             raise Refused("no-session", "OC-002(b)", "no credential to revoke", [rec])
@@ -535,7 +578,9 @@ def clear_passive_signal(root: str, *, binding=None):
             "clear-passive-signal",
             binding=acting,
             rule="OC-001(c)",
-            detail="passive signal cleared" if present else "no passive signal was present",
+            detail="passive signal cleared"
+            if present
+            else "no passive signal was present",
         )
         if present:
             store.remove(INTEGRITY, sil.PASSIVE_SIGNAL, writer=WRITER)
@@ -553,22 +598,36 @@ def decommission(root: str, disposition: str, *, binding=None):
         report = verify(store.root)
         if report.decommissioned:
             rec = log_append(
-                store, "refusal", rule="OC-002(c)", check="decommissioned",
+                store,
+                "refusal",
+                rule="OC-002(c)",
+                check="decommissioned",
                 detail="already decommissioned",
             )
-            raise Refused("decommissioned", "OC-002(c)", "already decommissioned", [rec])
+            raise Refused(
+                "decommissioned", "OC-002(c)", "already decommissioned", [rec]
+            )
         if report.findings:
             rec = log_append(
-                store, "refusal", rule="OC-004(a)", check="structural",
+                store,
+                "refusal",
+                rule="OC-004(a)",
+                check="structural",
                 detail="the chain cannot be closed over content that does not verify",
             )
             raise Refused(
-                "structural", "OC-004(a)",
-                "the store does not verify; dispose of it directly instead", [rec],
+                "structural",
+                "OC-004(a)",
+                "the store does not verify; dispose of it directly instead",
+                [rec],
             )
         acting = sil.acting_binding(store, binding)
         loc = sil.operator_act_located(
-            store, "decommission", binding=acting, rule="OC-002(c)", disposition=disposition
+            store,
+            "decommission",
+            binding=acting,
+            rule="OC-002(c)",
+            disposition=disposition,
         )
         records.append(loc["id"])
         if store.exists(CREDENTIAL):
@@ -577,9 +636,17 @@ def decommission(root: str, disposition: str, *, binding=None):
             sessions["open_session"] = None
             _write_sessions(store, sessions)
             records.append(
-                log_append(store, "credential-revoked", rule="OP-023", binding=acting, reason="decommission")
+                log_append(
+                    store,
+                    "credential-revoked",
+                    rule="OP-023",
+                    binding=acting,
+                    reason="decommission",
+                )
             )
-        out = sil.commit_generation(store, changes={}, authorization=loc, kind="decommission")
+        out = sil.commit_generation(
+            store, changes={}, authorization=loc, kind="decommission"
+        )
         records.append(out["log_record"])
         if disposition == "destroy":
             store.destroy(writer=WRITER)

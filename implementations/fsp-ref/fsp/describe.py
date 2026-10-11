@@ -32,5 +32,8 @@ def state(root: str):
         )
     return {
         "state": entries,
-        "evidence": [evidence("fsp/store.py", "LAYOUT"), evidence("fsp/store.py", "Store._guard")],
+        "evidence": [
+            evidence("fsp/store.py", "LAYOUT"),
+            evidence("fsp/store.py", "Store._guard"),
+        ],
     }

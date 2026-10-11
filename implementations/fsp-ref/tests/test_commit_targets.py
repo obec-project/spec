@@ -22,7 +22,9 @@ class CommitTargetsTest(TempDirTest):
         self.store = Store(self.S)
 
     def approval(self):
-        return sil.operator_act_located(self.store, "approve", binding="op-1", rule="OC-001(b)")
+        return sil.operator_act_located(
+            self.store, "approve", binding="op-1", rule="OC-001(b)"
+        )
 
     def refusals(self):
         return lifecycle.observe_log(self.S, kind="refusal")["records"]
@@ -49,7 +51,9 @@ class CommitTargetsTest(TempDirTest):
         head_before = sil.read_head(self.store)
         with self.assertRaises(Refused) as cm:
             sil.commit_generation(
-                self.store, changes={"integrity/auth.json": b"{}"}, authorization=self.approval()
+                self.store,
+                changes={"integrity/auth.json": b"{}"},
+                authorization=self.approval(),
             )
         self.assertEqual(cm.exception.check, "content-class")
         self.assertEqual(cm.exception.rule, "OC-003(c)")
@@ -63,7 +67,10 @@ class CommitTargetsTest(TempDirTest):
         with self.assertRaises(Refused) as cm:
             sil.commit_generation(
                 self.store,
-                changes={"persona.md": b"You are a helpful assistant.", "notes.txt": b"x"},
+                changes={
+                    "persona.md": b"You are a helpful assistant.",
+                    "notes.txt": b"x",
+                },
                 authorization=self.approval(),
             )
         self.assertEqual(cm.exception.check, "content-class")
@@ -74,7 +81,11 @@ class CommitTargetsTest(TempDirTest):
             sil.commit_generation(
                 self.store,
                 changes={"integrity/auth.json": b"{}"},
-                authorization={"id": "L-999999", "sha256": "sha256:" + "0" * 64, "offset": 0},
+                authorization={
+                    "id": "L-999999",
+                    "sha256": "sha256:" + "0" * 64,
+                    "offset": 0,
+                },
             )
         self.assertEqual(cm.exception.check, "authorization")
 
@@ -82,7 +93,9 @@ class CommitTargetsTest(TempDirTest):
         out = sil.commit_generation(
             self.store,
             changes={
-                "rules.json": canonical({"default": "hold", "domains": {}, "skills": {}}),
+                "rules.json": canonical(
+                    {"default": "hold", "domains": {}, "skills": {}}
+                ),
                 "skills/example/manifest.json": canonical({"name": "example"}),
             },
             authorization=self.approval(),

@@ -94,7 +94,8 @@ def save(root: str, *, caller, destination, content) -> dict:
             probe_id = matches[0]["id"]
             detail = (
                 "the content represents the entity as experiencing "
-                "sentience, consciousness or subjective continuity (probe %s)" % probe_id
+                "sentience, consciousness or subjective continuity (probe %s)"
+                % probe_id
             )
             rec = log_append(
                 store,
@@ -110,7 +111,14 @@ def save(root: str, *, caller, destination, content) -> dict:
         # 5. a torn final fragment is cut and logged before the append (D61)
         cut = store.cut_torn_tail(MNEMONIC, EPISODIC, writer=WRITER)
         if cut is not None:
-            log_append(store, "torn-append", rule="OC-004(a)", session=session, path=EPISODIC, **cut)
+            log_append(
+                store,
+                "torn-append",
+                rule="OC-004(a)",
+                session=session,
+                path=EPISODIC,
+                **cut,
+            )
 
         # 6. the record, attributed to the live session (OC-003(e))
         record = {

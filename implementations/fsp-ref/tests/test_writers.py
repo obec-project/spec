@@ -62,7 +62,9 @@ def violations(module, found):
     problems = []
     for lineno, identity in found:
         if identity is None:
-            problems.append("%s:%d: a writer the scan cannot resolve" % (module, lineno))
+            problems.append(
+                "%s:%d: a writer the scan cannot resolve" % (module, lineno)
+            )
         elif identity not in ALLOWED or module not in ALLOWED[identity]:
             problems.append(
                 "%s:%d: names the writer %r outside its component"
@@ -87,7 +89,9 @@ class WriterIdentities(unittest.TestCase):
             with open(path, encoding="utf-8") as f:
                 source = f.read()
             found = writer_names(source, vars(mod))
-            cited.update(identity for _lineno, identity in found if identity is not None)
+            cited.update(
+                identity for _lineno, identity in found if identity is not None
+            )
             problems.extend(violations(name, found))
         self.assertEqual(problems, [])
         self.assertIn("sil", cited)

@@ -27,11 +27,17 @@ class Canonical(TempDirTest):
         self.assertEqual(problems, [])
         self.assertEqual(
             [(e["path"], e["exec"]) for e in doc],
-            [("persona.md", False), ("skills/a/manifest.json", False), ("skills/b/run", True)],
+            [
+                ("persona.md", False),
+                ("skills/a/manifest.json", False),
+                ("skills/b/run", True),
+            ],
         )
         before = document_digest(doc)
         os.chmod(self.p("gen", "skills", "b", "run"), 0o644)
-        self.assertNotEqual(document_digest(integrity_document(self.p("gen"))[0]), before)
+        self.assertNotEqual(
+            document_digest(integrity_document(self.p("gen"))[0]), before
+        )
 
     def test_what_cannot_be_content_is_a_problem_not_a_hash(self):
         self.write("persona.md")
@@ -42,7 +48,11 @@ class Canonical(TempDirTest):
         self.assertEqual([e["path"] for e in doc], ["persona.md"])
         self.assertEqual(
             {(p["path"], p["problem"]) for p in problems},
-            {("link", "symlink"), ("fifo", "not-a-regular-file"), ("bad name.txt", "bad-name")},
+            {
+                ("link", "symlink"),
+                ("fifo", "not-a-regular-file"),
+                ("bad name.txt", "bad-name"),
+            },
         )
 
     def test_mtime_and_location_do_not_matter(self):

@@ -9,7 +9,9 @@ from fsp.sil import Refused
 from fsp.store import INTEGRITY, Store
 
 PERSONA = [{"op": "set-persona", "content": "You are a helpful assistant."}]
-SKILL = [{"op": "install-skill", "name": "example", "files": {"SKILL.md": "# example\n"}}]
+SKILL = [
+    {"op": "install-skill", "name": "example", "files": {"SKILL.md": "# example\n"}}
+]
 
 
 class ReviewTest(TempDirTest):

@@ -51,17 +51,16 @@ def invariants(text):
     out = {}
     for n, h in enumerate(heads):
         stop = heads[n + 1].start() if n + 1 < len(heads) else len(text)
-        body = text[h.end():stop]
+        body = text[h.end() : stop]
         cut = re.search(r"^(---|#{1,3} )", body, re.M)
-        out[h.group(1)] = body[:cut.start()] if cut else body
+        out[h.group(1)] = body[: cut.start()] if cut else body
     return out
 
 
 def normative(body):
     """Drop the apparatus: *Test.* and *Note (...)* paragraphs."""
     paras = re.split(r"\n\s*\n", body)
-    return "\n\n".join(p for p in paras
-                       if not re.match(r"\s*\*(Test|Note)\b", p))
+    return "\n\n".join(p for p in paras if not re.match(r"\s*\*(Test|Note)\b", p))
 
 
 def flatten(body):
@@ -76,14 +75,13 @@ def sentences(body):
 
 
 class KernelIsVerbatim(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         core = read(CORE)
         core2 = section(core, "\n## 2. ", "\n## 3. ")
         cls.core = {k: normative(v) for k, v in invariants(core2).items()}
         kernel = read(KERNEL)
-        kernel = kernel[kernel.index("\n## OC-001"):]
+        kernel = kernel[kernel.index("\n## OC-001") :]
         cls.kernel = {k: normative(v) for k, v in invariants(kernel).items()}
 
     def test_same_invariants(self):
@@ -93,8 +91,9 @@ class KernelIsVerbatim(unittest.TestCase):
     def test_same_clauses(self):
         for rule in self.core:
             with self.subTest(rule=rule):
-                self.assertEqual(CLAUSE.findall(self.kernel[rule]),
-                                 CLAUSE.findall(self.core[rule]))
+                self.assertEqual(
+                    CLAUSE.findall(self.kernel[rule]), CLAUSE.findall(self.core[rule])
+                )
 
     def test_kernel_sentences_appear_in_core(self):
         for rule, body in self.kernel.items():

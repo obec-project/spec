@@ -45,9 +45,7 @@ class LogDamageTest(TempDirTest):
         complete = self.lines()[-1]
         with open(self.log_path(), "ab") as f:
             f.write(b'{"torn":')
-        self.assertEqual(
-            self.store.read_last_line("integrity/log.jsonl"), complete
-        )
+        self.assertEqual(self.store.read_last_line("integrity/log.jsonl"), complete)
         self.assertIsNone(self.store.read_last_line("integrity/ledger.jsonl"))
 
     def test_records_chain_by_the_bytes_of_the_line_before(self):

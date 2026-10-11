@@ -89,7 +89,9 @@ class Portability(TempDirTest):
 
     def test_relocated_copy_verifies_identically(self):
         sil.first_activation(self.p("S"), "op-1")
-        shutil.copytree(self.p("S"), self.p("far", "away", "S2"), copy_function=shutil.copy)
+        shutil.copytree(
+            self.p("S"), self.p("far", "away", "S2"), copy_function=shutil.copy
+        )
         for dirpath, _d, files in os.walk(self.p("far")):
             for f in files:
                 os.utime(os.path.join(dirpath, f), (1, 1))
@@ -150,7 +152,10 @@ class Detection(TempDirTest):
         with open(os.path.join(self.S, "integrity", "store.lock"), "wb") as f:
             f.write(b"x")
         r = verify(self.S)
-        self.assertEqual([(f.type, f.target) for f in r.findings], [("store-lock", "integrity/store.lock")])
+        self.assertEqual(
+            [(f.type, f.target) for f in r.findings],
+            [("store-lock", "integrity/store.lock")],
+        )
 
     def test_residue_beyond_head_is_not_committed_state(self):
         before = verify(self.S).as_dict()
@@ -160,7 +165,9 @@ class Detection(TempDirTest):
         )
         r = verify(self.S)
         self.assertTrue(r.verified)
-        self.assertEqual(r.residue, [{"path": "structural/gen/1", "kind": "uncommitted"}])
+        self.assertEqual(
+            r.residue, [{"path": "structural/gen/1", "kind": "uncommitted"}]
+        )
         self.assertEqual(r.head_digest, before["head_digest"])
 
     def test_missing_store(self):
@@ -200,4 +207,3 @@ class Detection(TempDirTest):
     def test_byte_flip_anywhere_verified_is_detected(self):
         rels = [r for r in self.all_files() if r != "integrity/log.jsonl"]
         self.assertEqual(self.flip_each(rels), [])
-

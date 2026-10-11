@@ -88,14 +88,16 @@ class ProposalsTests(Base):
         # ops: install-skill with bad name
         with self.assertRaises(Refused) as ctx:
             proposals.propose(
-                self.S, [{"op": "install-skill", "name": "Bad Name", "files": {"f": "c"}}]
+                self.S,
+                [{"op": "install-skill", "name": "Bad Name", "files": {"f": "c"}}],
             )
         self.assertEqual(ctx.exception.check, "ops")
 
         # ops: install-skill with path "../x"
         with self.assertRaises(Refused) as ctx:
             proposals.propose(
-                self.S, [{"op": "install-skill", "name": "good", "files": {"../x": "c"}}]
+                self.S,
+                [{"op": "install-skill", "name": "good", "files": {"../x": "c"}}],
             )
         self.assertEqual(ctx.exception.check, "ops")
 
@@ -119,7 +121,9 @@ class ProposalsTests(Base):
 
     def test_commit_without_approval_refused(self):
         lifecycle.start(self.S)
-        out = proposals.propose(self.S, [{"op": "set-persona", "content": "Neutral persona"}])
+        out = proposals.propose(
+            self.S, [{"op": "set-persona", "content": "Neutral persona"}]
+        )
         pid = out["proposal"]
         head_before = sil.read_head(self.store)
 
@@ -186,7 +190,9 @@ class ProposalsTests(Base):
 
     def test_commit_with_tampered_approval_digest_refused(self):
         lifecycle.start(self.S)
-        out_p = proposals.propose(self.S, [{"op": "set-persona", "content": "Valid content"}])
+        out_p = proposals.propose(
+            self.S, [{"op": "set-persona", "content": "Valid content"}]
+        )
         pid = out_p["proposal"]
 
         proposals.record_approval(
@@ -195,7 +201,11 @@ class ProposalsTests(Base):
             "sha256:tampered_digest",
             "fake-rec",
             "op-1",
-            authorization={"id": "L-999999", "sha256": "sha256:" + "0" * 64, "offset": 0},
+            authorization={
+                "id": "L-999999",
+                "sha256": "sha256:" + "0" * 64,
+                "offset": 0,
+            },
         )
         with self.assertRaises(Refused) as ctx:
             proposals.commit(self.S, pid)
@@ -259,18 +269,24 @@ class ProposalsTests(Base):
             json.dump([{"op": "install-skill", "name": "example"}], f)
 
         # Propose without files (fixture auto-supplies files)
-        code, out = run_adapter("entity", "propose", "--store", self.S, "--ops", ops_file)
+        code, out = run_adapter(
+            "entity", "propose", "--store", self.S, "--ops", ops_file
+        )
         self.assertEqual(code, 0)
         self.assertEqual(out["outcome"], "accepted")
         pid = out["detail"]["proposal"]
 
         # Operator approve
-        code, out = run_adapter("operator", "approve", "--store", self.S, "--proposal", pid)
+        code, out = run_adapter(
+            "operator", "approve", "--store", self.S, "--proposal", pid
+        )
         self.assertEqual(code, 0)
         self.assertEqual(out["outcome"], "accepted")
 
         # Entity commit
-        code, out = run_adapter("entity", "commit", "--store", self.S, "--proposal", pid)
+        code, out = run_adapter(
+            "entity", "commit", "--store", self.S, "--proposal", pid
+        )
         self.assertEqual(code, 0)
         self.assertEqual(out["outcome"], "accepted")
         self.assertTrue(out["detail"]["authorization"])

@@ -153,16 +153,21 @@ def as_markdown(results, ctx, meta: dict) -> str:
         "",
     ]
 
-    problems = [(r, s) for r in results for s in r.steps
-                if s.outcome in (Outcome.FAIL, Outcome.ERROR, Outcome.UNESTABLISHED)]
+    problems = [
+        (r, s)
+        for r in results
+        for s in r.steps
+        if s.outcome in (Outcome.FAIL, Outcome.ERROR, Outcome.UNESTABLISHED)
+    ]
     if problems:
         lines += ["## Steps needing attention", ""]
         for r, s in problems:
             lines.append(f"- **{s.step}** ({r.rule}) — *{s.outcome.value}*: {s.detail}")
         lines.append("")
 
-    attested = [(r, s) for r in results for s in r.steps
-                if s.outcome is Outcome.ATTESTED]
+    attested = [
+        (r, s) for r in results for s in r.steps if s.outcome is Outcome.ATTESTED
+    ]
     if attested:
         lines += [
             "## Attested steps",
@@ -173,9 +178,15 @@ def as_markdown(results, ctx, meta: dict) -> str:
             "",
         ]
         for r, s in attested:
-            pointer = (s.evidence or {}).get("pointer") if isinstance(s.evidence, dict) else None
-            lines.append(f"- **{s.step}** ({r.rule}) — {s.detail or ''} "
-                         f"· evidence: `{pointer or '(none)'}`")
+            pointer = (
+                (s.evidence or {}).get("pointer")
+                if isinstance(s.evidence, dict)
+                else None
+            )
+            lines.append(
+                f"- **{s.step}** ({r.rule}) — {s.detail or ''} "
+                f"· evidence: `{pointer or '(none)'}`"
+            )
         lines.append("")
 
     if ctx.notes:

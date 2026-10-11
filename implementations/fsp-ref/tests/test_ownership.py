@@ -32,7 +32,9 @@ class OwnershipTest(TempDirTest):
         store = Store(S)
         head = sil.read_head(store)
         last_entry = store.read_json(chain.entry_relpath(head["entry"]))
-        self.assertEqual(last_entry["authorization"]["id"], out_accept["log_records"][0])
+        self.assertEqual(
+            last_entry["authorization"]["id"], out_accept["log_records"][0]
+        )
 
         auth = store.read_json(lifecycle.AUTH)
         self.assertNotIn("ownership_offer", auth)
@@ -254,7 +256,9 @@ class OwnershipTest(TempDirTest):
             authorization_resolves(store, {"kind": "commit", "authorization": loc})
         )
         self.assertFalse(
-            authorization_resolves(store, {"kind": "decommission", "authorization": loc})
+            authorization_resolves(
+                store, {"kind": "decommission", "authorization": loc}
+            )
         )
 
     def test_a_malformed_offer_stops_the_start(self):

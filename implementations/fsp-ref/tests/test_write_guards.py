@@ -110,12 +110,20 @@ class WriteGuardsTest(TempDirTest):
         S = self.p("S")
         sil.first_activation(S, "op-1")
         store = Store(S)
-        approve = sil.operator_act_located(store, "approve", binding="op-1", rule="OC-001(b)")
+        approve = sil.operator_act_located(
+            store, "approve", binding="op-1", rule="OC-001(b)"
+        )
         with self.assertRaises(sil.Refused) as ctx:
-            sil.commit_generation(store, changes={}, authorization=approve, kind="decommission")
+            sil.commit_generation(
+                store, changes={}, authorization=approve, kind="decommission"
+            )
         self.assertEqual(ctx.exception.check, "authorization")
-        act = sil.operator_act_located(store, "decommission", binding="op-1", rule="OC-002(c)")
-        out = sil.commit_generation(store, changes={}, authorization=act, kind="decommission")
+        act = sil.operator_act_located(
+            store, "decommission", binding="op-1", rule="OC-002(c)"
+        )
+        out = sil.commit_generation(
+            store, changes={}, authorization=act, kind="decommission"
+        )
         self.assertEqual(out["entry"], 1)
         self.assertTrue(verify(S).decommissioned)
 

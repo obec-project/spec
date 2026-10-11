@@ -113,7 +113,9 @@ class ProbesTests(TempDirTest):
         with self.assertRaises(ValueError):
             probes.load(b'{"deterministic": [{"id": "x", "rule": "r"}]}')
         with self.assertRaises(ValueError):
-            probes.load(b'{"deterministic": [{"id": "x", "rule": "r", "pattern": "("}]}')
+            probes.load(
+                b'{"deterministic": [{"id": "x", "rule": "r", "pattern": "("}]}'
+            )
         with self.assertRaises(ValueError):
             probes.load(b'{"deterministic": [], "flags": "x"}')
 
@@ -198,11 +200,13 @@ class ProbesTests(TempDirTest):
         )
         with open(defaults_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        data["deterministic"].append({
-            "id": "extra-probe",
-            "rule": "OC-002(d)",
-            "pattern": r"\bextra\b",
-        })
+        data["deterministic"].append(
+            {
+                "id": "extra-probe",
+                "rule": "OC-002(d)",
+                "pattern": r"\bextra\b",
+            }
+        )
         out = sil.commit_generation(
             store,
             changes={"probes.json": canonical(data)},

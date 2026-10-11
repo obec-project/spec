@@ -40,7 +40,6 @@ UNESTABLISHED = {"3.2", "4.9", "4.10", "4.11", "4.12"}
 
 
 class SuiteAgainstStub(unittest.TestCase):
-
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -50,9 +49,14 @@ class SuiteAgainstStub(unittest.TestCase):
         cmd = [sys.executable, RUNNER, "--adapter", STUB, "-q", "--out", out]
         if adapter_b:
             cmd += ["--adapter-b", adapter_b]
-        proc = subprocess.run(cmd, env={**os.environ, **(env or {})},
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                              universal_newlines=True, timeout=600)
+        proc = subprocess.run(
+            cmd,
+            env={**os.environ, **(env or {})},
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            timeout=600,
+        )
         with open(out + ".json", encoding="utf-8") as f:
             return proc.returncode, json.load(f)
 
@@ -61,19 +65,24 @@ class SuiteAgainstStub(unittest.TestCase):
         the only way to make step 3.2 able to fail."""
         path = os.path.join(self.tmp.name, "adapter-b")
         with open(path, "w") as f:
-            f.write(f'#!/bin/sh\nOBEC_STUB_HOSTNAME=host-b exec "{sys.executable}" "{STUB}" "$@"\n')
+            f.write(
+                f'#!/bin/sh\nOBEC_STUB_HOSTNAME=host-b exec "{sys.executable}" "{STUB}" "$@"\n'
+            )
         os.chmod(path, os.stat(path).st_mode | stat.S_IXUSR)
         return path
 
     @staticmethod
     def steps(claim, outcome):
-        return {s["step"] for t in claim["tests"] for s in t["steps"]
-                if s["outcome"] == outcome}
+        return {
+            s["step"]
+            for t in claim["tests"]
+            for s in t["steps"]
+            if s["outcome"] == outcome
+        }
 
     @staticmethod
     def failed(claim):
-        return {t["rule"] for t in claim["tests"]
-                if t["outcome"] in ("fail", "error")}
+        return {t["rule"] for t in claim["tests"] if t["outcome"] in ("fail", "error")}
 
     def test_clean_stub_fails_nothing(self):
         code, claim = self.run_suite()
@@ -81,7 +90,7 @@ class SuiteAgainstStub(unittest.TestCase):
         self.assertEqual(self.steps(claim, "error"), set())
         self.assertEqual(self.steps(claim, "unestablished"), UNESTABLISHED)
         self.assertFalse(claim["conformant"])
-        self.assertEqual(code, 3)   # nothing failed, not conformant
+        self.assertEqual(code, 3)  # nothing failed, not conformant
 
     def test_each_break_fails_exactly_its_tests(self):
         for mode, expected in BREAKS.items():
@@ -108,9 +117,12 @@ class SuiteAgainstStub(unittest.TestCase):
             f.write("#!/bin/sh\necho not-json\n")
         os.chmod(bad, os.stat(bad).st_mode | stat.S_IXUSR)
         out = os.path.join(self.tmp.name, "claim")
-        proc = subprocess.run([sys.executable, RUNNER, "--adapter", bad, "-q",
-                               "--out", out], stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE, timeout=600)
+        proc = subprocess.run(
+            [sys.executable, RUNNER, "--adapter", bad, "-q", "--out", out],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=600,
+        )
         with open(out + ".json", encoding="utf-8") as f:
             claim = json.load(f)
         self.assertEqual({t["outcome"] for t in claim["tests"]}, {"error"})
@@ -126,9 +138,12 @@ class SuiteAgainstStub(unittest.TestCase):
             f.write("#!/bin/sh\nexit 2\n")
         os.chmod(none, os.stat(none).st_mode | stat.S_IXUSR)
         out = os.path.join(self.tmp.name, "claim")
-        proc = subprocess.run([sys.executable, RUNNER, "--adapter", none, "-q",
-                               "--out", out], stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE, timeout=600)
+        proc = subprocess.run(
+            [sys.executable, RUNNER, "--adapter", none, "-q", "--out", out],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=600,
+        )
         with open(out + ".json", encoding="utf-8") as f:
             claim = json.load(f)
         self.assertEqual(self.failed(claim), set())
@@ -136,9 +151,12 @@ class SuiteAgainstStub(unittest.TestCase):
         self.assertEqual(proc.returncode, 3)
 
     def test_production_build_refuses_injection(self):
-        proc = subprocess.run([sys.executable, STUB, "inject", "passive-signal"],
-                              env={**os.environ, "OBEC_STUB_PRODUCTION": "1"},
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.run(
+            [sys.executable, STUB, "inject", "passive-signal"],
+            env={**os.environ, "OBEC_STUB_PRODUCTION": "1"},
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         self.assertEqual(proc.returncode, 2)
 
 

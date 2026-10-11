@@ -31,7 +31,12 @@ SWEEP_BLOCK = 1 << 20
 
 
 def _default_state():
-    return {"session": None, "last_check": None, "acts_since": 0, "sweep": {"log": None}}
+    return {
+        "session": None,
+        "last_check": None,
+        "acts_since": 0,
+        "sweep": {"log": None},
+    }
 
 
 def _read_state(store: Store):
@@ -61,7 +66,9 @@ def _parse(text):
     if not isinstance(text, str):
         return None
     try:
-        return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc
+        )
     except ValueError:
         return None
 
@@ -123,7 +130,11 @@ def _sweep(store: Store, session, state):
         )
     if finding is not None:
         again, _, _ = sweep_log(store, position, SWEEP_BLOCK)
-        if again is None or (again.type, again.target, again.evidence.get("offset")) != (
+        if again is None or (
+            again.type,
+            again.target,
+            again.evidence.get("offset"),
+        ) != (
             finding.type,
             finding.target,
             finding.evidence.get("offset"),
@@ -185,7 +196,9 @@ def _correct_skills(store: Store, report, session, findings):
         return "nominal"
     for f in findings:
         if _skill_of(f) in to_prune:
-            log_append(store, "anomaly", rule="OP-003(b)", session=session, **f.as_dict())
+            log_append(
+                store, "anomaly", rule="OP-003(b)", session=session, **f.as_dict()
+            )
     for attempt in range(1, config.value(store, "n_corrections") + 1):
         index, excluded = lifecycle._build_index(store, report)
         store.replace_json(INTEGRITY, lifecycle.INDEX, index, writer=sil.WRITER)
@@ -200,7 +213,9 @@ def _correct_skills(store: Store, report, session, findings):
         )
         remaining = {s["name"] for s in store.read_json(lifecycle.INDEX)["skills"]}
         if not (to_prune & remaining):
-            log_append(store, "skill-excluded", rule="OP-006", session=session, skills=excluded)
+            log_append(
+                store, "skill-excluded", rule="OP-006", session=session, skills=excluded
+            )
             cred = lifecycle._read_credential(store)
             binding = cred.get("binding") if isinstance(cred, dict) else None
             lifecycle._notify(store, binding, "skill-excluded", excluded)
@@ -242,7 +257,9 @@ def _critical(store: Store, session, findings):
     except (OSError, ValueError):
         pass
     records.append(lifecycle._notify(store, binding, "vital-critical", detail))
-    records.append(sil.raise_passive_signal(store, "vital-critical", detail, session=session))
+    records.append(
+        sil.raise_passive_signal(store, "vital-critical", detail, session=session)
+    )
     raise Refused("vital-critical", "OP-003(b)", detail, records)
 
 

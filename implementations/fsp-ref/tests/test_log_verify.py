@@ -47,7 +47,9 @@ class LogVerificationTests(TempDirTest):
         blocking = r.blocking_findings()
         self.assertEqual(len(blocking), 1)
         self.assertEqual(blocking[0].type, "chain-entry")
-        self.assertEqual(blocking[0].evidence.get("problem"), "authorization-unresolved")
+        self.assertEqual(
+            blocking[0].evidence.get("problem"), "authorization-unresolved"
+        )
         res = lifecycle.start(root)
         self.assertNotEqual(res.outcome, "accepted")
         self.assertFalse(Store(root).exists(lifecycle.CREDENTIAL))
@@ -81,7 +83,9 @@ class LogVerificationTests(TempDirTest):
             at="1970-01-01T00:00:00Z",
             kind="commit",
         )
-        store.replace(INTEGRITY, chain.entry_relpath(n), canonical(body), writer=sil.WRITER)
+        store.replace(
+            INTEGRITY, chain.entry_relpath(n), canonical(body), writer=sil.WRITER
+        )
         os.link(
             os.path.join(root, chain.document_relpath(r.head_entry)),
             os.path.join(root, chain.document_relpath(n)),
@@ -90,13 +94,20 @@ class LogVerificationTests(TempDirTest):
             os.path.join(root, chain.gen_relpath(r.head_entry)),
             os.path.join(root, chain.gen_relpath(n)),
         )
-        new_head = chain.head(entry=n, entry_id=chain.entry_id(body), baseline=r.head_digest)
+        new_head = chain.head(
+            entry=n, entry_id=chain.entry_id(body), baseline=r.head_digest
+        )
         store.replace(INTEGRITY, chain.HEAD, canonical(new_head), writer=sil.WRITER)
 
         r2 = verify(root)
         self.assertFalse(r2.chain_intact)
         blocking = [f for f in r2.blocking_findings() if f.type == "chain-entry"]
-        self.assertTrue(any(f.evidence.get("problem") == "authorization-unresolved" for f in blocking))
+        self.assertTrue(
+            any(
+                f.evidence.get("problem") == "authorization-unresolved"
+                for f in blocking
+            )
+        )
 
     def test_checkpoint_after_start_and_stop(self):
         # start + stop leaves a checkpoint equal to the session-close locator.
@@ -194,7 +205,9 @@ class LogVerificationTests(TempDirTest):
         self.assertEqual(r.log_full_reason, "checkpoint-missing")
         lifecycle.start(root)
         records, _ = store.read_jsonl("integrity/log.jsonl")
-        verif_records = [rec for rec in records if rec.get("kind") == "log-verification"]
+        verif_records = [
+            rec for rec in records if rec.get("kind") == "log-verification"
+        ]
         self.assertTrue(verif_records)
         self.assertEqual(verif_records[-1]["mode"], "full")
         self.assertEqual(verif_records[-1]["reason"], "checkpoint-missing")
@@ -212,7 +225,9 @@ class LogVerificationTests(TempDirTest):
         self.assertEqual(r2.log_full_reason, "checkpoint-unreadable")
         lifecycle.start(root)
         records2, _ = store.read_jsonl("integrity/log.jsonl")
-        verif_records2 = [rec for rec in records2 if rec.get("kind") == "log-verification"]
+        verif_records2 = [
+            rec for rec in records2 if rec.get("kind") == "log-verification"
+        ]
         self.assertTrue(verif_records2)
         self.assertEqual(verif_records2[-1]["mode"], "full")
         self.assertEqual(verif_records2[-1]["reason"], "checkpoint-unreadable")
@@ -227,7 +242,12 @@ class LogVerificationTests(TempDirTest):
         store = Store(root)
         chk = store.read_json("integrity/log-checkpoint.json")
         chk["offset"] = 0
-        store.replace(INTEGRITY, "integrity/log-checkpoint.json", canonical(chk), writer=sil.WRITER)
+        store.replace(
+            INTEGRITY,
+            "integrity/log-checkpoint.json",
+            canonical(chk),
+            writer=sil.WRITER,
+        )
 
         r = verify(root)
         self.assertFalse(r.chain_intact)

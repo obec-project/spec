@@ -68,7 +68,9 @@ def binding_add(root: str, target: str, *, binding=None):
                 check="binding-id",
                 detail="invalid binding id %r" % (target,),
             )
-            raise Refused("binding-id", "OC-001(a)", "invalid binding id %r" % (target,), [rec])
+            raise Refused(
+                "binding-id", "OC-001(a)", "invalid binding id %r" % (target,), [rec]
+            )
         owner = sil.owner_binding(store)
         if acting != owner:
             rec = log_append(
@@ -111,7 +113,9 @@ def binding_add(root: str, target: str, *, binding=None):
                 check="decommissioned",
                 detail="already decommissioned",
             )
-            raise Refused("decommissioned", "OC-002(c)", "already decommissioned", [rec])
+            raise Refused(
+                "decommissioned", "OC-002(c)", "already decommissioned", [rec]
+            )
         if report.findings:
             rec = log_append(
                 store,
@@ -181,7 +185,9 @@ def binding_remove(root: str, target: str, *, binding=None):
                 check="binding-id",
                 detail="invalid binding id %r" % (target,),
             )
-            raise Refused("binding-id", "OC-001(a)", "invalid binding id %r" % (target,), [rec])
+            raise Refused(
+                "binding-id", "OC-001(a)", "invalid binding id %r" % (target,), [rec]
+            )
         active = sil.active_bindings(store) or []
         owner = sil.owner_binding(store)
         if target not in active:
@@ -254,7 +260,9 @@ def binding_remove(root: str, target: str, *, binding=None):
                 check="decommissioned",
                 detail="already decommissioned",
             )
-            raise Refused("decommissioned", "OC-002(c)", "already decommissioned", [rec])
+            raise Refused(
+                "decommissioned", "OC-002(c)", "already decommissioned", [rec]
+            )
         if report.findings:
             rec = log_append(
                 store,
@@ -328,7 +336,9 @@ def ownership_offer(root: str, target: str, *, binding=None):
                 check="binding-id",
                 detail="invalid binding id %r" % (target,),
             )
-            raise Refused("binding-id", "OC-001(a)", "invalid binding id %r" % (target,), [rec])
+            raise Refused(
+                "binding-id", "OC-001(a)", "invalid binding id %r" % (target,), [rec]
+            )
         owner = sil.owner_binding(store)
         if acting != owner:
             rec = log_append(
@@ -339,7 +349,9 @@ def ownership_offer(root: str, target: str, *, binding=None):
                 check="owner-only",
                 detail="only the owner can offer ownership",
             )
-            raise Refused("owner-only", "OC-001(a)", "only the owner can offer ownership", [rec])
+            raise Refused(
+                "owner-only", "OC-001(a)", "only the owner can offer ownership", [rec]
+            )
         if target == owner:
             rec = log_append(
                 store,
@@ -350,7 +362,10 @@ def ownership_offer(root: str, target: str, *, binding=None):
                 detail="cannot offer ownership to oneself",
             )
             raise Refused(
-                "ownership-self", "OC-001(a)", "cannot offer ownership to oneself", [rec]
+                "ownership-self",
+                "OC-001(a)",
+                "cannot offer ownership to oneself",
+                [rec],
             )
         active = sil.active_bindings(store) or []
         if target not in active:
@@ -378,7 +393,9 @@ def ownership_offer(root: str, target: str, *, binding=None):
                 check="decommissioned",
                 detail="already decommissioned",
             )
-            raise Refused("decommissioned", "OC-002(c)", "already decommissioned", [rec])
+            raise Refused(
+                "decommissioned", "OC-002(c)", "already decommissioned", [rec]
+            )
         if report.findings:
             rec = log_append(
                 store,
@@ -472,7 +489,9 @@ def ownership_accept(root: str, *, binding=None):
                 check="decommissioned",
                 detail="already decommissioned",
             )
-            raise Refused("decommissioned", "OC-002(c)", "already decommissioned", [rec])
+            raise Refused(
+                "decommissioned", "OC-002(c)", "already decommissioned", [rec]
+            )
         if report.findings:
             rec = log_append(
                 store,
@@ -484,7 +503,11 @@ def ownership_accept(root: str, *, binding=None):
             )
             raise Refused("structural", "OC-004(a)", "the store does not verify", [rec])
         loc = sil.operator_act_located(
-            store, "ownership-accept", binding=acting, rule="OC-001(a)", offer=offer["record"]
+            store,
+            "ownership-accept",
+            binding=acting,
+            rule="OC-001(a)",
+            offer=offer["record"],
         )
         active = sil.active_bindings(store) or []
         new_content = {"bindings": [{"id": b} for b in active], "owner": acting}
@@ -495,7 +518,11 @@ def ownership_accept(root: str, *, binding=None):
         )
         auth.pop("ownership_offer", None)
         proposals.write_auth(store, auth)
-        return {"entry": out["entry"], "owner": acting, "log_records": [loc["id"], out["log_record"]]}
+        return {
+            "entry": out["entry"],
+            "owner": acting,
+            "log_records": [loc["id"], out["log_record"]],
+        }
 
 
 def ownership_withdraw(root: str, *, binding=None):
@@ -546,7 +573,10 @@ def ownership_withdraw(root: str, *, binding=None):
                 detail="only the owner can withdraw an ownership offer",
             )
             raise Refused(
-                "owner-only", "OC-001(a)", "only the owner can withdraw an ownership offer", [rec]
+                "owner-only",
+                "OC-001(a)",
+                "only the owner can withdraw an ownership offer",
+                [rec],
             )
         offer = auth.get("ownership_offer")
         if not offer:
@@ -562,7 +592,11 @@ def ownership_withdraw(root: str, *, binding=None):
                 "no-offer", "OC-001(a)", "there is no pending ownership offer", [rec]
             )
         loc = sil.operator_act_located(
-            store, "ownership-withdraw", binding=acting, rule="OC-001(a)", offer=offer["record"]
+            store,
+            "ownership-withdraw",
+            binding=acting,
+            rule="OC-001(a)",
+            offer=offer["record"],
         )
         auth.pop("ownership_offer", None)
         proposals.write_auth(store, auth)
@@ -642,9 +676,16 @@ def approve(root: str, proposal_id: str, *, binding=None):
             )
         digest = prop["digest"]
         loc = sil.operator_act_located(
-            store, "approve", binding=acting, rule="OC-001(b)", proposal=proposal_id, digest=digest
+            store,
+            "approve",
+            binding=acting,
+            rule="OC-001(b)",
+            proposal=proposal_id,
+            digest=digest,
         )
-        proposals.record_approval(store, proposal_id, digest, loc["id"], acting, authorization=loc)
+        proposals.record_approval(
+            store, proposal_id, digest, loc["id"], acting, authorization=loc
+        )
         return {"log_records": [loc["id"]]}
 
 
@@ -654,9 +695,15 @@ def grant(root: str, *, expiry=None, budget=None, scope=None, binding=None):
     with store.write_lock():
         acting = sil.acting_binding(store, binding)
 
-        for axis_name, axis_val in (("expiry", expiry), ("budget", budget), ("scope", scope)):
+        for axis_name, axis_val in (
+            ("expiry", expiry),
+            ("budget", budget),
+            ("scope", scope),
+        ):
             if axis_val is None or axis_val == "":
-                detail = "a window is bounded on all three axes: --%s is missing" % (axis_name,)
+                detail = "a window is bounded on all three axes: --%s is missing" % (
+                    axis_name,
+                )
                 rec = log_append(
                     store,
                     "refusal",

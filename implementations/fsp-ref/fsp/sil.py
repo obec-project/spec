@@ -180,7 +180,9 @@ def initial_structure(*, name: str, operator: str, persona: bytes = None):
     }
 
 
-def first_activation(root: str, operator: str, *, name="entity", persona=None, model=None):
+def first_activation(
+    root: str, operator: str, *, name="entity", persona=None, model=None
+):
     """First Activation Protocol (D29, OP-017).
 
     Runs exactly once. Writes the founding Operator binding, the initial
@@ -191,7 +193,9 @@ def first_activation(root: str, operator: str, *, name="entity", persona=None, m
     issued here: the first one comes from a start that runs every gate.
     """
     if not BINDING_ID.match(operator or ""):
-        raise Refused("binding", "OC-001(a)", "invalid Operator binding id %r" % operator)
+        raise Refused(
+            "binding", "OC-001(a)", "invalid Operator binding id %r" % operator
+        )
     store = scaffold_store(root, model=model)
     with store.write_lock():
         if store.exists(chain.HEAD):
@@ -212,12 +216,16 @@ def first_activation(root: str, operator: str, *, name="entity", persona=None, m
         marker = store.read_json(MARKER)
 
         gen = chain.gen_relpath(0)
-        for rel, data in sorted(initial_structure(name=name, operator=operator, persona=persona).items()):
+        for rel, data in sorted(
+            initial_structure(name=name, operator=operator, persona=persona).items()
+        ):
             store.replace(STRUCTURAL, gen + "/" + rel, data, writer=COMMITTER)
 
         document, problems = integrity_document(store.path(gen))
         assert not problems, problems
-        store.replace(INTEGRITY, chain.document_relpath(0), canonical(document), writer=WRITER)
+        store.replace(
+            INTEGRITY, chain.document_relpath(0), canonical(document), writer=WRITER
+        )
         state_digest = document_digest(document)
 
         at = clock.iso()
@@ -230,7 +238,9 @@ def first_activation(root: str, operator: str, *, name="entity", persona=None, m
             at=at,
             implementation="fsp-ref " + __version__,
         )
-        store.replace(INTEGRITY, chain.entry_relpath(0), canonical(anchor), writer=WRITER)
+        store.replace(
+            INTEGRITY, chain.entry_relpath(0), canonical(anchor), writer=WRITER
+        )
         genesis_id = chain.entry_id(anchor)
 
         records = [
@@ -336,7 +346,9 @@ def acting_binding(store: Store, requested=None):
             check="binding",
             detail="Operator act as %r, which is not an active binding" % (binding,),
         )
-        raise Refused("binding", "OC-001(a)", "%r is not an active binding" % (binding,), [rec])
+        raise Refused(
+            "binding", "OC-001(a)", "%r is not an active binding" % (binding,), [rec]
+        )
     return binding
 
 
@@ -350,7 +362,9 @@ def operator_act_located(
 
 def operator_act(store: Store, act, *, binding, rule="OC-001(a)", **payload):
     """Log an Operator act, attributed to its binding (OC-001(a))."""
-    return log_append(store, "operator-act", rule=rule, binding=binding, act=act, **payload)
+    return log_append(
+        store, "operator-act", rule=rule, binding=binding, act=act, **payload
+    )
 
 
 def set_operational(store: Store, key, value):
@@ -413,7 +427,9 @@ def _commit_stage(stage: str) -> None:
     hooks.commit_stage(stage)
 
 
-def commit_generation(store: Store, *, changes, authorization, kind="commit", session=None):
+def commit_generation(
+    store: Store, *, changes, authorization, kind="commit", session=None
+):
     """Write generation ``n+1`` and extend the chain. ``changes`` maps a
     structural path to its new bytes, or to None to remove it. The single
     atomic point is the rename of ``HEAD``; everything before it is residue
@@ -425,7 +441,9 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
     (D68)."""
     with store.write_lock():
         head = read_head(store)
-        if not authorization_resolves(store, {"kind": kind, "authorization": authorization}):
+        if not authorization_resolves(
+            store, {"kind": kind, "authorization": authorization}
+        ):
             rec = log_append(
                 store,
                 "refusal",
@@ -442,7 +460,9 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
             )
         undeclared = sorted(rel for rel in changes if not structural_target(rel))
         if undeclared:
-            detail = "not structural data the store declares: %s" % ", ".join(undeclared)
+            detail = "not structural data the store declares: %s" % ", ".join(
+                undeclared
+            )
             rec = log_append(
                 store,
                 "refusal",
@@ -468,7 +488,13 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
             data = changes.get(rel)
             if data is None:
                 data = store.read_bytes(cur + "/" + rel)
-            store.replace(STRUCTURAL, nxt + "/" + rel, data, writer=COMMITTER, executable=executable)
+            store.replace(
+                STRUCTURAL,
+                nxt + "/" + rel,
+                data,
+                writer=COMMITTER,
+                executable=executable,
+            )
         for rel, data in sorted(changes.items()):
             if data is not None and rel not in files:
                 store.replace(STRUCTURAL, nxt + "/" + rel, data, writer=COMMITTER)
@@ -498,7 +524,12 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
                     check="probe-set",
                     detail="the committed probe set cannot be read",
                 )
-                raise Refused("probe-set", "OC-002(d)", "the committed probe set cannot be read", [rec])
+                raise Refused(
+                    "probe-set",
+                    "OC-002(d)",
+                    "the committed probe set cannot be read",
+                    [rec],
+                )
 
             if candidate is not None:
                 try:
@@ -563,11 +594,17 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
         new_doc, problems = integrity_document(store.path(nxt))
         if problems:
             store.remove(STRUCTURAL, nxt, writer=COMMITTER)
-            raise Refused("structural", "OC-004(a)", "staged generation has problems: %r" % problems)
+            raise Refused(
+                "structural",
+                "OC-004(a)",
+                "staged generation has problems: %r" % problems,
+            )
         state_digest = document_digest(new_doc)
 
         # 3. integrity document and chain entry
-        store.replace(INTEGRITY, chain.document_relpath(n + 1), canonical(new_doc), writer=WRITER)
+        store.replace(
+            INTEGRITY, chain.document_relpath(n + 1), canonical(new_doc), writer=WRITER
+        )
         _commit_stage("write")
         body = chain.commit(
             n=n + 1,
@@ -577,7 +614,9 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
             at=clock.iso(),
             kind=kind,
         )
-        store.replace(INTEGRITY, chain.entry_relpath(n + 1), canonical(body), writer=WRITER)
+        store.replace(
+            INTEGRITY, chain.entry_relpath(n + 1), canonical(body), writer=WRITER
+        )
         _commit_stage("chain-entry")
         entry_id = chain.entry_id(body)
 
@@ -599,4 +638,9 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
         )
         if n >= 1:
             store.remove(STRUCTURAL, chain.gen_relpath(n - 1), writer=COMMITTER)
-        return {"entry": n + 1, "entry_id": entry_id, "state_digest": state_digest, "log_record": rec}
+        return {
+            "entry": n + 1,
+            "entry_id": entry_id,
+            "state_digest": state_digest,
+            "log_record": rec,
+        }

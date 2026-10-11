@@ -183,10 +183,16 @@ def propose(root: str, ops: list) -> dict:
         if not (
             isinstance(ops, list)
             and len(ops) > 0
-            and all(isinstance(op, dict) and isinstance(op.get("op"), str) for op in ops)
+            and all(
+                isinstance(op, dict) and isinstance(op.get("op"), str) for op in ops
+            )
         ):
             rec = log_append(
-                store, "refusal", rule="OC-001(b)", check="ops", detail="invalid ops format"
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                check="ops",
+                detail="invalid ops format",
             )
             raise Refused("ops", "OC-001(b)", "invalid ops format", [rec])
 
@@ -234,7 +240,10 @@ def propose(root: str, ops: list) -> dict:
                         detail="set-persona requires a string content",
                     )
                     raise Refused(
-                        "ops", "OC-001(b)", "set-persona requires a string content", [rec]
+                        "ops",
+                        "OC-001(b)",
+                        "set-persona requires a string content",
+                        [rec],
                     )
             elif op_name == "install-skill":
                 name = op.get("name")
@@ -247,13 +256,19 @@ def propose(root: str, ops: list) -> dict:
                         detail="install-skill has invalid skill name",
                     )
                     raise Refused(
-                        "ops", "OC-001(b)", "install-skill has invalid skill name", [rec]
+                        "ops",
+                        "OC-001(b)",
+                        "install-skill has invalid skill name",
+                        [rec],
                     )
                 files = op.get("files")
                 if not (
                     isinstance(files, dict)
                     and len(files) > 0
-                    and all(isinstance(k, str) and isinstance(v, str) for k, v in files.items())
+                    and all(
+                        isinstance(k, str) and isinstance(v, str)
+                        for k, v in files.items()
+                    )
                 ):
                     rec = log_append(
                         store,
@@ -299,7 +314,10 @@ def propose(root: str, ops: list) -> dict:
                         detail="duplicate write target %r" % (target,),
                     )
                     raise Refused(
-                        "ops", "OC-001(b)", "duplicate write target %r" % (target,), [rec]
+                        "ops",
+                        "OC-001(b)",
+                        "duplicate write target %r" % (target,),
+                        [rec],
                     )
                 targets.add(target)
             elif op_name == "install-skill":
@@ -315,7 +333,10 @@ def propose(root: str, ops: list) -> dict:
                             detail="duplicate write target %r" % (target,),
                         )
                         raise Refused(
-                            "ops", "OC-001(b)", "duplicate write target %r" % (target,), [rec]
+                            "ops",
+                            "OC-001(b)",
+                            "duplicate write target %r" % (target,),
+                            [rec],
                         )
                     targets.add(target)
 
@@ -344,7 +365,10 @@ def propose(root: str, ops: list) -> dict:
         # 6b. pending cap (D52)
         cap = config.value(store, "pending_cap")
         if len(auth["proposals"]) >= cap:
-            detail = "%d proposals pending; the cap is %d" % (len(auth["proposals"]), cap)
+            detail = "%d proposals pending; the cap is %d" % (
+                len(auth["proposals"]),
+                cap,
+            )
             rec = log_append(
                 store,
                 "refusal",
@@ -363,7 +387,11 @@ def propose(root: str, ops: list) -> dict:
                 normalized.append({"op": "set-persona", "content": op["content"]})
             elif op_name == "install-skill":
                 normalized.append(
-                    {"op": "install-skill", "name": op["name"], "files": dict(op["files"])}
+                    {
+                        "op": "install-skill",
+                        "name": op["name"],
+                        "files": dict(op["files"]),
+                    }
                 )
 
         digest = sha256(canonical(normalized))
@@ -396,7 +424,13 @@ def propose(root: str, ops: list) -> dict:
 
 
 def record_approval(
-    store: Store, pid: str, digest: str, record: str, binding: str, *, authorization: dict
+    store: Store,
+    pid: str,
+    digest: str,
+    record: str,
+    binding: str,
+    *,
+    authorization: dict,
 ) -> None:
     """Record an Operator approval for a proposal."""
     auth = read_auth(store)
@@ -466,7 +500,9 @@ def commit(root: str, proposal_id: str) -> dict:
                 auth = read_auth(store)
 
             prop_categories = set(CATEGORIES.get(op.get("op")) for op in prop["ops"])
-            can_cover = ("persona" not in prop_categories) and (None not in prop_categories)
+            can_cover = ("persona" not in prop_categories) and (
+                None not in prop_categories
+            )
             if can_cover:
                 for g in auth.get("grants", []):
                     if g.get("state") == "open":
@@ -503,7 +539,9 @@ def commit(root: str, proposal_id: str) -> dict:
 
         changes = {}
         head = sil.read_head(store)
-        existing_skills = set(store.listdir(chain.gen_relpath(head["entry"]) + "/skills"))
+        existing_skills = set(
+            store.listdir(chain.gen_relpath(head["entry"]) + "/skills")
+        )
 
         for op in prop["ops"]:
             op_name = op["op"]

@@ -22,7 +22,12 @@ class MemoryInterfaceTests(TempDirTest):
 
     def test_a_cpe_save_writes_an_episodic_record_attributed_to_its_session(self):
         lifecycle.start(self.S)
-        out = mil.save(self.S, caller="cpe", destination="episodic", content="The Operator prefers short answers.")
+        out = mil.save(
+            self.S,
+            caller="cpe",
+            destination="episodic",
+            content="The Operator prefers short answers.",
+        )
         self.assertTrue(out["record"].startswith("M-"))
         recs = self.records()
         self.assertEqual(len(recs), 1)
@@ -33,8 +38,12 @@ class MemoryInterfaceTests(TempDirTest):
 
     def test_records_are_appended_with_distinct_ids(self):
         lifecycle.start(self.S)
-        first = mil.save(self.S, caller="cpe", destination="episodic", content="First note.")
-        second = mil.save(self.S, caller="cpe", destination="episodic", content="Second note.")
+        first = mil.save(
+            self.S, caller="cpe", destination="episodic", content="First note."
+        )
+        second = mil.save(
+            self.S, caller="cpe", destination="episodic", content="Second note."
+        )
         recs = self.records()
         self.assertEqual(len(recs), 2)
         self.assertNotEqual(recs[0]["id"], recs[1]["id"])
@@ -45,11 +54,15 @@ class MemoryInterfaceTests(TempDirTest):
         lifecycle.start(self.S)
         for destination in ("session", "semantic", "nowhere"):
             with self.assertRaises(Refused) as ctx:
-                mil.save(self.S, caller="cpe", destination=destination, content="A note.")
+                mil.save(
+                    self.S, caller="cpe", destination=destination, content="A note."
+                )
             self.assertEqual(ctx.exception.check, "mnemonic-destination")
             self.assertEqual(ctx.exception.rule, "OC-003(c)")
         self.assertFalse(self.store.exists(mil.EPISODIC))
-        refusals = [r for r in self.log("refusal") if r.get("check") == "mnemonic-destination"]
+        refusals = [
+            r for r in self.log("refusal") if r.get("check") == "mnemonic-destination"
+        ]
         self.assertGreaterEqual(len(refusals), 3)
 
     def test_an_unknown_caller_is_refused(self):
@@ -75,7 +88,12 @@ class MemoryInterfaceTests(TempDirTest):
     def test_content_the_probes_flag_is_refused(self):
         lifecycle.start(self.S)
         with self.assertRaises(Refused) as ctx:
-            mil.save(self.S, caller="cpe", destination="episodic", content=probes.REFERENCE_TEXTS[0])
+            mil.save(
+                self.S,
+                caller="cpe",
+                destination="episodic",
+                content=probes.REFERENCE_TEXTS[0],
+            )
         self.assertEqual(ctx.exception.check, "self-representation")
         self.assertEqual(ctx.exception.rule, "OC-002(d)")
         self.assertFalse(self.store.exists(mil.EPISODIC))

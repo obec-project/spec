@@ -50,7 +50,12 @@ def parse_flags(argv):
 
 
 def accepted(detail=None, log_records=()):
-    return {"ok": True, "outcome": "accepted", "log_records": list(log_records), "detail": detail or {}}
+    return {
+        "ok": True,
+        "outcome": "accepted",
+        "log_records": list(log_records),
+        "detail": detail or {},
+    }
 
 
 def refused(exc: sil.Refused, detail=None):
@@ -136,9 +141,14 @@ def lifecycle_stop(flags):
 def lifecycle_decommission(flags):
     disposition = flags.get("disposition")
     out, ref = _sil_call(
-        lifecycle.decommission, _store(flags), disposition, binding=flags.get("operator")
+        lifecycle.decommission,
+        _store(flags),
+        disposition,
+        binding=flags.get("operator"),
     )
-    return ref or accepted({"entry": out["entry"], "disposition": disposition}, out["log_records"])
+    return ref or accepted(
+        {"entry": out["entry"], "disposition": disposition}, out["log_records"]
+    )
 
 
 def operator_revoke_credential(flags):
@@ -147,17 +157,23 @@ def operator_revoke_credential(flags):
         # The Operator's own hand: `rm S/CREDENTIAL`, no component involved.
         removed = remove_as_operator(root, "CREDENTIAL")
         return accepted({"removed": removed, "direct": True})
-    out, ref = _sil_call(lifecycle.revoke_credential, root, binding=flags.get("operator"))
+    out, ref = _sil_call(
+        lifecycle.revoke_credential, root, binding=flags.get("operator")
+    )
     return ref or accepted({"direct": False}, out["log_records"])
 
 
 def operator_clear_passive_signal(flags):
-    out, ref = _sil_call(lifecycle.clear_passive_signal, _store(flags), binding=flags.get("operator"))
+    out, ref = _sil_call(
+        lifecycle.clear_passive_signal, _store(flags), binding=flags.get("operator")
+    )
     return ref or accepted({"cleared": out["cleared"]}, out["log_records"])
 
 
 def operator_binding_list(flags):
-    out, ref = _sil_call(operator.binding_list, _store(flags), binding=flags.get("operator"))
+    out, ref = _sil_call(
+        operator.binding_list, _store(flags), binding=flags.get("operator")
+    )
     return ref or accepted({"bindings": out["bindings"], "owner": out["owner"]})
 
 
@@ -233,7 +249,11 @@ def entity_propose(flags):
         raise CannotAttempt("cannot read ops: %s" % (e,))
     if isinstance(ops, list):
         for op in ops:
-            if isinstance(op, dict) and op.get("op") == "install-skill" and "files" not in op:
+            if (
+                isinstance(op, dict)
+                and op.get("op") == "install-skill"
+                and "files" not in op
+            ):
                 try:
                     from fsp_testing import fixture
 
@@ -252,7 +272,8 @@ def entity_commit(flags):
         raise CannotAttempt("--proposal is required")
     out, ref = _sil_call(proposals.commit, _store(flags), proposal_id)
     return ref or accepted(
-        {"authorization": out["authorization"], "entry": out["entry"]}, out["log_records"]
+        {"authorization": out["authorization"], "entry": out["entry"]},
+        out["log_records"],
     )
 
 
@@ -260,7 +281,9 @@ def observe_log(flags):
     root = _store(flags)
     if verify_state(root) in ("absent", "foreign"):
         raise CannotAttempt("%s is not an fsp store" % root)
-    return accepted(lifecycle.observe_log(root, kind=flags.get("kind"), since=flags.get("since")))
+    return accepted(
+        lifecycle.observe_log(root, kind=flags.get("kind"), since=flags.get("since"))
+    )
 
 
 def describe_config(flags):
@@ -349,7 +372,9 @@ COMMANDS = {
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if len(argv) < 2:
-        print("usage: obec-adapter <class> <command> [--flag value ...]", file=sys.stderr)
+        print(
+            "usage: obec-adapter <class> <command> [--flag value ...]", file=sys.stderr
+        )
         return 1
     key = (argv[0], argv[1])
     fn = COMMANDS.get(key)

@@ -24,12 +24,12 @@ class Outcome(str, Enum):
 
 @dataclass
 class StepResult:
-    step: str                 # "2.10"
-    kind: str                 # "E" or "A"
+    step: str  # "2.10"
+    kind: str  # "E" or "A"
     outcome: Outcome
     detail: str = ""
-    evidence: Any = None      # attested steps: the describe output + pointer
-    calls: list = field(default_factory=list)   # adapter invocations made
+    evidence: Any = None  # attested steps: the describe output + pointer
+    calls: list = field(default_factory=list)  # adapter invocations made
 
     @property
     def counts_against_conformance(self) -> bool:
@@ -38,7 +38,7 @@ class StepResult:
 
 @dataclass
 class TestResult:
-    rule: str                 # "OC-001"
+    rule: str  # "OC-001"
     title: str
     steps: list = field(default_factory=list)
 

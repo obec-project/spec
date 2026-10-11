@@ -137,7 +137,14 @@ class InterruptTest(TempDirTest):
     def test_the_adapter_interrupts_and_the_start_recovers(self):
         S, pid = self._setup_store("S-adapter")
         code, out = run_adapter(
-            "inject", "interrupt", "--store", S, "--stage", "chain-entry", "--proposal", pid
+            "inject",
+            "interrupt",
+            "--store",
+            S,
+            "--stage",
+            "chain-entry",
+            "--proposal",
+            pid,
         )
         self.assertEqual(code, 0)
         self.assertEqual(out["outcome"], "accepted")
@@ -149,10 +156,14 @@ class InterruptTest(TempDirTest):
         gates = [g["gate"] for g in out_start["detail"]["gates"]]
         self.assertIn("crash-recovery", gates)
         self.assertIn("structural-verification", gates)
-        self.assertLess(gates.index("crash-recovery"), gates.index("structural-verification"))
+        self.assertLess(
+            gates.index("crash-recovery"), gates.index("structural-verification")
+        )
 
     def test_a_commit_without_fsp_testing(self):
         S, pid = self._setup_store("S-prod")
-        with mock.patch.dict(sys.modules, {"fsp_testing": None, "fsp_testing.hooks": None}):
+        with mock.patch.dict(
+            sys.modules, {"fsp_testing": None, "fsp_testing.hooks": None}
+        ):
             out_c = proposals.commit(S, pid)
         self.assertEqual(out_c["entry"], 1)

@@ -89,7 +89,13 @@ LAYOUT = (
 )
 
 # The structural data a commit may write, relative to a generation (D68).
-STRUCTURAL_FILES = ("persona.md", "config.json", "bindings.json", "rules.json", "probes.json")
+STRUCTURAL_FILES = (
+    "persona.md",
+    "config.json",
+    "bindings.json",
+    "rules.json",
+    "probes.json",
+)
 SKILL_NAME = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
 
 
@@ -146,7 +152,9 @@ def _check_relpath(relpath: str) -> str:
         or "\\" in relpath
         or any(p in ("", ".", "..") for p in relpath.split("/"))
     ):
-        raise GuardError("store-path", "not a normalized store-relative path: %r" % relpath)
+        raise GuardError(
+            "store-path", "not a normalized store-relative path: %r" % relpath
+        )
     return relpath
 
 
@@ -265,7 +273,9 @@ class Store:
             raise GuardError("content-class", "unknown content class %r" % cls)
         d = datum_of(relpath)
         if d is None:
-            raise GuardError("content-class", "%s is not a datum of any class" % relpath)
+            raise GuardError(
+                "content-class", "%s is not a datum of any class" % relpath
+            )
         if d.cls != cls:
             raise GuardError(
                 "content-class", "%s is %s content, not %s" % (relpath, d.cls, cls)
@@ -273,7 +283,8 @@ class Store:
         owner, _op = OWNER[cls]
         if writer != owner:
             raise GuardError(
-                "sole-writer", "%s content has one writer (%s), not %s" % (cls, owner, writer)
+                "sole-writer",
+                "%s content has one writer (%s), not %s" % (cls, owner, writer),
             )
         if form != d.form and not (d.form == "tree" and form == "replace"):
             raise GuardError(
@@ -308,7 +319,7 @@ class Store:
                 os.fchmod(fd, 0o755 if executable else 0o644)
                 view = memoryview(data)
                 while view:
-                    view = view[os.write(fd, view):]
+                    view = view[os.write(fd, view) :]
                 os.fsync(fd)
             finally:
                 os.close(fd)
@@ -337,7 +348,7 @@ class Store:
                     )
                 view = memoryview(line)
                 while view:
-                    view = view[os.write(fd, view):]
+                    view = view[os.write(fd, view) :]
                 os.fsync(fd)
             finally:
                 os.close(fd)
@@ -416,7 +427,9 @@ class Store:
                 raise GuardError("append-only", "%s is append-only" % relpath)
             if d is not None and d.form == "lock":
                 raise GuardError("store-lock", "%s is never removed" % relpath)
-            self._guard(cls, relpath, writer, d.form if d and d.form != "tree" else "replace")
+            self._guard(
+                cls, relpath, writer, d.form if d and d.form != "tree" else "replace"
+            )
         target = self.path(relpath)
         with self.write_lock():
             try:
@@ -482,7 +495,9 @@ class Store:
             raise GuardError("sole-writer", "first activation belongs to the SIL")
         with self.write_lock():
             if self.exists("HEAD"):
-                raise GuardError("first-activation", "store is active; nothing is residue")
+                raise GuardError(
+                    "first-activation", "store is active; nothing is residue"
+                )
             for name in ("structural", "memory"):
                 target = os.path.join(self.root, name)
                 if os.path.isdir(target):

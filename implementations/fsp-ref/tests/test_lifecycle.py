@@ -129,7 +129,9 @@ class CredentialAtStart(Base):
         with open(self.store.path(lifecycle.SESSIONS), "w") as f:
             f.write("{")
         res = lifecycle.start(self.S)
-        self.assertEqual((res.outcome, res.gates[-1]["gate"]), ("aborted", "crash-recovery"))
+        self.assertEqual(
+            (res.outcome, res.gates[-1]["gate"]), ("aborted", "crash-recovery")
+        )
 
 
 class Gates(Base):
@@ -149,7 +151,10 @@ class Gates(Base):
         rec = sil.raise_passive_signal(self.store, "test", "a condition")
         hooks.add_gate_failure(self.S, "index")
         res = lifecycle.start(self.S)
-        self.assertEqual(res.gates, [{"gate": "passive-signal", "outcome": "fail", "rule": "OC-001(c)"}])
+        self.assertEqual(
+            res.gates,
+            [{"gate": "passive-signal", "outcome": "fail", "rule": "OC-001(c)"}],
+        )
         self.assertEqual(res.lesser_outcome, "suspended")
         with open(self.store.path(sil.PASSIVE_SIGNAL)) as f:
             text = f.read()
@@ -168,13 +173,18 @@ class Gates(Base):
         with open(self.store.path("structural/gen/0/persona.md"), "ab") as f:
             f.write(b"x")
         res = lifecycle.start(self.S)
-        self.assertEqual((res.outcome, res.gates[-1]["gate"]), ("aborted", "structural-verification"))
+        self.assertEqual(
+            (res.outcome, res.gates[-1]["gate"]), ("aborted", "structural-verification")
+        )
 
     def test_a_drifted_skill_is_excluded_and_the_start_goes_on(self):
         manifest = canonical({"name": "example"})
         sil.commit_generation(
             self.store,
-            changes={"skills/example/manifest.json": manifest, "skills/example/run": b"x"},
+            changes={
+                "skills/example/manifest.json": manifest,
+                "skills/example/run": b"x",
+            },
             authorization=sil.operator_act_located(
                 self.store, "approve", binding="op-1", rule="OC-001(b)"
             ),
@@ -201,7 +211,9 @@ class Gates(Base):
 
     def test_the_starting_binding_must_be_active(self):
         res = lifecycle.start(self.S, binding="op-9")
-        self.assertEqual((res.outcome, res.gates[-1]["gate"]), ("aborted", "binding-verification"))
+        self.assertEqual(
+            (res.outcome, res.gates[-1]["gate"]), ("aborted", "binding-verification")
+        )
 
 
 class Session(Base):
@@ -220,7 +232,9 @@ class Session(Base):
         self.assertTrue(remove_as_operator(self.S, "CREDENTIAL"))
         self.assertIsNone(lifecycle.live_session(self.S))
         self.assertIsNone(lifecycle.live_session(self.S))
-        self.assertEqual([r["session"] for r in self.log("credential-removed-directly")], ["s-1"])
+        self.assertEqual(
+            [r["session"] for r in self.log("credential-removed-directly")], ["s-1"]
+        )
         self.assertEqual(lifecycle.start(self.S).outcome, "accepted")
 
     def test_a_credential_of_another_session_is_not_this_one(self):
@@ -235,7 +249,10 @@ class Session(Base):
         lifecycle.start(self.S)
         lifecycle.revoke_credential(self.S)
         act = self.log("operator-act")[-1]
-        self.assertEqual((act["act"], act["binding"], act["session"]), ("revoke-credential", "op-1", "s-1"))
+        self.assertEqual(
+            (act["act"], act["binding"], act["session"]),
+            ("revoke-credential", "op-1", "s-1"),
+        )
         self.assertIsNone(lifecycle.live_session(self.S))
 
     def test_an_inactive_binding_cannot_act(self):
@@ -262,11 +279,15 @@ class Decommission(Base):
 
     def test_nothing_may_follow_a_decommission_entry(self):
         lifecycle.decommission(self.S, "archive")
-        auth = sil.operator_act_located(self.store, "approve", binding="op-1", rule="OC-001(b)")
+        auth = sil.operator_act_located(
+            self.store, "approve", binding="op-1", rule="OC-001(b)"
+        )
         sil.commit_generation(self.store, changes={}, authorization=auth)
         r = verify(self.S)
         self.assertFalse(r.chain_intact)
-        self.assertIn("after-decommission", [f.evidence.get("problem") for f in r.findings])
+        self.assertIn(
+            "after-decommission", [f.evidence.get("problem") for f in r.findings]
+        )
 
     def test_destroy_leaves_no_chain(self):
         lifecycle.decommission(self.S, "destroy")

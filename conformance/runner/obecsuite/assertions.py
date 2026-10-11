@@ -15,8 +15,10 @@ def _fail(msg: str):
 
 def accepted(res, why: str = ""):
     if res.outcome != "accepted":
-        _fail(f"expected accepted{' — ' + why if why else ''}, got "
-              f"{res.outcome!r} {res.refusal or ''}")
+        _fail(
+            f"expected accepted{' — ' + why if why else ''}, got "
+            f"{res.outcome!r} {res.refusal or ''}"
+        )
 
 
 def refused(ctx, res, check: str = None, rule: str = None, why: str = ""):

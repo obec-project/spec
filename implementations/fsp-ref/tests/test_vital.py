@@ -99,7 +99,10 @@ class VitalTest(TempDirTest):
     def test_a_drifted_skill_is_pruned_and_the_session_goes_on(self):
         self.install_skill()
         res = lifecycle.start(self.S)
-        self.assertEqual([s["name"] for s in self.store.read_json(lifecycle.INDEX)["skills"]], ["example"])
+        self.assertEqual(
+            [s["name"] for s in self.store.read_json(lifecycle.INDEX)["skills"]],
+            ["example"],
+        )
         with open(self.store.path("structural/gen/1/skills/example/run"), "ab") as f:
             f.write(b"y")
         hooks.advance_clock(self.S, 60)
@@ -131,7 +134,9 @@ class VitalTest(TempDirTest):
         self.assertTrue(self.log("vital-critical"))
         self.assertTrue(self.log("credential-revoked"))
         self.assertTrue(self.log("passive-signal"))
-        self.assertEqual(self.log("operator-notification")[-1]["condition"], "vital-critical")
+        self.assertEqual(
+            self.log("operator-notification")[-1]["condition"], "vital-critical"
+        )
         self.assertIsNone(self.store.read_json(lifecycle.SESSIONS)["open_session"])
         self.assertEqual(lifecycle.start(self.S).gates[0]["outcome"], "fail")
 
@@ -139,7 +144,9 @@ class VitalTest(TempDirTest):
         res = lifecycle.start(self.S)
         real = verify(self.S)
         fake = verify(self.S)
-        fake.findings.append(Finding("integrity-document", "integrity/documents/0.json", "sil", {}))
+        fake.findings.append(
+            Finding("integrity-document", "integrity/documents/0.json", "sil", {})
+        )
         hooks.advance_clock(self.S, 60)
         with mock.patch.object(vital, "verify", side_effect=[fake, real]):
             self.assertEqual(vital.before_act(self.S, res.session), "nominal")
@@ -205,7 +212,11 @@ class VitalTest(TempDirTest):
         res = lifecycle.start(self.S)
         self.assertIsNone(vital.before_act(self.S, res.session))
         st = self.state()
-        st["sweep"]["log"] = {"id": "L-000001", "offset": 0, "sha256": "sha256:" + "0" * 64}
+        st["sweep"]["log"] = {
+            "id": "L-000001",
+            "offset": 0,
+            "sha256": "sha256:" + "0" * 64,
+        }
         with open(self.store.path(vital.STATE), "wb") as f:
             f.write(canonical(st))
         hooks.advance_clock(self.S, 60)
@@ -217,7 +228,9 @@ class VitalTest(TempDirTest):
 
     def test_a_sweep_finding_gone_on_the_second_read_is_noise(self):
         res = lifecycle.start(self.S)
-        bad = Finding("log-record", "integrity/log.jsonl", "sil", {"offset": 0, "problem": "prev"})
+        bad = Finding(
+            "log-record", "integrity/log.jsonl", "sil", {"offset": 0, "problem": "prev"}
+        )
         hooks.advance_clock(self.S, 60)
         with mock.patch.object(
             vital, "sweep_log", side_effect=[(bad, None, None), (None, None, None)]

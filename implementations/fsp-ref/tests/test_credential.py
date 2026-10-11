@@ -15,7 +15,9 @@ class CredentialAtStart(unittest.TestCase):
         for lock, residue, process_holder in itertools.product(
             (LOCK_HELD, LOCK_UNKNOWN), (True, False), (True, False)
         ):
-            with self.subTest(lock=lock, residue=residue, process_holder=process_holder):
+            with self.subTest(
+                lock=lock, residue=residue, process_holder=process_holder
+            ):
                 self.assertEqual(
                     classify_credential(
                         lock, residue=residue, process_holder=process_holder

@@ -214,7 +214,9 @@ class OperatorActs(Base):
         self.assertEqual(out["detail"]["owner"], "op-1")
 
         # binding-remove of last binding (refused, exit 0)
-        code, out = run_adapter("operator", "binding-remove", "--store", self.S, "--id", "op-1")
+        code, out = run_adapter(
+            "operator", "binding-remove", "--store", self.S, "--id", "op-1"
+        )
         self.assertEqual(code, 0)
         self.assertEqual(out["outcome"], "refused")
         self.assertEqual(out["refusal"]["check"], "last-binding")
@@ -222,10 +224,14 @@ class OperatorActs(Base):
 
         # set-workspace (accepted)
         ws = self.p("ws")
-        code, out = run_adapter("operator", "set-workspace", "--store", self.S, "--path", ws)
+        code, out = run_adapter(
+            "operator", "set-workspace", "--store", self.S, "--path", ws
+        )
         self.assertEqual(code, 0)
         self.assertEqual(out["outcome"], "accepted")
-        self.assertEqual(out["detail"]["workspace"], os.path.realpath(os.path.abspath(ws)))
+        self.assertEqual(
+            out["detail"]["workspace"], os.path.realpath(os.path.abspath(ws))
+        )
 
         # binding-add without --id -> exit 1
         code, out = run_adapter("operator", "binding-add", "--store", self.S)

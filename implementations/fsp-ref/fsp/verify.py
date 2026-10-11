@@ -22,8 +22,22 @@ import os
 import re
 
 from . import chain
-from .digest import document_digest, integrity_document, is_canonical, sha256, valid_relpath
-from .store import LOCK, MARKER, STORE_FORMAT, STORE_FORMAT_VERSION, TEMP_NAME, Store, datum_of
+from .digest import (
+    document_digest,
+    integrity_document,
+    is_canonical,
+    sha256,
+    valid_relpath,
+)
+from .store import (
+    LOCK,
+    MARKER,
+    STORE_FORMAT,
+    STORE_FORMAT_VERSION,
+    TEMP_NAME,
+    Store,
+    datum_of,
+)
 
 
 class Finding:
@@ -131,7 +145,9 @@ def verify(root: str, *, full_log: bool = False) -> Report:
     marker, problem = _read_canonical(store, MARKER)
     if problem == "missing":
         r.state = "foreign"
-        r.findings.append(Finding("store-marker", MARKER, "operator", {"problem": problem}))
+        r.findings.append(
+            Finding("store-marker", MARKER, "operator", {"problem": problem})
+        )
         return r
     if problem or not (
         isinstance(marker, dict)
@@ -139,7 +155,9 @@ def verify(root: str, *, full_log: bool = False) -> Report:
         and marker.get("format_version") == STORE_FORMAT_VERSION
     ):
         r.findings.append(
-            Finding("store-marker", MARKER, "sil", {"problem": problem or "unknown-format"})
+            Finding(
+                "store-marker", MARKER, "sil", {"problem": problem or "unknown-format"}
+            )
         )
         # The store cannot be read as an fsp store; nothing else is trusted.
         return r
@@ -156,7 +174,9 @@ def verify(root: str, *, full_log: bool = False) -> Report:
         and isinstance(head["entry"], int)
         and head["entry"] >= 0
     ):
-        r.findings.append(Finding("head-invalid", chain.HEAD, "sil", {"problem": problem or "schema"}))
+        r.findings.append(
+            Finding("head-invalid", chain.HEAD, "sil", {"problem": problem or "schema"})
+        )
         return r
     n = head["entry"]
     r.head_entry = n
@@ -182,7 +202,9 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
         rel = chain.entry_relpath(k)
         body, problem = _read_canonical(store, rel)
         if problem:
-            r.findings.append(Finding("chain-entry", rel, "sil", {"entry": k, "problem": problem}))
+            r.findings.append(
+                Finding("chain-entry", rel, "sil", {"entry": k, "problem": problem})
+            )
             ok = False
             prev_id = None
             continue
@@ -195,7 +217,9 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
         elif k == 0:
             if body.get("kind") != "genesis" or "predecessor" in body:
                 why = "not-genesis"
-            elif not (body.get("binding") and body.get("state_digest") and body.get("version")):
+            elif not (
+                body.get("binding") and body.get("state_digest") and body.get("version")
+            ):
                 why = "genesis-fields"
             else:
                 r.genesis_digest = eid
@@ -211,7 +235,9 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
             elif not authorization_resolves(store, body):
                 why = "authorization-unresolved"
         if why:
-            r.findings.append(Finding("chain-entry", rel, "sil", {"entry": k, "problem": why}))
+            r.findings.append(
+                Finding("chain-entry", rel, "sil", {"entry": k, "problem": why})
+            )
             ok = False
         prev_id = eid
         prev_kind = body.get("kind") if isinstance(body, dict) else None
@@ -233,10 +259,14 @@ def _verify_chain(store: Store, head: dict, r: Report) -> bool:
     if r.entries and len(r.entries) == n + 1:
         last_id, last = r.entries[-1]
         if head["entry_id"] != last_id:
-            r.findings.append(Finding("head-mismatch", chain.HEAD, "sil", {"field": "entry_id"}))
+            r.findings.append(
+                Finding("head-mismatch", chain.HEAD, "sil", {"field": "entry_id"})
+            )
             ok = False
         elif head["baseline"] != last.get("state_digest"):
-            r.findings.append(Finding("head-mismatch", chain.HEAD, "sil", {"field": "baseline"}))
+            r.findings.append(
+                Finding("head-mismatch", chain.HEAD, "sil", {"field": "baseline"})
+            )
             ok = False
         elif ok and last.get("kind") == "decommission":
             r.decommissioned = True
@@ -253,7 +283,11 @@ def authorization_resolves(store: Store, body: dict) -> bool:
     auth_offset = auth.get("offset")
     if not isinstance(auth_id, str) or not re.match(r"^L-[0-9]{6}$", auth_id):
         return False
-    if not isinstance(auth_offset, int) or isinstance(auth_offset, bool) or auth_offset < 0:
+    if (
+        not isinstance(auth_offset, int)
+        or isinstance(auth_offset, bool)
+        or auth_offset < 0
+    ):
         return False
     if not isinstance(auth_sha256, str):
         return False
@@ -266,13 +300,23 @@ def authorization_resolves(store: Store, body: dict) -> bool:
         rec = json.loads(line.decode("utf-8"))
     except (UnicodeDecodeError, ValueError):
         return False
-    if not isinstance(rec, dict) or rec.get("id") != auth_id or rec.get("kind") != "operator-act":
+    if (
+        not isinstance(rec, dict)
+        or rec.get("id") != auth_id
+        or rec.get("kind") != "operator-act"
+    ):
         return False
 
     entry_kind = body.get("kind")
     act = rec.get("act")
     if entry_kind == "commit":
-        return act in {"approve", "grant", "binding-add", "binding-remove", "ownership-accept"}
+        return act in {
+            "approve",
+            "grant",
+            "binding-add",
+            "binding-remove",
+            "ownership-accept",
+        }
     elif entry_kind == "decommission":
         return act == "decommission"
     return False
@@ -464,24 +508,46 @@ def sweep_log(store: Store, position, max_bytes: int):
             if not isinstance(rec, dict):
                 raise ValueError("not a dict")
         except (UnicodeDecodeError, ValueError):
-            return Finding(
-                "log-record", relpath, "sil", {"offset": cur, "problem": "unparseable"}
-            ), last, reset
+            return (
+                Finding(
+                    "log-record",
+                    relpath,
+                    "sil",
+                    {"offset": cur, "problem": "unparseable"},
+                ),
+                last,
+                reset,
+            )
 
         if not is_canonical(rec, line):
-            return Finding(
-                "log-record", relpath, "sil", {"offset": cur, "problem": "not-canonical"}
-            ), last, reset
+            return (
+                Finding(
+                    "log-record",
+                    relpath,
+                    "sil",
+                    {"offset": cur, "problem": "not-canonical"},
+                ),
+                last,
+                reset,
+            )
 
         if rec.get("id") != "L-%06d" % seq:
-            return Finding(
-                "log-record", relpath, "sil", {"offset": cur, "problem": "sequence"}
-            ), last, reset
+            return (
+                Finding(
+                    "log-record", relpath, "sil", {"offset": cur, "problem": "sequence"}
+                ),
+                last,
+                reset,
+            )
 
         if rec.get("prev") != prev:
-            return Finding(
-                "log-record", relpath, "sil", {"offset": cur, "problem": "prev"}
-            ), last, reset
+            return (
+                Finding(
+                    "log-record", relpath, "sil", {"offset": cur, "problem": "prev"}
+                ),
+                last,
+                reset,
+            )
 
         last = {"id": rec["id"], "offset": cur, "sha256": sha256(line)}
         seq += 1
@@ -501,10 +567,16 @@ def _verify_content(store: Store, head: dict, r: Report) -> bool:
     doc_rel = chain.document_relpath(n)
     doc, problem = _read_canonical(store, doc_rel)
     if problem or not isinstance(doc, list):
-        r.findings.append(Finding("integrity-document", doc_rel, "sil", {"problem": problem or "schema"}))
+        r.findings.append(
+            Finding(
+                "integrity-document", doc_rel, "sil", {"problem": problem or "schema"}
+            )
+        )
         return False
     if document_digest(doc) != head["baseline"]:
-        r.findings.append(Finding("integrity-document", doc_rel, "sil", {"problem": "digest"}))
+        r.findings.append(
+            Finding("integrity-document", doc_rel, "sil", {"problem": "digest"})
+        )
         return False
 
     gen_rel = chain.gen_relpath(n)
@@ -524,9 +596,15 @@ def _verify_content(store: Store, head: dict, r: Report) -> bool:
             )
         )
         ok = False
-    expected = {e["path"]: e for e in doc if isinstance(e, dict) and valid_relpath(e.get("path", ""))}
+    expected = {
+        e["path"]: e
+        for e in doc
+        if isinstance(e, dict) and valid_relpath(e.get("path", ""))
+    }
     if len(expected) != len(doc):
-        r.findings.append(Finding("integrity-document", doc_rel, "sil", {"problem": "entries"}))
+        r.findings.append(
+            Finding("integrity-document", doc_rel, "sil", {"problem": "entries"})
+        )
         ok = False
     found = {e["path"]: e for e in actual}
     for path in sorted(set(expected) | set(found)):
@@ -570,7 +648,9 @@ def _unclassified(store: Store, r: Report) -> None:
                 r.findings.append(Finding("unclassified-datum", rel, "operator", {}))
             elif rel == LOCK and os.path.getsize(os.path.join(dirpath, name)):
                 # The lock file carries no content; bytes in it are not ours.
-                r.findings.append(Finding("store-lock", rel, "sil", {"problem": "not-empty"}))
+                r.findings.append(
+                    Finding("store-lock", rel, "sil", {"problem": "not-empty"})
+                )
 
 
 def _residue(store: Store, n: int, r: Report) -> None:
@@ -581,7 +661,9 @@ def _residue(store: Store, n: int, r: Report) -> None:
     for name in store.listdir("integrity/documents"):
         m = re.match(r"^([0-9]+)\.json$", name)
         if m and int(m.group(1)) > n:
-            r.residue.append({"path": "integrity/documents/" + name, "kind": "uncommitted"})
+            r.residue.append(
+                {"path": "integrity/documents/" + name, "kind": "uncommitted"}
+            )
     for name in store.listdir("structural/gen"):
         if name.isdigit() and int(name) > n:
             r.residue.append({"path": "structural/gen/" + name, "kind": "uncommitted"})

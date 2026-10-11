@@ -42,7 +42,8 @@ class Adapter(TempDirTest):
         self.assertEqual(len(passive), 1)
         self.assertEqual(passive[0]["path"], self.p("S", "PASSIVE-SIGNAL"))
         self.assertEqual(
-            {e["write_path"] for e in entries if e["class"] == "integrity"}, {"integrity-write"}
+            {e["write_path"] for e in entries if e["class"] == "integrity"},
+            {"integrity-write"},
         )
         self.assertTrue(out["detail"]["evidence"])
 
@@ -58,9 +59,22 @@ class Adapter(TempDirTest):
         shutil.copy(os.path.join(ROOT, "obec-adapter"), prod)
         adapter = os.path.join(prod, "obec-adapter")
         S = self.p("S")
-        run_adapter("lifecycle", "init", "--store", S, "--operator", "op-1", adapter=adapter)
+        run_adapter(
+            "lifecycle", "init", "--store", S, "--operator", "op-1", adapter=adapter
+        )
         code, _ = run_adapter(
-            "inject", "corrupt", "--store", S, "--kind", "structural-byte", adapter=adapter
+            "inject",
+            "corrupt",
+            "--store",
+            S,
+            "--kind",
+            "structural-byte",
+            adapter=adapter,
         )
         self.assertEqual(code, 2)
-        self.assertEqual(run_adapter("inject", "corrupt", "--store", S, "--kind", "structural-byte")[0], 0)
+        self.assertEqual(
+            run_adapter("inject", "corrupt", "--store", S, "--kind", "structural-byte")[
+                0
+            ],
+            0,
+        )

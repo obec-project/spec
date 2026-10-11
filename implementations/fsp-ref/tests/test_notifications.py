@@ -32,7 +32,8 @@ class NotificationsTest(TempDirTest):
 
     def test_a_fresh_store_has_no_pending_notice(self):
         self.assertEqual(
-            operator.notifications(self.S), {"notifications": [], "pointer_reset": False}
+            operator.notifications(self.S),
+            {"notifications": [], "pointer_reset": False},
         )
 
     def test_a_notice_is_pending_until_acknowledged(self):
@@ -107,6 +108,7 @@ class NotificationsTest(TempDirTest):
         hooks.advance_clock(self.S, 60)
         with self.assertRaises(Refused):
             proposals.propose(
-                self.S, [{"op": "set-persona", "content": "You are a helpful assistant."}]
+                self.S,
+                [{"op": "set-persona", "content": "You are a helpful assistant."}],
             )
         self.assertEqual(self.pending()[-1]["condition"], "vital-critical")

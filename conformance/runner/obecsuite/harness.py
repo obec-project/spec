@@ -106,10 +106,14 @@ class Runner:
             try:
                 fn(self.ctx)
             except Exception as exc:
-                tr.steps.append(StepResult(
-                    step="—", kind="E", outcome=Outcome.ERROR,
-                    detail=f"test aborted: {type(exc).__name__}: {exc}",
-                ))
+                tr.steps.append(
+                    StepResult(
+                        step="—",
+                        kind="E",
+                        outcome=Outcome.ERROR,
+                        detail=f"test aborted: {type(exc).__name__}: {exc}",
+                    )
+                )
             self.ctx._current = None
             self.results.append(tr)
             if verbose:
@@ -119,8 +123,11 @@ class Runner:
     @staticmethod
     def _echo(tr: TestResult):
         mark = {
-            Outcome.PASS: "pass", Outcome.FAIL: "FAIL", Outcome.ERROR: "ERROR",
-            Outcome.UNESTABLISHED: "unest", Outcome.ATTESTED: "attest",
+            Outcome.PASS: "pass",
+            Outcome.FAIL: "FAIL",
+            Outcome.ERROR: "ERROR",
+            Outcome.UNESTABLISHED: "unest",
+            Outcome.ATTESTED: "attest",
         }[tr.outcome]
         print(f"  {tr.rule}  {mark:<6}  {tr.title}")
         for s in tr.steps:

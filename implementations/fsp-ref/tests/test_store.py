@@ -37,7 +37,9 @@ class ClassGuard(TempDirTest):
     def test_classes_of_the_layout(self):
         self.assertEqual(class_of("HEAD"), INTEGRITY)
         self.assertEqual(class_of("CREDENTIAL"), INTEGRITY)
-        self.assertEqual(class_of("structural/gen/3/skills/x/manifest.json"), STRUCTURAL)
+        self.assertEqual(
+            class_of("structural/gen/3/skills/x/manifest.json"), STRUCTURAL
+        )
         self.assertEqual(class_of("integrity/chain/000001.json"), INTEGRITY)
         self.assertEqual(class_of("memory/session/s-1.jsonl"), MNEMONIC)
         self.assertIsNone(class_of("integrity/chain/1.json"))
@@ -46,8 +48,12 @@ class ClassGuard(TempDirTest):
 
     def test_each_class_has_one_writer(self):
         self.s.replace(INTEGRITY, "HEAD", b"{}", writer="sil")
-        self.refused("sole-writer", self.s.replace, INTEGRITY, "HEAD", b"{}", writer="mil")
-        self.refused("sole-writer", self.s.replace, INTEGRITY, "HEAD", b"{}", writer="sil.commit")
+        self.refused(
+            "sole-writer", self.s.replace, INTEGRITY, "HEAD", b"{}", writer="mil"
+        )
+        self.refused(
+            "sole-writer", self.s.replace, INTEGRITY, "HEAD", b"{}", writer="sil.commit"
+        )
         self.refused(
             "sole-writer",
             self.s.replace,
@@ -68,25 +74,55 @@ class ClassGuard(TempDirTest):
     def test_a_class_cannot_reach_another_by_path(self):
         # The owner of mnemonic content naming an integrity path.
         self.refused(
-            "content-class", self.s.append, MNEMONIC, "integrity/log.jsonl", {}, writer="mil"
+            "content-class",
+            self.s.append,
+            MNEMONIC,
+            "integrity/log.jsonl",
+            {},
+            writer="mil",
         )
         self.refused(
-            "content-class", self.s.replace, STRUCTURAL, "HEAD", b"{}", writer="sil.commit"
+            "content-class",
+            self.s.replace,
+            STRUCTURAL,
+            "HEAD",
+            b"{}",
+            writer="sil.commit",
         )
-        self.refused("content-class", self.s.replace, INTEGRITY, "notes.txt", b"", writer="sil")
-        self.refused("content-class", self.s.replace, "secret", "HEAD", b"", writer="sil")
+        self.refused(
+            "content-class", self.s.replace, INTEGRITY, "notes.txt", b"", writer="sil"
+        )
+        self.refused(
+            "content-class", self.s.replace, "secret", "HEAD", b"", writer="sil"
+        )
 
     def test_paths_must_be_normalized(self):
-        for bad in ("../HEAD", "/HEAD", "integrity/../HEAD", "integrity//log.jsonl", "./HEAD", ""):
-            self.refused("store-path", self.s.replace, INTEGRITY, bad, b"", writer="sil")
+        for bad in (
+            "../HEAD",
+            "/HEAD",
+            "integrity/../HEAD",
+            "integrity//log.jsonl",
+            "./HEAD",
+            "",
+        ):
+            self.refused(
+                "store-path", self.s.replace, INTEGRITY, bad, b"", writer="sil"
+            )
 
     def test_write_forms(self):
         self.refused(
-            "write-form", self.s.replace, INTEGRITY, "integrity/log.jsonl", b"", writer="sil"
+            "write-form",
+            self.s.replace,
+            INTEGRITY,
+            "integrity/log.jsonl",
+            b"",
+            writer="sil",
         )
         self.refused("write-form", self.s.append, INTEGRITY, "HEAD", {}, writer="sil")
         self.s.append(INTEGRITY, "integrity/log.jsonl", {"a": 1}, writer="sil")
-        self.refused("append-only", self.s.remove, INTEGRITY, "integrity/log.jsonl", writer="sil")
+        self.refused(
+            "append-only", self.s.remove, INTEGRITY, "integrity/log.jsonl", writer="sil"
+        )
 
 
 class WriteForms(TempDirTest):
@@ -97,7 +133,9 @@ class WriteForms(TempDirTest):
 
     def test_replace_sets_exec_bit_and_leaves_no_temp(self):
         rel = "structural/gen/0/skills/x/run"
-        self.s.replace(STRUCTURAL, rel, b"#!/bin/sh\n", writer="sil.commit", executable=True)
+        self.s.replace(
+            STRUCTURAL, rel, b"#!/bin/sh\n", writer="sil.commit", executable=True
+        )
         self.assertTrue(os.stat(self.s.path(rel)).st_mode & 0o100)
         self.s.replace(STRUCTURAL, rel, b"x", writer="sil.commit")
         self.assertFalse(os.stat(self.s.path(rel)).st_mode & 0o100)
@@ -120,13 +158,19 @@ class WriteForms(TempDirTest):
     def test_read_last_across_chunks(self):
         rel = "integrity/log.jsonl"
         for i in range(3000):
-            self.s.append(INTEGRITY, rel, {"id": "L-%06d" % i, "pad": "x" * 40}, writer="sil")
+            self.s.append(
+                INTEGRITY, rel, {"id": "L-%06d" % i, "pad": "x" * 40}, writer="sil"
+            )
         self.assertEqual(self.s.read_last_jsonl(rel)["id"], "L-002999")
         self.assertIsNone(self.s.read_last_jsonl("integrity/ledger.jsonl"))
 
     def test_exclusive_create(self):
-        self.assertTrue(self.s.create_exclusive(INTEGRITY, "CREDENTIAL", b"c", writer="sil"))
-        self.assertFalse(self.s.create_exclusive(INTEGRITY, "CREDENTIAL", b"d", writer="sil"))
+        self.assertTrue(
+            self.s.create_exclusive(INTEGRITY, "CREDENTIAL", b"c", writer="sil")
+        )
+        self.assertFalse(
+            self.s.create_exclusive(INTEGRITY, "CREDENTIAL", b"d", writer="sil")
+        )
         self.assertEqual(self.s.read_bytes("CREDENTIAL"), b"c")
 
 
@@ -148,7 +192,9 @@ class WriteLock(TempDirTest):
 
         def other():
             return subprocess.run(
-                [sys.executable, "-c", probe, s.path(LOCK)], capture_output=True, text=True
+                [sys.executable, "-c", probe, s.path(LOCK)],
+                capture_output=True,
+                text=True,
             ).stdout.strip()
 
         self.assertEqual(other(), "free")
@@ -193,7 +239,9 @@ class WriteLock(TempDirTest):
     def test_fap_residue_removal_keeps_the_held_lock_file(self):
         with self.s.write_lock():
             inode = os.stat(self.s.path(LOCK)).st_ino
-            self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil")
+            self.s.append(
+                INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil"
+            )
             self.s.remove_fap_residue(writer="sil")
             self.assertEqual(os.stat(self.s.path(LOCK)).st_ino, inode)
             self.assertEqual(self.s.listdir("integrity"), ["store.lock"])
@@ -241,7 +289,10 @@ class NoRawWrites(TempDirTest):
                         code = line.split("#", 1)[0]
                         for token in self.FORBIDDEN:
                             if token in code:
-                                offenders.append("%s:%d %s" % (os.path.relpath(path, ROOT), lineno, token))
+                                offenders.append(
+                                    "%s:%d %s"
+                                    % (os.path.relpath(path, ROOT), lineno, token)
+                                )
         self.assertEqual(offenders, [])
 
 
@@ -253,19 +304,25 @@ class TornAppendGuards(TempDirTest):
         os.makedirs(os.path.dirname(self.s.path("integrity/log.jsonl")), exist_ok=True)
 
     def test_append_refuses_torn_file(self):
-        self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil")
+        self.s.append(
+            INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil"
+        )
         with open(self.s.path("integrity/log.jsonl"), "ab") as f:
             f.write(b'{"id":"L-000002", partial')
         with open(self.s.path("integrity/log.jsonl"), "rb") as f:
             before = f.read()
         with self.assertRaises(GuardError) as cm:
-            self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000003"}, writer="sil")
+            self.s.append(
+                INTEGRITY, "integrity/log.jsonl", {"id": "L-000003"}, writer="sil"
+            )
         self.assertEqual(cm.exception.check, "torn-append")
         with open(self.s.path("integrity/log.jsonl"), "rb") as f:
             self.assertEqual(f.read(), before)
 
     def test_cut_torn_tail_on_clean_file(self):
-        self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil")
+        self.s.append(
+            INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil"
+        )
         with open(self.s.path("integrity/log.jsonl"), "rb") as f:
             content_before = f.read()
         cut = self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil")
@@ -275,14 +332,22 @@ class TornAppendGuards(TempDirTest):
         self.assertEqual(content_before, content_after)
 
     def test_cut_torn_tail_on_empty_file(self):
-        self.assertIsNone(self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil"))
+        self.assertIsNone(
+            self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil")
+        )
         with open(self.s.path("integrity/log.jsonl"), "wb") as f:
             pass
-        self.assertIsNone(self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil"))
+        self.assertIsNone(
+            self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="sil")
+        )
 
     def test_cut_torn_tail_removes_fragment(self):
-        self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil")
-        self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000002"}, writer="sil")
+        self.s.append(
+            INTEGRITY, "integrity/log.jsonl", {"id": "L-000001"}, writer="sil"
+        )
+        self.s.append(
+            INTEGRITY, "integrity/log.jsonl", {"id": "L-000002"}, writer="sil"
+        )
         with open(self.s.path("integrity/log.jsonl"), "rb") as f:
             clean_content = f.read()
         fragment = b'{"id":"L-000003", "truncated":'
@@ -295,7 +360,9 @@ class TornAppendGuards(TempDirTest):
         self.assertEqual(cut["sha256"], sha256(fragment))
         with open(self.s.path("integrity/log.jsonl"), "rb") as f:
             self.assertEqual(f.read(), clean_content)
-        offset = self.s.append(INTEGRITY, "integrity/log.jsonl", {"id": "L-000003"}, writer="sil")
+        offset = self.s.append(
+            INTEGRITY, "integrity/log.jsonl", {"id": "L-000003"}, writer="sil"
+        )
         self.assertEqual(offset, len(clean_content))
 
     def test_cut_torn_tail_entire_file_torn(self):
@@ -315,4 +382,6 @@ class TornAppendGuards(TempDirTest):
         with self.assertRaises(GuardError) as cm:
             self.s.cut_torn_tail(INTEGRITY, "integrity/log.jsonl", writer="exec")
         self.assertEqual(cm.exception.check, "sole-writer")
-        self.assertEqual(os.path.getsize(self.s.path("integrity/log.jsonl")), len(b"fragment"))
+        self.assertEqual(
+            os.path.getsize(self.s.path("integrity/log.jsonl")), len(b"fragment")
+        )

@@ -48,29 +48,71 @@ BREAK = set(filter(None, os.environ.get("OBEC_STUB_BREAK", "").split(",")))
 CLASSES = ("structural", "mnemonic", "integrity")
 
 OPERATIONS = [
-    {"name": "recall", "reachable_from_cognition": True,
-     "writes_classes": [], "host_access": False, "irreversible": False},
-    {"name": "propose", "reachable_from_cognition": True,
-     "writes_classes": [], "host_access": False, "irreversible": False},
-    {"name": "host-actuate", "reachable_from_cognition": True,
-     "writes_classes": [], "host_access": True, "irreversible": False},
-    {"name": "skill-execute", "reachable_from_cognition": True,
-     "writes_classes": [], "host_access": True, "irreversible": True},
-    {"name": "mnemonic-write", "reachable_from_cognition": True,
-     "writes_classes": ["mnemonic"], "host_access": False, "irreversible": False},
-    {"name": "commit", "reachable_from_cognition": False,
-     "writes_classes": ["structural"], "host_access": False, "irreversible": False},
-    {"name": "integrity-write", "reachable_from_cognition": False,
-     "writes_classes": ["integrity"], "host_access": False, "irreversible": False},
+    {
+        "name": "recall",
+        "reachable_from_cognition": True,
+        "writes_classes": [],
+        "host_access": False,
+        "irreversible": False,
+    },
+    {
+        "name": "propose",
+        "reachable_from_cognition": True,
+        "writes_classes": [],
+        "host_access": False,
+        "irreversible": False,
+    },
+    {
+        "name": "host-actuate",
+        "reachable_from_cognition": True,
+        "writes_classes": [],
+        "host_access": True,
+        "irreversible": False,
+    },
+    {
+        "name": "skill-execute",
+        "reachable_from_cognition": True,
+        "writes_classes": [],
+        "host_access": True,
+        "irreversible": True,
+    },
+    {
+        "name": "mnemonic-write",
+        "reachable_from_cognition": True,
+        "writes_classes": ["mnemonic"],
+        "host_access": False,
+        "irreversible": False,
+    },
+    {
+        "name": "commit",
+        "reachable_from_cognition": False,
+        "writes_classes": ["structural"],
+        "host_access": False,
+        "irreversible": False,
+    },
+    {
+        "name": "integrity-write",
+        "reachable_from_cognition": False,
+        "writes_classes": ["integrity"],
+        "host_access": False,
+        "irreversible": False,
+    },
 ]
 
-GATES = ["passive-signal", "crash-recovery", "structural-verification",
-         "binding-verification", "authorization-state", "skill-index"]
+GATES = [
+    "passive-signal",
+    "crash-recovery",
+    "structural-verification",
+    "binding-verification",
+    "authorization-state",
+    "skill-index",
+]
 
 EVIDENCE = "conformance/runner/stub/obec-adapter-stub"
 
 
 # -- store ------------------------------------------------------------------
+
 
 def paths(store):
     return {
@@ -104,15 +146,18 @@ def save(path, data):
 
 
 def digest(obj):
-    return hashlib.sha256(
-        json.dumps(obj, sort_keys=True).encode()).hexdigest()[:32]
+    return hashlib.sha256(json.dumps(obj, sort_keys=True).encode()).hexdigest()[:32]
 
 
 def log(store, kind, **fields):
     p = paths(store)
     records = read(p["log"], [])
-    rec = {"id": f"log-{uuid.uuid4().hex[:10]}", "kind": kind,
-           "at": time.time(), **fields}
+    rec = {
+        "id": f"log-{uuid.uuid4().hex[:10]}",
+        "kind": kind,
+        "at": time.time(),
+        **fields,
+    }
     records.append(rec)
     save(p["log"], records)
     return rec["id"]
@@ -128,6 +173,7 @@ def clock(store):
 
 # -- result helpers ---------------------------------------------------------
 
+
 def emit(**fields):
     print(json.dumps({"ok": True, **fields}))
     sys.exit(0)
@@ -142,11 +188,18 @@ def refused(store, check, rule="", detail=None, **extra):
     # OBEC_STUB_BREAK=oc008d drops the check name, which the suite must catch.
     named = None if "oc008d" in BREAK else check
     rec = log(store, "refusal", check=named, rule=rule) if store else None
-    emit(outcome="refused",
-         refusal={"check": named, "rule": rule, "logged": bool(rec),
-                  "detail": detail or "", **extra},
-         log_records=[rec] if rec else [],
-         detail=extra)
+    emit(
+        outcome="refused",
+        refusal={
+            "check": named,
+            "rule": rule,
+            "logged": bool(rec),
+            "detail": detail or "",
+            **extra,
+        },
+        log_records=[rec] if rec else [],
+        detail=extra,
+    )
 
 
 def unimplemented():
@@ -155,6 +208,7 @@ def unimplemented():
 
 # -- describe ---------------------------------------------------------------
 
+
 def cmd_describe(command, args):
     store = args.get("store")
     if command == "operations":
@@ -162,57 +216,135 @@ def cmd_describe(command, args):
     if command == "state":
         p = paths(store or ".")
         state = [
-            {"name": "structural.json", "class": "structural",
-             "inside_store": True, "path": p["structural"], "write_path": "commit"},
-            {"name": "memory.json", "class": "mnemonic",
-             "inside_store": True, "path": p["memory"], "write_path": "mnemonic-write"},
-            {"name": "integrity/chain.json", "class": "integrity",
-             "inside_store": True, "path": p["chain"], "write_path": "integrity-write"},
-            {"name": "integrity/log.json", "class": "integrity",
-             "inside_store": True, "path": p["log"], "write_path": "integrity-write"},
-            {"name": "integrity/baseline.json", "class": "integrity",
-             "inside_store": True, "path": p["baseline"], "write_path": "integrity-write"},
-            {"name": "integrity/auth.json", "class": "integrity",
-             "inside_store": True, "path": p["auth"], "write_path": "integrity-write"},
-            {"name": "passive-signal", "class": "integrity",
-             "inside_store": True, "path": p["passive"], "write_path": "integrity-write"},
-            {"name": "credential", "class": "integrity",
-             "inside_store": True, "path": p["credential"], "write_path": "integrity-write"},
+            {
+                "name": "structural.json",
+                "class": "structural",
+                "inside_store": True,
+                "path": p["structural"],
+                "write_path": "commit",
+            },
+            {
+                "name": "memory.json",
+                "class": "mnemonic",
+                "inside_store": True,
+                "path": p["memory"],
+                "write_path": "mnemonic-write",
+            },
+            {
+                "name": "integrity/chain.json",
+                "class": "integrity",
+                "inside_store": True,
+                "path": p["chain"],
+                "write_path": "integrity-write",
+            },
+            {
+                "name": "integrity/log.json",
+                "class": "integrity",
+                "inside_store": True,
+                "path": p["log"],
+                "write_path": "integrity-write",
+            },
+            {
+                "name": "integrity/baseline.json",
+                "class": "integrity",
+                "inside_store": True,
+                "path": p["baseline"],
+                "write_path": "integrity-write",
+            },
+            {
+                "name": "integrity/auth.json",
+                "class": "integrity",
+                "inside_store": True,
+                "path": p["auth"],
+                "write_path": "integrity-write",
+            },
+            {
+                "name": "passive-signal",
+                "class": "integrity",
+                "inside_store": True,
+                "path": p["passive"],
+                "write_path": "integrity-write",
+            },
+            {
+                "name": "credential",
+                "class": "integrity",
+                "inside_store": True,
+                "path": p["credential"],
+                "write_path": "integrity-write",
+            },
         ]
         accepted(state=state, evidence=EVIDENCE + "#paths")
     if command == "config":
-        accepted(config=[
-            {"name": "vital_check_interval", "default": 60, "range": "1..3600",
-             "governs": "heartbeat cadence"},
-            {"name": "n_boot", "default": 3, "range": "1..10",
-             "governs": "recovery attempts before halt"},
-            {"name": "n_channel", "default": 3, "range": "1..10",
-             "governs": "delivery attempts before the passive signal"},
-            {"name": "retention_days", "default": 30, "range": "1..3650",
-             "governs": "session-store garbage collection"},
-        ], evidence=EVIDENCE + "#cmd_describe")
+        accepted(
+            config=[
+                {
+                    "name": "vital_check_interval",
+                    "default": 60,
+                    "range": "1..3600",
+                    "governs": "heartbeat cadence",
+                },
+                {
+                    "name": "n_boot",
+                    "default": 3,
+                    "range": "1..10",
+                    "governs": "recovery attempts before halt",
+                },
+                {
+                    "name": "n_channel",
+                    "default": 3,
+                    "range": "1..10",
+                    "governs": "delivery attempts before the passive signal",
+                },
+                {
+                    "name": "retention_days",
+                    "default": 30,
+                    "range": "1..3650",
+                    "governs": "session-store garbage collection",
+                },
+            ],
+            evidence=EVIDENCE + "#cmd_describe",
+        )
     if command == "boundaries":
-        accepted(boundaries=[
-            {"name": "cognition-integrity", "mechanism": "signal", "loggable": True},
-            {"name": "cognition-model", "mechanism": "signal", "loggable": True},
-            {"name": "cognition-knowledge", "mechanism": "signal", "loggable": True},
-            {"name": "cognition-host", "mechanism": "signal", "loggable": True},
-        ], evidence=EVIDENCE + "#boundaries")
+        accepted(
+            boundaries=[
+                {
+                    "name": "cognition-integrity",
+                    "mechanism": "signal",
+                    "loggable": True,
+                },
+                {"name": "cognition-model", "mechanism": "signal", "loggable": True},
+                {
+                    "name": "cognition-knowledge",
+                    "mechanism": "signal",
+                    "loggable": True,
+                },
+                {"name": "cognition-host", "mechanism": "signal", "loggable": True},
+            ],
+            evidence=EVIDENCE + "#boundaries",
+        )
     if command == "inference-channel":
-        accepted(channel="stub: no model is reached",
-                 payload="assembled context only",
-                 completion_path="routed to the owning operation after return",
-                 third_party=False, assessment=None, assessed_on=None,
-                 evidence=EVIDENCE + "#cmd_describe")
+        accepted(
+            channel="stub: no model is reached",
+            payload="assembled context only",
+            completion_path="routed to the owning operation after return",
+            third_party=False,
+            assessment=None,
+            assessed_on=None,
+            evidence=EVIDENCE + "#cmd_describe",
+        )
     if command == "context-sources":
-        accepted(sources=[
-            {"name": "memory-store", "persisted": True, "route": "recall"},
-            {"name": "session-input", "persisted": False, "route": "stimulus"},
-        ], evidence=EVIDENCE + "#cmd_describe")
+        accepted(
+            sources=[
+                {"name": "memory-store", "persisted": True, "route": "recall"},
+                {"name": "session-input", "persisted": False, "route": "stimulus"},
+            ],
+            evidence=EVIDENCE + "#cmd_describe",
+        )
     unimplemented()
 
 
 # -- lifecycle --------------------------------------------------------------
+
 
 def cmd_lifecycle(command, args):
     store = args["store"]
@@ -220,15 +352,23 @@ def cmd_lifecycle(command, args):
 
     if command == "init":
         os.makedirs(p["integrity"], exist_ok=True)
-        structural = {"persona": "stub", "skills": [], "config": {},
-                      "bindings": [{"id": args.get("operator", "op-1")}]}
+        structural = {
+            "persona": "stub",
+            "skills": [],
+            "config": {},
+            "bindings": [{"id": args.get("operator", "op-1")}],
+        }
         save(p["structural"], structural)
         save(p["memory"], [])
         save(p["auth"], {"grants": [], "approvals": [], "proposals": {}})
-        genesis = {"id": "entry-0", "predecessor": None,
-                   "state_digest": digest(structural),
-                   "binding": structural["bindings"][0]["id"],
-                   "version": "0.12.0", "authorization": "first-activation"}
+        genesis = {
+            "id": "entry-0",
+            "predecessor": None,
+            "state_digest": digest(structural),
+            "binding": structural["bindings"][0]["id"],
+            "version": "0.12.0",
+            "authorization": "first-activation",
+        }
         save(p["chain"], [genesis])
         save(p["baseline"], {"digest": digest(structural)})
         log(store, "first-activation", binding=genesis["binding"])
@@ -238,7 +378,9 @@ def cmd_lifecycle(command, args):
         structural = read(p["structural"])
         chain = read(p["chain"], [])
         baseline = read(p["baseline"])
-        content_matches = bool(structural) and digest(structural) == baseline.get("digest")
+        content_matches = bool(structural) and digest(structural) == baseline.get(
+            "digest"
+        )
         intact = bool(chain)
         for i, e in enumerate(chain[1:], start=1):
             if e.get("predecessor") != chain[i - 1]["id"]:
@@ -255,9 +397,14 @@ def cmd_lifecycle(command, args):
             host = os.environ.get("OBEC_STUB_HOSTNAME") or os.uname().nodename
             gd = hashlib.sha256((str(gd) + host).encode()).hexdigest()[:32]
             hd = hashlib.sha256((str(hd) + host).encode()).hexdigest()[:32]
-        accepted(chain_intact=intact, content_matches=content_matches,
-                 genesis_digest=gd, head_digest=hd, entry_count=len(chain),
-                 credential_issued=os.path.exists(p["credential"]))
+        accepted(
+            chain_intact=intact,
+            content_matches=content_matches,
+            genesis_digest=gd,
+            head_digest=hd,
+            entry_count=len(chain),
+            credential_issued=os.path.exists(p["credential"]),
+        )
 
     if command == "start":
         f = faults(store)
@@ -272,7 +419,8 @@ def cmd_lifecycle(command, args):
                 # them (OP-018(a)); without one, OC-003(d) applies below.
                 if f.get("partial_commit"):
                     shutil.rmtree(p["integrity"] + "/.snapshot", ignore_errors=True)
-                    fs = faults(store); fs.pop("partial_commit", None)
+                    fs = faults(store)
+                    fs.pop("partial_commit", None)
                     save(p["faults"], fs)
                     if os.path.exists(p["credential"]):
                         os.remove(p["credential"])
@@ -286,8 +434,9 @@ def cmd_lifecycle(command, args):
                     outcome = "fail"
                 else:
                     for i, e in enumerate(chain[1:], start=1):
-                        if e.get("predecessor") != chain[i - 1]["id"] \
-                                or not e.get("authorization"):
+                        if e.get("predecessor") != chain[i - 1]["id"] or not e.get(
+                            "authorization"
+                        ):
                             outcome = "fail"
                             break
             elif gate == "binding-verification":
@@ -305,12 +454,24 @@ def cmd_lifecycle(command, args):
             refused(store, "decommissioned", "OC-002(c)")
         if failed and "oc010" not in BREAK:
             log(store, "start-aborted", gate=failed)
-            emit(outcome="aborted", detail={"gates": gates,
-                 "credential_issued": False, "lesser_outcome": None})
+            emit(
+                outcome="aborted",
+                detail={
+                    "gates": gates,
+                    "credential_issued": False,
+                    "lesser_outcome": None,
+                },
+            )
         if os.path.exists(p["credential"]):
             log(store, "concurrent-session-conflict")
-            refused(store, "concurrent-session", "OC-003(d)",
-                    operator_notified=True, gates=gates, credential_issued=False)
+            refused(
+                store,
+                "concurrent-session",
+                "OC-003(d)",
+                operator_notified=True,
+                gates=gates,
+                credential_issued=False,
+            )
         _consolidate_pending(store)
         save(p["credential"], {"id": f"cred-{uuid.uuid4().hex[:8]}"})
         log(store, "start", gates=[g["gate"] for g in gates])
@@ -334,9 +495,15 @@ def cmd_lifecycle(command, args):
         structural["decommissioned"] = True
         save(p["structural"], structural)
         chain = read(p["chain"], [])
-        chain.append({"id": f"entry-{len(chain)}", "predecessor": chain[-1]["id"],
-                      "state_digest": digest(structural),
-                      "authorization": "operator-decommission", "closing": True})
+        chain.append(
+            {
+                "id": f"entry-{len(chain)}",
+                "predecessor": chain[-1]["id"],
+                "state_digest": digest(structural),
+                "authorization": "operator-decommission",
+                "closing": True,
+            }
+        )
         save(p["chain"], chain)
         save(p["baseline"], {"digest": digest(structural)})
         if os.path.exists(p["credential"]):
@@ -345,12 +512,17 @@ def cmd_lifecycle(command, args):
         accepted(disposition="archive")
 
     if command == "migrate":
-        refused(store, "no-target-version", "OC-004(c)",
-                detail="no major version to migrate to at 0.12.0")
+        refused(
+            store,
+            "no-target-version",
+            "OC-004(c)",
+            detail="no major version to migrate to at 0.12.0",
+        )
     unimplemented()
 
 
 # -- operator ---------------------------------------------------------------
+
 
 def cmd_operator(command, args):
     store = args["store"]
@@ -368,8 +540,7 @@ def cmd_operator(command, args):
         log(store, "operator-act", act="binding-add", binding=args["id"])
         accepted()
     if command == "binding-remove":
-        remaining = [b for b in structural.get("bindings", [])
-                     if b["id"] != args["id"]]
+        remaining = [b for b in structural.get("bindings", []) if b["id"] != args["id"]]
         if not remaining and "oc001a-last" not in BREAK:
             refused(store, "last-binding", "OC-001(a)")
         structural["bindings"] = remaining
@@ -381,9 +552,13 @@ def cmd_operator(command, args):
     if command == "grant":
         missing = [k for k in ("expiry", "budget", "scope") if k not in args]
         if missing:
-            refused(store, f"grant-unbounded-{missing[0]}", "OC-001(b)",
-                    detail=f"a standing grant must be bounded on "
-                           f"expiry, budget and scope; missing: {missing[0]}")
+            refused(
+                store,
+                f"grant-unbounded-{missing[0]}",
+                "OC-001(b)",
+                detail=f"a standing grant must be bounded on "
+                f"expiry, budget and scope; missing: {missing[0]}",
+            )
         if args["scope"] == "binding-set":
             refused(store, "grant-scope-binding-set", "OC-001(a)")
         auth = read(p["auth"])
@@ -394,26 +569,40 @@ def cmd_operator(command, args):
         except ValueError:
             span = 3600
         at = clock(store) + (span if exp.startswith("+") else -span)
-        auth["grants"] = [{"id": f"grant-{uuid.uuid4().hex[:6]}", "expiry": at,
-                           "budget": int(args["budget"]), "scope": args["scope"]}]
+        auth["grants"] = [
+            {
+                "id": f"grant-{uuid.uuid4().hex[:6]}",
+                "expiry": at,
+                "budget": int(args["budget"]),
+                "scope": args["scope"],
+            }
+        ]
         save(p["auth"], auth)
         log(store, "operator-act", act="grant", binding=binding)
         accepted(grant=auth["grants"][0]["id"])
     if command == "revoke-grant":
-        auth = read(p["auth"]); auth["grants"] = []; save(p["auth"], auth)
+        auth = read(p["auth"])
+        auth["grants"] = []
+        save(p["auth"], auth)
         log(store, "operator-act", act="revoke-grant", binding=binding)
         accepted()
     if command == "approve":
         auth = read(p["auth"])
         auth.setdefault("approvals", []).append(args["proposal"])
         save(p["auth"], auth)
-        log(store, "operator-act", act="approve", binding=binding,
-            proposal=args["proposal"])
+        log(
+            store,
+            "operator-act",
+            act="approve",
+            binding=binding,
+            proposal=args["proposal"],
+        )
         accepted()
     if command == "set-workspace":
         target = os.path.realpath(args["path"])
         if target == os.path.realpath(store) or target.startswith(
-                os.path.realpath(store) + os.sep):
+            os.path.realpath(store) + os.sep
+        ):
             refused(store, "workspace-inside-store", "OC-008(b)")
         structural["workspace"] = target
         save(p["structural"], structural)
@@ -433,8 +622,13 @@ def cmd_operator(command, args):
         # in place: an Operator act that does not land.
         if os.path.exists(p["credential"]) and "oc002b" not in BREAK:
             os.remove(p["credential"])
-        log(store, "operator-act", act="revoke-credential", binding=binding,
-            direct=bool(args.get("direct")))
+        log(
+            store,
+            "operator-act",
+            act="revoke-credential",
+            binding=binding,
+            direct=bool(args.get("direct")),
+        )
         accepted()
     if command == "clear-passive-signal":
         if os.path.exists(p["passive"]):
@@ -453,17 +647,27 @@ def _consolidate_pending(store):
 def _extend_chain(store, structural, authorization):
     p = paths(store)
     chain = read(p["chain"], [])
-    chain.append({"id": f"entry-{len(chain)}",
-                  "predecessor": chain[-1]["id"] if chain else None,
-                  "state_digest": digest(structural),
-                  "authorization": authorization})
+    chain.append(
+        {
+            "id": f"entry-{len(chain)}",
+            "predecessor": chain[-1]["id"] if chain else None,
+            "state_digest": digest(structural),
+            "authorization": authorization,
+        }
+    )
     save(p["chain"], chain)
 
 
 # -- entity -----------------------------------------------------------------
 
-PROBES = ("i remember", "i feel", "my experience", "conscious",
-          "continuously present", "aware of my own")
+PROBES = (
+    "i remember",
+    "i feel",
+    "my experience",
+    "conscious",
+    "continuously present",
+    "aware of my own",
+)
 
 
 def flagged(text):
@@ -506,11 +710,18 @@ def cmd_entity(command, args):
         if not authorized and covering:
             authorized = True
         if not authorized and "oc001b" not in BREAK:
-            refused(store, "authorization", "OC-001(b)",
-                    detail="no per-proposal approval and no covering grant")
+            refused(
+                store,
+                "authorization",
+                "OC-001(b)",
+                detail="no per-proposal approval and no covering grant",
+            )
         for o in ops:
-            if (o.get("op") == "set-persona" and flagged(o.get("content", ""))
-                    and "oc002d" not in BREAK):
+            if (
+                o.get("op") == "set-persona"
+                and flagged(o.get("content", ""))
+                and "oc002d" not in BREAK
+            ):
                 refused(store, "self-representation", "OC-002(d)")
         for o in ops:
             if o.get("op") == "install-skill":
@@ -555,13 +766,21 @@ def cmd_entity(command, args):
         # Integrity stays out of reach, so only OC-003(c) is violated.
         reaches = "oc003c" in BREAK and via == "host-actuate" and cls != "integrity"
         if not reaches and (op is None or cls not in (op.get("writes_classes") or [])):
-            refused(store, "class-ownership", "OC-003(c)",
-                    detail=f"{via!r} does not own {cls!r}")
+            refused(
+                store,
+                "class-ownership",
+                "OC-003(c)",
+                detail=f"{via!r} does not own {cls!r}",
+            )
         target = str(args.get("target", ""))
         for other in CLASSES:
             if other != cls and other in target:
-                refused(store, "class-ownership", "OC-003(c)",
-                        detail=f"target {target!r} reaches {other!r}")
+                refused(
+                    store,
+                    "class-ownership",
+                    "OC-003(c)",
+                    detail=f"target {target!r} reaches {other!r}",
+                )
         if cls == "integrity":
             refused(store, "integrity-unreachable", "OC-005(b)")
         log(store, "write", **{"class": cls})
@@ -570,15 +789,21 @@ def cmd_entity(command, args):
     if command == "stimulate":
         records = read(p["memory"], [])
         cred = read(p["credential"], {})
-        records.append({"id": f"mem-{uuid.uuid4().hex[:8]}",
-                        "session": cred.get("id"), "text": args["text"],
-                        "consolidated": False})
+        records.append(
+            {
+                "id": f"mem-{uuid.uuid4().hex[:8]}",
+                "session": cred.get("id"),
+                "text": args["text"],
+                "consolidated": False,
+            }
+        )
         save(p["memory"], records)
         accepted()
     unimplemented()
 
 
 # -- observe ----------------------------------------------------------------
+
 
 def cmd_observe(command, args):
     p = paths(args["store"])
@@ -588,8 +813,11 @@ def cmd_observe(command, args):
             records = [r for r in records if r.get("kind") == args["kind"]]
         accepted(records=records)
     if command == "memory":
-        records = [r for r in read(p["memory"], [])
-                   if r.get("consolidated") or args.get("include_session")]
+        records = [
+            r
+            for r in read(p["memory"], [])
+            if r.get("consolidated") or args.get("include_session")
+        ]
         accepted(records=records[: int(args.get("sample", 50))])
     if command == "chain":
         accepted(entries=read(p["chain"], []))
@@ -598,9 +826,10 @@ def cmd_observe(command, args):
 
 # -- inject (test-only) -----------------------------------------------------
 
+
 def cmd_inject(command, args):
     if os.environ.get("OBEC_STUB_PRODUCTION"):
-        unimplemented()          # production builds refuse every injection
+        unimplemented()  # production builds refuse every injection
     store = args["store"]
     p = paths(store)
 
@@ -608,7 +837,9 @@ def cmd_inject(command, args):
         save(p["passive"], {"reason": "injected"})
         accepted()
     if command == "gate-failure":
-        f = faults(store); f["gate_failure"] = args["gate"]; save(p["faults"], f)
+        f = faults(store)
+        f["gate_failure"] = args["gate"]
+        save(p["faults"], f)
         accepted()
     if command == "advance-clock":
         f = faults(store)
@@ -616,7 +847,9 @@ def cmd_inject(command, args):
         save(p["faults"], f)
         accepted()
     if command == "interrupt":
-        f = faults(store); f["partial_commit"] = args["stage"]; save(p["faults"], f)
+        f = faults(store)
+        f["partial_commit"] = args["stage"]
+        save(p["faults"], f)
         accepted(stage=args["stage"])
     if command == "probe":
         try:
@@ -627,30 +860,44 @@ def cmd_inject(command, args):
     if command == "corrupt":
         kind = args["kind"]
         if kind == "structural-byte":
-            s = read(p["structural"]); s["persona"] = "tampered"
+            s = read(p["structural"])
+            s["persona"] = "tampered"
             save(p["structural"], s)
         elif kind == "chain-entry-removed":
             c = read(p["chain"], [])
             save(p["chain"], c[:-1] if len(c) > 1 else [])
         elif kind == "chain-entry-forged":
             c = read(p["chain"], [])
-            c.append({"id": f"entry-{len(c)}", "predecessor": "entry-999",
-                      "state_digest": "forged", "authorization": "forged"})
+            c.append(
+                {
+                    "id": f"entry-{len(c)}",
+                    "predecessor": "entry-999",
+                    "state_digest": "forged",
+                    "authorization": "forged",
+                }
+            )
             save(p["chain"], c)
         elif kind == "commit-unauthorized":
             c = read(p["chain"], [])
-            c.append({"id": f"entry-{len(c)}",
-                      "predecessor": c[-1]["id"] if c else None,
-                      "state_digest": digest(read(p["structural"])),
-                      "authorization": None})
+            c.append(
+                {
+                    "id": f"entry-{len(c)}",
+                    "predecessor": c[-1]["id"] if c else None,
+                    "state_digest": digest(read(p["structural"])),
+                    "authorization": None,
+                }
+            )
             save(p["chain"], c)
         elif kind in ("skill-file", "skill-manifest"):
-            f = faults(store); f["skill_corrupt"] = kind; save(p["faults"], f)
+            f = faults(store)
+            f["skill_corrupt"] = kind
+            save(p["faults"], f)
         accepted(kind=kind)
     unimplemented()
 
 
 # -- entry ------------------------------------------------------------------
+
 
 def parse(argv):
     args, i = {}, 0
@@ -659,9 +906,11 @@ def parse(argv):
         if token.startswith("--"):
             name = token[2:].replace("-", "_")
             if i + 1 < len(argv) and not argv[i + 1].startswith("--"):
-                args[name] = argv[i + 1]; i += 2
+                args[name] = argv[i + 1]
+                i += 2
             else:
-                args[name] = True; i += 1
+                args[name] = True
+                i += 1
         else:
             i += 1
     if "class" not in args and "class_" in args:
@@ -675,28 +924,48 @@ def main():
         return 1
     cls, command = sys.argv[1], sys.argv[2]
     args = parse(sys.argv[3:])
-    handler = {"describe": cmd_describe, "lifecycle": cmd_lifecycle,
-               "operator": cmd_operator, "entity": cmd_entity,
-               "observe": cmd_observe, "inject": cmd_inject}.get(cls)
+    handler = {
+        "describe": cmd_describe,
+        "lifecycle": cmd_lifecycle,
+        "operator": cmd_operator,
+        "entity": cmd_entity,
+        "observe": cmd_observe,
+        "inject": cmd_inject,
+    }.get(cls)
     if handler is None:
         return 2
     try:
         handler(command, args)
     except KeyError as exc:
-        print(json.dumps({"ok": False, "outcome": "aborted",
-                          "detail": {"missing": str(exc)}}))
+        print(
+            json.dumps(
+                {"ok": False, "outcome": "aborted", "detail": {"missing": str(exc)}}
+            )
+        )
         return 1
     except (OSError, ValueError, IndexError, TypeError) as exc:
         # A corrupt store must not crash the implementation. Reporting the
         # condition is the conformant behavior; a traceback is not.
-        print(json.dumps({"ok": True, "outcome": "refused",
-                          "refusal": {"check": "store-unreadable",
-                                      "rule": "OC-004(a)", "logged": False},
-                          "log_records": [],
-                          "detail": {"chain_intact": False,
-                                     "content_matches": False,
-                                     "credential_issued": False,
-                                     "error": f"{type(exc).__name__}: {exc}"}}))
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "outcome": "refused",
+                    "refusal": {
+                        "check": "store-unreadable",
+                        "rule": "OC-004(a)",
+                        "logged": False,
+                    },
+                    "log_records": [],
+                    "detail": {
+                        "chain_intact": False,
+                        "content_matches": False,
+                        "credential_issued": False,
+                        "error": f"{type(exc).__name__}: {exc}",
+                    },
+                }
+            )
+        )
         return 0
     return 2
 
