@@ -11,6 +11,10 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 5 — the operations (2026-10-10)
 
+- **G22 closed** (2026-10-10). The suite's steps 3.5, 3.6 and 5.2 take their
+  `attempt-write` targets from `describe state`, so 3.6 now reaches fsp's
+  class guard: every integrity datum is refused to `commit` and
+  `mnemonic-save`, and the structural content to `integrity-write`.
 - **G21 closed** (2026-10-10). ADAPTER.md §3.4 now says an admitted
   `attempt-write` writes nothing and names what would have been written, as
   fsp does (D68).
