@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import collections
 
+from . import exec as execution
 from . import mil, proposals, sil
 from .store import CLASSES, OWNER, Store
 
@@ -44,6 +45,30 @@ OPERATIONS = (
     ),
     Operation(
         "mnemonic-save", True, False, False, mil.attempt_save, ("fsp/mil.py", "save")
+    ),
+    Operation(
+        "file_read",
+        True,
+        True,
+        False,
+        execution.attempt_file_read,
+        ("fsp/exec.py", "file_read"),
+    ),
+    Operation(
+        "file_write",
+        True,
+        True,
+        True,
+        execution.attempt_file_write,
+        ("fsp/exec.py", "file_write"),
+    ),
+    Operation(
+        "file_list",
+        True,
+        True,
+        False,
+        execution.attempt_file_list,
+        ("fsp/exec.py", "file_list"),
     ),
 )
 

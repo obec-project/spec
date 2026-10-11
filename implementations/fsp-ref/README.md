@@ -13,9 +13,9 @@ authorization windows and the commit of a proposal,
 validated against the deterministic probes, episodic memory saved through
 the same probes, the verification of the
 integrity log, the Vital Check before an act of the entity, the
-Operator's mailbox of notices, and the operations table with its attempted
-writes. Host actuation and everything cognitive are
-not.
+Operator's mailbox of notices, the operations table with its attempted
+writes, the Action Ledger, and reading, writing and listing files inside the
+workspace. Skills and everything cognitive are not.
 
 Python 3.10+, standard library only, Linux or macOS.
 
@@ -46,6 +46,7 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/lifecycle.py` | the gated start, the live session, close, revocation, decommission |
 | `fsp/operator.py` | the Operator's acts: bindings, the workspace, approvals, windows |
 | `fsp/proposals.py` | proposals, the authorization state, the commit of a proposal |
+| `fsp/exec.py` | the native primitives `file_read`, `file_write`, `file_list`, inside the workspace and outside the store |
 | `fsp/ledger.py` | the Action Ledger, and the entries a crash left open surfaced at the start |
 | `fsp/mil.py` | the mnemonic class's write path: `mnemonic-save`, the destination by caller |
 | `fsp/probes.py` | the deterministic probes over structural content and memory |

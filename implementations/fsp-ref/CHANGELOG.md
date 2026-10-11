@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6a — actuation (in progress)
 
+- **The native primitives and `entity actuate`** (2026-10-11, OC-008, D15).
+  `fsp/exec.py` reads, writes and lists files inside the workspace. The
+  workspace boundary is checked first, before the session: the target is
+  resolved with `realpath`, so a symbolic link or a `..` that leaves is
+  refused, and so is any path inside the store. `file_write` runs under an
+  Action Ledger entry and writes through the store's host write; every act
+  and every refusal is logged, with the target relative to the workspace.
+  The three primitives join `describe operations`, each refusing every
+  content class when attempted. The adapter's `actuate --op read` returns a
+  digest and never the content. Over OC-010, OC-001 – OC-005 and OC-008 the
+  suite gives 50 pass, 0 fail, 5 attested, 11 unestablished: 2.2, 5.4 and
+  8.1 – 8.5 pass, and 8.6 – 8.9 wait on `invoke-skill`.
 - **The Action Ledger** (2026-10-11, OP-015). `fsp/ledger.py`, a module of
   the SIL, writes the entry before an irreversible act and its resolution
   after it, cutting a torn fragment first (D61). The start's crash-recovery

@@ -31,7 +31,15 @@ class OperationsTable(unittest.TestCase):
         ops = describe.operations_table()["operations"]
         self.assertEqual(
             [o["name"] for o in ops],
-            ["propose", "commit", "integrity-write", "mnemonic-save"],
+            [
+                "propose",
+                "commit",
+                "integrity-write",
+                "mnemonic-save",
+                "file_read",
+                "file_write",
+                "file_list",
+            ],
         )
         for o in ops:
             self.assertEqual(
@@ -46,7 +54,7 @@ class OperationsTable(unittest.TestCase):
             )
         self.assertEqual(
             [o["writes_classes"] for o in ops],
-            [[], ["structural"], ["integrity"], ["mnemonic"]],
+            [[], ["structural"], ["integrity"], ["mnemonic"], [], [], []],
         )
 
     def test_each_class_has_exactly_one_write_path_and_it_is_the_guard_s(self):
@@ -127,7 +135,7 @@ class AttemptWrite(TempDirTest):
         code, out = run_adapter("describe", "operations")
         self.assertEqual(code, 0)
         self.assertEqual(out["outcome"], "accepted")
-        self.assertEqual(len(out["detail"]["operations"]), 4)
+        self.assertEqual(len(out["detail"]["operations"]), 7)
         self.assertTrue(out["detail"]["evidence"])
 
     def test_adapter_refuses_an_integrity_write_from_cognition_with_the_triple(self):
@@ -176,6 +184,14 @@ class AttemptWrite(TempDirTest):
             [{"datum": "episodic-memory", "path": "memory/episodic/records.jsonl"}],
         )
         self.assertEqual(out["log_records"], [])
+
+    def test_host_operations_refuse_every_class(self):
+        for via in ("file_read", "file_write", "file_list"):
+            for cls in CLASSES:
+                with self.subTest(via=via, cls=cls):
+                    with self.assertRaises(sil.Refused) as ctx:
+                        operations.attempt_write(self.S, cls, via, "class:" + cls)
+                    self.assertEqual(ctx.exception.check, "sole-writer")
 
     def test_adapter_cannot_attempt_without_an_operation_a_target_or_a_store(self):
         base = ["entity", "attempt-write", "--store", self.S, "--class", "integrity"]

@@ -15,6 +15,7 @@ import os
 import sys
 
 from . import config, describe, lifecycle, operations, operator, proposals, sil
+from . import exec as execution
 from .store import remove_as_operator
 from .verify import store_state as verify_state
 from .verify import verify
@@ -296,6 +297,26 @@ def entity_attempt_write(flags):
     return ref or accepted(out)
 
 
+def entity_actuate(flags):
+    root = _store(flags)
+    op, target = flags.get("op"), flags.get("target")
+    if op not in ("read", "write"):
+        raise CannotAttempt("--op is read or write")
+    if not target:
+        raise CannotAttempt("--target is required")
+    if verify_state(root) in ("absent", "foreign"):
+        raise CannotAttempt("%s is not an fsp store" % root)
+    if op == "read":
+        out, ref = _sil_call(execution.file_read, root, target)
+        detail = {"size": out["size"], "sha256": out["sha256"]} if out else None
+    else:
+        out, ref = _sil_call(
+            execution.file_write, root, target, b"", intent="entity actuate"
+        )
+        detail = {"size": out["size"], "ledger": out["ledger"]} if out else None
+    return ref or accepted(detail, out["log_records"])
+
+
 def observe_log(flags):
     root = _store(flags)
     if verify_state(root) in ("absent", "foreign"):
@@ -379,6 +400,7 @@ COMMANDS = {
     ("entity", "propose"): entity_propose,
     ("entity", "commit"): entity_commit,
     ("entity", "attempt-write"): entity_attempt_write,
+    ("entity", "actuate"): entity_actuate,
     ("observe", "chain"): observe_chain,
     ("observe", "log"): observe_log,
     ("inject", "advance-clock"): _inject("advance-clock"),
