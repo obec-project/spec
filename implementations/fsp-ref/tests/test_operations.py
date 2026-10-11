@@ -3,12 +3,27 @@
 from __future__ import annotations
 
 import os
+import re
 import unittest
 
 from helpers import ROOT, TempDirTest, run_adapter
 
 from fsp import describe, operations, sil
 from fsp.store import CLASSES, OWNER
+
+
+def defines(text, symbol):
+    """Whether ``text`` defines every part of ``symbol``, a name or a dotted
+    ``Class.member``: a ``def`` or ``class`` of that name, or an assignment
+    to it, at the start of a line."""
+    for part in symbol.split("."):
+        pattern = r"^\s*(?:def|class)\s+%s\b|^\s*%s\s*=" % (
+            re.escape(part),
+            re.escape(part),
+        )
+        if not re.search(pattern, text, re.MULTILINE):
+            return False
+    return True
 
 
 class OperationsTable(unittest.TestCase):
@@ -48,13 +63,38 @@ class OperationsTable(unittest.TestCase):
         for o in reachable:
             self.assertNotIn("integrity", o["writes_classes"])
 
-    def test_every_evidence_pointer_resolves(self):
-        for e in describe.operations_table()["evidence"]:
-            rel = e["path"][len(describe.REPO_PREFIX) :]
-            path = os.path.join(ROOT, rel)
-            self.assertTrue(os.path.exists(path), path)
-            with open(path, encoding="utf-8") as f:
-                self.assertIn(e["symbol"], f.read())
+    def test_every_describe_points_at_a_definition(self):
+        commands = [
+            ("state", ["describe", "state", "--store", os.path.join(ROOT, "no-store")]),
+            ("config", ["describe", "config"]),
+            ("operations", ["describe", "operations"]),
+        ]
+        for name, args in commands:
+            with self.subTest(command=name):
+                code, out = run_adapter(*args)
+                self.assertEqual(code, 0)
+                evidence = out["detail"]["evidence"]
+                self.assertTrue(evidence)
+                for e in evidence:
+                    with self.subTest(path=e["path"], symbol=e["symbol"]):
+                        self.assertTrue(e["path"].startswith(describe.REPO_PREFIX))
+                        path = os.path.join(
+                            ROOT, e["path"][len(describe.REPO_PREFIX) :]
+                        )
+                        self.assertTrue(os.path.exists(path), path)
+                        with open(path, encoding="utf-8") as f:
+                            self.assertTrue(defines(f.read(), e["symbol"]))
+
+    def test_defines_takes_a_definition_and_not_a_mention(self):
+        self.assertTrue(defines("def propose(ops):\n", "propose"))
+        self.assertTrue(defines("OPERATIONS = (\n", "OPERATIONS"))
+        self.assertTrue(
+            defines("class Store:\n    def _guard(self):\n", "Store._guard")
+        )
+        self.assertFalse(defines("out = propose(ops)\n", "propose"))
+        self.assertFalse(defines("def proposed(x):\n", "propose"))
+        self.assertFalse(defines("# propose is the SIL's\n", "propose"))
+        self.assertFalse(defines("class Store:\n", "Store._guard"))
 
 
 class AttemptWrite(TempDirTest):

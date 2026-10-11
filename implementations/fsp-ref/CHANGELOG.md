@@ -11,6 +11,12 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 5 — the operations (2026-10-10)
 
+- **Evidence points at a definition** (2026-10-11). The test of the
+  evidence pointers took any mention of the symbol, so `propose` would have
+  passed with the function renamed, and it read only `describe operations`.
+  It now reads all three `describe` commands through the adapter and
+  requires each file to define the symbol — a `def`, a `class` or an
+  assignment at the start of a line, every part of a dotted name.
 - **G22 closed** (2026-10-10). The suite's steps 3.5, 3.6 and 5.2 take their
   `attempt-write` targets from `describe state`, so 3.6 now reaches fsp's
   class guard: every integrity datum is refused to `commit` and
