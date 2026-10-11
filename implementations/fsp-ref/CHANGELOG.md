@@ -42,6 +42,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   with any other path is refused whole, logged with `check: content-class`,
   after its authorization and before any write. The skill-name pattern now
   lives in the store, and `proposals` imports it.
+- **The MIL's write path** (2026-10-10, D21, D67). `fsp/mil.py` is the
+  mnemonic class's only writer, and `mnemonic-save` its one path: the CPE may
+  write `episodic` only, any other destination or caller is refused
+  (`check: mnemonic-destination`), and the content passes the deterministic
+  probes of the committed generation before it is written, so a record that
+  represents the entity as sentient never lands (`check:
+  self-representation`). Each record carries the live session that produced
+  it (OC-003(e)), and an act of the entity runs the Vital Check first (D65).
+  A torn fragment at the end of the file is cut and logged before the append,
+  as the log's is (D61). The `session` and `semantic` destinations, a
+  record's conversation and `supersedes`, and recall are Phase 7.
 
 ## Phase 4 — the Vital Check (2026-10-10)
 

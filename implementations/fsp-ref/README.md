@@ -10,7 +10,8 @@ start, sessions, revocation, the passive signal and decommission are in
 place, and so are the Operator's acts on bindings and the workspace,
 proposals, their review and the cap on pending ones, approvals,
 authorization windows and the commit of a proposal,
-validated against the deterministic probes, the verification of the
+validated against the deterministic probes, episodic memory saved through
+the same probes, the verification of the
 integrity log, the Vital Check before an act of the entity, and the
 Operator's mailbox of notices. Host actuation and everything cognitive are
 not.
@@ -44,7 +45,8 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/lifecycle.py` | the gated start, the live session, close, revocation, decommission |
 | `fsp/operator.py` | the Operator's acts: bindings, the workspace, approvals, windows |
 | `fsp/proposals.py` | proposals, the authorization state, the commit of a proposal |
-| `fsp/probes.py` | the deterministic probes over structural content |
+| `fsp/mil.py` | the mnemonic class's write path: `mnemonic-save`, the destination by caller |
+| `fsp/probes.py` | the deterministic probes over structural content and memory |
 | `fsp/defaults/` | the persona and probes first activation writes |
 | `fsp/config.py` | the configuration surface |
 | `fsp/clock.py` | the clock, and the one windows are judged by, which a test build can advance |
