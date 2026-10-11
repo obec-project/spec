@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 
+from . import operations
 from .store import LAYOUT, OWNER
 
 REPO_PREFIX = "implementations/fsp-ref/"
@@ -37,3 +38,25 @@ def state(root: str):
             evidence("fsp/store.py", "Store._guard"),
         ],
     }
+
+
+def operations_table():
+    """``describe operations``: generated from ``operations.OPERATIONS`` and the
+    store's ``OWNER`` (D67)."""
+    entries = []
+    evidence_list = [
+        evidence("fsp/operations.py", "OPERATIONS"),
+        evidence("fsp/store.py", "OWNER"),
+    ]
+    for op in operations.OPERATIONS:
+        entries.append(
+            {
+                "name": op.name,
+                "reachable_from_cognition": op.reachable_from_cognition,
+                "writes_classes": operations.writes_classes(op.name),
+                "host_access": op.host_access,
+                "irreversible": op.irreversible,
+            }
+        )
+        evidence_list.append(evidence(*op.evidence))
+    return {"operations": entries, "evidence": evidence_list}

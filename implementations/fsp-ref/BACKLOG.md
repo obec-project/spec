@@ -8,11 +8,10 @@ done is in [CHANGELOG.md](CHANGELOG.md).
 ## 1. Phases
 
 Each phase ends with `run.py --only …` green on its invariants
-([AGENTS.md](AGENTS.md)). Phases 0–4 are done.
+([AGENTS.md](AGENTS.md)). Phases 0–5 are done.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **5** | `describe operations` from the operations the code has (D67); `entity attempt-write` through each operation's own check, the target resolved through the `LAYOUT` (D68) | OC-001 1.9, OC-002 2.1, OC-003(c), OC-005 but 5.4 |
 | **6** | actuation inside the workspace (declared since Phase 3), allowlist with digest-pinned skills (D16), a hold and the Operator's four answers to it (D66), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
 | **7** | session records, the conversation and its recall scope (D11, D60), `mnemonic-recall`, `mnemonic-save`'s `session` and `semantic` destinations and a record's conversation and `supersedes`, the probes over memory (D12), promotion under authorization and the semantic ledger (D53), `/resume`, `/inject` and `/retract`, Sleep | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the process holding the session: `holder` and the `flock` on `CREDENTIAL` (D25), suspend (D19); the prompts and `/notifications` (D66), the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |

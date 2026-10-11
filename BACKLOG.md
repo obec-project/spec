@@ -14,7 +14,7 @@ steps go with evidence and review; step 3.2 requires a real second host;
 ## 1. Before announcing
 
 - **The reference implementation passes the suite** — the trigger above.
-  Phases 5–9 of [fsp-ref's backlog](implementations/fsp-ref/BACKLOG.md).
+  Phases 6–9 of [fsp-ref's backlog](implementations/fsp-ref/BACKLOG.md).
 - **`.github/ISSUE_TEMPLATE/challenge-invariant.md`** — the most important
   template, because it turns [CONTRIBUTING §7](CONTRIBUTING.md#7-challenging-an-invariant)
   from an invitation into a process: fields for which of the ten invariants,

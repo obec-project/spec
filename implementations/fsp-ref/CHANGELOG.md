@@ -9,7 +9,21 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
-## Phase 5 — the operations (in progress)
+## Phase 5 — the operations (2026-10-10)
+
+- **The operations table, `describe operations` and `entity attempt-write`**
+  (2026-10-10, D67, D68). `fsp/operations.py` holds the four operations the
+  code has — `propose`, `commit`, `integrity-write`, `mnemonic-save` — each
+  with its attempted write and a pointer to its real path. What each one
+  writes is read from the store's `OWNER`, so the table and the class guard
+  cannot disagree, and each class has exactly one write path.
+  `describe operations` is generated from it, with evidence pointers a test
+  resolves against the source. The adapter checks only that the arguments,
+  the store and the operation exist; the operation's attempt does the
+  refusing. The suite's OC-001 1.9, OC-003 3.4 – 3.6 and OC-005 5.1 – 5.3
+  now pass and OC-002 2.1 is attested: over OC-010 and OC-001 – OC-005,
+  41 pass, 0 fail, 5 attested, 9 unestablished, every one of the nine
+  waiting on a later phase, a second host or a second version.
 
 - **D67, D68 and D69 added — the operations, the attempted write, the
   writers** (2026-10-10). `describe operations` reports only the operations

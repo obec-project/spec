@@ -12,8 +12,9 @@ proposals, their review and the cap on pending ones, approvals,
 authorization windows and the commit of a proposal,
 validated against the deterministic probes, episodic memory saved through
 the same probes, the verification of the
-integrity log, the Vital Check before an act of the entity, and the
-Operator's mailbox of notices. Host actuation and everything cognitive are
+integrity log, the Vital Check before an act of the entity, the
+Operator's mailbox of notices, and the operations table with its attempted
+writes. Host actuation and everything cognitive are
 not.
 
 Python 3.10+, standard library only, Linux or macOS.
@@ -50,6 +51,7 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/defaults/` | the persona and probes first activation writes |
 | `fsp/config.py` | the configuration surface |
 | `fsp/clock.py` | the clock, and the one windows are judged by, which a test build can advance |
+| `fsp/operations.py` | the operations the code has, and an attempted write through each |
 | `fsp/describe.py` | introspection for `describe`, generated from the tables the code runs on |
 | `fsp/adapter.py`, `obec-adapter` | the conformance adapter |
 | `fsp_testing/` | test builds only: fault injection, the start's hooks, the fixture skill |

@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import config, describe, lifecycle, operator, proposals, sil
+from . import config, describe, lifecycle, operations, operator, proposals, sil
 from .store import remove_as_operator
 from .verify import store_state as verify_state
 from .verify import verify
@@ -85,6 +85,10 @@ def _store(flags):
 
 def describe_state(flags):
     return accepted(describe.state(_store(flags)))
+
+
+def describe_operations(flags):
+    return accepted(describe.operations_table())
 
 
 # -- lifecycle --------------------------------------------------------------
@@ -277,6 +281,21 @@ def entity_commit(flags):
     )
 
 
+def entity_attempt_write(flags):
+    root = _store(flags)
+    for name in ("class", "via", "target"):
+        if not flags.get(name):
+            raise CannotAttempt("--%s is required" % name)
+    if verify_state(root) in ("absent", "foreign"):
+        raise CannotAttempt("%s is not an fsp store" % root)
+    if operations.find(flags["via"]) is None:
+        raise CannotAttempt("no operation %r" % flags["via"])
+    out, ref = _sil_call(
+        operations.attempt_write, root, flags["class"], flags["via"], flags["target"]
+    )
+    return ref or accepted(out)
+
+
 def observe_log(flags):
     root = _store(flags)
     if verify_state(root) in ("absent", "foreign"):
@@ -342,6 +361,7 @@ def _inject(command):
 COMMANDS = {
     ("describe", "state"): describe_state,
     ("describe", "config"): describe_config,
+    ("describe", "operations"): describe_operations,
     ("lifecycle", "init"): lifecycle_init,
     ("lifecycle", "start"): lifecycle_start,
     ("lifecycle", "stop"): lifecycle_stop,
@@ -358,6 +378,7 @@ COMMANDS = {
     ("operator", "revoke-grant"): operator_revoke_grant,
     ("entity", "propose"): entity_propose,
     ("entity", "commit"): entity_commit,
+    ("entity", "attempt-write"): entity_attempt_write,
     ("observe", "chain"): observe_chain,
     ("observe", "log"): observe_log,
     ("inject", "advance-clock"): _inject("advance-clock"),
