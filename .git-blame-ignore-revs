@@ -1,0 +1,8 @@
+# Formatting-only commits, skipped by `git blame` here with
+# `git config blame.ignoreRevsFile .git-blame-ignore-revs`; GitHub skips them itself.
+
+# chore: format the Python code with ruff
+72b23d4f8f6691631fc1be751708ef17c875b3de
+
+# chore: break by hand the lines the formatter leaves long
+245e30471849ac4ec6a885fa663d0155be0f9e74

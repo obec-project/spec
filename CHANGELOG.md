@@ -74,7 +74,8 @@ The conformance suite carries its own version line; a claim names both, as in
   and the length rule catches the strings and comments it does not break.
   Ruff is a tool of the repository, not a dependency: the suite and fsp-ref
   still run on the standard library alone. Only Python is formatted; the
-  documents are not.
+  documents are not. CI checks both, and `.git-blame-ignore-revs` keeps the
+  reformat out of `git blame`.
 
 ## 0.12.0 — 2026-09-27
 
