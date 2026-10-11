@@ -12,7 +12,7 @@ import secrets
 from . import chain, clock, config, lifecycle, sil, vital
 from .digest import canonical, sha256
 from .sil import WRITER, Refused, log_append
-from .store import INTEGRITY, Store
+from .store import INTEGRITY, SKILL_NAME, Store
 
 CATEGORIES = {
     "set-persona": "persona",
@@ -27,7 +27,6 @@ WINDOW_CATEGORIES = (
     "parameters",
 )
 
-SKILL_NAME = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
 EXPIRY_RE = re.compile(r"^([+-])(\d+)([smhd])$")
 
 

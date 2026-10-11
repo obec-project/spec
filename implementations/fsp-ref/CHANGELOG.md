@@ -33,6 +33,15 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   may name, or cannot be resolved at all. Today only the SIL's five modules
   name a writer, all within bounds; the MIL's `mil.py` is the first module
   a later task adds under it.
+- **A commit writes only the structural data the store declares**
+  (2026-10-10, D68). `commit_generation` took any change path, so a change
+  named `integrity/auth.json` became the structural file
+  `structural/gen/<n+1>/integrity/auth.json`, a datum no class should hold
+  there; no caller did that, but nothing stopped one. `store.structural_target`
+  admits the five structural files and `skills/<name>/<path>`, and a commit
+  with any other path is refused whole, logged with `check: content-class`,
+  after its authorization and before any write. The skill-name pattern now
+  lives in the store, and `proposals` imports it.
 
 ## Phase 4 — the Vital Check (2026-10-10)
 

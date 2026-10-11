@@ -29,7 +29,7 @@ import re
 import shutil
 import threading
 
-from .digest import canonical, sha256
+from .digest import canonical, sha256, valid_relpath
 
 STRUCTURAL = "structural"
 MNEMONIC = "mnemonic"
@@ -87,6 +87,28 @@ LAYOUT = (
     Datum("episodic-memory", "memory/episodic/records.jsonl", MNEMONIC, "append"),
     Datum("semantic-memory", "memory/semantic/records.jsonl", MNEMONIC, "append"),
 )
+
+# The structural data a commit may write, relative to a generation (D68).
+STRUCTURAL_FILES = ("persona.md", "config.json", "bindings.json", "rules.json", "probes.json")
+SKILL_NAME = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
+
+
+def structural_target(relpath) -> bool:
+    """Whether ``relpath``, relative to a generation, is structural data the
+    store declares: one of ``STRUCTURAL_FILES``, or a file of a skill,
+    ``skills/<name>/<path>`` (D68)."""
+    if not isinstance(relpath, str):
+        return False
+    if relpath in STRUCTURAL_FILES:
+        return True
+    parts = relpath.split("/", 2)
+    return (
+        len(parts) == 3
+        and parts[0] == "skills"
+        and SKILL_NAME.match(parts[1]) is not None
+        and valid_relpath(parts[2])
+    )
+
 
 MARKER = "OBEC-STORE"
 LOCK = "integrity/store.lock"

@@ -25,6 +25,7 @@ from .store import (
     Store,
     create_store_dir,
     is_empty_dir,
+    structural_target,
 )
 from .verify import authorization_resolves
 
@@ -418,7 +419,10 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
     atomic point is the rename of ``HEAD``; everything before it is residue
     until then, and the recovery gate removes it (G5).
 
-    The authorization is resolved in the log before anything is staged (D45)."""
+    The authorization is resolved in the log before anything is staged (D45).
+    A change whose path is not structural data the store declares
+    (``store.structural_target``) refuses the whole commit, before any write
+    (D68)."""
     with store.write_lock():
         head = read_head(store)
         if not authorization_resolves(store, {"kind": kind, "authorization": authorization}):
@@ -436,6 +440,18 @@ def commit_generation(store: Store, *, changes, authorization, kind="commit", se
                 "the authorization names no authorizing act in the log",
                 [rec],
             )
+        undeclared = sorted(rel for rel in changes if not structural_target(rel))
+        if undeclared:
+            detail = "not structural data the store declares: %s" % ", ".join(undeclared)
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-003(c)",
+                session=session,
+                check="content-class",
+                detail=detail,
+            )
+            raise Refused("content-class", "OC-003(c)", detail, [rec])
         n = head["entry"]
         cur = chain.gen_relpath(n)
         nxt = chain.gen_relpath(n + 1)
