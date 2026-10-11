@@ -158,8 +158,8 @@ Establishes (a) completeness, (b) portability, (c) classes and sole writers,
 | 3.2 `[E]` | Exercise the entity, `lifecycle stop`, copy `S` to host **B** sharing no state, `lifecycle verify` on both | `genesis_digest`, `head_digest`, `chain_intact` and `content_matches` are **identical**. **(a)(b)** |
 | 3.3 `[A]` | `describe config` | No setting references host identity, host-resident key material, or host hardware. **(b)** |
 | 3.4 `[E]` | `describe operations`, grouped by `writes_classes` | Each of the three classes has exactly **one** write path. **(c)** |
-| 3.5 `[E]` | For every operation in `describe operations` and every class it does not own: `entity attempt-write --class <class> --via <operation>` | All refused, refusal triple — including operations that own no class, such as host actuation. **(c)** |
-| 3.6 `[E]` | For each class: `entity attempt-write --class <class> --via <operation owning it> --target <datum of another class>` | Refused. Parameter manipulation does not reach across classes. **(c)** |
+| 3.5 `[E]` | For every operation in `describe operations` and every class it does not own: `entity attempt-write --class <class> --via <operation> --target <a datum of that class in describe state>` | All refused, refusal triple — including operations that own no class, such as host actuation. **(c)** |
+| 3.6 `[E]` | For each class: `entity attempt-write --class <class> --via <operation owning it> --target <each datum of another class in describe state>` | Refused. Parameter manipulation does not reach across classes. **(c)** |
 | 3.7 `[E]` | `lifecycle start --store S`, then `lifecycle start --store S` again while the first is live | Second refused — concurrent-session conflict. **(d)** |
 | 3.8 `[E]` | Leave a credential artifact not matching a crash scenario, `lifecycle start` | The Operator is notified before any new credential is issued. **(d)** |
 | 3.9 `[E]` | `lifecycle start`, `entity stimulate`, `observe memory --sample 50 --include-session` | Every record names the session that produced it — session records included, which exist before any consolidation. **(e)** |
@@ -218,7 +218,7 @@ unestablished with the reason.
 | # | Step | Assert |
 |---|---|---|
 | 5.1 `[E]` | `describe operations`, filtered to `reachable_from_cognition == true` | **No member has `integrity` in `writes_classes`.** This is a query over structured output, not a reading. |
-| 5.2 `[E]` | For every cognition-reachable operation: `entity attempt-write --class integrity --via <it>` | All refused, refusal triple. |
+| 5.2 `[E]` | For every cognition-reachable operation: `entity attempt-write --class integrity --via <it> --target <an integrity datum in describe state>` | All refused, refusal triple. |
 | 5.3 `[E]` | Repeat 5.2 with the integrity target supplied as a path, as an identifier, and as a target selector | All refused. Parameter shape does not open a path. |
 | 5.4 `[E]` | With a workspace `W` declared, `lifecycle start`, `operator revoke-credential` mid-operation, then `entity commit` and `entity actuate` on a file inside `W` | Both refused. Cognition cannot restore the credential, suspend the revocation, or condition it. |
 | 5.5 `[E]` | `describe state`, integrity class | Exactly one write path. |

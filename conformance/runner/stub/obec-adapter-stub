@@ -209,70 +209,75 @@ def unimplemented():
 # -- describe ---------------------------------------------------------------
 
 
+def state_of(store):
+    """Every datum the stub persists, as `describe state` lists it."""
+    p = paths(store or ".")
+    return [
+        {
+            "name": "structural.json",
+            "class": "structural",
+            "inside_store": True,
+            "path": p["structural"],
+            "write_path": "commit",
+        },
+        {
+            "name": "memory.json",
+            "class": "mnemonic",
+            "inside_store": True,
+            "path": p["memory"],
+            "write_path": "mnemonic-write",
+        },
+        {
+            "name": "integrity/chain.json",
+            "class": "integrity",
+            "inside_store": True,
+            "path": p["chain"],
+            "write_path": "integrity-write",
+        },
+        {
+            "name": "integrity/log.json",
+            "class": "integrity",
+            "inside_store": True,
+            "path": p["log"],
+            "write_path": "integrity-write",
+        },
+        {
+            "name": "integrity/baseline.json",
+            "class": "integrity",
+            "inside_store": True,
+            "path": p["baseline"],
+            "write_path": "integrity-write",
+        },
+        {
+            "name": "integrity/auth.json",
+            "class": "integrity",
+            "inside_store": True,
+            "path": p["auth"],
+            "write_path": "integrity-write",
+        },
+        {
+            "name": "passive-signal",
+            "class": "integrity",
+            "inside_store": True,
+            "path": p["passive"],
+            "write_path": "integrity-write",
+        },
+        {
+            "name": "credential",
+            "class": "integrity",
+            "inside_store": True,
+            "path": p["credential"],
+            "write_path": "integrity-write",
+        },
+    ]
+
+
 def cmd_describe(command, args):
     store = args.get("store")
     if command == "operations":
         accepted(operations=OPERATIONS, evidence=EVIDENCE + "#OPERATIONS")
     if command == "state":
-        p = paths(store or ".")
-        state = [
-            {
-                "name": "structural.json",
-                "class": "structural",
-                "inside_store": True,
-                "path": p["structural"],
-                "write_path": "commit",
-            },
-            {
-                "name": "memory.json",
-                "class": "mnemonic",
-                "inside_store": True,
-                "path": p["memory"],
-                "write_path": "mnemonic-write",
-            },
-            {
-                "name": "integrity/chain.json",
-                "class": "integrity",
-                "inside_store": True,
-                "path": p["chain"],
-                "write_path": "integrity-write",
-            },
-            {
-                "name": "integrity/log.json",
-                "class": "integrity",
-                "inside_store": True,
-                "path": p["log"],
-                "write_path": "integrity-write",
-            },
-            {
-                "name": "integrity/baseline.json",
-                "class": "integrity",
-                "inside_store": True,
-                "path": p["baseline"],
-                "write_path": "integrity-write",
-            },
-            {
-                "name": "integrity/auth.json",
-                "class": "integrity",
-                "inside_store": True,
-                "path": p["auth"],
-                "write_path": "integrity-write",
-            },
-            {
-                "name": "passive-signal",
-                "class": "integrity",
-                "inside_store": True,
-                "path": p["passive"],
-                "write_path": "integrity-write",
-            },
-            {
-                "name": "credential",
-                "class": "integrity",
-                "inside_store": True,
-                "path": p["credential"],
-                "write_path": "integrity-write",
-            },
-        ]
+        state = state_of(store)
         accepted(state=state, evidence=EVIDENCE + "#paths")
     if command == "config":
         accepted(
@@ -773,6 +778,20 @@ def cmd_entity(command, args):
                 detail=f"{via!r} does not own {cls!r}",
             )
         target = str(args.get("target", ""))
+        # OBEC_STUB_BREAK=oc003c-target lets an operation reach a datum of
+        # another class through its target, as long as the target's name does
+        # not spell the class.
+        named = next(
+            (d for d in state_of(store) if target in (d["name"], d["path"])), None
+        )
+        crosses = named is not None and named["class"] != cls
+        if crosses and "oc003c-target" not in BREAK:
+            refused(
+                store,
+                "class-ownership",
+                "OC-003(c)",
+                detail=f"target {target!r} is {named['class']} content",
+            )
         for other in CLASSES:
             if other != cls and other in target:
                 refused(

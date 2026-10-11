@@ -60,6 +60,18 @@ The conformance suite carries its own version line; a claim names both, as in
   admitted attempt either writing something made up or nothing at all.
   Prompted by fsp-ref (D68). No step checks an admitted attempt, so what
   conformance means does not change.
+- Steps 3.5, 3.6 and 5.2 take their `attempt-write` targets from `describe
+  state`, and ADAPTER.md §3.4 requires the name of every datum listed there
+  to be accepted as a target. They passed made-up names — `integrity-datum`,
+  `integrity-baseline` — which the contract never defined: an
+  implementation that refused them as unknown passed 3.6, whose operation
+  owns the class, without a class ever being compared. 3.6 now tries every
+  datum of the other class. It caught the stub at once, which refused a
+  target only when its name spelled the other class, so `passive-signal`
+  reached integrity through the mnemonic write; the stub resolves the target
+  against its own state now, and the break `oc003c-target` proves the step
+  can fail. What conformance means changes, so the suite's version moves at
+  the next release; it still has 77 steps.
 
 **Repository**
 

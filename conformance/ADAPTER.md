@@ -257,9 +257,10 @@ implementation's real paths, within the live session (§2.5).
 it is where an adapter is most tempted to cheat. It MUST route the attempt
 through the named operation exactly as a real request would, including the
 parameter the test supplies. `T` may be a name, a path, or a selector such as
-`class:integrity`; the suite varies its shape on purpose. An adapter that
-validates the target itself before calling the operation is testing the
-adapter.
+`class:integrity`, and the `name` of every datum `describe state` lists MUST be
+accepted as a name; the suite takes its targets from there and varies their
+shape on purpose. An adapter that validates the target itself before calling
+the operation is testing the adapter.
 
 An attempt carries no content, so it writes none. The operation runs every
 check its real path runs before it writes, and stops there: an attempt it

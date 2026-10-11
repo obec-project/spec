@@ -82,6 +82,7 @@ OBEC_STUB_BREAK=oc008a python3 run.py --adapter ./stub/obec-adapter-stub
 | `oc002d` | commits a persona that claims experience | OC-002 |
 | `oc003b` | folds the hostname into verification | OC-003 — **only with a real `--adapter-b`** |
 | `oc003c` | lets host actuation write structural and mnemonic content | OC-003, OC-008 |
+| `oc003c-target` | lets an operation reach another class's datum through its target | OC-003 |
 | `oc008a` | skips the workspace boundary check | OC-008 |
 | `oc008d` | refuses without naming the check | OC-001, OC-002, OC-003, OC-005, OC-008 |
 | `oc010` | issues a credential on a failed gate | OC-001, OC-004, OC-010 |

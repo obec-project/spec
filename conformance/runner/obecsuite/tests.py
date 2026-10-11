@@ -17,6 +17,16 @@ class _Skip(Exception):
     """Leaves a step at the outcome it was already given."""
 
 
+def _data_of(ad, store, cls):
+    """The names `describe state` lists for the data of class `cls` in `store`.
+    Each is a target `entity attempt-write` accepts (ADAPTER.md §3.4)."""
+    state = ad.call("describe", "state", store=store)["state"] or []
+    names = [d["name"] for d in state if d.get("class") == cls and d.get("name")]
+    if not names:
+        raise StepUnestablished(f"describe state lists no {cls} datum to target")
+    return names
+
+
 # --------------------------------------------------------------------------
 # OC-001 — An entity exists only bound to an Operator, who holds final authority
 #          over everything it is and does
@@ -464,20 +474,24 @@ def oc003(ctx):
         # OBEC-Attest. Here OC-003(c) has to hold on its own.
         store = st.fresh("classes")
         ops = ad.call("describe", "operations")["operations"] or []
+        first = {
+            c: _data_of(ad, store, c)[0]
+            for c in ("structural", "mnemonic", "integrity")
+        }
         for o in ops:
             owns = o.get("writes_classes") or []
-            for target in ("structural", "mnemonic", "integrity"):
-                if target in owns:
+            for cls in ("structural", "mnemonic", "integrity"):
+                if cls in owns:
                     continue
                 res = ad.call(
                     "entity",
                     "attempt-write",
                     store=store,
-                    **{"class": target},
+                    **{"class": cls},
                     via=o["name"],
-                    target=f"{target}-datum",
+                    target=first[cls],
                 )
-                a.refused(ctx, res, why=f"write {target} via {o['name']}")
+                a.refused(ctx, res, why=f"write {cls} via {o['name']}")
 
     with ctx.step("3.6", "E", "parameter manipulation does not cross classes"):
         store = st.fresh("params")
@@ -485,15 +499,18 @@ def oc003(ctx):
         for o in ops:
             for cls in o.get("writes_classes") or []:
                 other = "integrity" if cls != "integrity" else "structural"
-                res = ad.call(
-                    "entity",
-                    "attempt-write",
-                    store=store,
-                    **{"class": cls},
-                    via=o["name"],
-                    target=f"{other}-datum",
-                )
-                a.refused(ctx, res, why=f"{o['name']} reaching {other} by target")
+                for datum in _data_of(ad, store, other):
+                    res = ad.call(
+                        "entity",
+                        "attempt-write",
+                        store=store,
+                        **{"class": cls},
+                        via=o["name"],
+                        target=datum,
+                    )
+                    a.refused(
+                        ctx, res, why=f"{o['name']} reaching {other} datum {datum!r}"
+                    )
 
     with ctx.step("3.7", "E", "no concurrent sessions over one store"):
         store = st.fresh("concurrent")
@@ -659,6 +676,7 @@ def oc005(ctx):
         ops = ad.call("describe", "operations")["operations"] or []
         reachable = [o for o in ops if o.get("reachable_from_cognition")]
         a.truthy(reachable, "no cognition-reachable operations reported")
+        target = _data_of(ad, store, "integrity")[0]
         for o in reachable:
             res = ad.call(
                 "entity",
@@ -666,7 +684,7 @@ def oc005(ctx):
                 store=store,
                 **{"class": "integrity"},
                 via=o["name"],
-                target="integrity-baseline",
+                target=target,
             )
             a.refused(ctx, res, why=f"via {o['name']}")
 
