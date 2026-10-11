@@ -11,6 +11,9 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 5 — the operations (2026-10-10)
 
+- **G21 closed** (2026-10-10). ADAPTER.md §3.4 now says an admitted
+  `attempt-write` writes nothing and names what would have been written, as
+  fsp does (D68).
 - **The operations table, `describe operations` and `entity attempt-write`**
   (2026-10-10, D67, D68). `fsp/operations.py` holds the four operations the
   code has — `propose`, `commit`, `integrity-write`, `mnemonic-save` — each

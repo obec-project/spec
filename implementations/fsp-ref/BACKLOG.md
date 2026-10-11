@@ -97,11 +97,6 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
   is refused as unknown before any class is compared. The suite should take
   a datum of the other class from `describe state`, which moves a test and
   the suite's version.
-- **G21 — what `attempt-write` writes.** ADAPTER.md §3.4 says the command
-  routes through the named operation as a real request would, and not what
-  it writes when the operation admits the attempt: the command carries no
-  content, and writing any would corrupt the store. fsp writes nothing and
-  reports what would be written (D68); the contract should say so.
 - **G20 — scheduled triggers have a home and no mechanism.** The Core says,
   in a note to OC-002 and in the glossary's *Stimulus*, that schedules are
   structural content and a trigger firing executes standing Operator
