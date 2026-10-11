@@ -9,6 +9,28 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
+## Phase 6a — actuation (in progress)
+
+- **Phase 6 split, and actuation designed** (2026-10-11). Phase 6 is split:
+  6a is what the suite asks of OC-008 — the native file primitives, the
+  Action Ledger, `entity actuate`, `entity invoke-skill` and running a
+  skill — and 6b the rest of the allowlist, `http_fetch` and monitoring. The
+  Operator's answers to a hold need the UI and move to Phase 8; until then a
+  hold with no one to answer it is a refusal, as it already is in an auto
+  session (D66). A skill is checked before the Operator's rule (§5), so a
+  hold only ever asks about a skill whose content is what was admitted, and
+  the suite's step 8.9 reaches the manifest check; the suite still accepts
+  any refusal there (G23). A skill runs from a copy outside the store, so
+  what is checked is what runs and the skill gets no path into the store;
+  its `argv` names an interpreter, since skill files carry no execute bit.
+  `actuate --op write` writes an empty file through the real path, and
+  `--op read` returns a digest, never content. An Action Ledger entry left
+  open by a crash surfaces at the next start as a notice and is closed
+  `interrupted`, never re-executed. 6a reads a skill's rule by name and
+  digest; the op that changes the rules comes with 6b.
+
+---
+
 ## Phase 5 — the operations (2026-10-10)
 
 - **Evidence points at a definition** (2026-10-11). The test of the

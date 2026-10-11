@@ -12,9 +12,10 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **6** | actuation inside the workspace (declared since Phase 3), allowlist with digest-pinned skills (D16), a hold and the Operator's four answers to it (D66), native primitives, `http_fetch`, skills in their invocation context (D51), monitoring | OC-008, OC-002 2.2, 5.4 |
+| **6a** | the native primitives `file_read`, `file_write`, `file_list` inside the workspace (declared since Phase 3), in the fixed order of checks (§5), `file_write` through the Action Ledger and an unresolved entry surfaced at the start (OP-015); `entity actuate`; `entity invoke-skill` through its four gates, the skill's rule read by name and digest (D16), a skill run from a copy without a shell in its invocation context, its process group ended with it (D51); a hold with no one to answer it refuses (D66) | OC-008, OC-002 2.2, 5.4 |
+| **6b** | the proposal op that changes `rules.json`, under the window category `rules` (D50); a skill's typed `args`; `http_fetch` under the allowlist's domains (G9); monitoring around each skill (D2) | — (unit tests) |
 | **7** | session records, the conversation and its recall scope (D11, D60), `mnemonic-recall`, `mnemonic-save`'s `session` and `semantic` destinations and a record's conversation and `supersedes`, the probes over memory (D12), promotion under authorization and the semantic ledger (D53), `/resume`, `/inject` and `/retract`, Sleep | OC-007, OC-003(e), OC-002(d) |
-| **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the process holding the session: `holder` and the `flock` on `CREDENTIAL` (D25), suspend (D19); the prompts and `/notifications` (D66), the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |
+| **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the process holding the session: `holder` and the `flock` on `CREDENTIAL` (D25), suspend (D19); the prompts, the Operator's four answers to a hold, and `/notifications` (D66), the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, including a name already in use (D54), `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json`, `notify_command` (D66) | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
 | **11** | the agenda (D62): `agenda.json`, `/agenda` and `fsp agenda`, the `agenda` proposal op, items' scoped authorizations; `fsp tick` and its host entry installed by `fsp init`/`endure`, the auto session and the main start suspending it (D63); worker skills, run in the background (D64) | — (unit tests) |
@@ -89,6 +90,14 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
   OP-001 could recommend it (D36): it is what makes it possible, when a model
   turns out to be problematic, to find everything it did — including the
   memories it saved.
+- **G23 — the suite's skill steps accept any refusal.** Steps 8.7 – 8.9 assert
+  a refusal without naming the check, and the suite installs the fixture
+  skill by commit but has no way to allow it. An implementation whose
+  allowlist holds by default and is checked first refuses every invocation
+  there, and passes 8.9 without validating a manifest. fsp checks the skill
+  before the rule (§5), so its manifest check is reached; the suite should
+  name the checks, or let the fixture be allowed, which moves the suite's
+  version.
 - **G20 — scheduled triggers have a home and no mechanism.** The Core says,
   in a note to OC-002 and in the glossary's *Stimulus*, that schedules are
   structural content and a trigger firing executes standing Operator
