@@ -90,6 +90,14 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
   OP-001 could recommend it (D36): it is what makes it possible, when a model
   turns out to be problematic, to find everything it did — including the
   memories it saved.
+- **G22 — the suite's attempt targets name no datum.** Steps 3.5, 3.6 and
+  5.2 pass targets such as `integrity-datum` and `integrity-baseline`,
+  which the contract does not define and fsp's `LAYOUT` does not hold. fsp
+  checks the writer before the target (D68), so 3.5 and 5.2 still reach the
+  class guard; 3.6 cannot, since its operation owns the class and the target
+  is refused as unknown before any class is compared. The suite should take
+  a datum of the other class from `describe state`, which moves a test and
+  the suite's version.
 - **G21 — what `attempt-write` writes.** ADAPTER.md §3.4 says the command
   routes through the named operation as a real request would, and not what
   it writes when the operation admits the attempt: the command carries no

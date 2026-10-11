@@ -158,6 +158,20 @@ def _check_relpath(relpath: str) -> str:
     return relpath
 
 
+def _known_class(cls) -> None:
+    if cls not in CLASSES:
+        raise GuardError("content-class", "unknown content class %r" % cls)
+
+
+def _sole_writer(cls, writer) -> None:
+    owner, _op = OWNER[cls]
+    if writer != owner:
+        raise GuardError(
+            "sole-writer",
+            "%s content has one writer (%s), not %s" % (cls, owner, writer),
+        )
+
+
 def _fsync_dir(path: str) -> None:
     fd = os.open(path, os.O_RDONLY)
     try:
@@ -269,8 +283,7 @@ class Store:
 
     def _guard(self, cls: str, relpath: str, writer: str, form: str):
         _check_relpath(relpath)
-        if cls not in CLASSES:
-            raise GuardError("content-class", "unknown content class %r" % cls)
+        _known_class(cls)
         d = datum_of(relpath)
         if d is None:
             raise GuardError(
@@ -280,16 +293,59 @@ class Store:
             raise GuardError(
                 "content-class", "%s is %s content, not %s" % (relpath, d.cls, cls)
             )
-        owner, _op = OWNER[cls]
-        if writer != owner:
-            raise GuardError(
-                "sole-writer",
-                "%s content has one writer (%s), not %s" % (cls, owner, writer),
-            )
+        _sole_writer(cls, writer)
         if form != d.form and not (d.form == "tree" and form == "replace"):
             raise GuardError(
                 "write-form", "%s is written by %s, not %s" % (relpath, d.form, form)
             )
+
+    def resolve(self, target):
+        """The data that ``target`` names, as ``(datum, relpath)`` pairs, with
+        ``relpath`` None when ``target`` names a datum and not a file (D68).
+
+        ``target`` is a datum name, a store-relative path, an absolute path
+        inside the store, or ``class:<c>`` for every datum of the class.
+        Anything else resolves to nothing.
+        """
+        if not isinstance(target, str) or target == "":
+            return []
+        if target.startswith("class:"):
+            return [(d, None) for d in LAYOUT if d.cls == target[6:]]
+        if os.path.isabs(target):
+            path = os.path.abspath(target)
+            if not path.startswith(self.root + os.sep):
+                return []
+            target = os.path.relpath(path, self.root).replace(os.sep, "/")
+        else:
+            for d in LAYOUT:
+                if d.name == target:
+                    return [(d, None)]
+        try:
+            _check_relpath(target)
+        except GuardError:
+            return []
+        d = datum_of(target)
+        return [(d, target)] if d is not None else []
+
+    def attempt(self, cls, target, *, writer):
+        """The class guard of an attempted write, which writes nothing (D68).
+
+        Returns the ``(datum, relpath)`` pairs that ``target`` resolves to, or
+        raises ``GuardError`` with the check that refused.
+        """
+        _known_class(cls)
+        _sole_writer(cls, writer)
+        resolved = self.resolve(target)
+        if not resolved:
+            raise GuardError(
+                "target-unknown", "%r names no datum of the store" % (target,)
+            )
+        for d, _rel in resolved:
+            if d.cls != cls:
+                raise GuardError(
+                    "content-class", "%s is %s content, not %s" % (d.name, d.cls, cls)
+                )
+        return resolved
 
     def _makedirs(self, absdir: str) -> None:
         if os.path.isdir(absdir):

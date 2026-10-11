@@ -53,6 +53,20 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   A torn fragment at the end of the file is cut and logged before the append,
   as the log's is (D61). The `session` and `semantic` destinations, a
   record's conversation and `supersedes`, and recall are Phase 7.
+- **D68 revised, and the attempted write's checks** (2026-10-10). The suite
+  passes `attempt-write` targets such as `integrity-datum`, which name no
+  datum here; resolving the target first would have refused them as unknown
+  and never reached the class guard, so an operation that could write a
+  class it does not own would still pass. The writer is checked first, then
+  the target, then its class, then the operation's own check; a selector is
+  admitted only if every datum it reaches is. `Store.resolve` takes a name,
+  a store path, an absolute path inside the store or `class:<c>`, and
+  `Store.attempt` runs the guard's own checks without writing. Each
+  operation's attempt lives in its owner's module under its own writer:
+  `sil.attempt_commit`, `sil.attempt_integrity_write`, `mil.attempt_save`,
+  and `proposals.attempt_propose`, which refuses every class. A refusal is
+  logged; an admitted attempt names what it reaches and is not. Step 3.6
+  still cannot reach the guard, since its operation owns the class (G22).
 
 ## Phase 4 — the Vital Check (2026-10-10)
 

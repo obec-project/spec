@@ -426,6 +426,19 @@ def propose(root: str, ops: list) -> dict:
         return {"proposal": pid, "log_records": [rec]}
 
 
+def attempt_propose(store: Store, cls, target):
+    """propose's attempted write: the SIL records a proposal, so propose
+    writes no content class and refuses every one (D68)."""
+    raise sil.refuse_attempt(
+        store,
+        "sole-writer",
+        "propose writes no content class; the SIL records a proposal",
+        via="propose",
+        content_class=cls,
+        target=target,
+    )
+
+
 def record_approval(
     store: Store,
     pid: str,

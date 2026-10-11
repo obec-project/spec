@@ -22,6 +22,7 @@ from .store import (
     STORE_FORMAT,
     STORE_FORMAT_VERSION,
     STRUCTURAL,
+    GuardError,
     Store,
     create_store_dir,
     is_empty_dir,
@@ -134,6 +135,14 @@ def log_append(store: Store, kind, *, rule=None, binding=None, session=None, **p
     return log_append_located(
         store, kind, rule=rule, binding=binding, session=session, **payload
     )["id"]
+
+
+def refuse_attempt(store: Store, check, detail, **payload) -> Refused:
+    """Log the refusal of an attempted write and return it (D68)."""
+    rec = log_append(
+        store, "refusal", rule="OC-003(c)", check=check, detail=detail, **payload
+    )
+    return Refused(check, "OC-003(c)", detail, [rec])
 
 
 # -- scaffolding (D27) and First Activation (D29) ---------------------------
@@ -426,6 +435,47 @@ def _commit_stage(stage: str) -> None:
     except ImportError:
         return
     hooks.commit_stage(stage)
+
+
+def attempt_commit(store: Store, cls, target):
+    """commit's attempted write: the class guard, then the structural data the
+    store declares (D68)."""
+    try:
+        resolved = store.attempt(cls, target, writer=COMMITTER)
+    except GuardError as e:
+        raise refuse_attempt(
+            store, e.check, e.detail, via="commit", content_class=cls, target=target
+        )
+    for _d, rel in resolved:
+        if rel is None:
+            continue
+        inner = rel.split("/", 3)[3]  # the path within the generation
+        if not structural_target(inner):
+            raise refuse_attempt(
+                store,
+                "content-class",
+                "%s is not structural data the store declares" % rel,
+                via="commit",
+                content_class=cls,
+                target=target,
+            )
+    return resolved
+
+
+def attempt_integrity_write(store: Store, cls, target):
+    """integrity-write's attempted write: the class guard (D68)."""
+    try:
+        resolved = store.attempt(cls, target, writer=WRITER)
+    except GuardError as e:
+        raise refuse_attempt(
+            store,
+            e.check,
+            e.detail,
+            via="integrity-write",
+            content_class=cls,
+            target=target,
+        )
+    return resolved
 
 
 def commit_generation(

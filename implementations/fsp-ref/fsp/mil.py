@@ -8,7 +8,7 @@ import secrets
 
 from . import clock, probes, sil, vital
 from .sil import Refused, log_append
-from .store import MNEMONIC, Store, datum_of
+from .store import MNEMONIC, GuardError, Store, datum_of
 
 WRITER = "mil"
 EPISODIC = "memory/episodic/records.jsonl"
@@ -29,6 +29,13 @@ def admits(caller, destination) -> bool:
     return destination in CALLERS.get(caller, ())
 
 
+def _destination_of_datum(d):
+    for k, name in DESTINATIONS.items():
+        if name == d.name:
+            return k
+    return None
+
+
 def destination_of(relpath):
     """The destination whose datum ``relpath`` is, or None (D21).
 
@@ -38,10 +45,7 @@ def destination_of(relpath):
     d = datum_of(relpath)
     if d is None:
         return None
-    for k, name in DESTINATIONS.items():
-        if name == d.name:
-            return k
-    return None
+    return _destination_of_datum(d)
 
 
 def save(root: str, *, caller, destination, content) -> dict:
@@ -129,3 +133,31 @@ def save(root: str, *, caller, destination, content) -> dict:
         }
         store.append(MNEMONIC, EPISODIC, record, writer=WRITER)
         return {"record": record["id"]}
+
+
+def attempt_save(store: Store, cls, target):
+    """mnemonic-save's attempted write, as the CPE calls it: the class guard,
+    then the destination (D21, D68)."""
+    try:
+        resolved = store.attempt(cls, target, writer=WRITER)
+    except GuardError as e:
+        raise sil.refuse_attempt(
+            store,
+            e.check,
+            e.detail,
+            via="mnemonic-save",
+            content_class=cls,
+            target=target,
+        )
+    for d, _rel in resolved:
+        destination = _destination_of_datum(d)
+        if not admits("cpe", destination):
+            raise sil.refuse_attempt(
+                store,
+                "mnemonic-destination",
+                "%r may not write the %r destination" % ("cpe", destination),
+                via="mnemonic-save",
+                content_class=cls,
+                target=target,
+            )
+    return resolved
