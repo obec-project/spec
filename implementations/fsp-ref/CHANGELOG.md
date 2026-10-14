@@ -11,6 +11,19 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **A proposal changes the skills' allowlist** (2026-10-13, D70, D58).
+  `allow-skill`, `deny-skill` and `unset-skill` are proposal ops of
+  category `rules`. Proposing checks their form and refuses a skill named
+  by two ops; the commit, after the authorization and the proposal's file
+  ops, applies them to the `rules.json` of the generation in force and
+  refuses (`rule-target`) rules that cannot be read as rules, an
+  `allow-skill` whose skill is absent from the generation being built or
+  whose digest is not that skill's, and an `unset-skill` of an entry the
+  rules do not hold. The digest is computed as the commit will write the
+  skill, so `install-skill` and `allow-skill` land together and the skill
+  runs. `default` and `domains` are left as they are. A refused commit
+  writes no generation and leaves the proposal pending. Over OC-010,
+  OC-001 – OC-005 and OC-008 the suite still gives 54 pass, 0 fail.
 - **The allowlist's ops designed** (2026-10-13, D70). A proposal changes
   `rules.json` one entry at a time — `allow-skill` with the skill's digest,
   `deny-skill`, `unset-skill` — applied by the commit to the generation it

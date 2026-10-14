@@ -10,14 +10,20 @@ import re
 import secrets
 
 from . import chain, clock, config, lifecycle, sil, vital
-from .digest import canonical, sha256
+from . import manifest as skill_manifest
+from .digest import canonical, integrity_document, sha256
 from .sil import WRITER, Refused, log_append
 from .store import INTEGRITY, SKILL_NAME, Store
 
 CATEGORIES = {
     "set-persona": "persona",
     "install-skill": "skills.install",
+    "allow-skill": "rules",
+    "deny-skill": "rules",
+    "unset-skill": "rules",
 }
+
+RULE_OPS = ("allow-skill", "deny-skill", "unset-skill")
 
 WINDOW_CATEGORIES = (
     "skills.install",
@@ -28,6 +34,7 @@ WINDOW_CATEGORIES = (
 )
 
 EXPIRY_RE = re.compile(r"^([+-])(\d+)([smhd])$")
+DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}\Z")
 
 
 def covers(scope: str, category: str) -> bool:
@@ -301,9 +308,34 @@ def propose(root: str, ops: list) -> dict:
                             "invalid skill file path %r" % (file_path,),
                             [rec],
                         )
+            elif op_name in RULE_OPS:
+                name = op.get("name")
+                if not (isinstance(name, str) and SKILL_NAME.match(name)):
+                    detail = "%s has invalid skill name" % (op_name,)
+                    rec = log_append(
+                        store,
+                        "refusal",
+                        rule="OC-001(b)",
+                        check="ops",
+                        detail=detail,
+                    )
+                    raise Refused("ops", "OC-001(b)", detail, [rec])
+                if op_name == "allow-skill":
+                    digest = op.get("digest")
+                    if not (isinstance(digest, str) and DIGEST_RE.match(digest)):
+                        detail = "allow-skill requires a sha256 digest"
+                        rec = log_append(
+                            store,
+                            "refusal",
+                            rule="OC-001(b)",
+                            check="ops",
+                            detail=detail,
+                        )
+                        raise Refused("ops", "OC-001(b)", detail, [rec])
 
         # 4. no duplicate write targets
         targets = set()
+        rule_targets = set()
         for op in ops:
             op_name = op["op"]
             if op_name == "set-persona":
@@ -342,6 +374,19 @@ def propose(root: str, ops: list) -> dict:
                             [rec],
                         )
                     targets.add(target)
+            elif op_name in RULE_OPS:
+                name = op["name"]
+                if name in rule_targets:
+                    detail = "skill %r is named by more than one op" % (name,)
+                    rec = log_append(
+                        store,
+                        "refusal",
+                        rule="OC-001(b)",
+                        check="rule-target",
+                        detail=detail,
+                    )
+                    raise Refused("rule-target", "OC-001(b)", detail, [rec])
+                rule_targets.add(name)
 
         # 5. require live session
         session = vital.require_entity_session(root, "propose")
@@ -396,6 +441,16 @@ def propose(root: str, ops: list) -> dict:
                         "files": dict(op["files"]),
                     }
                 )
+            elif op_name == "allow-skill":
+                normalized.append(
+                    {
+                        "op": "allow-skill",
+                        "name": op["name"],
+                        "digest": op["digest"],
+                    }
+                )
+            elif op_name in ("deny-skill", "unset-skill"):
+                normalized.append({"op": op_name, "name": op["name"]})
 
         digest = sha256(canonical(normalized))
         pid = "P-" + secrets.token_hex(8)
@@ -458,6 +513,87 @@ def record_approval(
     }
     auth["approvals"][pid] = entry
     write_auth(store, auth)
+
+
+def _skill_files(document, changes, name):
+    """The ``{path, sha256, exec}`` entries of the skill ``name`` in the
+    generation a commit builds from ``document`` and ``changes``, as
+    ``sil.commit_generation`` writes it (D70, D16)."""
+    prefix = "skills/%s/" % (name,)
+    entries = {e["path"]: e for e in document if e["path"].startswith(prefix)}
+    for path, data in changes.items():
+        if not path.startswith(prefix):
+            continue
+        if data is None:
+            entries.pop(path, None)
+        else:
+            existing = entries.get(path)
+            entries[path] = {
+                "path": path,
+                "sha256": sha256(data),
+                "exec": existing["exec"] if existing is not None else False,
+            }
+    return sorted(entries.values(), key=lambda f: f["path"])
+
+
+def _refuse_rule(store: Store, session, detail: str):
+    rec = log_append(
+        store,
+        "refusal",
+        rule="OC-001(b)",
+        session=session,
+        check="rule-target",
+        detail=detail,
+    )
+    raise Refused("rule-target", "OC-001(b)", detail, [rec])
+
+
+def _rules_change(store, head, changes, ops, session):
+    """Apply the proposal's rule ops to the ``rules.json`` of the generation
+    being committed and return its new bytes (D70)."""
+    gen = chain.gen_relpath(head["entry"])
+    try:
+        rules = store.read_json(gen + "/rules.json")
+    except (OSError, ValueError):
+        rules = None
+    if not isinstance(rules, dict) or not isinstance(rules.get("skills"), dict):
+        _refuse_rule(
+            store,
+            session,
+            "the rules of generation %d cannot be read as rules" % (head["entry"],),
+        )
+    skills = rules["skills"]
+    document = integrity_document(store.path(gen))[0]
+    for op in ops:
+        name = op["name"]
+        if op["op"] == "allow-skill":
+            files = _skill_files(document, changes, name)
+            if not files:
+                _refuse_rule(
+                    store,
+                    session,
+                    "skill %r is not in the generation being committed" % (name,),
+                )
+            actual = skill_manifest.skill_digest(files)
+            if actual != op["digest"]:
+                _refuse_rule(
+                    store,
+                    session,
+                    "the digest of skill %r is %s, not %s"
+                    % (name, actual, op["digest"]),
+                )
+            skills[name] = {"rule": "allow", "digest": op["digest"]}
+        elif op["op"] == "deny-skill":
+            skills[name] = {"rule": "deny"}
+        else:
+            if name not in skills:
+                _refuse_rule(
+                    store,
+                    session,
+                    "the rules hold no entry for skill %r" % (name,),
+                )
+            del skills[name]
+    return canonical(rules)
 
 
 def commit(root: str, proposal_id: str) -> dict:
@@ -582,6 +718,12 @@ def commit(root: str, proposal_id: str) -> dict:
                     )
                 for file_path, text in op["files"].items():
                     changes["skills/%s/%s" % (name, file_path)] = text.encode("utf-8")
+
+        rule_ops = [op for op in prop["ops"] if op["op"] in RULE_OPS]
+        if rule_ops:
+            changes["rules.json"] = _rules_change(
+                store, head, changes, rule_ops, session
+            )
 
         out = sil.commit_generation(
             store, changes=changes, authorization=auth_loc, session=session
