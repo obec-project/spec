@@ -244,10 +244,14 @@ Transient session input is operational context, not consolidated knowledge.
 
 **(a) One path, inside a declared boundary.** All host actuation MUST occur
 through a single execution path, and only inside the **workspace** — the host
-territory the Operator has explicitly declared. The boundary is declared, never
-inferred: a location the Operator did not place inside it is out of reach
-regardless of what host permissions would allow. A target outside the boundary
-MUST be rejected before any other check runs. For a skill, the boundary is
+territory the Operator has explicitly declared: the locations the entity may act
+on and, where the Operator declares them, the network destinations it may reach.
+The boundary is declared, never inferred: a location or destination the Operator
+did not place inside it is out of reach regardless of what host permissions or
+network access would allow. A target is inside only if what it resolves to is: a
+name that leads outside the boundary is outside it. Before any other check runs,
+a target outside the boundary MUST be rejected, or held until the Operator either
+places it inside the boundary or refuses it. For a skill, the boundary is
 applied to what the execution path can see: the targets the skill declares and
 the parameters it is invoked with. What an admitted skill's own code does beyond
 them is bounded by its admission under (c), not by the path.

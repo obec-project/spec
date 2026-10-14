@@ -52,6 +52,23 @@ The conformance suite carries its own version line; a claim names both, as in
   returning by it stays Critical: that is the case where something holds
   the execution beyond what ending it should take. Prompted by fsp-ref,
   whose design said both.
+- **Clarifying revision of OC-008(a).** The workspace was "the host
+  territory the Operator has explicitly declared", and every sentence and
+  test spoke of paths, so an operation that reaches the network was either
+  outside every declared territory or outside the rule. The territory is now
+  the locations the entity may act on and the network destinations the
+  Operator declares; a target is judged by what it resolves to, so a name
+  that leads outside, as a symbolic link does, is outside. A target outside
+  may be held until the Operator places it inside the boundary or refuses
+  it, instead of only rejected, still before any other check runs: what the
+  clause protects, no act outside the declared territory and nothing checked
+  before the boundary, holds either way, and an implementation that always
+  rejects stays conformant. A note says where no one can answer, a hold is a
+  rejection. The Core's test of OC-008 adds a network destination the
+  Operator did not declare. The Profile's OP-016 says a held target is a
+  declaration of the workspace, for the act, the session or as a setting,
+  and the resumed act passes every check again. Prompted by fsp-ref's
+  `http_fetch` (its G9).
 
 **Conformance suite**
 

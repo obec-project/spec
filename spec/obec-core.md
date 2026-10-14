@@ -448,10 +448,14 @@ its use.
 
 **(a) One path, inside a declared boundary.** All host actuation MUST occur
 through a single execution path, and only inside the **workspace** — the host
-territory the Operator has explicitly declared. The boundary is declared, never
-inferred: a location the Operator did not place inside it is out of reach
-regardless of what host permissions would allow. A target outside the boundary
-MUST be rejected before any other check runs. For a skill, the boundary is
+territory the Operator has explicitly declared: the locations the entity may act
+on and, where the Operator declares them, the network destinations it may reach.
+The boundary is declared, never inferred: a location or destination the Operator
+did not place inside it is out of reach regardless of what host permissions or
+network access would allow. A target is inside only if what it resolves to is: a
+name that leads outside the boundary is outside it. Before any other check runs,
+a target outside the boundary MUST be rejected, or held until the Operator either
+places it inside the boundary or refuses it. For a skill, the boundary is
 applied to what the execution path can see: the targets the skill declares and
 the parameters it is invoked with. What an admitted skill's own code does beyond
 them is bounded by its admission under (c), not by the path.
@@ -474,8 +478,9 @@ manifest validation is excluded from the index and reported to the Operator.
 be logged; every result MUST be logged.
 
 *Test.* **(a)(b)** Attempt actuation outside the boundary; on a path that resolves
-outside it through a symbolic link or a relative traversal; and on a path inside
-the Entity Store. All three must be rejected before any further check runs.
+outside it through a symbolic link or a relative traversal; on a network
+destination the Operator did not declare; and on a path inside the Entity Store.
+All four must be rejected before any further check runs.
 Attempt to declare the store as workspace; it must be refused. **(c)** Invoke a
 skill absent from the index; one whose manifest fails validation; and one whose
 file was altered after the index was built. All three must be refused. Confirm no
@@ -493,6 +498,13 @@ typed arguments left to the entity.
 run there. They are one rule because both are checks on a single execution path;
 as separate invariants, a per-operation check would sit at the same altitude as
 a domain boundary.
+
+*Note (non-normative).* A network destination is territory as a location is:
+declaring one is the Operator's act, as declaring a folder is, and a name is
+judged by the address it resolves to, as a path is by where its links lead. A
+hold at the boundary asks the Operator to declare: the act waits with nothing
+else checked, and an act the Operator places inside proceeds inside the
+boundary. Where no one can answer, a hold is a rejection.
 
 ---
 
