@@ -11,6 +11,14 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The Closure Payload's emission designed** (2026-10-14, D91). D84
+  took the payload as input until cognition could emit it. `/exit` now
+  asks the model for it in a call of its own, logged and numbered like a
+  cycle; a completion that does not parse refuses the exit, and a payload
+  that parses is checked as any payload is. A refusal leaves the session
+  live for the Operator to try again or leave with `/new`, and nothing
+  retries on its own.
+
 - **Every record an intent causes names its cycle** (2026-10-14, D90).
   `sil.originated_by` sets a context variable while the cycle dispatches
   an intent; the log, the episodic record, the Action Ledger's open entry
