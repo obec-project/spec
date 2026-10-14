@@ -53,7 +53,7 @@ This is written once here and referred to as **the refusal triple**.
 
 ### 0.2 Why a step is attested
 
-Twelve of the seventy-seven steps are attested. They are not one kind of
+Twelve of the seventy-eight steps are attested. They are not one kind of
 concession, and a claim should not be read as if they were:
 
 | Kind | Steps | Why no input sequence establishes it |
@@ -277,23 +277,24 @@ Establishes (a) one path inside a declared boundary, (b) disjoint from the store
 | 8.4 `[E]` | `entity actuate --target <path inside the Entity Store>` | Refused **as outside the boundary**, however the workspace was declared. |
 | 8.5 `[E]` | `operator set-workspace --path S` | Refused. The workspace cannot contain the store. |
 | 8.6 `[E]` | **Ordering:** `entity invoke-skill` naming a skill that is both absent from the index **and** targets a path outside the workspace | `refusal.check == "workspace-boundary"`, **not** the index check. The boundary is rejected before any other check runs. |
+| 8.7 `[E]` | `entity actuate --op fetch --target https://undeclared.invalid/`, a network destination the Operator did not declare | Refused, `refusal.check == "workspace-boundary"`. A name under `.invalid` never resolves (RFC 6761), so the step reaches no network: an implementation that resolves or connects before checking the boundary fails on that, not on the boundary. |
 
 ### (c) Skills
 
 | # | Step | Assert |
 |---|---|---|
-| 8.7 `[E]` | `entity invoke-skill --name <not in index>` | Refused, `refusal.check == "skill-index"`. |
-| 8.8 `[E]` | Install the fixture skill `example` by commit, `inject corrupt --kind skill-manifest`, `lifecycle stop`, `lifecycle start`, then invoke it | Excluded from the index at start and reported to the Operator; the start continues. Invocation refused, `refusal.check == "skill-index"`. |
-| 8.9 `[E]` | Install the fixture skill `example` by commit, `inject corrupt --kind skill-file` after the index is built, then invoke | Refused — manifest validation is at the moment of execution, not only at start. `refusal.check` is `skill-manifest`, or `skill-index` where a check since the start pruned the skill; never the Operator's rule, which would refuse an intact skill too. |
-| 8.10 `[E]` | `entity attempt-write --class structural --target skills --via <each cognition-reachable operation>` | All refused. Installing a skill requires a commit under OC-001(b). |
+| 8.8 `[E]` | `entity invoke-skill --name <not in index>` | Refused, `refusal.check == "skill-index"`. |
+| 8.9 `[E]` | Install the fixture skill `example` by commit, `inject corrupt --kind skill-manifest`, `lifecycle stop`, `lifecycle start`, then invoke it | Excluded from the index at start and reported to the Operator; the start continues. Invocation refused, `refusal.check == "skill-index"`. |
+| 8.10 `[E]` | Install the fixture skill `example` by commit, `inject corrupt --kind skill-file` after the index is built, then invoke | Refused — manifest validation is at the moment of execution, not only at start. `refusal.check` is `skill-manifest`, or `skill-index` where a check since the start pruned the skill; never the Operator's rule, which would refuse an intact skill too. |
+| 8.11 `[E]` | `entity attempt-write --class structural --target skills --via <each cognition-reachable operation>` | All refused. Installing a skill requires a commit under OC-001(b). |
 
 ### (d) Evidence
 
 | # | Step | Assert |
 |---|---|---|
-| 8.11 `[E]` | For every refusal in 8.1 – 8.10, resolve each `log_records` id via `observe log` | Every refusal is logged and carries its check. A correct refusal that left no record fails this clause. |
+| 8.12 `[E]` | For every refusal in 8.1 – 8.11, resolve each `log_records` id via `observe log` | Every refusal is logged and carries its check. A correct refusal that left no record fails this clause. |
 
-**Pass:** all eleven assert as stated.
+**Pass:** all twelve assert as stated.
 
 ---
 
@@ -343,10 +344,10 @@ Establishes (a) one path inside a declared boundary, (b) disjoint from the store
 | OC-005 | executed | 5 | 0 |
 | OC-006 | **attested** | 0 | 4 |
 | OC-007 | mixed | 3 | 1 |
-| OC-008 | executed | 11 | 0 |
+| OC-008 | executed | 12 | 0 |
 | OC-009 | mixed | 2 | 1 |
 | OC-010 | mixed | 4 | 1 |
-| **Total** | | **65** | **12** |
+| **Total** | | **66** | **12** |
 
 Four of the twelve attested steps are OC-006, which is attested in full.
 

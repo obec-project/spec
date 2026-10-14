@@ -935,13 +935,25 @@ def oc008(ctx):
         )
         refusals.append(res)
 
-    with ctx.step("8.7", "E", "an unindexed skill does not run"):
+    with ctx.step("8.7", "E", "an undeclared network destination is refused"):
+        store, ws = prepared("network")
+        res = ad.call(
+            "entity",
+            "actuate",
+            store=store,
+            op="fetch",
+            target="https://undeclared.invalid/",
+        )
+        a.refused(ctx, res, check="workspace-boundary")
+        refusals.append(res)
+
+    with ctx.step("8.8", "E", "an unindexed skill does not run"):
         store, ws = prepared("unindexed")
         res = ad.call("entity", "invoke-skill", store=store, name="absent-skill")
         a.refused(ctx, res, check="skill-index")
         refusals.append(res)
 
-    with ctx.step("8.8", "E", "an invalid manifest excludes the skill"):
+    with ctx.step("8.9", "E", "an invalid manifest excludes the skill"):
         store, ws = prepared("badmanifest")
         install(store, "example")
         ad.call("inject", "corrupt", store=store, kind="skill-manifest")
@@ -956,7 +968,7 @@ def oc008(ctx):
         a.refused(ctx, res, check="skill-index")
         refusals.append(res)
 
-    with ctx.step("8.9", "E", "manifest validation is at the moment of execution"):
+    with ctx.step("8.10", "E", "manifest validation is at the moment of execution"):
         store, ws = prepared("runtime")
         install(store, "example")
         ad.call("inject", "corrupt", store=store, kind="skill-file")
@@ -972,7 +984,7 @@ def oc008(ctx):
         )
         refusals.append(res)
 
-    with ctx.step("8.10", "E", "installing a skill requires a commit"):
+    with ctx.step("8.11", "E", "installing a skill requires a commit"):
         store, ws = prepared("install")
         ops = ad.call("describe", "operations")["operations"] or []
         for o in [o for o in ops if o.get("reachable_from_cognition")]:
@@ -987,12 +999,12 @@ def oc008(ctx):
             a.refused(ctx, res, why=f"via {o['name']}")
             refusals.append(res)
 
-    with ctx.step("8.11", "E", "every refusal is evidenced"):
+    with ctx.step("8.12", "E", "every refusal is evidenced"):
         if not refusals:
-            # 8.1 - 8.10 established no refusal: there is nothing to check,
+            # 8.1 - 8.11 established no refusal: there is nothing to check,
             # which is missing evidence, not a failure of the implementation.
             # Had one of them run and not refused, that step failed already.
-            raise StepUnestablished("no refusal from 8.1 - 8.10 was established")
+            raise StepUnestablished("no refusal from 8.1 - 8.11 was established")
         for res in refusals:
             a.truthy(
                 res.refusal.get("check"),

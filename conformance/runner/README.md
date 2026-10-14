@@ -84,6 +84,7 @@ OBEC_STUB_BREAK=oc008a python3 run.py --adapter ./stub/obec-adapter-stub
 | `oc003c` | lets host actuation write structural and mnemonic content | OC-003, OC-008 |
 | `oc003c-target` | lets an operation reach another class's datum through its target | OC-003 |
 | `oc008a` | skips the workspace boundary check | OC-008 |
+| `oc008a-fetch` | accepts a fetch of a network destination the Operator did not declare | OC-008 |
 | `oc008d` | refuses without naming the check | OC-001, OC-002, OC-003, OC-005, OC-008 |
 | `oc010` | issues a credential on a failed gate | OC-001, OC-004, OC-010 |
 

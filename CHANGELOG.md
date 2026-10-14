@@ -72,6 +72,18 @@ The conformance suite carries its own version line; a claim names both, as in
 
 **Conformance suite**
 
+- Step 8.7 attempts `entity actuate --op fetch` of a network destination
+  the Operator did not declare, and asserts the refusal names
+  `workspace-boundary`, for the clarified OC-008(a). The destination is
+  under `.invalid`, which never resolves, so the step reaches no network,
+  and an implementation that resolves or connects before the boundary fails
+  on that. ADAPTER.md adds `--op fetch` to `entity actuate` and says a hold
+  at the boundary resolves as a refusal, since the adapter has no Operator
+  to answer. The steps after it are renumbered, 8.7 – 8.11 becoming 8.8 –
+  8.12; the suite has 78 steps, 66 executed. The stub refuses every fetch,
+  having no network operation, and gains a break that proves the step can
+  fail. A change to what conformance means, so the suite's version moves at
+  the next release.
 - TESTS.md §0.3 says what *detected* asserts — `lifecycle verify` returns
   `chain_intact` or `content_matches` false — and steps 4.3 – 4.6 assert
   *operation stopped*: the start that follows issues no credential. The rows

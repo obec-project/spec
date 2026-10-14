@@ -21,6 +21,7 @@ It exists for two reasons:
          OBEC_STUB_BREAK=oc003b   fold the hostname into verification
          OBEC_STUB_BREAK=oc003c   let host actuation write the store
          OBEC_STUB_BREAK=oc008a   skip the workspace boundary check
+         OBEC_STUB_BREAK=oc008a-fetch accept a fetch of an undeclared destination
          OBEC_STUB_BREAK=oc008d   refuse without naming the check
          OBEC_STUB_BREAK=oc010    issue a credential on a failed gate
 
@@ -753,7 +754,12 @@ def cmd_entity(command, args):
     if command in ("actuate", "invoke-skill"):
         ws = structural.get("workspace")
         target = args.get("target")
-        if target is not None or command == "actuate":
+        if command == "actuate" and args.get("op") == "fetch":
+            # No network operation and no declared destination: every fetch is
+            # outside the boundary. The URL is not resolved as a path.
+            if not ({"oc008a-fetch", "oc008a"} & BREAK):
+                refused(store, "workspace-boundary", "OC-008(a)")
+        elif target is not None or command == "actuate":
             real = os.path.realpath(target or "")
             inside_store = real.startswith(os.path.realpath(store))
             outside_ws = not ws or not real.startswith(os.path.realpath(ws))

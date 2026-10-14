@@ -246,13 +246,17 @@ implementation's real paths, within the live session (§2.5).
 |---|---|---|---|
 | `entity propose --store PATH --ops FILE` | originate an evolution proposal from the ops in `FILE` (§3.6) | `proposal`: its id | OC-001(b) |
 | `entity commit --store PATH --proposal ID` | attempt to commit a proposal under whatever authorization currently exists | `authorization`: the id of the authorization that covered it | OC-001(b), OC-004(b) |
-| `entity actuate --store PATH --op read\|write --target P` | attempt a host operation on `P` | — | OC-002(b), OC-005(c), OC-008(a)(b) |
+| `entity actuate --store PATH --op read\|write\|fetch --target P` | attempt a host operation on `P`: a path, or for `fetch` a URL | — | OC-002(b), OC-005(c), OC-008(a)(b) |
 | `entity invoke-skill --store PATH --name N [--target P]` | attempt to execute skill `N`, on `P` if given | — | OC-008(a)(c) |
 | `entity attempt-write --store PATH --class structural\|mnemonic\|integrity --via OPERATION --target T` | attempt to write a content class through a named operation, with `T` as its target parameter | — | OC-001(b), OC-003(c), OC-005(b), OC-008(c) |
 | `entity stimulate --store PATH --text S` | deliver a stimulus | — | OC-003(e), OC-007 |
 
 `entity actuate` MAY also accept `--op execute`; the suite does not use it.
-`--op write` carries no content, and writes an empty file at `P`.
+`--op write` carries no content, and writes an empty file at `P`. `--op fetch`
+reads the URL `P`; an implementation with no network operation declares no
+destination, so it refuses every `fetch` at the boundary, `workspace-boundary`.
+The adapter has no Operator to answer a hold: a target held at the boundary
+(Core OC-008(a)) resolves as a refusal with the boundary's check.
 
 `entity attempt-write` is the command that tests the sole-writer discipline, and
 it is where an adapter is most tempted to cheat. It MUST route the attempt
@@ -352,8 +356,9 @@ absence is what the tests look for.
   authorization covers it
 - `operator set-workspace` pointing inside the Entity Store → refused
 - `entity actuate` outside the workspace, or resolving outside it through a
-  symbolic link or relative traversal → refused **before any other check runs**,
-  and the refusal names `workspace-boundary`
+  symbolic link or relative traversal, or `--op fetch` of a destination the
+  Operator did not declare → refused **before any other check runs**, and the
+  refusal names `workspace-boundary`
 - `entity actuate` or `entity commit` with no live session → refused
 - `entity invoke-skill` naming a skill the start did not index, or one its
   check excluded → refused, and the refusal names `skill-index`; naming a skill
