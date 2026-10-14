@@ -95,6 +95,13 @@ SETTINGS = (
         (5, 900),
         "seconds one call to the model may take before it fails (OC-006, D87)",
     ),
+    Setting(
+        "answer_reserve",
+        1024,
+        (256, 32768),
+        "tokens of the model's window kept for its answer when context is "
+        "assembled (D88)",
+    ),
 )
 
 _BY_NAME = {s.name: s for s in SETTINGS}

@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **Context is assembled by priority within a budget** (2026-10-14,
+  D88). `context.assemble` builds one call's messages from the store:
+  the persona, the instructions, the session's meta, the first turn and
+  the current one always, then the always-loaded records, the working
+  set, the recent turns whole, the conversation's episodic index and the
+  semantic index while they fit, refusing with `context-budget` when not
+  even the fixed part fits. `context.record_truncation` writes a
+  `context-truncated` session record once per change and tells the
+  Operator when an always-loaded record leaves the context. The session
+  store gains the `reply`, `results` and `context-truncated` kinds the
+  cycle will write.
+
 - **Context assembly designed** (2026-10-14, D88). D22 and D77 named
   what goes in and how the history is cut, not how the sources share a
   budget. The Operator set the priority: after what always goes in, the
