@@ -17,7 +17,6 @@ from .sil import Refused, log_append
 from .store import GuardError, Store, remove_host_tree, write_host_file
 
 OUTPUT_CAP = 1 << 16  # the most bytes kept of each output stream of a skill
-_FILLS = ("skill", "workspace", "target")
 
 
 def workspace_of(store: Store):
@@ -200,15 +199,21 @@ def _end_group(pid):
         pass
 
 
-def invoke_skill(root, name, target=None):
+def invoke_skill(root, name, target=None, args=None):
     """Invoke the skill ``name`` from a verified copy, under the Operator's rule,
-    its process group ended with it (OC-008, D51, D16)."""
+    its process group ended with it, with its typed arguments (OC-008, D51, D16,
+    D71)."""
     op = "invoke-skill"
     store = Store(root)
     copy = None
     try:
         with store.write_lock():
             real_t, rel_t = boundary(store, op, target if target is not None else ".")
+            marked = {}
+            if isinstance(args, dict):
+                for k in sorted(args, key=str):
+                    if skill_manifest.is_marked_path(args[k]):
+                        marked[k] = boundary(store, op, args[k]["path"])[0]
             ws_real = os.path.realpath(workspace_of(store))
             session = vital.require_entity_session(root, op)
 
@@ -287,6 +292,13 @@ def invoke_skill(root, name, target=None):
             for t in manifest["targets"]:
                 boundary(store, op, t)
 
+            schema = manifest.get("args", {})
+            found = skill_manifest.invocation_problems(schema, args)
+            if found:
+                raise _refuse(
+                    store, op, name, "skill-args", "OC-008(c)", "; ".join(found)
+                )
+
             digest = skill_manifest.skill_digest(entry["files"])
             try:
                 rules = store.read_json(
@@ -348,11 +360,14 @@ def invoke_skill(root, name, target=None):
                 )
 
             values = {"skill": copy, "workspace": ws_real, "target": real_t}
-            argv = []
-            for a in manifest["argv"]:
-                for k in _FILLS:
-                    a = a.replace("{%s}" % k, values[k])
-                argv.append(a)
+            for k, spec in schema.items():
+                if spec["type"] == "path":
+                    values["args." + k] = marked[k]
+                elif spec["type"] == "boolean":
+                    values["args." + k] = "true" if args[k] else "false"
+                else:
+                    values["args." + k] = str(args[k])
+            argv = [skill_manifest.fill(a, values) for a in manifest["argv"]]
             timeout = manifest["timeout_s"]
             entry_id = None
             if manifest["irreversible"]:
@@ -414,6 +429,7 @@ def invoke_skill(root, name, target=None):
                 outcome=outcome,
                 exit=proc.returncode,
                 ledger=entry_id,
+                args=args if args is not None else {},
             )
             return {
                 "skill": name,

@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **A skill takes typed arguments** (2026-10-13, OC-008, D71). A manifest's
+  `args` declares `string`, `integer`, `boolean`, `choice` and `path`
+  arguments, checked by `manifest.problems` with the rest of the manifest,
+  so a skill with an invalid schema is excluded at the start. `invoke_skill`
+  takes `args`: every marked path passes the workspace boundary right after
+  the target, before the session and the index; after the manifest and the
+  declared targets, an invocation without exactly the declared names, each
+  of its type, is refused with `skill-args`, before the Operator's rule. The
+  `argv` is filled in one pass and the arguments are logged with the
+  execution. A skill without `args` runs as before; the adapter's
+  `invoke-skill` takes no arguments, since the contract defines none. Over
+  OC-010, OC-001 – OC-005 and OC-008 the suite still gives 54 pass, 0 fail.
 - **A skill's typed arguments designed** (2026-10-13, D71). A manifest
   declares `args` of five types — `string`, `integer`, `boolean`, `choice`,
   `path` — every one required, used in `argv` as `{args.<name>}`. The
