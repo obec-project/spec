@@ -69,6 +69,18 @@ The conformance suite carries its own version line; a claim names both, as in
   declaration of the workspace, for the act, the session or as a setting,
   and the resumed act passes every check again. Prompted by fsp-ref's
   `http_fetch` (its G9).
+- A note to OC-007 says what the mnemonic recall path reads and what the
+  invariant governs. ADR 0003 placed the conversation's transcript in the
+  Memory Store, read in the assembled context and never recalled, and
+  concluded OC-007 needed no change; the suite's step 7.2 still read
+  "through the mnemonic recall path" as the recall operation alone, so the
+  transcript failed it, and the persona, persisted and informing cognition,
+  could only be omitted from `describe context-sources`, which step 7.3
+  exists to catch. The note says the recall path is the memory path's
+  reading side, the transcript's assembly included, and that structural
+  content informs cognition as what the entity is, authorized by commit,
+  not as knowledge it acquired. The kernel is untouched. Prompted by
+  fsp-ref's Phase 7 (its G25).
 
 **Conformance suite**
 

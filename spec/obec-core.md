@@ -430,6 +430,14 @@ Transient session input is operational context, not consolidated knowledge.
 persisted that informs cognition without having passed through recall is a
 failure.
 
+*Note (non-normative).* The mnemonic recall path is the memory path's reading
+side: recall, and the assembly of the current conversation's transcript, which
+is mnemonic content (OC-003(c)) that recall never returns and that reaches
+cognition only in the assembled context. Structural content — the persona above
+all — also informs cognition, as what the entity is, authorized by the Operator
+through commit (OC-001(b)), not as knowledge the entity acquired; OC-007 governs
+knowledge.
+
 *Note (non-normative).* Peer-sourced content under the Cognitive Mesh Interface
 (CMI) extension enters as a stimulus, never as knowledge: what an entity retains
 from a shared space is its own decision, executed through its own write paths.
