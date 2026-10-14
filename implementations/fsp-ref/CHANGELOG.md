@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **Context assembly designed** (2026-10-14, D88). D22 and D77 named
+  what goes in and how the history is cut, not how the sources share a
+  budget. The Operator set the priority: after what always goes in, the
+  always-loaded records, then the working set the last conversation
+  handed over, then the recent turns, then this conversation's own
+  memory as an index, then the semantic index; recall returns the rest
+  whole. A turn is a stimulus with its reply and results, kept whole. A
+  truncation is recorded once per change, and the Operator is told when
+  an always-loaded record leaves the context. Calibrating the token
+  estimate waits for the live process of Phase 8b.
+
 - **The inference channel** (2026-10-14, D87). `fsp/model.py` has the
   two declared backends: `FakeModel`, scripted, and `OllamaModel`, one
   `POST /api/chat` with the context only, through an opener that uses no
