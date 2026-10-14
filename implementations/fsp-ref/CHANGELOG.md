@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **The Sleep designed** (2026-10-14, D83). OP-022 says a Sleep follows
+  every normal close and OP-018 that a crash re-runs it, not where fsp
+  keeps the fact that one is under way. `sessions.json` names the session
+  whose Sleep runs, and the credential stays until it completes, so a
+  start that finds either recovers; the marker alone counts toward
+  `n_boot`, so a Sleep that crashes the start that re-runs it still halts
+  at the threshold. The re-run comes after the gates that verify the
+  structure and the authorizations it uses. Promotion runs in every
+  Sleep. Retention keeps everything in v0, by the Operator's choice:
+  collection is irreversible, and no entity in use has yet shown what
+  grows.
+
 - **Semantic memory is read through its ledger** (2026-10-14, D82).
   `mil.semantic_check` compares the records with the ledger and names
   what diverges; `mil.semantic_live` is what recall may return. Recall
