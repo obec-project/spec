@@ -11,6 +11,15 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **Provenance by dispatch designed** (2026-10-14, D90). D36 wants every
+  record an intent causes to name its cycle, which by hand means every
+  owner's every record, refusals included. The cycle sets a context
+  variable while it dispatches, and the writers label what they write
+  with it; outside a dispatch nothing is labelled, and nothing checks the
+  label, so it carries provenance and no authority. Each `inference`
+  names the model fingerprint in force through a session record the
+  start and `/model` write.
+
 - **The cognitive cycle** (2026-10-14, D89). `cycle.respond` records the
   Operator's text as a stimulus and runs the chain. Each cycle assembles
   the context, calls the model outside the write lock, logs the call as
