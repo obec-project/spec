@@ -9,6 +9,21 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
+## Phase 8 — cognition and the UI (in progress)
+
+- **Phase 8 planned, and the inference channel designed** (2026-10-14,
+  D87). The Operator split the phase: 8a builds cognition headless,
+  tested through the API with the fake backend, and moves the suite on
+  OC-006 and OC-009; 8b holds the session live and draws the UI, a line
+  REPL. D87 makes the channel one call over a declared backend, `ollama`
+  or `fake`, never a hidden mode. The model is an operational setting the
+  Operator's act sets only after the model answers a minimal call, and
+  the start logs its fingerprint from the setting without calling the
+  server, so a start never waits on the network. The Operator chose a
+  local Ollama, so v0 claims no third-party channel and step 6.4 needs no
+  dated assessment yet. `describe boundaries` waits for the cycle, the
+  first code that logs the crossing to the model.
+
 ## Phase 7 — memory (2026-10-14)
 
 - **The Operator's words enter episodic memory as verified quotes**
