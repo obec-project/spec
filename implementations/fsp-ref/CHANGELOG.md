@@ -9,6 +9,26 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
+## Phase 7 — memory (in progress)
+
+- **A semantic record's slug and category designed** (2026-10-14, D77).
+  Loading every semantic record in every cycle would outgrow a local
+  model's context within weeks, and recall alone would lose what must
+  shape every answer. A record now carries a slug, which the index shows,
+  and one of six categories — `rule`, `guidance`, `operator`, `project`,
+  `reference`, `knowledge` — by whether it says how to act or what is
+  true, and about whom, what or where. The categories in `always_loaded`,
+  a structural parameter, `rule`, `guidance` and `operator` by default,
+  enter every context whole; the others show as slugs within the budget
+  and are recalled whole on demand. An always-loaded record acts as a line
+  of the persona, so the entity only proposes slug and category, the
+  probes run on both, and the Operator's authorization covers them with
+  the content; none is about the entity itself, which is the persona's.
+  Records that do not fit are dropped `rule` last and the Operator told,
+  never silently. Also G25 closed: describe context-sources names each
+  source's class, and the Core says the recall path includes the
+  transcript's assembly.
+
 ## Phase 6b — the allowlist (2026-10-14)
 
 - **`http_fetch` reads the declared network** (2026-10-14, OC-008(a),
