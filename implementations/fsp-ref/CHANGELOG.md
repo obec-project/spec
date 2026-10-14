@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Promotion's order and recovery designed** (2026-10-14, D81). D53
+  names a promotion's parts, not their order, and the order decides what
+  a crash leaves. Written ledger first, a crash would leave an entry with
+  no record, which the next promotion would skip as done, and the memory
+  would stay missing. So the SIL logs the promotion, the MIL appends the
+  record, and the SIL appends the ledger entry last; a crash between the
+  two leaves a record recall withholds, and the next promotion of the
+  same request completes the entry instead of writing a second record.
+  The approved text passes the probes again, and a `supersedes` must name
+  a live record. `/retract` appends a retraction; removing the content is
+  not in v0.
+
 - **Promotion requests wait for the Operator** (2026-10-14, D53, D77,
   D80). The MIL appends a request to `memory/semantic/pending.jsonl`, a
   new datum, after checking its slug, its category among the six and its
