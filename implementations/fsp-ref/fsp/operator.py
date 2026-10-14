@@ -9,7 +9,7 @@ import json
 import os
 from pathlib import Path
 
-from . import clock, lifecycle, proposals, sil
+from . import clock, lifecycle, mil, proposals, sil
 from .digest import sha256
 from .sil import Refused, log_append
 from .store import INTEGRITY, Store, canonical
@@ -993,6 +993,25 @@ def notifications(root: str, *, binding=None):
     with store.write_lock():
         pending, reset = _pending(store)
         return {"notifications": [rec for rec, _, _ in pending], "pointer_reset": reset}
+
+
+def clear_transcript(root: str, *, binding=None):
+    """Cut the transcript of the live session's conversation, as a recorded
+    Operator act (D13, D78). It neither counts as an entity operation nor
+    triggers a Vital Check."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        session = lifecycle.require_session(root, "clear-transcript")
+        act = sil.operator_act(
+            store,
+            "clear-transcript",
+            binding=acting,
+            rule="OP-009(a)",
+            session=session,
+        )
+        rid = mil.save_session(store, session, "transcript-cleared", act=act)
+        return {"record": rid, "log_records": [act]}
 
 
 def acknowledge_notifications(root: str, *, binding=None):

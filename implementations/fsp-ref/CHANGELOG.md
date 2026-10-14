@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Each session writes its records, and sessions chain into a
+  conversation** (2026-10-14, D10, D24, D78). A start writes the
+  session's `session-open {conversation, continues}` through the MIL's
+  `session` destination, continuing the conversation of the most recent
+  earlier session that has one, unless that session left it; a session
+  that crashed before its first record is skipped. The transcript is the
+  conversation's records across its sessions after the last
+  `transcript-cleared`, which `/clear` writes as a logged Operator act
+  that runs no Vital Check (D13). A record that does not decode is
+  skipped and hides none of the others.
+
 - **The session store and the context sources designed** (2026-10-14,
   D78). The session-open lived only in the integrity log, so nothing
   chained a session to its conversation and the transcript D10 promises
@@ -23,7 +34,6 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   table, `CONTEXT_SOURCES`, names every source of context, for assembly in
   Phase 8 and for `describe context-sources` now, as `OPERATIONS` does for
   the operations.
-
 - **A semantic record's slug and category designed** (2026-10-14, D77).
   Loading every semantic record in every cycle would outgrow a local
   model's context within weeks, and recall alone would lose what must

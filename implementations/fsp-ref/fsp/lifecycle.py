@@ -382,6 +382,9 @@ def start(root: str, *, binding=None) -> StartResult:
                 gates=[g["gate"] for g in res.gates],
             )
         )
+        from . import mil  # imported here to avoid an import cycle
+
+        mil.open_session_record(store, session, sessions["last_session"])
         res.outcome = "accepted"
         res.credential_issued = True
         res.session = session
