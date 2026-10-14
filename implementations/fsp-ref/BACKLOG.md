@@ -34,6 +34,10 @@ After that: a test entity on Ollama, operated for days, measuring what
   an Operator's *I feel* as readily as the entity's. The probes of D12 must
   run on what is attributed to the entity — its turns and what it
   consolidates — not on the whole transcript.
+- **Phase 8 — a proposal op for structural parameters.** The window
+  category `parameters` exists and no op writes `config.json`, so
+  `always_loaded` keeps its default (D82). The op checks what it writes:
+  `always_loaded` a list of distinct categories (D77).
 - **Phase 8 — `fsp run` in a folder D30 refuses** (`~`, the entity folder):
   what `run` does instead is not decided.
 - **Phase 10 — the entity folder** (`.git`, `.gitignore`, `.gitattributes`,

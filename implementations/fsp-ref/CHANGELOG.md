@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Semantic recall through the ledger designed** (2026-10-14, D82). D53
+  and OP-004(a) say a diverging record is withheld and reported, not what
+  counts as live, who reports, or how often. A record is live when the
+  ledger seals it, nothing retracts it and nothing supersedes it; the
+  ledger is checked whole, since only authorized promotions grow it and
+  recall reads it whole anyway. Recall reports what it withheld in its log
+  record, and the Vital Check notifies the Operator once per finding and
+  ends Degraded, since a withheld record does not stop the entity.
+  Semantic memory has no conversation scope. `always_loaded` falls back to
+  its default until a proposal op writes structural parameters, which the
+  BACKLOG now carries.
+
 - **Promotion writes semantic memory** (2026-10-14, D53, D81).
   `mil.promote` writes a pending request's record and its entry in the
   semantic ledger, a new integrity datum, in D81's order, and completes
