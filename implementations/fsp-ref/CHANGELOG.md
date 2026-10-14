@@ -11,6 +11,15 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **A file that vanishes mid-picture is absent from it** (2026-10-14, D73).
+  The monitor's pictures are taken under the lock, which keeps out fsp's
+  own writers but not a process the watchdog could not reap or a
+  descendant that left the group. A file such a process removed between
+  the listing and the read made the picture raise, and the invocation
+  ended in an exception instead of Critical, its execution unlogged. Such
+  a file now counts as absent, which the comparison reports as removed,
+  and one that vanishes while `verify()` checks a generation a commit
+  moved `HEAD` to is a `structural` finding.
 - **`observe log` reads past a damaged line** (2026-10-14, D45). One line
   of the integrity log that did not parse made `observe_log` raise, so the
   Operator could not read the log, the Critical that reported the damage

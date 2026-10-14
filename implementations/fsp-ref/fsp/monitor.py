@@ -38,15 +38,19 @@ def picture(store) -> dict:
             d = datum_of(rel)
             if d is None or d.form == "lock" or rel == sil.LOG:
                 continue
-            if d.name in FIXED:
-                fixed[rel] = sha256_file(store.path(rel))
-            elif d.form == "append":
-                size = os.path.getsize(store.path(rel))
-                start = max(0, size - TAIL)
-                tail = store.read_range(rel, start, size - start)
-                append[rel] = [size, start, sha256(tail)]
-            else:
-                replace[rel] = sha256_file(store.path(rel))
+            try:
+                if d.name in FIXED:
+                    fixed[rel] = sha256_file(store.path(rel))
+                elif d.form == "append":
+                    size = os.path.getsize(store.path(rel))
+                    start = max(0, size - TAIL)
+                    tail = store.read_range(rel, start, size - start)
+                    append[rel] = [size, start, sha256(tail)]
+                else:
+                    replace[rel] = sha256_file(store.path(rel))
+            except FileNotFoundError:
+                # Removed between the listing and the read: absent from the picture.
+                continue
     return {
         "head": fixed.get(chain.HEAD),
         "fixed": fixed,
@@ -57,7 +61,10 @@ def picture(store) -> dict:
 
 
 def _log_picture(store) -> dict:
-    size = os.path.getsize(store.path(sil.LOG)) if store.exists(sil.LOG) else 0
+    try:
+        size = os.path.getsize(store.path(sil.LOG))
+    except FileNotFoundError:
+        size = 0
     position = None
     line = store.read_last_line(sil.LOG)
     if (
@@ -114,7 +121,11 @@ def _compare_log(store, before, after, findings):
 
 def _compare_structural(store, before, after, findings):
     if after["head"] != before["head"]:
-        findings.extend(verify(store.root).findings)
+        try:
+            findings.extend(verify(store.root).findings)
+        except FileNotFoundError as e:
+            rel = os.path.relpath(e.filename, store.root) if e.filename else "."
+            findings.append(_found(rel.replace(os.sep, "/"), "structural", "removed"))
         return
     for rel in sorted(set(before["fixed"]) | set(after["fixed"])):
         old = before["fixed"].get(rel)

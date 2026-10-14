@@ -24,13 +24,6 @@ After that: a test entity on Ollama, operated for days, measuring what
 
 ### Carried into the phases
 
-- **Phase 6b — a picture over a store something else is writing.** The
-  monitor's pictures are taken under the lock, which keeps out fsp's own
-  writers but not a process the watchdog could not reap or a descendant that
-  left the group. A file such a process removes between the listing and the
-  read makes `monitor.picture` raise, and the invocation ends in an
-  exception instead of Critical, its execution unlogged. A file that
-  vanishes mid-picture should count as absent.
 - **Phase 7 — the probes over memory tell the entity's words from others'.**
   Episodic memory records the conversation, and a first-person pattern flags
   an Operator's *I feel* as readily as the entity's. The probes of D12 must

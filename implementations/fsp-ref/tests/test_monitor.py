@@ -11,7 +11,7 @@ from unittest import mock
 
 from helpers import TempDirTest
 
-from fsp import chain, lifecycle, operator, sil
+from fsp import chain, lifecycle, monitor, operator, sil
 from fsp import exec as execution
 from fsp import manifest as skill_manifest
 from fsp.digest import canonical
@@ -233,6 +233,40 @@ class MonitorTests(TempDirTest):
             lifecycle.observe_log(self.S, kind="vital-critical")["records"], []
         )
         self.assertEqual(self.last_execution()["outcome"], "done")
+
+    def test_a_file_removed_mid_picture_is_absent_from_it(self):
+        gone = self.store.path("integrity/operational.json")
+        real = monitor.sha256_file
+
+        def hash_or_gone(path):
+            if path == gone:
+                raise FileNotFoundError(2, "removed", path)
+            return real(path)
+
+        with mock.patch.object(monitor, "sha256_file", hash_or_gone):
+            picture = monitor.picture(self.store)
+        self.assertNotIn("integrity/operational.json", picture["replace"])
+        self.assertIn("HEAD", picture["fixed"])
+
+    def test_a_file_removed_during_verification_is_a_finding(self):
+        before = monitor.picture(self.store)
+        self.commit({"persona.md": b"another persona\n"})
+        gone = self.store.path("structural/gen/1/persona.md")
+
+        def removed(root):
+            raise FileNotFoundError(2, "removed", gone)
+
+        with mock.patch.object(monitor, "verify", removed):
+            findings = [f.as_dict() for f in monitor.compare(self.store, before)]
+        self.assertIn(
+            {
+                "type": "skill-monitor",
+                "target": "structural/gen/1/persona.md",
+                "owner": "exec",
+                "evidence": {"class": "structural", "problem": "removed"},
+            },
+            findings,
+        )
 
 
 if __name__ == "__main__":
