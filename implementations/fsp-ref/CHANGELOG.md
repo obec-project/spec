@@ -11,6 +11,16 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **`/exit` with a Closure Payload the model emits** (2026-10-14, D91).
+  `cycle.emit_closure` asks the model for the payload in a call of its
+  own, logged as an `inference` with `closure` and recorded as a cycle;
+  a completion that is not a payload is a `cycle-aborted` and refuses the
+  exit. `operator.exit_with_closure` hands the payload to
+  `exit_conversation`, whose checks still apply. This closes Phase 8a:
+  cognition runs headless, and the suite over OC-001 to OC-010 has no
+  failure, OC-006 and OC-009 attested and OC-001's 1.16 with them. The
+  README says so.
+
 - **The Closure Payload's emission designed** (2026-10-14, D91). D84
   took the payload as input until cognition could emit it. `/exit` now
   asks the model for it in a call of its own, logged and numbered like a

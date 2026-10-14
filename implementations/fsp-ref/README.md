@@ -22,7 +22,10 @@ allowlist's domains and `http_fetch`, and memory: the session store and the
 conversation, recall by words and by lineage, semantic promotion under the
 Operator's authorization and its ledger, the Sleep after every close and its
 re-run after a crash, `/exit` with a Closure Payload, `/new`, `/resume` and
-`/inject`. Everything cognitive is not.
+`/inject`. So is cognition without a UI: the inference channel to a local
+Ollama or a declared fake, context assembled by priority within a budget,
+the cycle and its chain, and the Closure Payload emitted by the model. The
+live session and the chat are not.
 
 Python 3.10+, standard library only, Linux or macOS.
 
@@ -59,7 +62,9 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/ledger.py` | the Action Ledger, and the entries a crash left open surfaced at the start |
 | `fsp/mil.py` | the memory path: the session store and the conversation, `mnemonic-save` and `mnemonic-recall`, promotion and the semantic ledger, the consolidation, the pointer map |
 | `fsp/sleep.py` | the Sleep after every normal close |
-| `fsp/context.py` | the sources of assembled context |
+| `fsp/model.py` | the inference channel: the `ollama` and `fake` backends |
+| `fsp/cycle.py` | the cognitive cycle, its chain, and the Closure Payload's emission |
+| `fsp/context.py` | the sources of assembled context, and its assembly |
 | `fsp/vital.py` | the Vital Check before an act of the entity |
 | `fsp/probes.py` | the deterministic probes over structural content and memory |
 | `fsp/defaults/` | the persona and probes first activation writes |

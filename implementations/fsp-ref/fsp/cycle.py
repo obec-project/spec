@@ -55,6 +55,44 @@ results of all the intents except reply arrive in the next turn under \
 "Results:". Only reply reaches the Operator. Send an empty list when there is \
 nothing to do or to say."""
 
+CLOSURE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "consolidation": {"type": "string"},
+        "working_set": {"type": "array", "items": {"type": "string"}},
+        "message": {"type": "string"},
+        "promotions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "slug": {"type": "string"},
+                    "category": {"type": "string"},
+                    "content": {"type": "string"},
+                },
+                "required": ["slug", "category", "content"],
+            },
+        },
+    },
+    "required": ["consolidation", "working_set", "message", "promotions"],
+}
+
+CLOSURE_INSTRUCTIONS = (
+    """\
+The Operator is ending this conversation. Respond only with one JSON object \
+with these fields:
+- consolidation: what this conversation established, in the entity's own words.
+- working_set: the ids of the records the next conversation needs, each the \
+latest record of its lineage.
+- message: what gives those records their context, and the next steps.
+- promotions: what is worth becoming semantic knowledge. Each is an object \
+with slug, category and content, and optionally supersedes and sources. The \
+category is one of: """
+    + ", ".join(mil.CATEGORIES)
+    + """.
+The entity does not describe itself as conscious or sentient."""
+)
+
 RESULT_CAP = 16000
 
 
@@ -186,9 +224,10 @@ def _channel(root, store, session):
 
 
 def _abort(store, session, cid, inference, reason):
-    """Record an aborted cycle: the log record and the session record (D89)."""
+    """Record an aborted cycle: the log record and the session record (D89).
+    Returns the id of the ``cycle-aborted`` log record."""
     with store.write_lock():
-        log_append(
+        aborted = log_append(
             store,
             "cycle-aborted",
             rule="OP-001(a)",
@@ -205,6 +244,7 @@ def _abort(store, session, cid, inference, reason):
             intents=[],
             aborted=reason,
         )
+    return aborted
 
 
 def _run_intents(root, cid, intents):
@@ -343,3 +383,89 @@ def respond(root, text, *, channel=None, date=None):
         "replies": replies,
         "aborted": aborted,
     }
+
+
+def _refuse_emission(store, session, cid, inference, reason):
+    """Record the aborted closure cycle and raise the refusal of the exit
+    (D91, OP-009(d))."""
+    aborted = _abort(store, session, cid, inference, reason)
+    raise Refused("closure-emission", "OP-009(d)", reason, [aborted])
+
+
+def emit_closure(root, *, channel=None, date=None):
+    """Ask cognition for the Closure Payload in a call of its own (D91,
+    OP-009(d)): the context is assembled as for a cycle with the closure's
+    instructions, the call is logged as an ``inference`` with ``closure`` and
+    recorded as a ``cycle``. Returns ``{"payload", "cycle"}``; any abort is
+    recorded as a ``cycle-aborted`` and refused, ``check: closure-emission``.
+    The call to the model is made without the write lock."""
+    store = Store(root)
+    session = vital.require_entity_session(root, "exit")
+    num_ctx = model.NUM_CTX_DEFAULT
+    if channel is None:
+        channel, num_ctx = _channel(root, store, session)
+    if date is None:
+        date = clock.iso()[:10]
+
+    with store.write_lock():
+        n = 1 + sum(
+            1 for r in mil.session_records(store, session) if r.get("kind") == "cycle"
+        )
+        cid = "%s/c-%d" % (session, n)
+        try:
+            assembled = context.assemble(
+                store,
+                session,
+                num_ctx=num_ctx,
+                date=date,
+                instructions=CLOSURE_INSTRUCTIONS,
+            )
+            context.record_truncation(store, session, assembled)
+        except Refused:
+            assembled = None
+    if assembled is None:
+        _refuse_emission(store, session, cid, None, "context-budget")
+
+    try:
+        completion = channel.complete(assembled["messages"], schema=CLOSURE_SCHEMA)
+    except model.ModelError as e:
+        _refuse_emission(store, session, cid, None, "model: %s" % (e,))
+
+    with store.write_lock():
+        fingerprint = None
+        for r in mil.session_records(store, session):
+            if r.get("kind") == "model-fingerprint":
+                fingerprint = r.get("record")
+        inf = log_append(
+            store,
+            "inference",
+            rule="OC-006",
+            session=session,
+            cycle=cid,
+            fingerprint=fingerprint,
+            model=completion["model"],
+            estimate=assembled["estimate"],
+            prompt_eval_count=completion["prompt_eval_count"],
+            closure=True,
+        )
+
+    try:
+        payload = json.loads(completion["text"])
+    except (ValueError, RecursionError, TypeError):
+        payload = None
+    if not isinstance(payload, dict) or set(payload) != set(CLOSURE_SCHEMA["required"]):
+        _refuse_emission(
+            store, session, cid, inf, "the completion is not a Closure Payload"
+        )
+
+    with store.write_lock():
+        mil.save_session(
+            store,
+            session,
+            "cycle",
+            cycle=cid,
+            inference=inf,
+            intents=[],
+            closure=True,
+        )
+    return {"payload": payload, "cycle": cid}

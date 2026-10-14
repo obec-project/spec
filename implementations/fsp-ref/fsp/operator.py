@@ -9,7 +9,7 @@ import json
 import os
 from pathlib import Path
 
-from . import clock, config, lifecycle, mil, model, proposals, sil
+from . import clock, config, cycle, lifecycle, mil, model, proposals, sil
 from .digest import sha256
 from .sil import Refused, log_append
 from .store import INTEGRITY, Store, canonical
@@ -1279,6 +1279,15 @@ def exit_conversation(root: str, payload, *, binding=None):
         )
         out = lifecycle.close_session(store, session, acting)
         return {**out, "closure": rid, "log_records": [act] + out["log_records"]}
+
+
+def exit_with_closure(root: str, *, channel=None, binding=None, date=None):
+    """End the live session's conversation with a Closure Payload that
+    cognition emits in a call of its own (D91, OP-009(d)). A refused emission
+    or a refused payload (D84) propagates, and the session stays live."""
+    emitted = cycle.emit_closure(root, channel=channel, date=date)
+    out = exit_conversation(root, emitted["payload"], binding=binding)
+    return {**out, "cycle": emitted["cycle"]}
 
 
 def new_conversation(root: str, *, binding=None):
