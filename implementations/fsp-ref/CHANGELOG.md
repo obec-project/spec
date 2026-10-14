@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The cycle designed** (2026-10-14, D89). OP-001 says what a cycle is,
+  not how fsp tells a chain to go on or stop, nor what a malformed
+  completion does. One call, then every intent dispatched in order to its
+  owner's own function, none seeing another's result; a completion that
+  does not parse aborts the cycle and dispatches nothing. Results go on
+  as the next cycle's input; replies alone end the chain, and so does a
+  limit, logged. Each call is logged as `inference`, the crossing to the
+  model, which lets `describe boundaries` declare all four crossings
+  loggable. Preemption and queueing wait for the live process of 8b. The
+  cycle's id reaching every owner's records (D36) and the Closure Payload
+  emitted by the model follow in their own steps.
+
 - **Context is assembled by priority within a budget** (2026-10-14,
   D88). `context.assemble` builds one call's messages from the store:
   the persona, the instructions, the session's meta, the first turn and
