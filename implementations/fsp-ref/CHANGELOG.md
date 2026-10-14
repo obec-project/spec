@@ -11,6 +11,20 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **The Closure Payload and the consolidation designed** (2026-10-14,
+  D84). OP-009(d) and (e) say what the payload and the Resumption Record
+  carry, not where the payload comes from before there is a cognition to
+  emit it, nor how a Sleep that re-runs avoids writing twice. Until Phase
+  8, `exit` takes the payload as input and checks it before anything is
+  written: a payload the probes flag, or whose working set names a record
+  that is not the latest of its lineage in scope, never closes the
+  session. Each write of the consolidation names the payload, so a re-run
+  finds what it already wrote. The Resumption Record is replaced whole,
+  and `sleep-complete` names its digest, so the next conversation can
+  tell a record from a completed Sleep from one a crash left. `/new`
+  leaves with no payload. Loading the record into the next conversation
+  comes next, with `/resume` and `/inject`.
+
 - **Every normal close runs a Sleep** (2026-10-14, D83). `stop` closes the
   session, runs `sleep.run`, which promotes the authorized requests, then
   removes the credential and clears the `sleep` marker, in that order. D83
