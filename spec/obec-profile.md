@@ -625,6 +625,11 @@ The Operator's operational rules over host operations — **allow**, **deny**, o
 workspace boundary declaration is either configuration or an operational
 setting (OC-003(c)). A held operation waits for an explicit Operator decision;
 the decision and its outcome are logged, and the hold travels under OP-008(a).
+A target outside the workspace MAY be held the same way (OC-008(a)): the
+Operator's decision to place it inside is a declaration of the workspace — for
+the held act, for the session, or as a standing setting — and the held act,
+resumed, passes every check again, since the target may have changed while it
+waited.
 
 An allow rule for a skill SHOULD name the admitted content it allows — the
 skill's digest — and not only its name. A skill whose content changes, by any
