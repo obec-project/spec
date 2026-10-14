@@ -11,6 +11,19 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **The pointer map, `/inject` and `/resume` designed** (2026-10-14,
+  D85). D60 says what each does, not where a conversation's pointer map
+  lives, how the start tells a Resumption Record from a completed Sleep
+  without reading the log back, or how a resumed conversation finds its
+  transcript. A conversation's pointer map is a file of entries, each
+  naming where the record came from and the act that added it. The start
+  reads the one log record the checkpoint locates, which is the last
+  `sleep-complete`, and seeds the new conversation only if that record
+  names the Resumption Record's current digest. `/resume` names, in the
+  `conversation-left` it writes, the last session of the conversation to
+  resume, found by the Operator's act, so the start continues that
+  session at constant cost.
+
 - **`/exit` and `/new` leave the conversation** (2026-10-14, D84).
   `operator.exit_conversation` checks the Closure Payload, records the act
   and the payload among the session records, and closes;
