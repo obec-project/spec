@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import os
 
-from . import operations
+from . import context, operations
 from .store import LAYOUT, OWNER
 
 REPO_PREFIX = "implementations/fsp-ref/"
@@ -60,3 +60,12 @@ def operations_table():
         )
         evidence_list.append(evidence(*op.evidence))
     return {"operations": entries, "evidence": evidence_list}
+
+
+def context_sources_table():
+    """``describe context-sources``: generated from ``context.CONTEXT_SOURCES``
+    (D78)."""
+    return {
+        "sources": [dict(s) for s in context.CONTEXT_SOURCES],
+        "evidence": [evidence("fsp/context.py", "CONTEXT_SOURCES")],
+    }

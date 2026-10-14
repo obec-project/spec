@@ -14,9 +14,9 @@ import json
 import os
 import sys
 
-from . import config, describe, lifecycle, operations, operator, proposals, sil
+from . import config, describe, lifecycle, mil, operations, operator, proposals, sil
 from . import exec as execution
-from .store import remove_as_operator
+from .store import Store, remove_as_operator
 from .verify import store_state as verify_state
 from .verify import verify
 
@@ -90,6 +90,10 @@ def describe_state(flags):
 
 def describe_operations(flags):
     return accepted(describe.operations_table())
+
+
+def describe_context_sources(flags):
+    return accepted(describe.context_sources_table())
 
 
 # -- lifecycle --------------------------------------------------------------
@@ -345,6 +349,17 @@ def entity_invoke_skill(flags):
     )
 
 
+def entity_stimulate(flags):
+    text = flags.get("text")
+    if not text:
+        raise CannotAttempt("--text is required")
+    root = _store(flags)
+    if verify_state(root) in ("absent", "foreign"):
+        raise CannotAttempt("%s is not an fsp store" % root)
+    out, ref = _sil_call(mil.stimulate, root, text)
+    return ref or accepted(out)
+
+
 def observe_log(flags):
     root = _store(flags)
     if verify_state(root) in ("absent", "foreign"):
@@ -352,6 +367,19 @@ def observe_log(flags):
     return accepted(
         lifecycle.observe_log(root, kind=flags.get("kind"), since=flags.get("since"))
     )
+
+
+def observe_memory(flags):
+    root = _store(flags)
+    sample = flags.get("sample")
+    if not (sample and sample.isascii() and sample.isdigit()) or int(sample) < 1:
+        raise CannotAttempt("--sample is a positive integer")
+    if verify_state(root) in ("absent", "foreign"):
+        raise CannotAttempt("%s is not an fsp store" % root)
+    records = mil.observe(
+        Store(root), include_session=bool(flags.get("include-session"))
+    )
+    return accepted({"records": records[: int(sample)]})
 
 
 def describe_config(flags):
@@ -411,6 +439,7 @@ COMMANDS = {
     ("describe", "state"): describe_state,
     ("describe", "config"): describe_config,
     ("describe", "operations"): describe_operations,
+    ("describe", "context-sources"): describe_context_sources,
     ("lifecycle", "init"): lifecycle_init,
     ("lifecycle", "start"): lifecycle_start,
     ("lifecycle", "stop"): lifecycle_stop,
@@ -430,8 +459,10 @@ COMMANDS = {
     ("entity", "attempt-write"): entity_attempt_write,
     ("entity", "actuate"): entity_actuate,
     ("entity", "invoke-skill"): entity_invoke_skill,
+    ("entity", "stimulate"): entity_stimulate,
     ("observe", "chain"): observe_chain,
     ("observe", "log"): observe_log,
+    ("observe", "memory"): observe_memory,
     ("inject", "advance-clock"): _inject("advance-clock"),
     ("inject", "corrupt"): _inject("corrupt"),
     ("inject", "gate-failure"): _inject("gate-failure"),

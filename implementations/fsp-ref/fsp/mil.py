@@ -8,12 +8,13 @@ import json
 import re
 import secrets
 
-from . import clock, probes, sil, vital
+from . import clock, lifecycle, probes, sil, vital
 from .sil import Refused, log_append
 from .store import MNEMONIC, GuardError, Store, datum_of
 
 WRITER = "mil"
 EPISODIC = "memory/episodic/records.jsonl"
+SEMANTIC = "memory/semantic/records.jsonl"
 
 # Each destination of mnemonic-save and the datum it writes (D21).
 DESTINATIONS = {
@@ -211,8 +212,15 @@ def session_records(store: Store, session) -> list:
     """The records of ``session`` in order (D78). A missing file is empty; a
     line that is not a JSON object and a final fragment without its newline
     are skipped."""
+    return _read_records(store, session_path(session))
+
+
+def _read_records(store: Store, relpath: str) -> list:
+    """The JSON-object records of ``relpath`` in order. A missing file is
+    empty; a line that is not a JSON object and a final fragment without its
+    newline are skipped."""
     try:
-        data = store.read_bytes(session_path(session))
+        data = store.read_bytes(relpath)
     except FileNotFoundError:
         return []
     records = []
@@ -300,4 +308,29 @@ def transcript(store: Store, session) -> list:
     for i in range(len(records) - 1, -1, -1):
         if records[i].get("kind") == "transcript-cleared":
             return records[i + 1 :]
+    return records
+
+
+def stimulate(root: str, text: str) -> dict:
+    """Record ``text`` as a stimulus in the live session's file (D78). It is
+    not probed and not episodic memory, and it runs no Vital Check."""
+    store = Store(root)
+    with store.write_lock():
+        session = lifecycle.require_session(root, "stimulate")
+        rid = save_session(store, session, "stimulus", text=text)
+    return {"record": rid, "session": session}
+
+
+# -- observation (D78, OC-003(e)) ---------------------------------------------
+
+
+def observe(store: Store, *, include_session=False) -> list:
+    """The mnemonic records: the episodic, then the semantic, and with
+    ``include_session`` every session's records in session-file name order
+    (D78)."""
+    records = _read_records(store, EPISODIC) + _read_records(store, SEMANTIC)
+    if include_session:
+        for name in store.listdir("memory/session"):
+            if name.endswith(".jsonl"):
+                records.extend(session_records(store, name[: -len(".jsonl")]))
     return records
