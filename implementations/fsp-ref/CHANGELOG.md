@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Promotion requests and their authorization designed** (2026-10-14,
+  D80). D53 said what a promotion needs, not where a request waits or
+  where the Operator's decision lives. A request is a pending record the
+  MIL appends, with its slug, category, content, the semantic record it
+  supersedes, the episodic records it consolidates, and the digest of the
+  four that matter; the probes run on slug and content before it is ever
+  offered. The Operator approves it in the review, with the request's text
+  or their own, which then passes the probes too, or rejects it; the
+  decision lives in `auth.json` beside the proposals', and a window over
+  `memory.semantic` may authorize promotion at the Sleep instead.
+
 - **Episodic records belong to their conversation, and recall stays in
   its scope** (2026-10-14, D11, D79). An episodic record now names its
   conversation and, optionally, the latest record of a lineage in scope
