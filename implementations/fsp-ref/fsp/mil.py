@@ -66,12 +66,16 @@ def destination_of(relpath):
     return _destination_of_datum(d)
 
 
-def save(root: str, *, caller, destination, content, supersedes=None) -> dict:
+def save(
+    root: str, *, caller, destination, content, supersedes=None, quotes=None
+) -> dict:
     """Write an episodic record attributed to the live session (OC-003(e)),
     to the destination the caller may use (D21), after the deterministic
     probes (D12). The record names its conversation and, when given, the
     latest record in the conversation's recall scope that it supersedes
-    (D11, D79)."""
+    (D11, D79). The probes run on ``content`` only; ``quotes``, a list of
+    ``{record, text}``, are verified against the stimuli of the conversation's
+    transcript and kept outside the probes (D86)."""
     store = Store(root)
     with store.write_lock():
         # 1. the caller may write the destination
@@ -98,6 +102,20 @@ def save(root: str, *, caller, destination, content, supersedes=None) -> dict:
 
         # 3. a live session, with the Vital Check when one is due (D65)
         session = vital.require_entity_session(root, "mnemonic-save")
+
+        # 3a. the quotes: literal parts of the transcript's stimuli (D86)
+        if quotes is not None:
+            problem = _quote_problem(store, session, quotes)
+            if problem is not None:
+                rec = log_append(
+                    store,
+                    "refusal",
+                    rule="OP-005(a)",
+                    session=session,
+                    check="quote",
+                    detail=problem,
+                )
+                raise Refused("quote", "OP-005(a)", problem, [rec])
 
         # 4. the deterministic probes of the committed generation (D12)
         try:
@@ -181,8 +199,39 @@ def save(root: str, *, caller, destination, content, supersedes=None) -> dict:
         }
         if supersedes is not None:
             record["supersedes"] = supersedes
+        if quotes:
+            record["quotes"] = quotes
         store.append(MNEMONIC, EPISODIC, record, writer=WRITER)
         return {"record": record["id"]}
+
+
+def _quote_problem(store: Store, session, quotes):
+    """Why ``quotes`` are not verified quotes of the transcript's stimuli, or
+    None when each is a literal part of the stimulus it names (D86)."""
+    if not isinstance(quotes, list):
+        return "quotes must be a list"
+    for q in quotes:
+        if (
+            not isinstance(q, dict)
+            or set(q) != {"record", "text"}
+            or not isinstance(q["record"], str)
+            or not isinstance(q["text"], str)
+            or q["text"].strip() == ""
+        ):
+            return "a quote is {record, text}, both strings, text not empty"
+    stimuli = {
+        r["id"]: r.get("text")
+        for r in transcript(store, session)
+        if r.get("kind") == "stimulus"
+    }
+    for q in quotes:
+        held = stimuli.get(q["record"])
+        if not isinstance(held, str) or q["text"] not in held:
+            return "%r is not a literal part of a stimulus of the transcript (%s)" % (
+                q["text"],
+                q["record"],
+            )
+    return None
 
 
 def attempt_save(store: Store, cls, target):

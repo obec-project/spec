@@ -9,7 +9,16 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
-## Phase 7 — memory (in progress)
+## Phase 7 — memory (2026-10-14)
+
+- **The Operator's words enter episodic memory as verified quotes**
+  (2026-10-14, D86). `mil.save` takes `quotes`, each naming a stimulus of
+  the conversation's transcript that holds it verbatim, and runs the
+  probes on the content only; a quote no stimulus holds is refused,
+  `check: quote`. This closes Phase 7: the suite over its invariants has
+  no failure, OC-007 and OC-002 attested and OC-003 unestablished only for
+  want of a second host (3.2, Phase 9). The README now says what fsp-ref
+  has, which it had not since Phase 6b.
 
 - **The probes' attribution designed, and the first deviation recorded**
   (2026-10-14, D86). The probes ran on an episodic record's whole content,

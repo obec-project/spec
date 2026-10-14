@@ -8,11 +8,10 @@ done is in [CHANGELOG.md](CHANGELOG.md).
 ## 1. Phases
 
 Each phase ends with `run.py --only …` green on its invariants
-([AGENTS.md](AGENTS.md)). Phases 0–5, 6a and 6b are done.
+([AGENTS.md](AGENTS.md)). Phases 0–5, 6a, 6b and 7 are done.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **7** | what is left: the probes over memory on the entity's words (below) | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the process holding the session: `holder` and the `flock` on `CREDENTIAL` (D25), suspend (D19); the prompts, the Operator's four answers to a hold, and `/notifications` (D66), the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, including a name already in use (D54), `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json`, `notify_command` (D66) | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
@@ -29,11 +28,6 @@ After that: a test entity on Ollama, operated for days, measuring what
   rejected. Open: whether a skill's `path` argument may declare itself
   read-only in the manifest (D71), so that only those are asked about — a
   declaration the skill's code is trusted to keep (D51), not a confinement.
-- **Phase 7 — the probes over memory tell the entity's words from others'.**
-  Episodic memory records the conversation, and a first-person pattern flags
-  an Operator's *I feel* as readily as the entity's. The probes of D12 must
-  run on what is attributed to the entity — its turns and what it
-  consolidates — not on the whole transcript.
 - **Phase 8 — a proposal op for structural parameters.** The window
   category `parameters` exists and no op writes `config.json`, so
   `always_loaded` keeps its default (D82). The op checks what it writes:

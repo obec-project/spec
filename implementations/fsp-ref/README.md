@@ -16,8 +16,13 @@ integrity log, the Vital Check before an act of the entity, the
 Operator's mailbox of notices, the operations table with its attempted
 writes, the Action Ledger, and reading, writing and listing files inside the
 workspace, and skills run from a verified copy under the Operator's rule,
-which a proposal changes one entry at a time, with typed arguments.
-The allowlist's domains, `http_fetch` and everything cognitive are not.
+which a proposal changes one entry at a time, with typed arguments, under
+a watchdog and the monitor of what an execution touched. So are the
+allowlist's domains and `http_fetch`, and memory: the session store and the
+conversation, recall by words and by lineage, semantic promotion under the
+Operator's authorization and its ledger, the Sleep after every close and its
+re-run after a crash, `/exit` with a Closure Payload, `/new`, `/resume` and
+`/inject`. Everything cognitive is not.
 
 Python 3.10+, standard library only, Linux or macOS.
 
@@ -48,10 +53,14 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/lifecycle.py` | the gated start, the live session, close, revocation, decommission |
 | `fsp/operator.py` | the Operator's acts: bindings, the workspace, approvals, windows |
 | `fsp/proposals.py` | proposals, the authorization state, the commit of a proposal |
-| `fsp/exec.py` | the native primitives `file_read`, `file_write`, `file_list`, inside the workspace and outside the store |
+| `fsp/exec.py` | the native primitives `file_read`, `file_write`, `file_list` and `http_fetch`, inside the workspace and outside the store, and skills under the watchdog |
+| `fsp/monitor.py` | the picture of what an execution touched, compared after it |
 | `fsp/manifest.py` | a skill's manifest, checked at the start and before it runs, and its digest |
 | `fsp/ledger.py` | the Action Ledger, and the entries a crash left open surfaced at the start |
-| `fsp/mil.py` | the mnemonic class's write path: `mnemonic-save`, the destination by caller |
+| `fsp/mil.py` | the memory path: the session store and the conversation, `mnemonic-save` and `mnemonic-recall`, promotion and the semantic ledger, the consolidation, the pointer map |
+| `fsp/sleep.py` | the Sleep after every normal close |
+| `fsp/context.py` | the sources of assembled context |
+| `fsp/vital.py` | the Vital Check before an act of the entity |
 | `fsp/probes.py` | the deterministic probes over structural content and memory |
 | `fsp/defaults/` | the persona and probes first activation writes |
 | `fsp/config.py` | the configuration surface |
