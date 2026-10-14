@@ -399,16 +399,16 @@ def start(root: str, *, binding=None) -> StartResult:
         mil.open_session_record(store, session, sessions["last_session"])
         in_force = model.setting(store)
         if in_force is not None:
-            res.log_records.append(
-                log_append(
-                    store,
-                    "model-fingerprint",
-                    rule="OC-006",
-                    binding=acting,
-                    session=session,
-                    **in_force,
-                )
+            fp = log_append(
+                store,
+                "model-fingerprint",
+                rule="OC-006",
+                binding=acting,
+                session=session,
+                **in_force,
             )
+            res.log_records.append(fp)
+            mil.save_session(store, session, "model-fingerprint", record=fp)
         res.outcome = "accepted"
         res.credential_issued = True
         res.session = session

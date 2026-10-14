@@ -9,6 +9,8 @@ gates, credential and the Vital Check come in later phases, here.
 
 from __future__ import annotations
 
+import contextlib
+import contextvars
 import json
 import os
 import re
@@ -96,10 +98,31 @@ def _next_seq(store, last_line):
     return store.read_from(LOG, 0).count(b"\n") + 1
 
 
+CURRENT_CYCLE = contextvars.ContextVar("cycle", default=None)
+
+
+@contextlib.contextmanager
+def originated_by(cycle):
+    """Name ``cycle`` as the originator of every record written inside the
+    block, however deep (D90). The label is restored on exit, also when the
+    block raises. It is metadata only: no check reads it."""
+    token = CURRENT_CYCLE.set(cycle)
+    try:
+        yield
+    finally:
+        CURRENT_CYCLE.reset(token)
+
+
+def current_cycle():
+    """The cycle whose dispatch is running, or None outside a dispatch (D90)."""
+    return CURRENT_CYCLE.get()
+
+
 def log_append_located(
     store: Store, kind, *, rule=None, binding=None, session=None, **payload
 ) -> dict:
-    """Append one record to the integrity log and return its locator dict (D41)."""
+    """Append one record to the integrity log and return its locator dict (D41).
+    Inside a dispatch the record names the cycle, unless the payload does (D90)."""
     with store.write_lock():
         cut = store.cut_torn_tail(INTEGRITY, LOG, writer=WRITER)
         if cut is not None:
@@ -121,6 +144,8 @@ def log_append_located(
             record["binding"] = binding
         if session is not None:
             record["session"] = session
+        if current_cycle() is not None and "cycle" not in record:
+            record["cycle"] = current_cycle()
         offset = store.append(INTEGRITY, LOG, record, writer=WRITER)
         return {
             "id": record["id"],

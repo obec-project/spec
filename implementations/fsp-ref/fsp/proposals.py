@@ -558,6 +558,8 @@ def propose(root: str, ops: list) -> dict:
             "record": rec,
             "session": session,
         }
+        if sil.current_cycle() is not None:
+            auth["proposals"][pid]["cycle"] = sil.current_cycle()
         write_auth(store, auth)
 
         # 10. return

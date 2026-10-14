@@ -719,6 +719,9 @@ def set_model(
         fp = log_append(
             store, "model-fingerprint", rule="OC-006", binding=acting, act=act, **value
         )
+        live = lifecycle.live_session(root)
+        if live is not None:
+            mil.save_session(store, live, "model-fingerprint", record=fp)
         return {"model": value, "log_records": [act, fp]}
 
 

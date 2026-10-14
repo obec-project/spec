@@ -123,7 +123,8 @@ def dispatch(root, cycle_id, intent):
     Returns ``{"op", "outcome", ...}``."""
     op = intent["op"]
     try:
-        result = _dispatch_to_owner(root, cycle_id, intent)
+        with sil.originated_by(cycle_id):
+            result = _dispatch_to_owner(root, cycle_id, intent)
     except Refused as e:
         return {
             "op": op,
@@ -281,12 +282,17 @@ def respond(root, text, *, channel=None, date=None):
             break
 
         with store.write_lock():
+            fingerprint = None
+            for r in mil.session_records(store, session):
+                if r.get("kind") == "model-fingerprint":
+                    fingerprint = r.get("record")
             inf = log_append(
                 store,
                 "inference",
                 rule="OC-006",
                 session=session,
                 cycle=cid,
+                fingerprint=fingerprint,
                 model=completion["model"],
                 estimate=assembled["estimate"],
                 prompt_eval_count=completion["prompt_eval_count"],

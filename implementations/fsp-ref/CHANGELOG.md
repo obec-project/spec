@@ -11,6 +11,14 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **Every record an intent causes names its cycle** (2026-10-14, D90).
+  `sil.originated_by` sets a context variable while the cycle dispatches
+  an intent; the log, the episodic record, the Action Ledger's open entry
+  and the proposal in `auth.json` take `cycle` from it, a refusal or a
+  Vital Check included, and nothing outside a dispatch is labelled. The
+  start and `/model` within a session write a `model-fingerprint`
+  session record, and each `inference` names the last one.
+
 - **Provenance by dispatch designed** (2026-10-14, D90). D36 wants every
   record an intent causes to name its cycle, which by hand means every
   owner's every record, refusals included. The cycle sets a context

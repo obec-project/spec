@@ -42,6 +42,7 @@ SESSION_KINDS = (
     "results",
     "context-truncated",
     "cycle",
+    "model-fingerprint",
 )
 SESSION_ID = re.compile(r"^s-[0-9]+\Z")
 
@@ -205,6 +206,8 @@ def save(
             record["supersedes"] = supersedes
         if quotes:
             record["quotes"] = quotes
+        if sil.current_cycle() is not None:
+            record["cycle"] = sil.current_cycle()
         store.append(MNEMONIC, EPISODIC, record, writer=WRITER)
         return {"record": record["id"]}
 

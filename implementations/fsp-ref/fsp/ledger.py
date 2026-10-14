@@ -10,7 +10,7 @@ import os
 import secrets
 
 from . import clock
-from .sil import WRITER, log_append
+from .sil import WRITER, current_cycle, log_append
 from .store import INTEGRITY, Store
 
 LEDGER = "integrity/ledger.jsonl"
@@ -36,19 +36,18 @@ def open_entry(store: Store, *, op, target, intent, session):
     """Write the write-ahead entry before an irreversible act (OP-015). Returns
     its id; the act is performed only after this entry is on disk."""
     entry_id = "A-" + secrets.token_hex(8)
-    _append(
-        store,
-        {
-            "id": entry_id,
-            "kind": "open",
-            "op": op,
-            "target": target,
-            "intent": intent,
-            "session": session,
-            "at": clock.iso(),
-        },
-        session=session,
-    )
+    entry = {
+        "id": entry_id,
+        "kind": "open",
+        "op": op,
+        "target": target,
+        "intent": intent,
+        "session": session,
+        "at": clock.iso(),
+    }
+    if current_cycle() is not None:
+        entry["cycle"] = current_cycle()
+    _append(store, entry, session=session)
     return entry_id
 
 
