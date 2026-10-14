@@ -50,7 +50,12 @@ class AttemptTests(TempDirTest):
         )
         self.assertEqual(
             [d.name for d, _ in resolve("class:mnemonic")],
-            ["session-store", "episodic-memory", "semantic-memory"],
+            [
+                "session-store",
+                "episodic-memory",
+                "semantic-memory",
+                "pending-promotions",
+            ],
         )
         self.assertEqual(
             names(resolve("memory/session/s-1.jsonl")),

@@ -9,12 +9,17 @@ import re
 import secrets
 
 from . import clock, lifecycle, probes, sil, vital
+from .digest import canonical, sha256
 from .sil import Refused, log_append
 from .store import MNEMONIC, GuardError, Store, datum_of
 
 WRITER = "mil"
 EPISODIC = "memory/episodic/records.jsonl"
 SEMANTIC = "memory/semantic/records.jsonl"
+PENDING = "memory/semantic/pending.jsonl"
+
+# The categories of a semantic record (D77).
+CATEGORIES = ("rule", "guidance", "operator", "project", "reference", "knowledge")
 
 # Each destination of mnemonic-save and the datum it writes (D21).
 DESTINATIONS = {
@@ -200,6 +205,147 @@ def attempt_save(store: Store, cls, target):
                 target=target,
             )
     return resolved
+
+
+# -- promotion requests (D53, D77, D80) ----------------------------------------
+
+
+def promotion_digest(slug, category, content, supersedes) -> str:
+    """The digest of a promotion's text: what the Operator's authorization
+    names (D53, D80)."""
+    return sha256(
+        canonical(
+            {
+                "slug": slug,
+                "category": category,
+                "content": content,
+                "supersedes": supersedes,
+            }
+        )
+    )
+
+
+def _check_promotion(store: Store, session, slug, category, content, *, binding=None):
+    """The checks a promotion's text passes, whether it is the entity's request
+    or the Operator's edit: slug, category, content, then the probes of the
+    committed generation (OP-009(f), OC-002(d), D77). A refusal is logged with
+    the session and, when given, the binding, and raised."""
+    who = {}
+    if session is not None:
+        who["session"] = session
+    if binding is not None:
+        who["binding"] = binding
+
+    def refuse(rule, check, detail, **extra):
+        rec = log_append(
+            store, "refusal", rule=rule, check=check, detail=detail, **who, **extra
+        )
+        return Refused(check, rule, detail, [rec])
+
+    if (
+        not isinstance(slug, str)
+        or slug.strip() == ""
+        or len(slug) > 120
+        or "\n" in slug
+    ):
+        raise refuse(
+            "OP-009(f)",
+            "slug",
+            "a slug is a non-empty single line of at most 120 characters",
+        )
+    if category not in CATEGORIES:
+        raise refuse(
+            "OP-009(f)",
+            "category",
+            "%r is not a category of semantic memory" % (category,),
+        )
+    if not isinstance(content, str) or content.strip() == "":
+        raise refuse("OP-009(f)", "content", "a promotion requires a non-empty content")
+    try:
+        probe_set = sil.committed_probes(store)
+    except (OSError, ValueError, KeyError):
+        raise refuse("OC-002(d)", "probe-set", "the committed probe set cannot be read")
+    for text in (slug, content):
+        matches = probes.scan(probe_set, text)
+        if matches:
+            probe_id = matches[0]["id"]
+            raise refuse(
+                "OC-002(d)",
+                "self-representation",
+                "the promotion represents the entity as experiencing "
+                "sentience, consciousness or subjective continuity (probe %s)"
+                % probe_id,
+                probe=probe_id,
+            )
+
+
+def request_promotion(
+    store: Store,
+    session,
+    *,
+    slug,
+    category,
+    content,
+    supersedes=None,
+    sources=(),
+) -> str:
+    """Record a request to promote a memory to semantic memory and return its
+    id (D53, D77, D80). It writes only the pending file: the promotion itself
+    waits for the Operator's authorization. Called with the store lock held."""
+    _check_promotion(store, session, slug, category, content)
+    if supersedes is not None and not isinstance(supersedes, str):
+        detail = "supersedes is a record id or absent"
+        rec = log_append(
+            store,
+            "refusal",
+            rule="OP-009(f)",
+            session=session,
+            check="supersedes",
+            detail=detail,
+        )
+        raise Refused("supersedes", "OP-009(f)", detail, [rec])
+    if not isinstance(sources, (list, tuple)) or not all(
+        isinstance(s, str) for s in sources
+    ):
+        detail = "sources is a list of strings"
+        rec = log_append(
+            store,
+            "refusal",
+            rule="OP-009(f)",
+            session=session,
+            check="sources",
+            detail=detail,
+        )
+        raise Refused("sources", "OP-009(f)", detail, [rec])
+    cut = store.cut_torn_tail(MNEMONIC, PENDING, writer=WRITER)
+    if cut is not None:
+        log_append(
+            store,
+            "torn-append",
+            rule="OC-004(a)",
+            session=session,
+            path=PENDING,
+            **cut,
+        )
+    record = {
+        "id": "PP-" + secrets.token_hex(8),
+        "session": session,
+        "conversation": conversation_of(store, session),
+        "at": clock.iso(),
+        "slug": slug,
+        "category": category,
+        "content": content,
+        "supersedes": supersedes,
+        "sources": list(sources),
+        "digest": promotion_digest(slug, category, content, supersedes),
+    }
+    store.append(MNEMONIC, PENDING, record, writer=WRITER)
+    return record["id"]
+
+
+def pending_promotions(store: Store) -> list:
+    """The promotion requests in order (D80)."""
+    return _read_records(store, PENDING)
 
 
 # -- recall (D11, D60, D79) -----------------------------------------------------

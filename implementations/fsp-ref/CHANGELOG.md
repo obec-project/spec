@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Promotion requests wait for the Operator** (2026-10-14, D53, D77,
+  D80). The MIL appends a request to `memory/semantic/pending.jsonl`, a
+  new datum, after checking its slug, its category among the six and its
+  content, and running the probes on slug and content; a flagged request
+  is never offered. The Operator approves it as it stands or with their
+  own text, which passes the same checks and probes, or rejects it; the
+  decision lives in `auth.json`'s `promotions`, the approval naming the
+  digest of the text approved and the log record that authorized it. The
+  review lists the undecided requests with their content, and a window
+  may now cover `memory.semantic`. Nothing writes semantic memory yet.
+
 - **Promotion requests and their authorization designed** (2026-10-14,
   D80). D53 said what a promotion needs, not where a request waits or
   where the Operator's decision lives. A request is a pending record the

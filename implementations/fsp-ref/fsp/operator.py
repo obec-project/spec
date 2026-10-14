@@ -878,7 +878,138 @@ def review_list(root: str, *, binding=None):
                 }
             )
         items.sort(key=lambda it: it["record"])
-        return {"proposals": items}
+        promotions = [
+            {
+                "promotion": r["id"],
+                "slug": r["slug"],
+                "category": r["category"],
+                "content": r["content"],
+                "supersedes": r["supersedes"],
+                "digest": r["digest"],
+                "session": r["session"],
+                "conversation": r["conversation"],
+            }
+            for r in mil.pending_promotions(store)
+            if r.get("id") not in auth["promotions"]
+        ]
+        return {"proposals": items, "promotions": promotions}
+
+
+def _undecided_promotion(store: Store, acting, promotion_id):
+    """The authorization state and the request ``promotion_id`` names, when the
+    Operator has not decided it yet (OC-001(b), D53). An unknown or decided
+    promotion is refused and logged."""
+    try:
+        auth = proposals.read_auth(store)
+    except (OSError, ValueError) as e:
+        detail = "authorization state unreadable: %s" % (e,)
+        rec = log_append(
+            store,
+            "refusal",
+            rule="OC-001(b)",
+            binding=acting,
+            check="authorization-state",
+            detail=detail,
+        )
+        raise Refused("authorization-state", "OC-001(b)", detail, [rec])
+    request = next(
+        (r for r in mil.pending_promotions(store) if r.get("id") == promotion_id),
+        None,
+    )
+    if request is None:
+        check, detail = "promotion-unknown", "promotion %r is not known"
+    elif promotion_id in auth["promotions"]:
+        check, detail = "promotion-decided", "promotion %r is already decided"
+    else:
+        return auth, request
+    detail = detail % (promotion_id,)
+    rec = log_append(
+        store,
+        "refusal",
+        rule="OC-001(b)",
+        binding=acting,
+        check=check,
+        detail=detail,
+    )
+    raise Refused(check, "OC-001(b)", detail, [rec])
+
+
+def approve_promotion(root: str, promotion_id: str, *, edit=None, binding=None):
+    """Approve a promotion request as it stands or with the Operator's own text
+    (OC-001(b), D53, D80). The approval names the digest of the text approved;
+    an edit passes the same checks and probes as the request (OC-002(d))."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        auth, request = _undecided_promotion(store, acting, promotion_id)
+        if edit is None:
+            digest = request["digest"]
+        else:
+            if not isinstance(edit, dict) or set(edit) != {
+                "slug",
+                "category",
+                "content",
+            }:
+                detail = "an edit is an object with exactly slug, category and content"
+                rec = log_append(
+                    store,
+                    "refusal",
+                    rule="OC-001(b)",
+                    binding=acting,
+                    check="promotion-edit",
+                    detail=detail,
+                )
+                raise Refused("promotion-edit", "OC-001(b)", detail, [rec])
+            mil._check_promotion(
+                store,
+                None,
+                edit["slug"],
+                edit["category"],
+                edit["content"],
+                binding=acting,
+            )
+            digest = mil.promotion_digest(
+                edit["slug"], edit["category"], edit["content"], request["supersedes"]
+            )
+        loc = sil.operator_act_located(
+            store,
+            "approve-promotion",
+            binding=acting,
+            rule="OC-001(b)",
+            promotion=promotion_id,
+            digest=digest,
+        )
+        auth["promotions"][promotion_id] = {
+            "digest": digest,
+            "record": loc["id"],
+            "binding": acting,
+            "authorization": loc,
+            "edit": edit,
+        }
+        proposals.write_auth(store, auth)
+        return {
+            "promotion": promotion_id,
+            "digest": digest,
+            "log_records": [loc["id"]],
+        }
+
+
+def reject_promotion(root: str, promotion_id: str, *, binding=None):
+    """Reject a promotion request (OC-001(b), D53, D80)."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        auth, _request = _undecided_promotion(store, acting, promotion_id)
+        act = sil.operator_act(
+            store,
+            "reject-promotion",
+            binding=acting,
+            rule="OC-001(b)",
+            promotion=promotion_id,
+        )
+        auth["promotions"][promotion_id] = {"rejected": act, "binding": acting}
+        proposals.write_auth(store, auth)
+        return {"promotion": promotion_id, "log_records": [act]}
 
 
 def reject(root: str, proposal_id: str, *, binding=None):

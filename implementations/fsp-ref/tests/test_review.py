@@ -25,7 +25,9 @@ class ReviewTest(TempDirTest):
         return lifecycle.observe_log(self.S, kind=kind)["records"]
 
     def test_the_list_is_empty_without_proposals(self):
-        self.assertEqual(operator.review_list(self.S), {"proposals": []})
+        self.assertEqual(
+            operator.review_list(self.S), {"proposals": [], "promotions": []}
+        )
 
     def test_the_list_shows_pending_proposals_in_order(self):
         lifecycle.start(self.S)
@@ -65,7 +67,9 @@ class ReviewTest(TempDirTest):
         self.assertEqual(act["binding"], "op-1")
         self.assertEqual(act["rule"], "OC-001(b)")
         self.assertEqual(act["digest"], digest)
-        self.assertEqual(operator.review_list(self.S), {"proposals": []})
+        self.assertEqual(
+            operator.review_list(self.S), {"proposals": [], "promotions": []}
+        )
         self.assertNotIn(pid, self.store.read_json(lifecycle.AUTH)["proposals"])
 
     def test_rejecting_an_approved_proposal_withdraws_the_approval(self):
@@ -91,7 +95,9 @@ class ReviewTest(TempDirTest):
         pid = proposals.propose(self.S, PERSONA)["proposal"]
         lifecycle.stop(self.S)
         operator.reject(self.S, pid)
-        self.assertEqual(operator.review_list(self.S), {"proposals": []})
+        self.assertEqual(
+            operator.review_list(self.S), {"proposals": [], "promotions": []}
+        )
 
     def test_rejecting_over_unreadable_authorization_is_refused(self):
         lifecycle.start(self.S)

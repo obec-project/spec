@@ -35,6 +35,7 @@ WINDOW_CATEGORIES = (
     "skills.remove",
     "rules",
     "parameters",
+    "memory.semantic",
 )
 
 EXPIRY_RE = re.compile(r"^([+-])(\d+)([smhd])\Z")
@@ -81,7 +82,7 @@ def _is_valid_skill_path(p: str) -> bool:
 def read_auth(store: Store) -> dict:
     """Read authorization state (lifecycle.AUTH)."""
     if not store.exists(lifecycle.AUTH):
-        return {"proposals": {}, "approvals": {}, "grants": []}
+        return {"proposals": {}, "approvals": {}, "promotions": {}, "grants": []}
     data = store.read_json(lifecycle.AUTH)
     if not isinstance(data, dict):
         raise ValueError("authorization state is not an object")
@@ -91,6 +92,9 @@ def read_auth(store: Store) -> dict:
     approvals_obj = data.get("approvals")
     if approvals_obj is not None and not isinstance(approvals_obj, dict):
         raise ValueError("approvals must be an object")
+    promotions_obj = data.get("promotions")
+    if promotions_obj is not None and not isinstance(promotions_obj, dict):
+        raise ValueError("promotions must be an object")
     grants_obj = data.get("grants")
     if grants_obj is not None and not isinstance(grants_obj, list):
         raise ValueError("grants must be a list")
@@ -106,6 +110,8 @@ def read_auth(store: Store) -> dict:
         data["proposals"] = {}
     if "approvals" not in data:
         data["approvals"] = {}
+    if "promotions" not in data:
+        data["promotions"] = {}
     if "grants" not in data:
         data["grants"] = []
     return data
