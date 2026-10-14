@@ -8,7 +8,7 @@ import json
 import re
 import secrets
 
-from . import chain, clock, lifecycle, probes, proposals, sil, vital
+from . import chain, clock, config, lifecycle, probes, proposals, sil, vital
 from .digest import canonical, sha256
 from .sil import Refused, log_append
 from .store import MNEMONIC, GuardError, Store, datum_of
@@ -32,7 +32,13 @@ DESTINATIONS = {
 CALLERS = {"cpe": ("episodic",), "orchestrator": ("session",)}
 
 # The kinds of record a session's file holds (D78) and the session ids (D46).
-SESSION_KINDS = ("session-open", "stimulus", "transcript-cleared", "conversation-left")
+SESSION_KINDS = (
+    "session-open",
+    "stimulus",
+    "transcript-cleared",
+    "conversation-left",
+    "closure-payload",
+)
 SESSION_ID = re.compile(r"^s-[0-9]+\Z")
 
 
@@ -288,10 +294,14 @@ def request_promotion(
     content,
     supersedes=None,
     sources=(),
+    closure=None,
+    index=None,
 ) -> str:
     """Record a request to promote a memory to semantic memory and return its
     id (D53, D77, D80). It writes only the pending file: the promotion itself
-    waits for the Operator's authorization. Called with the store lock held."""
+    waits for the Operator's authorization. A request made from a Closure
+    Payload names it in ``closure`` and the promotion's position in ``index``
+    (D84). Called with the store lock held."""
     _check_promotion(store, session, slug, category, content)
     if supersedes is not None and not isinstance(supersedes, str):
         detail = "supersedes is a record id or absent"
@@ -339,6 +349,9 @@ def request_promotion(
         "sources": list(sources),
         "digest": promotion_digest(slug, category, content, supersedes),
     }
+    if closure is not None:
+        record["closure"] = closure
+        record["index"] = index
     store.append(MNEMONIC, PENDING, record, writer=WRITER)
     return record["id"]
 
@@ -859,6 +872,11 @@ def _left(store: Store, session) -> bool:
     )
 
 
+def conversation_left(store: Store, session) -> bool:
+    """Whether ``session``'s records end its conversation (D78, D84)."""
+    return _left(store, session)
+
+
 def open_session_record(store: Store, session, number) -> str:
     """Write the ``session-open`` record of the new session ``session``
     (number ``number``) and return its conversation (D78). The session
@@ -929,6 +947,203 @@ def stimulate(root: str, text: str) -> dict:
         session = lifecycle.require_session(root, "stimulate")
         rid = save_session(store, session, "stimulus", text=text)
     return {"record": rid, "session": session}
+
+
+# -- leaving a conversation (D84) -----------------------------------------------
+
+# The keys of a Closure Payload and of each promotion in it (D84).
+_PAYLOAD_KEYS = {"consolidation", "working_set", "message", "promotions"}
+_PROMOTION_REQUIRED = {"slug", "category", "content"}
+_PROMOTION_KEYS = _PROMOTION_REQUIRED | {"supersedes", "sources"}
+
+
+def resumption_path(conversation) -> str:
+    """The Resumption Record of ``conversation`` (D84)."""
+    return "memory/resumption/%s.json" % conversation
+
+
+def _payload_shaped(payload) -> bool:
+    """Whether ``payload`` has the shape of a Closure Payload (D84)."""
+    if not isinstance(payload, dict) or set(payload) != _PAYLOAD_KEYS:
+        return False
+    for key in ("consolidation", "message"):
+        if not isinstance(payload[key], str) or payload[key].strip() == "":
+            return False
+    working_set = payload["working_set"]
+    if not isinstance(working_set, list) or not all(
+        isinstance(i, str) for i in working_set
+    ):
+        return False
+    if len(set(working_set)) != len(working_set):
+        return False
+    promotions = payload["promotions"]
+    if not isinstance(promotions, list):
+        return False
+    for p in promotions:
+        if not isinstance(p, dict) or not _PROMOTION_REQUIRED <= set(p):
+            return False
+        if not set(p) <= _PROMOTION_KEYS:
+            return False
+        if not all(isinstance(p[k], str) for k in _PROMOTION_REQUIRED):
+            return False
+    return True
+
+
+def check_closure_payload(store: Store, session, payload) -> None:
+    """Check a Closure Payload before anything is written (D84). The first
+    failure is logged with the session and raised: the shape (OP-009(d)), the
+    pointer-map limit (OP-009(e)), the working set against the latest records
+    in the conversation's scope (OP-009(c)), then the probes on the
+    consolidation and the message (OC-002(d)). The promotions' own checks and
+    probes run at the Sleep. Called with the store lock held."""
+
+    def refuse(rule, check, detail, **extra):
+        rec = log_append(
+            store,
+            "refusal",
+            rule=rule,
+            session=session,
+            check=check,
+            detail=detail,
+            **extra,
+        )
+        return Refused(check, rule, detail, [rec])
+
+    if not _payload_shaped(payload):
+        raise refuse(
+            "OP-009(d)",
+            "closure-payload",
+            "a Closure Payload is exactly a consolidation, a working set, a "
+            "message and promotions",
+        )
+    working_set = payload["working_set"]
+    limit = config.value(store, "pointer_map_limit")
+    if len(working_set) > limit:
+        raise refuse(
+            "OP-009(e)",
+            "pointer-map-limit",
+            "the working set names %d records, at most %d" % (len(working_set), limit),
+        )
+    latest = {
+        r.get("id") for r in _latest(_scope(store, conversation_of(store, session)))
+    }
+    for rid in working_set:
+        if rid not in latest:
+            raise refuse(
+                "OP-009(c)",
+                "recall-scope",
+                "%r is not the latest of its lineage in the conversation's "
+                "recall scope" % (rid,),
+            )
+    try:
+        probe_set = sil.committed_probes(store)
+    except (OSError, ValueError, KeyError):
+        raise refuse("OC-002(d)", "probe-set", "the committed probe set cannot be read")
+    for text in (payload["consolidation"], payload["message"]):
+        matches = probes.scan(probe_set, text)
+        if matches:
+            probe_id = matches[0]["id"]
+            raise refuse(
+                "OC-002(d)",
+                "self-representation",
+                "the closure represents the entity as experiencing "
+                "sentience, consciousness or subjective continuity (probe %s)"
+                % probe_id,
+                probe=probe_id,
+            )
+
+
+def consolidate(store: Store, session):
+    """Consolidate the Closure Payload of ``session``, if its records hold one
+    (D84), and return what was written, or None. Each thing is written once,
+    however many times the Sleep runs: the consolidation as an episodic record
+    naming the payload in ``closure``, each promotion as a request naming the
+    payload and its index, and the Resumption Record, replaced whole. A
+    refused promotion is logged and skipped. Then ``conversation-left`` is
+    written if the records lack it. Called with the store lock held."""
+    payloads = [
+        r for r in session_records(store, session) if r.get("kind") == "closure-payload"
+    ]
+    if not payloads:
+        return None
+    pid = payloads[-1]["id"]
+    payload = payloads[-1]["payload"]
+    conversation = conversation_of(store, session)
+
+    consolidation = next(
+        (r["id"] for r in _episodic(store) if r.get("closure") == pid), None
+    )
+    if consolidation is None:
+        cut = store.cut_torn_tail(MNEMONIC, EPISODIC, writer=WRITER)
+        if cut is not None:
+            log_append(
+                store,
+                "torn-append",
+                rule="OC-004(a)",
+                session=session,
+                path=EPISODIC,
+                **cut,
+            )
+        record = {
+            "id": "M-" + secrets.token_hex(8),
+            "session": session,
+            "at": clock.iso(),
+            "content": payload["consolidation"],
+            "conversation": conversation,
+            "closure": pid,
+        }
+        store.append(MNEMONIC, EPISODIC, record, writer=WRITER)
+        consolidation = record["id"]
+
+    requests = []
+    for i, p in enumerate(payload["promotions"]):
+        existing = next(
+            (
+                r["id"]
+                for r in pending_promotions(store)
+                if r.get("closure") == pid and r.get("index") == i
+            ),
+            None,
+        )
+        if existing is None:
+            try:
+                existing = request_promotion(
+                    store,
+                    session,
+                    slug=p["slug"],
+                    category=p["category"],
+                    content=p["content"],
+                    supersedes=p.get("supersedes"),
+                    sources=p.get("sources", ()),
+                    closure=pid,
+                    index=i,
+                )
+            except Refused:
+                continue
+        requests.append(existing)
+
+    rr = {
+        "conversation": conversation,
+        "session": session,
+        "closure": pid,
+        "consolidation": consolidation,
+        "working_set": payload["working_set"],
+        "message": payload["message"],
+        "at": clock.iso(),
+    }
+    store.replace_json(MNEMONIC, resumption_path(conversation), rr, writer=WRITER)
+
+    if not _left(store, session):
+        save_session(store, session, "conversation-left", closure=pid)
+    return {
+        "closure": pid,
+        "consolidation": consolidation,
+        "requests": requests,
+        "resumption": {
+            "conversation": conversation,
+            "sha256": sha256(canonical(rr)),
+        },
+    }
 
 
 # -- observation (D78, OC-003(e)) ---------------------------------------------

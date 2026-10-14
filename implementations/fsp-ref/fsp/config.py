@@ -82,6 +82,13 @@ SETTINGS = (
         "seconds a fetch may take in all, its redirects included; reaching them "
         "is the result timeout (D75)",
     ),
+    Setting(
+        "pointer_map_limit",
+        20,
+        (0, 200),
+        "records the working set of a Closure Payload may name, the Resumption "
+        "Record's pointer map (OP-009(e), D84)",
+    ),
 )
 
 _BY_NAME = {s.name: s for s in SETTINGS}

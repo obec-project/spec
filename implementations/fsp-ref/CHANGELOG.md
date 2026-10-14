@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **`/exit` and `/new` leave the conversation** (2026-10-14, D84).
+  `operator.exit_conversation` checks the Closure Payload, records the act
+  and the payload among the session records, and closes;
+  `operator.new_conversation` writes `conversation-left` and closes. The
+  Sleep's consolidation writes the episodic record, the promotion
+  requests and the Resumption Record from the recorded payload, each
+  keyed to it, so a re-run after a crash finds them instead of writing
+  them again. A Sleep that ends the conversation logs a `gc` that keeps
+  everything. `stop` now shares `lifecycle.close_session` with both, and
+  `pointer_map_limit` (20) bounds the working set.
+
 - **The Closure Payload and the consolidation designed** (2026-10-14,
   D84). OP-009(d) and (e) say what the payload and the Resumption Record
   carry, not where the payload comes from before there is a cognition to

@@ -1184,6 +1184,41 @@ def clear_transcript(root: str, *, binding=None):
         return {"record": rid, "log_records": [act]}
 
 
+def exit_conversation(root: str, payload, *, binding=None):
+    """End the live session's conversation with a Closure Payload (D84,
+    OP-009(a)(d)(e)). The payload is checked before anything is written; a
+    refusal leaves the session live. Otherwise the act and the payload are
+    recorded, then the session closes and its Sleep consolidates."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        session = lifecycle.require_session(root, "exit")
+        mil.check_closure_payload(store, session, payload)
+        act = sil.operator_act(
+            store, "exit", binding=acting, rule="OP-009(a)", session=session
+        )
+        rid = mil.save_session(
+            store, session, "closure-payload", payload=payload, act=act
+        )
+        out = lifecycle.close_session(store, session, acting)
+        return {**out, "closure": rid, "log_records": [act] + out["log_records"]}
+
+
+def new_conversation(root: str, *, binding=None):
+    """Leave the live session's conversation with no payload and close the
+    session (D84, OP-009(a))."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        session = lifecycle.require_session(root, "new")
+        act = sil.operator_act(
+            store, "new", binding=acting, rule="OP-009(a)", session=session
+        )
+        mil.save_session(store, session, "conversation-left", act=act)
+        out = lifecycle.close_session(store, session, acting)
+        return {**out, "log_records": [act] + out["log_records"]}
+
+
 def acknowledge_notifications(root: str, *, binding=None):
     """Acknowledge every pending operator notice, as a recorded Operator act
     (D66). Writes nothing when no notice is pending."""

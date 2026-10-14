@@ -55,6 +55,7 @@ class AttemptTests(TempDirTest):
                 "episodic-memory",
                 "semantic-memory",
                 "pending-promotions",
+                "resumption-record",
             ],
         )
         self.assertEqual(

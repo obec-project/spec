@@ -12,7 +12,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **7** | what is left: the Closure Payload, the Resumption Record and the GC stage of the Sleep (D84); the next conversation's pointer map (D60); `/exit`, `/new`, `/resume` and `/inject`; the probes over memory on the entity's words (below) | OC-007, OC-003(e), OC-002(d) |
+| **7** | what is left: the next conversation's pointer map, from the Resumption Record of a completed Sleep (D60, OP-009(e)); `/resume` and `/inject`; the probes over memory on the entity's words (below) | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the process holding the session: `holder` and the `flock` on `CREDENTIAL` (D25), suspend (D19); the prompts, the Operator's four answers to a hold, and `/notifications` (D66), the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, including a name already in use (D54), `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json`, `notify_command` (D66) | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |

@@ -582,27 +582,34 @@ def stop(root: str, *, binding=None):
     store = Store(root)
     with store.write_lock():
         acting = binding or sil.owner_binding(store)
-        sessions = _read_sessions(store)
-        sessions["open_session"] = None
-        sessions["consecutive_recoveries"] = 0
-        sessions["sleep"] = session
-        _write_sessions(store, sessions)
-        loc = sil.log_append_located(
-            store,
-            "session-close",
-            rule="OP-021(a)",
-            binding=acting,
-            session=session,
-            mode="normal",
-        )
-        out = sleep.run(store, session)
-        _drop_credential(store)
-        sessions["sleep"] = None
-        _write_sessions(store, sessions)
+        return close_session(store, session, acting)
+
+
+def close_session(store: Store, session, acting):
+    """Close ``session`` normally and run its Sleep (D83, D84). Called with
+    the write lock held."""
+    sessions = _read_sessions(store)
+    sessions["open_session"] = None
+    sessions["consecutive_recoveries"] = 0
+    sessions["sleep"] = session
+    _write_sessions(store, sessions)
+    loc = sil.log_append_located(
+        store,
+        "session-close",
+        rule="OP-021(a)",
+        binding=acting,
+        session=session,
+        mode="normal",
+    )
+    out = sleep.run(store, session)
+    _drop_credential(store)
+    sessions["sleep"] = None
+    _write_sessions(store, sessions)
     return {
         "session": session,
         "log_records": [loc["id"]] + out["log_records"],
         "sleep": {"promoted": out["promoted"], "refused": out["refused"]},
+        "consolidation": out["consolidation"],
     }
 
 
