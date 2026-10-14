@@ -11,6 +11,15 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Recall v0 designed** (2026-10-14, D79). OP-009(c) fixes the scope and
+  the lineages but not how a query matches, whether recall is logged, or
+  what a misplaced `supersedes` does. A query returns the latest record of
+  each lineage in scope that holds every word of it, case-folded; asking
+  for a lineage returns its records in scope and names those outside.
+  `supersedes` must name the latest record of a lineage in scope, since a
+  fork would leave a lineage with two latest records. Every recall leaves
+  a record in the log: it crosses between cognition and memory (OC-009).
+
 - **The adapter delivers a stimulus and observes memory** (2026-10-14,
   D78, OC-003(e), OC-007). `entity stimulate` records the stimulus in the
   live session's records, with no cycle yet to consume it (Phase 8);
