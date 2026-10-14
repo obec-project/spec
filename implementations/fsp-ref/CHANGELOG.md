@@ -11,6 +11,16 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **The allowlist's domain ops** (2026-10-14, D70, D76). A proposal
+  carries `allow-domain`, `deny-domain` and `unset-domain`, each
+  `{domain}`, category `rules`, so a window on `rules` covers them as it
+  does the skill ops. Proposing checks the entry's form against
+  `store.DOMAIN_ENTRY` — one host, exact, `http://` for the same host in
+  clear — and refuses one out of it, `check: ops`, never rewriting it; the
+  commit applies the ops to the generation's `rules.json`, refusing an
+  `unset-` of an entry the rules do not hold. A skill and a domain of the
+  same text are two entries, so `example.com`, also a valid skill name,
+  can be named by one op of each in one proposal.
 - **The network as territory designed; G9 closed** (2026-10-14, D74 – D76).
   OC-008 spoke of paths only, so `http_fetch` had no declared territory to
   stay inside; OC-008(a) is clarified, and OP-016 follows. The workspace is

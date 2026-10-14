@@ -12,7 +12,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **6b** | `http_fetch` under the allowlist's domains (D75), with the domain ops (D70, D76) and `--op fetch` in the adapter (step 8.7); monitoring around each skill (D2, D73) | — (unit tests) |
+| **6b** | `http_fetch` under the allowlist's domains (D75) and `--op fetch` in the adapter (step 8.7) | — (unit tests) |
 | **7** | session records, the conversation and its recall scope (D11, D60), `mnemonic-recall`, `mnemonic-save`'s `session` and `semantic` destinations and a record's conversation and `supersedes`, the probes over memory (D12), promotion under authorization and the semantic ledger (D53), `/resume`, `/inject` and `/retract`, Sleep | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the process holding the session: `holder` and the `flock` on `CREDENTIAL` (D25), suspend (D19); the prompts, the Operator's four answers to a hold, and `/notifications` (D66), the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |

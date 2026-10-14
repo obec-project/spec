@@ -13,7 +13,7 @@ from . import chain, clock, config, lifecycle, sil, vital
 from . import manifest as skill_manifest
 from .digest import canonical, integrity_document, sha256
 from .sil import WRITER, Refused, log_append
-from .store import INTEGRITY, SKILL_NAME, Store
+from .store import DOMAIN_ENTRY, INTEGRITY, SKILL_NAME, Store
 
 CATEGORIES = {
     "set-persona": "persona",
@@ -21,9 +21,13 @@ CATEGORIES = {
     "allow-skill": "rules",
     "deny-skill": "rules",
     "unset-skill": "rules",
+    "allow-domain": "rules",
+    "deny-domain": "rules",
+    "unset-domain": "rules",
 }
 
-RULE_OPS = ("allow-skill", "deny-skill", "unset-skill")
+DOMAIN_OPS = ("allow-domain", "deny-domain", "unset-domain")
+RULE_OPS = ("allow-skill", "deny-skill", "unset-skill") + DOMAIN_OPS
 
 WINDOW_CATEGORIES = (
     "skills.install",
@@ -308,6 +312,18 @@ def propose(root: str, ops: list) -> dict:
                             "invalid skill file path %r" % (file_path,),
                             [rec],
                         )
+            elif op_name in DOMAIN_OPS:
+                domain = op.get("domain")
+                if not (isinstance(domain, str) and DOMAIN_ENTRY.match(domain)):
+                    detail = "%s has invalid domain" % (op_name,)
+                    rec = log_append(
+                        store,
+                        "refusal",
+                        rule="OC-001(b)",
+                        check="ops",
+                        detail=detail,
+                    )
+                    raise Refused("ops", "OC-001(b)", detail, [rec])
             elif op_name in RULE_OPS:
                 name = op.get("name")
                 if not (isinstance(name, str) and SKILL_NAME.match(name)):
@@ -374,9 +390,22 @@ def propose(root: str, ops: list) -> dict:
                             [rec],
                         )
                     targets.add(target)
+            elif op_name in DOMAIN_OPS:
+                domain = op["domain"]
+                if ("domain", domain) in rule_targets:
+                    detail = "domain %r is named by more than one op" % (domain,)
+                    rec = log_append(
+                        store,
+                        "refusal",
+                        rule="OC-001(b)",
+                        check="rule-target",
+                        detail=detail,
+                    )
+                    raise Refused("rule-target", "OC-001(b)", detail, [rec])
+                rule_targets.add(("domain", domain))
             elif op_name in RULE_OPS:
                 name = op["name"]
-                if name in rule_targets:
+                if ("skill", name) in rule_targets:
                     detail = "skill %r is named by more than one op" % (name,)
                     rec = log_append(
                         store,
@@ -386,7 +415,7 @@ def propose(root: str, ops: list) -> dict:
                         detail=detail,
                     )
                     raise Refused("rule-target", "OC-001(b)", detail, [rec])
-                rule_targets.add(name)
+                rule_targets.add(("skill", name))
 
         # 5. require live session
         session = vital.require_entity_session(root, "propose")
@@ -451,6 +480,8 @@ def propose(root: str, ops: list) -> dict:
                 )
             elif op_name in ("deny-skill", "unset-skill"):
                 normalized.append({"op": op_name, "name": op["name"]})
+            elif op_name in DOMAIN_OPS:
+                normalized.append({"op": op_name, "domain": op["domain"]})
 
         digest = sha256(canonical(normalized))
         pid = "P-" + secrets.token_hex(8)
@@ -556,15 +587,35 @@ def _rules_change(store, head, changes, ops, session):
         rules = store.read_json(gen + "/rules.json")
     except (OSError, ValueError):
         rules = None
-    if not isinstance(rules, dict) or not isinstance(rules.get("skills"), dict):
+    if not (
+        isinstance(rules, dict)
+        and isinstance(rules.get("skills"), dict)
+        and isinstance(rules.get("domains"), dict)
+    ):
         _refuse_rule(
             store,
             session,
             "the rules of generation %d cannot be read as rules" % (head["entry"],),
         )
     skills = rules["skills"]
+    domains = rules["domains"]
     document = integrity_document(store.path(gen))[0]
     for op in ops:
+        if op["op"] in DOMAIN_OPS:
+            domain = op["domain"]
+            if op["op"] == "allow-domain":
+                domains[domain] = {"rule": "allow"}
+            elif op["op"] == "deny-domain":
+                domains[domain] = {"rule": "deny"}
+            else:
+                if domain not in domains:
+                    _refuse_rule(
+                        store,
+                        session,
+                        "the rules hold no entry for domain %r" % (domain,),
+                    )
+                del domains[domain]
+            continue
         name = op["name"]
         if op["op"] == "allow-skill":
             files = _skill_files(document, changes, name)

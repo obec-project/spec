@@ -98,6 +98,12 @@ STRUCTURAL_FILES = (
     "probes.json",
 )
 SKILL_NAME = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}\Z")
+# A domain entry of the allowlist: one host, exact (D76).
+DOMAIN_ENTRY = re.compile(
+    r"^(?:http://)?(?=[a-z0-9.-]{1,253}\Z)"
+    r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+"
+    r"[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?\Z"
+)
 
 
 def structural_target(relpath) -> bool:

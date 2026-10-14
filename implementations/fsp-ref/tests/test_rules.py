@@ -274,6 +274,105 @@ class RuleOpsTests(TempDirTest):
             proposals.commit(self.S, pid)
         self.assertEqual(ctx.exception.check, "rule-target")
 
+    def test_allow_deny_and_unset_domains(self):
+        lifecycle.start(self.S)
+        self.land([{"op": "allow-domain", "domain": "example.com"}])
+        self.assertEqual(self.rules()["domains"], {"example.com": {"rule": "allow"}})
+        self.land([{"op": "deny-domain", "domain": "http://example.com"}])
+        self.assertEqual(
+            self.rules()["domains"],
+            {
+                "example.com": {"rule": "allow"},
+                "http://example.com": {"rule": "deny"},
+            },
+        )
+        self.land([{"op": "unset-domain", "domain": "example.com"}])
+        self.assertEqual(
+            self.rules()["domains"], {"http://example.com": {"rule": "deny"}}
+        )
+        self.assertEqual(self.rules()["skills"], {})
+
+    def test_unset_of_an_absent_domain_is_refused(self):
+        lifecycle.start(self.S)
+        with self.assertRaises(Refused) as ctx:
+            self.land([{"op": "unset-domain", "domain": "example.com"}])
+        self.assertEqual(ctx.exception.check, "rule-target")
+
+    def test_malformed_domain_ops_are_refused(self):
+        lifecycle.start(self.S)
+        cases = [
+            {"op": "allow-domain"},
+            {"op": "allow-domain", "domain": 7},
+            {"op": "allow-domain", "domain": "Example.com"},
+            {"op": "allow-domain", "domain": "example.com."},
+            {"op": "allow-domain", "domain": "localhost"},
+            {"op": "allow-domain", "domain": "1.2.3.4"},
+            {"op": "allow-domain", "domain": "*.github.io"},
+            {"op": "allow-domain", "domain": "https://example.com"},
+            {"op": "allow-domain", "domain": "example.com:443"},
+            {"op": "allow-domain", "domain": "http://Example.com"},
+        ]
+        for op in cases:
+            with self.subTest(op=op):
+                with self.assertRaises(Refused) as ctx:
+                    proposals.propose(self.S, [op])
+                self.assertEqual(ctx.exception.check, "ops")
+
+    def test_a_domain_named_twice_is_refused_at_propose(self):
+        lifecycle.start(self.S)
+        with self.assertRaises(Refused) as ctx:
+            proposals.propose(
+                self.S,
+                [
+                    {"op": "allow-domain", "domain": "example.com"},
+                    {"op": "deny-domain", "domain": "example.com"},
+                ],
+            )
+        self.assertEqual(ctx.exception.check, "rule-target")
+        self.assertEqual(proposals.read_auth(self.store)["proposals"], {})
+
+    def test_a_skill_and_a_domain_of_the_same_text_are_two_entries(self):
+        lifecycle.start(self.S)
+        self.land(
+            [
+                {"op": "deny-skill", "name": "example.com"},
+                {"op": "deny-domain", "domain": "example.com"},
+            ]
+        )
+        self.assertEqual(self.rules()["skills"]["example.com"], {"rule": "deny"})
+        self.assertEqual(self.rules()["domains"]["example.com"], {"rule": "deny"})
+
+    def test_domain_ops_are_of_category_rules(self):
+        lifecycle.start(self.S)
+        proposals.propose(self.S, [{"op": "allow-domain", "domain": "example.com"}])
+        last = lifecycle.observe_log(self.S, kind="proposal")["records"][-1]
+        self.assertEqual(last["categories"], ["rules"])
+
+    def test_adapter_allow_domain(self):
+        run_adapter("lifecycle", "start", "--store", self.S)
+        ops_file = self.p("ops.json")
+        with open(ops_file, "w", encoding="utf-8") as f:
+            json.dump([{"op": "allow-domain", "domain": "example.com"}], f)
+        code, out = run_adapter(
+            "entity", "propose", "--store", self.S, "--ops", ops_file
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(out["outcome"], "accepted")
+        pid = out["detail"]["proposal"]
+
+        code, out = run_adapter(
+            "operator", "approve", "--store", self.S, "--proposal", pid
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(out["outcome"], "accepted")
+
+        code, out = run_adapter(
+            "entity", "commit", "--store", self.S, "--proposal", pid
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(out["outcome"], "accepted")
+        self.assertEqual(self.rules()["domains"], {"example.com": {"rule": "allow"}})
+
     def test_adapter_allow_skill(self):
         run_adapter("lifecycle", "start", "--store", self.S)
         ops_file = self.p("ops.json")
