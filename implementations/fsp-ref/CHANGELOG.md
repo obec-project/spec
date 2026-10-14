@@ -11,6 +11,15 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **A skill's time limit told from the watchdog** (2026-10-14, D72). The
+  design said both that a skill's timeout is a result and that it is
+  Critical, and the Profile's OP-014(a) made any deadline expiring
+  Critical; a skill that was only slow would have revoked the credential.
+  The Profile is corrected: `timeout_s` is the skill's own limit and its
+  ending a result, and the watchdog, `timeout_s` + 5 s, bounds the path,
+  Critical when the process it launched is not reaped by then. The output
+  is read bounded as it arrives and the pipes closed at the limit, so a
+  descendant that left the group with `setsid` no longer holds the call.
 - **A skill takes typed arguments** (2026-10-13, OC-008, D71). A manifest's
   `args` declares `string`, `integer`, `boolean`, `choice` and `path`
   arguments, checked by `manifest.problems` with the rest of the manifest,
