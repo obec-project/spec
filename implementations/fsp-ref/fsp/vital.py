@@ -107,6 +107,8 @@ def before_act(root: str, session: str):
             return None
         result = check(store, root, session)
         _sweep(store, session, state)
+        if _semantic_sweep(store, session, state) and result == "nominal":
+            result = "degraded"
         state["last_check"] = clock.iso(now)
         state["acts_since"] = 0
         _write_state(store, state)
@@ -149,6 +151,58 @@ def _sweep(store: Store, session, state):
             return
         _critical(store, session, [finding])
     sweep["log"] = new_position
+
+
+def _semantic_sweep(store: Store, session, state) -> bool:
+    """Look for the findings of the semantic ledger (D82, OP-003(b),
+    OP-004(a)). A finding is confirmed by a second read; one not yet reported
+    is logged as ``semantic-withheld`` and notified to the Operator once, and
+    the confirmed keys are kept in ``sweep.semantic``. Returns whether any
+    finding is confirmed; none is Critical."""
+    from . import mil
+
+    sweep = state["sweep"]
+    first = mil.semantic_check(store)["findings"]
+    if not first:
+        sweep["semantic"] = []
+        return False
+    second = mil.semantic_check(store)["findings"]
+
+    def key(f):
+        return "%s:%s" % (f["type"], f["id"])
+
+    first_keys = {key(f) for f in first}
+    second_keys = {key(f) for f in second}
+    noise = [f for f in first if key(f) not in second_keys]
+    if noise:
+        log_append(
+            store,
+            "vital-noise",
+            rule="OP-003(b)",
+            session=session,
+            findings=[{"type": f["type"], "id": f["id"]} for f in noise],
+        )
+    confirmed = [f for f in second if key(f) in first_keys]
+    reported = set(sweep.get("semantic") or [])
+    new = [f for f in confirmed if key(f) not in reported]
+    if new:
+        log_append(
+            store,
+            "semantic-withheld",
+            rule="OP-004(a)",
+            session=session,
+            findings=[{"type": f["type"], "id": f["id"]} for f in new],
+        )
+        cred = lifecycle._read_credential(store)
+        binding = cred.get("binding") if isinstance(cred, dict) else None
+        lifecycle._notify(
+            store,
+            binding,
+            "semantic-withheld",
+            "; ".join(sorted({key(f) for f in new})),
+        )
+    sweep["semantic"] = sorted({key(f) for f in confirmed})
+    return bool(confirmed)
 
 
 def check(store: Store, root: str, session: str):

@@ -140,6 +140,23 @@ class PromotionApplyTests(TempDirTest):
         self.assertEqual(entry["id"], sid)
         self.assertEqual(entry["digest"], sha256(canonical(rec)))
 
+    def test_a_record_that_is_not_what_was_authorized_is_refused(self):
+        pid = self.request()
+        operator.approve_promotion(self.S, pid)
+        with mock.patch.object(
+            sil, "semantic_ledger_append", side_effect=OSError("crash")
+        ):
+            with self.assertRaises(OSError):
+                self.promote(pid)
+        (rec,) = mil.semantic_records(self.store)
+        rec["content"] = "The Operator prefers long answers."
+        with open(self.store.path(mil.SEMANTIC), "w", encoding="utf-8") as f:
+            f.write(json.dumps(rec) + "\n")
+        with self.assertRaises(Refused) as ctx:
+            self.promote(pid)
+        self.assertEqual(ctx.exception.check, "semantic-ledger")
+        self.assertEqual(self.ledger(), [])
+
     def test_a_changed_request_is_not_promoted(self):
         pid = self.request()
         operator.approve_promotion(self.S, pid)

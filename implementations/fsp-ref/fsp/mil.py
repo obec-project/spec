@@ -8,7 +8,7 @@ import json
 import re
 import secrets
 
-from . import clock, lifecycle, probes, proposals, sil, vital
+from . import chain, clock, lifecycle, probes, proposals, sil, vital
 from .digest import canonical, sha256
 from .sil import Refused, log_append
 from .store import MNEMONIC, GuardError, Store, datum_of
@@ -356,6 +356,118 @@ def semantic_records(store: Store) -> list:
     return _read_records(store, SEMANTIC)
 
 
+# -- reading semantic memory through its ledger (D77, D82) ----------------------
+
+# The categories always loaded when the head generation's config.json names none
+# (D77).
+ALWAYS_LOADED = ("rule", "guidance", "operator")
+
+
+def _sid(item):
+    """The ``id`` of a semantic record or ledger entry, or None when it is not a
+    string (D82)."""
+    rid = item.get("id")
+    return rid if isinstance(rid, str) else None
+
+
+def semantic_check(store: Store) -> dict:
+    """Read the semantic records and the ledger once and compare them (D82,
+    OP-009(f)). Returns ``records`` (all, in file order), ``sealed`` (those
+    whose first ``promotion`` entry carries the digest of the record's
+    canonical form, in file order), ``retracted`` (the ids with a
+    ``retraction`` entry) and ``findings`` (``{type, id}``: ``semantic-unsealed``
+    and ``semantic-digest`` per record in file order, then ``semantic-missing``
+    per entry in ledger order)."""
+    records = semantic_records(store)
+    ledger = sil.semantic_ledger(store)
+    first = {}
+    retracted = set()
+    for entry in ledger:
+        if _sid(entry) is None:
+            continue
+        if entry.get("kind") == "promotion":
+            first.setdefault(_sid(entry), entry)
+        elif entry.get("kind") == "retraction":
+            retracted.add(_sid(entry))
+    sealed = []
+    findings = []
+    for record in records:
+        entry = first.get(_sid(record))
+        if entry is None:
+            findings.append({"type": "semantic-unsealed", "id": _sid(record)})
+        elif entry.get("digest") != sha256(canonical(record)):
+            findings.append({"type": "semantic-digest", "id": _sid(record)})
+        else:
+            sealed.append(record)
+    present = {_sid(r) for r in records}
+    for entry in ledger:
+        rid = _sid(entry)
+        if entry.get("kind") == "promotion" and rid is not None and rid not in present:
+            findings.append({"type": "semantic-missing", "id": rid})
+    return {
+        "records": records,
+        "sealed": sealed,
+        "retracted": retracted,
+        "findings": findings,
+    }
+
+
+def semantic_live(check: dict) -> list:
+    """The records of ``check["sealed"]`` that are not retracted and that no
+    semantic record names in ``supersedes`` (D82)."""
+    superseded = _superseded(check["records"])
+    return [
+        r
+        for r in check["sealed"]
+        if r.get("id") not in check["retracted"] and r.get("id") not in superseded
+    ]
+
+
+def always_loaded_categories(store: Store) -> list:
+    """The categories context assembly loads whole: ``always_loaded`` of the
+    head generation's ``config.json`` when it is a non-empty list of distinct
+    categories, else ``ALWAYS_LOADED`` (D77, D82)."""
+    try:
+        config = store.read_json(
+            chain.gen_relpath(sil.read_head(store)["entry"]) + "/config.json"
+        )
+        listed = config["always_loaded"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return list(ALWAYS_LOADED)
+    if (
+        isinstance(listed, list)
+        and listed
+        and all(isinstance(c, str) and c in CATEGORIES for c in listed)
+        and len(set(listed)) == len(listed)
+    ):
+        return list(listed)
+    return list(ALWAYS_LOADED)
+
+
+def always_loaded(store: Store) -> list:
+    """The live records of the always-loaded categories, grouped in the order
+    of ``always_loaded_categories`` and in file order within each (D77, D82)."""
+    live = semantic_live(semantic_check(store))
+    return [
+        r
+        for c in always_loaded_categories(store)
+        for r in live
+        if r.get("category") == c
+    ]
+
+
+def semantic_index(store: Store) -> list:
+    """``{id, slug, category}`` of the live records outside the always-loaded
+    categories, newest first (D77, D82)."""
+    loaded = always_loaded_categories(store)
+    live = semantic_live(semantic_check(store))
+    return [
+        {"id": r.get("id"), "slug": r.get("slug"), "category": r.get("category")}
+        for r in reversed(live)
+        if r.get("category") not in loaded
+    ]
+
+
 def _promotion_refusal(store: Store, session, check, detail) -> Refused:
     rec = log_append(
         store,
@@ -568,9 +680,13 @@ def _lineage(records, rid) -> set:
 def recall(root: str, *, query=None, lineage=None) -> dict:
     """Recall from the live session's recall scope, by words or by lineage,
     and log what was returned (D79, OP-009(c)). By words it returns the latest
-    record of each lineage whose content holds every word, case-folded. By
+    record of each lineage whose content holds every word, case-folded, then
+    the live semantic records whose slug or content holds every word. By
     lineage it returns the records of the scope that belong to the lineage of
-    the id and names the ones outside the scope without returning them."""
+    the id and names the ones outside the scope without returning them; the id
+    of a semantic record returns the sealed, unretracted records of its
+    lineage instead (D82). The ids of the semantic records withheld are named
+    in the log record and in the result."""
     if (query is None) == (lineage is None):
         raise ValueError("recall takes exactly one of query and lineage")
     if query is not None and (not isinstance(query, str) or query.strip() == ""):
@@ -580,12 +696,39 @@ def recall(root: str, *, query=None, lineage=None) -> dict:
         session = vital.require_entity_session(root, "mnemonic-recall")
         conversation = conversation_of(store, session)
         scope = _scope(store, conversation)
+        check = semantic_check(store)
         if query is not None:
             words = query.casefold().split()
             returned = [
                 r
                 for r in _latest(scope)
                 if all(w in str(r.get("content", "")).casefold() for w in words)
+            ]
+            for r in semantic_live(check):
+                text = (
+                    str(r.get("slug", "")) + "\n" + str(r.get("content", ""))
+                ).casefold()
+                if all(w in text for w in words):
+                    returned.append(r)
+            outside = []
+        elif any(r.get("id") == lineage for r in check["records"]):
+            sealed_ids = {r.get("id") for r in check["sealed"]}
+            if lineage not in sealed_ids or lineage in check["retracted"]:
+                detail = "%r is not in the conversation's recall scope" % (lineage,)
+                rec = log_append(
+                    store,
+                    "refusal",
+                    rule="OP-009(c)",
+                    session=session,
+                    check="recall-scope",
+                    detail=detail,
+                )
+                raise Refused("recall-scope", "OP-009(c)", detail, [rec])
+            ids = _lineage(check["records"], lineage)
+            returned = [
+                r
+                for r in check["sealed"]
+                if r.get("id") in ids and r.get("id") not in check["retracted"]
             ]
             outside = []
         else:
@@ -604,6 +747,7 @@ def recall(root: str, *, query=None, lineage=None) -> dict:
             returned = [r for r in scope if r.get("id") in ids]
             in_scope = {r.get("id") for r in scope}
             outside = sorted(ids - in_scope)
+        withheld = sorted({f["id"] for f in check["findings"]}, key=str)
         rec = log_append(
             store,
             "recall",
@@ -613,8 +757,14 @@ def recall(root: str, *, query=None, lineage=None) -> dict:
             lineage=lineage,
             returned=[r["id"] for r in returned],
             outside=outside,
+            withheld=withheld,
         )
-        return {"records": returned, "outside": outside, "log_records": [rec]}
+        return {
+            "records": returned,
+            "outside": outside,
+            "withheld": withheld,
+            "log_records": [rec],
+        }
 
 
 def attempt_recall(store: Store, cls, target):

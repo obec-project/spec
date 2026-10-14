@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Semantic memory is read through its ledger** (2026-10-14, D82).
+  `mil.semantic_check` compares the records with the ledger and names
+  what diverges; `mil.semantic_live` is what recall may return. Recall
+  searches the live records by slug and content beside the episodic
+  scope, recalls a semantic lineage with its history, and names the
+  withheld ids in its result and its log record. `always_loaded` and
+  `semantic_index` give context assembly what it will read in Phase 8.
+  The Vital Check notifies the Operator once per finding and ends
+  Degraded. A record whose id is not a string is withheld like any other
+  divergence, rather than failing every recall.
+
 - **Semantic recall through the ledger designed** (2026-10-14, D82). D53
   and OP-004(a) say a diverging record is withheld and reported, not what
   counts as live, who reports, or how often. A record is live when the
