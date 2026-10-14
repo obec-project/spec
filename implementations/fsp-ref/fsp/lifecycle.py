@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import os
 
-from . import chain, clock, config, ledger, sil
+from . import chain, clock, config, ledger, sil, sleep
 from . import manifest as skill_manifest
 from .digest import canonical
 from .sil import WRITER, COMMITTER, Refused, log_append
@@ -88,6 +88,7 @@ _NO_SESSIONS = {
     "open_session": None,
     "consecutive_recoveries": 0,
     "ledger_offset": 0,
+    "sleep": None,
 }
 
 
@@ -105,6 +106,7 @@ def _read_sessions(store: Store):
         and isinstance(s["ledger_offset"], int)
         and not isinstance(s["ledger_offset"], bool)
         and s["ledger_offset"] >= 0
+        and (s["sleep"] is None or isinstance(s["sleep"], str))
     ):
         raise ValueError("session state has the wrong shape")
     return s
@@ -178,14 +180,16 @@ def start(root: str, *, binding=None) -> StartResult:
             return abort("crash-recovery", "session state unreadable: %s" % e)
         residue = verify(root).residue
         cred = _read_credential(store)
-        recover = bool(residue)
+        recover = bool(residue) or sessions["sleep"] is not None
         evidence = {"residue": [r["path"] for r in residue]}
+        if sessions["sleep"] is not None:
+            evidence["sleep"] = sessions["sleep"]
         if store.exists(CREDENTIAL):
             lock = store.probe_lock(CREDENTIAL) or sil.LOCK_FREE
             holder = cred.get("holder") if isinstance(cred, dict) else None
             process_holder = isinstance(holder, dict) and type(holder.get("pid")) is int
             verdict = sil.classify_credential(
-                lock, residue=bool(residue), process_holder=process_holder
+                lock, residue=recover, process_holder=process_holder
             )
             evidence.update(
                 {
@@ -338,6 +342,14 @@ def start(root: str, *, binding=None) -> StartResult:
                 "authorization-state", "authorization state unreadable: %s" % e
             )
         res.gate("authorization-state", "pass")
+
+        # D83: a Sleep a crash interrupted runs again, once the structure and
+        # the authorizations it uses are verified.
+        if sessions["sleep"] is not None:
+            out = sleep.run(store, sessions["sleep"], rerun=True)
+            res.log_records += out["log_records"]
+            sessions["sleep"] = None
+            _write_sessions(store, sessions)
 
         # 6. Skill Index build.
         if "index" in forced:
@@ -563,15 +575,17 @@ def require_session(root: str, what: str):
 
 
 def stop(root: str, *, binding=None):
-    """Normal close. Sleep and the Closure Payload come with memory (Phase 7)."""
+    """Normal close, then the Sleep (D83, OP-021(a), OP-022). The credential
+    is removed after ``sleep-complete``, and the ``sleep`` marker cleared
+    after it."""
     session = require_session(root, "stop")
     store = Store(root)
     with store.write_lock():
         acting = binding or sil.owner_binding(store)
-        _drop_credential(store)
         sessions = _read_sessions(store)
         sessions["open_session"] = None
         sessions["consecutive_recoveries"] = 0
+        sessions["sleep"] = session
         _write_sessions(store, sessions)
         loc = sil.log_append_located(
             store,
@@ -581,13 +595,15 @@ def stop(root: str, *, binding=None):
             session=session,
             mode="normal",
         )
-        store.replace(
-            INTEGRITY,
-            "integrity/log-checkpoint.json",
-            canonical(loc),
-            writer=sil.WRITER,
-        )
-    return {"session": session, "log_records": [loc["id"]]}
+        out = sleep.run(store, session)
+        _drop_credential(store)
+        sessions["sleep"] = None
+        _write_sessions(store, sessions)
+    return {
+        "session": session,
+        "log_records": [loc["id"]] + out["log_records"],
+        "sleep": {"promoted": out["promoted"], "refused": out["refused"]},
+    }
 
 
 def revoke_credential(root: str, *, binding=None):

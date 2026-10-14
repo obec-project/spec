@@ -110,12 +110,12 @@ class LogVerificationTests(TempDirTest):
         )
 
     def test_checkpoint_after_start_and_stop(self):
-        # start + stop leaves a checkpoint equal to the session-close locator.
+        # start + stop leaves a checkpoint equal to the sleep-complete locator.
         root = self.p("S")
         sil.first_activation(root, "op-1")
         lifecycle.start(root)
         out = lifecycle.stop(root)
-        close_id = out["log_records"][0]
+        close_id = out["log_records"][-1]
         store = Store(root)
         chk = store.read_json("integrity/log-checkpoint.json")
         self.assertEqual(chk["id"], close_id)
@@ -124,7 +124,7 @@ class LogVerificationTests(TempDirTest):
         self.assertEqual(chk["sha256"], sha256(line))
         rec = json.loads(line.decode("utf-8"))
         self.assertEqual(rec["id"], close_id)
-        self.assertEqual(rec["kind"], "session-close")
+        self.assertEqual(rec["kind"], "sleep-complete")
 
     def test_byte_flip_in_record_after_checkpoint_detected(self):
         # A byte flipped in a record after the checkpoint is found by the tail

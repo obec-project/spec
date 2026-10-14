@@ -138,6 +138,13 @@ def log_append(store: Store, kind, *, rule=None, binding=None, session=None, **p
     )["id"]
 
 
+def write_log_checkpoint(store: Store, loc: dict) -> None:
+    """Write the log checkpoint at the record ``loc`` locates (D45 (2))."""
+    store.replace(
+        INTEGRITY, "integrity/log-checkpoint.json", canonical(loc), writer=WRITER
+    )
+
+
 def semantic_ledger(store: Store) -> list:
     """The entries of the semantic ledger in order (D53, D81). A missing file
     is empty; a line that is not a JSON object and a final fragment without its

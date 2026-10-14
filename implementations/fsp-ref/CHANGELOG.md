@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Every normal close runs a Sleep** (2026-10-14, D83). `stop` closes the
+  session, runs `sleep.run`, which promotes the authorized requests, then
+  removes the credential and clears the `sleep` marker, in that order. D83
+  first cleared the marker before removing the credential; a crash between
+  the two would have left a credential with no marker and no residue,
+  which D25 reads as a live session, and no `stop` could end it. The
+  marker counts as D25's residue of a Sleep without completion, so a
+  start recovers from either, re-runs the Sleep after the
+  authorization-state gate, and counts the attempt toward `n_boot`. The
+  log checkpoint moves to `sleep-complete`, written by the SIL's
+  `write_log_checkpoint`, so the Sleep's module names no writer (D69).
+
 - **The Sleep designed** (2026-10-14, D83). OP-022 says a Sleep follows
   every normal close and OP-018 that a crash re-runs it, not where fsp
   keeps the fact that one is under way. `sessions.json` names the session
