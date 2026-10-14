@@ -7,7 +7,11 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
+import signal
 import time
+import unittest
+from unittest import mock
 
 from helpers import TempDirTest, run_adapter
 
@@ -200,6 +204,103 @@ class SkillTests(TempDirTest):
         with open(os.path.join(self.W, "child.pid")) as f:
             child = int(f.read())
         self.assertFalse(self.alive(child))
+
+    def recorded_pid(self, filename):
+        """The PID the skill wrote to ``filename`` in the workspace."""
+        with open(os.path.join(self.W, filename)) as f:
+            return int(f.read())
+
+    def kill_recorded(self, filename, group=False):
+        """Cleanup: SIGKILL the PID the skill wrote to ``filename`` in the
+        workspace, or the group it leads; nothing if the file was not written."""
+        try:
+            pid = self.recorded_pid(filename)
+        except FileNotFoundError:
+            return
+        try:
+            if group:
+                os.killpg(pid, signal.SIGKILL)
+            else:
+                os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+
+    def test_the_output_is_returned(self):
+        self.install(run="printf out; printf err >&2\n")
+        self.rule("example", "allow")
+        lifecycle.start(self.S)
+        out = execution.invoke_skill(self.S, "example")
+        self.assertEqual(out["outcome"], "done")
+        self.assertEqual(out["stdout"], b"out")
+        self.assertEqual(out["stderr"], b"err")
+
+    def test_an_endless_output_is_kept_bounded(self):
+        self.install(run="yes\n", timeout_s=1)
+        self.rule("example", "allow")
+        lifecycle.start(self.S)
+        t = time.monotonic()
+        out = execution.invoke_skill(self.S, "example")
+        self.assertEqual(out["outcome"], "timeout")
+        self.assertEqual(len(out["stdout"]), execution.OUTPUT_CAP)
+        self.assertLess(time.monotonic() - t, 10)
+
+    def test_a_large_output_is_cut_and_the_skill_completes(self):
+        self.install(run="head -c 1000000 /dev/zero; head -c 1000000 /dev/zero >&2\n")
+        self.rule("example", "allow")
+        lifecycle.start(self.S)
+        out = execution.invoke_skill(self.S, "example")
+        self.assertEqual(out["outcome"], "done")
+        self.assertEqual(len(out["stdout"]), execution.OUTPUT_CAP)
+        self.assertEqual(len(out["stderr"]), execution.OUTPUT_CAP)
+
+    def test_a_skill_that_closes_its_output_still_ends_at_its_limit(self):
+        self.install(run="exec >/dev/null 2>&1\nsleep 30\n", timeout_s=1)
+        self.rule("example", "allow")
+        lifecycle.start(self.S)
+        t = time.monotonic()
+        out = execution.invoke_skill(self.S, "example")
+        self.assertEqual(out["outcome"], "timeout")
+        self.assertLess(time.monotonic() - t, 10)
+
+    @unittest.skipUnless(shutil.which("setsid"), "setsid not found")
+    def test_a_descendant_that_left_the_group_does_not_hold_the_call(self):
+        self.install(
+            run='setsid sleep 30 &\necho $! > "$HOME/held.pid"\nexit 0\n',
+            timeout_s=1,
+        )
+        self.rule("example", "allow")
+        lifecycle.start(self.S)
+        self.addCleanup(self.kill_recorded, "held.pid")
+        t = time.monotonic()
+        out = execution.invoke_skill(self.S, "example")
+        self.assertEqual(out["outcome"], "timeout")
+        self.assertLess(time.monotonic() - t, 10)
+
+    def test_a_process_not_reaped_by_the_watchdog_is_critical(self):
+        self.install(
+            run='echo $$ > "$HOME/skill.pid"\nsleep 30\n',
+            timeout_s=1,
+        )
+        self.rule("example", "allow")
+        lifecycle.start(self.S)
+        self.addCleanup(self.kill_recorded, "skill.pid", True)
+        with mock.patch.object(execution, "_end_group", lambda pid: None):
+            with mock.patch.object(execution, "WATCHDOG_GRACE_S", 0.5):
+                with mock.patch.object(execution, "_run", wraps=execution._run) as run:
+                    with self.assertRaises(Refused) as ctx:
+                        execution.invoke_skill(self.S, "example")
+        self.assertEqual(ctx.exception.check, "vital-critical")
+        critical = lifecycle.observe_log(self.S, kind="vital-critical")["records"][-1]
+        self.assertEqual(critical["findings"][0]["type"], "watchdog")
+        rec = lifecycle.observe_log(self.S, kind="execution")["records"][-1]
+        self.assertEqual(rec["outcome"], "timeout")
+        self.assertIsNone(rec.get("exit"))
+        self.assertFalse(Store(self.S).exists(lifecycle.CREDENTIAL))
+        # The launched process is ended and reaped here: left running, its Popen
+        # would warn as it is finalized.
+        proc = run.call_args.args[0]
+        os.killpg(proc.pid, signal.SIGKILL)
+        proc.wait()
 
     def test_an_irreversible_skill_goes_through_the_ledger(self):
         self.install(irreversible=True)

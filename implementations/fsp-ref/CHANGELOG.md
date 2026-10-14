@@ -11,6 +11,16 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **A skill ends at its limit, and the watchdog bounds the path**
+  (2026-10-14, OP-014(a), D72). The output is read as it arrives, the first
+  64 KiB of each stream kept and the rest discarded, so a skill that prints
+  without end no longer holds memory until its timeout. At `timeout_s` the
+  group is ended and the pipes closed rather than drained, so a descendant
+  that left the group with `setsid` and kept the output open no longer
+  holds the call past the limit, which before waited on it with no bound.
+  A skill that closes its output and keeps running also ends at its limit.
+  The launched process not reaped by `timeout_s` + 5 s ends the invocation
+  Critical, a `watchdog` finding naming the skill and the process.
 - **A skill's monitoring designed** (2026-10-14, D73). The design compared
   size and mtime of `integrity/` and `memory/` before and after a skill;
   the skill runs outside the lock, so an Operator act during the run —

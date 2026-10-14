@@ -24,13 +24,6 @@ After that: a test entity on Ollama, operated for days, measuring what
 
 ### Carried into the phases
 
-- **Phase 6b — a skill's output and its descendants.** A skill's output is
-  read whole and then cut to 64 KiB, so a skill that prints without end
-  holds memory until its timeout; monitoring should read it bounded. A
-  descendant that leaves the skill's process group (`setsid`) and keeps its
-  output open keeps the invocation waiting after the timeout; the store's
-  lock is not held meanwhile, so nothing else is blocked, but the call does
-  not return.
 - **Phase 7 — the probes over memory tell the entity's words from others'.**
   Episodic memory records the conversation, and a first-person pattern flags
   an Operator's *I feel* as readily as the entity's. The probes of D12 must

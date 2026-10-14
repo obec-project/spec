@@ -7,16 +7,21 @@ from __future__ import annotations
 
 import json
 import os
+import selectors
 import signal
 import subprocess
+import time
 
 from . import chain, config, ledger, lifecycle, sil, vital
 from . import manifest as skill_manifest
 from .digest import sha256, sha256_file
 from .sil import Refused, log_append
 from .store import GuardError, Store, remove_host_tree, write_host_file
+from .verify import Finding
 
 OUTPUT_CAP = 1 << 16  # the most bytes kept of each output stream of a skill
+# seconds past timeout_s by which the launched process must be reaped (D72)
+WATCHDOG_GRACE_S = 5
 
 
 def workspace_of(store: Store):
@@ -197,6 +202,58 @@ def _end_group(pid):
         os.killpg(pid, signal.SIGKILL)
     except (ProcessLookupError, PermissionError):
         pass
+
+
+def _run(proc, timeout, launch):
+    """Read the output of ``proc`` as it arrives, keeping ``OUTPUT_CAP`` bytes of
+    each stream, until ``launch + timeout``; end its group if that comes first,
+    then wait for the reaping by ``launch + timeout + WATCHDOG_GRACE_S`` (D72).
+    Returns ``(out, err, outcome, reaped)``."""
+    deadline = launch + timeout
+    watchdog = deadline + WATCHDOG_GRACE_S
+    bufs = {proc.stdout: bytearray(), proc.stderr: bytearray()}
+    sel = selectors.DefaultSelector()
+    timed_out = False
+    try:
+        for f in bufs:
+            sel.register(f, selectors.EVENT_READ)
+        while sel.get_map():
+            left = deadline - time.monotonic()
+            if left <= 0:
+                timed_out = True
+                break
+            for key, _ in sel.select(left):
+                f = key.fileobj
+                chunk = os.read(f.fileno(), 65536)
+                if not chunk:
+                    sel.unregister(f)
+                    continue
+                buf = bufs[f]
+                buf += chunk[: OUTPUT_CAP - len(buf)]
+        if not timed_out:
+            try:
+                proc.wait(timeout=max(0, deadline - time.monotonic()))
+            except subprocess.TimeoutExpired:
+                timed_out = True
+        if timed_out:
+            _end_group(proc.pid)
+    finally:
+        sel.close()
+        proc.stdout.close()
+        proc.stderr.close()
+    if proc.returncode is None:
+        try:
+            proc.wait(timeout=max(0, watchdog - time.monotonic()))
+            reaped = True
+        except subprocess.TimeoutExpired:
+            reaped = False
+    else:
+        reaped = True
+    if timed_out:
+        outcome = "timeout"
+    else:
+        outcome = "done" if proc.returncode == 0 else "failed"
+    return bytes(bufs[proc.stdout]), bytes(bufs[proc.stderr]), outcome, reaped
 
 
 def invoke_skill(root, name, target=None, args=None):
@@ -398,13 +455,9 @@ def invoke_skill(root, name, target=None, args=None):
         except OSError as e:
             launch_error = str(e)
         else:
+            launch = time.monotonic()
             try:
-                out, err = proc.communicate(timeout=timeout)
-                outcome = "done" if proc.returncode == 0 else "failed"
-            except subprocess.TimeoutExpired:
-                _end_group(proc.pid)
-                out, err = proc.communicate()
-                outcome = "timeout"
+                out, err, outcome, reaped = _run(proc, timeout, launch)
             finally:
                 _end_group(proc.pid)
 
@@ -431,6 +484,19 @@ def invoke_skill(root, name, target=None, args=None):
                 ledger=entry_id,
                 args=args if args is not None else {},
             )
+            if not reaped:
+                vital._critical(
+                    store,
+                    session,
+                    [
+                        Finding(
+                            "watchdog",
+                            skill_dir,
+                            "exec",
+                            {"pid": proc.pid, "deadline_s": timeout + WATCHDOG_GRACE_S},
+                        )
+                    ],
+                )
             return {
                 "skill": name,
                 "outcome": outcome,
