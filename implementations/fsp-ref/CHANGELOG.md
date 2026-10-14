@@ -9,6 +9,23 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
+## Phase 6b — the allowlist (in progress)
+
+- **The allowlist's ops designed** (2026-10-13, D70). A proposal changes
+  `rules.json` one entry at a time — `allow-skill` with the skill's digest,
+  `deny-skill`, `unset-skill` — applied by the commit to the generation it
+  builds, so two pending proposals compose instead of the later one
+  dropping what the earlier allowed. An `allow-skill` matches the skill as
+  it will be committed, so it travels with the `install-skill` that brings
+  the skill; what depends on the generation is checked after the
+  authorization (D58). An op replaces whatever entry its name holds, so a
+  window on `rules` can lift a denial the Operator made: telling one apart
+  would mean reading content before the authorization. The domain ops wait
+  for `http_fetch`, which fixes what a domain is, since an entry admitted
+  before its form is fixed would stay in a generation that cannot change.
+
+---
+
 ## Phase 6a — actuation (2026-10-11)
 
 - **G23 closed** (2026-10-11). The suite's steps 8.7 – 8.9 name the check
