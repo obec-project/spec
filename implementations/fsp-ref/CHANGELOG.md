@@ -20,8 +20,9 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
   Operator's act sets only after the model answers a minimal call, and
   the start logs its fingerprint from the setting without calling the
   server, so a start never waits on the network. The Operator chose a
-  local Ollama, so v0 claims no third-party channel and step 6.4 needs no
-  dated assessment yet. `describe boundaries` waits for the cycle, the
+  local Ollama, so v0 refuses an endpoint off the local host: the channel
+  is never a third party, which `describe inference-channel` can then say
+  without reading a store, and step 6.4 needs no dated assessment yet. `describe boundaries` waits for the cycle, the
   first code that logs the crossing to the model.
 
 ## Phase 7 — memory (2026-10-14)
