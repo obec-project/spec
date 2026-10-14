@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **A skill's typed arguments designed** (2026-10-13, D71). A manifest
+  declares `args` of five types — `string`, `integer`, `boolean`, `choice`,
+  `path` — every one required, used in `argv` as `{args.<name>}`. The
+  caller marks a path, `{"path": …}`, so it passes the workspace boundary
+  before any other check, as OC-008(a) asks of a skill's parameters; reading
+  the type from the manifest would have checked it only after the index and
+  the manifest. A string beginning with `-` is refused, since without a
+  shell an argument read as an option still turns one command into another;
+  a value that needs the dash is a `choice` the Operator admitted. The
+  placeholders are filled in one pass, so a value is never read as one, and
+  the arguments are logged with the execution.
 - **Every pattern is anchored at the end of the string** (2026-10-13). A
   pattern ending in `$` also matched before a final newline, so a skill
   name, a binding id, an expiry or a digest ending in `\n` passed its check,
