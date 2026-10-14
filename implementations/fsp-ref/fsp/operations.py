@@ -71,6 +71,14 @@ OPERATIONS = (
         ("fsp/exec.py", "file_list"),
     ),
     Operation(
+        "http_fetch",
+        True,
+        True,
+        False,
+        execution.attempt_http_fetch,
+        ("fsp/exec.py", "http_fetch"),
+    ),
+    Operation(
         "invoke-skill",
         True,
         True,

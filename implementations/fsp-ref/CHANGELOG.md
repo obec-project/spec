@@ -9,8 +9,25 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ---
 
-## Phase 6b — the allowlist (in progress)
+## Phase 6b — the allowlist (2026-10-14)
 
+- **`http_fetch` reads the declared network** (2026-10-14, OC-008(a),
+  D74, D75). The boundary runs before any name is resolved: the URL's
+  form — `https` on 443, or `http` on 80 for a host named `http://`, no
+  credentials, a name and not an address — then the domain as territory,
+  a `deny` refused and an absent one held, which in v0 is refused
+  (`reason: hold`). Every address the name resolves to must be public,
+  `is_global` and not multicast, since Python counts multicast as global;
+  the connection goes to the address checked and `http.client` is handed
+  the socket, so nothing resolves the name again. The network is never
+  used under the store's lock. Each redirect, up to five, passes the whole
+  boundary again, so `https` to `http` needs the `http://` entry. The body
+  is kept up to 1 MiB, `truncated` said; `http_timeout_s` (30) is a
+  result. The adapter's `entity actuate --op fetch` reports status, size,
+  digest and outcome, never the body, and step 8.7 passes. `http_fetch`
+  joins the operations table, its attempted write refused like a read's.
+  The tests serve from a local server, with the resolver and the connector
+  replaced, so none reaches the network.
 - **The allowlist's domain ops** (2026-10-14, D70, D76). A proposal
   carries `allow-domain`, `deny-domain` and `unset-domain`, each
   `{domain}`, category `rules`, so a window on `rules` covers them as it

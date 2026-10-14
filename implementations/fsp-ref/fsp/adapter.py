@@ -300,8 +300,8 @@ def entity_attempt_write(flags):
 def entity_actuate(flags):
     root = _store(flags)
     op, target = flags.get("op"), flags.get("target")
-    if op not in ("read", "write"):
-        raise CannotAttempt("--op is read or write")
+    if op not in ("read", "write", "fetch"):
+        raise CannotAttempt("--op is read, write or fetch")
     if not target:
         raise CannotAttempt("--target is required")
     if verify_state(root) in ("absent", "foreign"):
@@ -309,6 +309,18 @@ def entity_actuate(flags):
     if op == "read":
         out, ref = _sil_call(execution.file_read, root, target)
         detail = {"size": out["size"], "sha256": out["sha256"]} if out else None
+    elif op == "fetch":
+        out, ref = _sil_call(execution.http_fetch, root, target)
+        detail = (
+            {
+                "status": out["status"],
+                "size": out["size"],
+                "sha256": out["sha256"],
+                "outcome": out["outcome"],
+            }
+            if out
+            else None
+        )
     else:
         out, ref = _sil_call(
             execution.file_write, root, target, b"", intent="entity actuate"

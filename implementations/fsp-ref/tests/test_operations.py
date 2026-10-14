@@ -39,6 +39,7 @@ class OperationsTable(unittest.TestCase):
                 "file_read",
                 "file_write",
                 "file_list",
+                "http_fetch",
                 "invoke-skill",
             ],
         )
@@ -55,7 +56,7 @@ class OperationsTable(unittest.TestCase):
             )
         self.assertEqual(
             [o["writes_classes"] for o in ops],
-            [[], ["structural"], ["integrity"], ["mnemonic"], [], [], [], []],
+            [[], ["structural"], ["integrity"], ["mnemonic"], [], [], [], [], []],
         )
 
     def test_each_class_has_exactly_one_write_path_and_it_is_the_guard_s(self):
@@ -136,7 +137,7 @@ class AttemptWrite(TempDirTest):
         code, out = run_adapter("describe", "operations")
         self.assertEqual(code, 0)
         self.assertEqual(out["outcome"], "accepted")
-        self.assertEqual(len(out["detail"]["operations"]), 8)
+        self.assertEqual(len(out["detail"]["operations"]), 9)
         self.assertTrue(out["detail"]["evidence"])
 
     def test_adapter_refuses_an_integrity_write_from_cognition_with_the_triple(self):

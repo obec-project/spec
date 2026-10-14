@@ -75,6 +75,13 @@ SETTINGS = (
         "corrections the owner of a finding may attempt before it escalates to "
         "Critical (D40)",
     ),
+    Setting(
+        "http_timeout_s",
+        30,
+        (1, 300),
+        "seconds a fetch may take in all, its redirects included; reaching them "
+        "is the result timeout (D75)",
+    ),
 )
 
 _BY_NAME = {s.name: s for s in SETTINGS}

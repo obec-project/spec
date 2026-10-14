@@ -5,21 +5,28 @@ outside the store (OC-008, D15)."""
 
 from __future__ import annotations
 
+import http.client
+import ipaddress
 import json
 import os
 import selectors
 import signal
+import socket
+import ssl
 import subprocess
 import time
+from urllib.parse import urljoin, urlsplit
 
-from . import chain, config, ledger, lifecycle, monitor, sil, vital
+from . import __version__, chain, config, ledger, lifecycle, monitor, sil, vital
 from . import manifest as skill_manifest
 from .digest import sha256, sha256_file
 from .sil import Refused, log_append
-from .store import GuardError, Store, remove_host_tree, write_host_file
+from .store import DOMAIN_ENTRY, GuardError, Store, remove_host_tree, write_host_file
 from .verify import Finding
 
 OUTPUT_CAP = 1 << 16  # the most bytes kept of each output stream of a skill
+FETCH_CAP = 1 << 20  # the most bytes of a fetched body kept (D75)
+MAX_REDIRECTS = 5  # redirects a fetch follows, each a new target (D75)
 # seconds past timeout_s by which the launched process must be reaped (D72)
 WATCHDOG_GRACE_S = 5
 
@@ -194,6 +201,230 @@ def file_list(root, target):
             store, session, "file_list", rel, outcome="done", count=len(names)
         )
         return {"entries": names, "target": rel, "log_records": [rec]}
+
+
+def _resolve(host, port):
+    """The addresses ``host`` resolves to, in the resolver's order, without
+    repeats (D75). A seam: the tests replace it."""
+    infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+    return list(dict.fromkeys(info[4][0] for info in infos))
+
+
+def _connect(address, port, host, tls, timeout):
+    """A connection to ``address``, wrapped in TLS checked against ``host`` when
+    ``tls`` (D75). A seam: the tests replace it."""
+    sock = socket.create_connection((address, port), timeout=timeout)
+    if not tls:
+        return sock
+    try:
+        return ssl.create_default_context().wrap_socket(sock, server_hostname=host)
+    except BaseException:
+        sock.close()
+        raise
+
+
+def _public(address):
+    """Whether ``address`` is one a fetch may reach: global and not multicast
+    (D75)."""
+    ip = ipaddress.ip_address(address)
+    return ip.is_global and not ip.is_multicast
+
+
+def _network_boundary(store, op, url):
+    """The boundary of a network target (OC-008(a), D74, D75). Returns
+    ``(scheme, host, port, path, key)``, where ``key`` is the allowlist entry
+    the target falls under (D76). Called with the write lock held; every check
+    runs before any name is resolved."""
+
+    def refuse(detail):
+        return _refuse(store, op, url, "workspace-boundary", "OC-008(a)", detail)
+
+    if not isinstance(url, str) or any(ord(c) < 0x21 or ord(c) == 0x7F for c in url):
+        raise refuse("%r is not a URL without spaces or control characters" % (url,))
+    parts = urlsplit(url)
+    if parts.scheme not in ("https", "http"):
+        raise refuse("%r is not https or http" % (parts.scheme,))
+    if parts.username is not None or parts.password is not None:
+        raise refuse("credentials in the URL")
+    default = 443 if parts.scheme == "https" else 80
+    try:
+        port = parts.port
+    except ValueError:
+        raise refuse("the port of %r is not a number in range" % (url,))
+    if port is None:
+        port = default
+    elif port != default:
+        raise refuse("port %s is not the scheme's" % (port,))
+    host = parts.hostname
+    if not host:
+        raise refuse("%r has no host name" % (url,))
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        pass
+    else:
+        raise refuse("%r is an address, not a name" % (host,))
+    key = host if parts.scheme == "https" else "http://" + host
+    if not DOMAIN_ENTRY.match(key):
+        raise refuse("%r is not a domain" % (key,))
+    try:
+        head = sil.read_head(store)
+        rules = store.read_json(chain.gen_relpath(head["entry"]) + "/rules.json")
+    except (OSError, ValueError, KeyError):
+        rules = None
+    domains = rules.get("domains") if isinstance(rules, dict) else None
+    entry = domains.get(key) if isinstance(domains, dict) else None
+    verdict = entry.get("rule") if isinstance(entry, dict) else None
+    if verdict == "deny":
+        raise refuse("%r is denied" % (key,))
+    if verdict != "allow":
+        raise _refuse(
+            store,
+            op,
+            url,
+            "workspace-boundary",
+            "OC-008(a)",
+            "%r is outside the declared territory" % (key,),
+            reason="hold",
+        )
+    path = (parts.path or "/") + ("?" + parts.query if parts.query else "")
+    return parts.scheme, host, port, path, key
+
+
+def http_fetch(root, url):
+    """Read ``url`` over HTTP or HTTPS from a declared, public destination (OC-008(a),
+    D74, D75). The body is kept up to ``FETCH_CAP``; reaching ``http_timeout_s`` is
+    the result ``timeout``. Returns the status, the content type, the final URL and
+    the body with its size and digest; the adapter reports only the size and the
+    digest (D15)."""
+    store = Store(root)
+    with store.write_lock():
+        info = _network_boundary(store, "http_fetch", url)
+        session = vital.require_entity_session(root, "http_fetch")
+        timeout = config.value(store, "http_timeout_s")
+    deadline = time.monotonic() + timeout
+    hops = []
+    current = url
+    status = content_type = None
+    body = b""
+    truncated = False
+    outcome = "done"
+    conn = resp = None
+    try:
+        while True:
+            scheme, host, port, path, _key = info
+            if time.monotonic() >= deadline:
+                outcome = "timeout"
+                break
+            try:
+                addresses = _resolve(host, port)
+            except OSError as e:
+                with store.write_lock():
+                    raise _failed(store, session, "http_fetch", url, str(e))
+            if not addresses or not all(_public(a) for a in addresses):
+                with store.write_lock():
+                    raise _refuse(
+                        store,
+                        "http_fetch",
+                        current,
+                        "workspace-boundary",
+                        "OC-008(a)",
+                        "%r resolves to an address outside the territory: %s"
+                        % (host, ", ".join(addresses) or "nothing"),
+                    )
+            tls = scheme == "https"
+            remaining = deadline - time.monotonic()
+            try:
+                sock = _connect(addresses[0], port, host, tls, remaining)
+                connect_class = (
+                    http.client.HTTPSConnection if tls else http.client.HTTPConnection
+                )
+                conn = connect_class(host, port, timeout=remaining)
+                conn.sock = sock
+                conn.request(
+                    "GET",
+                    path,
+                    headers={
+                        "User-Agent": "fsp/" + __version__,
+                        "Accept": "*/*",
+                        "Accept-Encoding": "identity",
+                        "Connection": "close",
+                    },
+                )
+                resp = conn.getresponse()
+                status = resp.status
+                content_type = resp.getheader("Content-Type")
+                hops.append({"url": current, "status": status})
+                location = resp.getheader("Location")
+                if status in (301, 302, 303, 307, 308) and location:
+                    resp.close()
+                    conn.close()
+                    resp = conn = None
+                    if len(hops) > MAX_REDIRECTS:
+                        with store.write_lock():
+                            raise _failed(
+                                store,
+                                session,
+                                "http_fetch",
+                                url,
+                                "more than %d redirects" % MAX_REDIRECTS,
+                            )
+                    current = urljoin(current, location)
+                    with store.write_lock():
+                        info = _network_boundary(store, "http_fetch", current)
+                    continue
+                # the response closes its socket once the body is complete
+                while not resp.isclosed():
+                    if time.monotonic() >= deadline:
+                        outcome = "timeout"
+                        break
+                    sock.settimeout(max(0.01, deadline - time.monotonic()))
+                    chunk = resp.read1(65536)
+                    if not chunk:
+                        break
+                    room = FETCH_CAP - len(body)
+                    body += chunk[:room]
+                    if len(chunk) > room:
+                        truncated = True
+                        break
+                break
+            except TimeoutError:
+                outcome = "timeout"
+                break
+            except (OSError, http.client.HTTPException, ValueError) as e:
+                with store.write_lock():
+                    raise _failed(store, session, "http_fetch", url, str(e))
+    finally:
+        if resp is not None:
+            resp.close()
+        if conn is not None:
+            conn.close()
+    digest = sha256(body)
+    with store.write_lock():
+        rec = _executed(
+            store,
+            session,
+            "http_fetch",
+            url,
+            outcome=outcome,
+            status=status,
+            final_url=current,
+            hops=hops,
+            size=len(body),
+            sha256=digest,
+            truncated=truncated,
+        )
+    return {
+        "status": status,
+        "content_type": content_type,
+        "url": current,
+        "data": body,
+        "size": len(body),
+        "sha256": digest,
+        "truncated": truncated,
+        "outcome": outcome,
+        "log_records": [rec],
+    }
 
 
 def _end_group(pid):
@@ -545,6 +776,19 @@ def attempt_file_list(store: Store, cls, target):
         "sole-writer",
         "file_list lists the workspace and writes no content class of the store",
         via="file_list",
+        content_class=cls,
+        target=target,
+    )
+
+
+def attempt_http_fetch(store: Store, cls, target):
+    """http_fetch's attempted write: a fetch reads the network and writes no
+    content class of the store, so it refuses every one (D68)."""
+    raise sil.refuse_attempt(
+        store,
+        "sole-writer",
+        "http_fetch reads the network and writes no content class of the store",
+        via="http_fetch",
         content_class=cls,
         target=target,
     )
