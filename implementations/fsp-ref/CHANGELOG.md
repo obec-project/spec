@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **The probes' attribution designed, and the first deviation recorded**
+  (2026-10-14, D86). The probes ran on an episodic record's whole content,
+  so the entity could not keep an Operator's *I feel* verbatim, though
+  OP-005(a) says an Operator's words are not the entity's drift. A record
+  now carries the Operator's words as quotes, each verified verbatim
+  against a stimulus of the conversation, and the probes run on the rest;
+  a quote no stimulus holds is refused, so quoting cannot carry the
+  entity's own words past them. The Operator chose to keep refusing a
+  flagged write rather than build OP-005(a)'s Semantic Digest, and DESIGN
+  §9 now records it as a deviation: nothing flagged reaches memory, and
+  the log holds every refusal.
+
 - **A conversation's scope crosses conversations only as the Operator
   allows** (2026-10-14, D85). Each conversation's pointer map is a file
   the MIL keeps, and recall's scope is the conversation's own records and
