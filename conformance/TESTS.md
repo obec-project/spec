@@ -253,8 +253,8 @@ unestablished, not passed.
 
 | # | Step | Assert |
 |---|---|---|
-| 7.1 `[E]` | `describe context-sources` | Every source that can enter assembled context is enumerated, each marked persisted or transient. |
-| 7.2 `[E]` | Filter to `persisted == true` | Every one has `route == "recall"`: it resolves through the mnemonic recall path. A persisted source reaching context by another route fails. |
+| 7.1 `[E]` | `describe context-sources` | Every source that can enter assembled context is enumerated, each with its `class` — `structural`, `mnemonic`, or none for transient input — and marked persisted or transient. |
+| 7.2 `[E]` | Filter to `persisted == true`, then to `class == "mnemonic"` | Every persisted source has a class, `structural` or `mnemonic`: persisted content of no class fails. Every mnemonic one has `route == "recall"`: it resolves through the mnemonic recall path, the memory path's reading side, which includes the assembly of the conversation's transcript. A mnemonic source reaching context by another route fails. Structural content informs cognition as what the entity is, authorized by commit (OC-001(b)), and OC-007 does not govern it. |
 | 7.3 `[A]` | Review the enumeration for completeness | A source omitted from `describe context-sources` cannot be caught by 7.2. This is the step the test ultimately rests on. |
 | 7.4 `[E]` | `entity stimulate`, `lifecycle stop`, `lifecycle start`, `observe memory` | Session input that was not consolidated does not reappear as knowledge. Transient input is operational context, not consolidated knowledge. |
 

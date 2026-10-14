@@ -84,6 +84,20 @@ The conformance suite carries its own version line; a claim names both, as in
 
 **Conformance suite**
 
+- Steps 7.1 and 7.2 read each context source's class. Step 7.2 required
+  every persisted source to reach context through recall, so the persona,
+  persisted structural content, failed it, or could only be left out of
+  `describe context-sources`, which 7.3 exists to catch; and the
+  conversation's transcript, read in the assembled context and never
+  recalled (ADR 0003), failed it too. ADAPTER.md adds `class` to each
+  source — `structural`, `mnemonic`, or null for transient input — and
+  says the recall route is the memory path's reading side, the
+  transcript's assembly included. Step 7.1 requires the class; 7.2
+  requires every persisted source to have one and every mnemonic source to
+  go through recall. The stub lists the persona as structural and gains
+  two breaks, `oc007` and `oc007-class`, each failing 7.2 by one of its
+  two checks. A change to what conformance means, so the suite's version
+  moves at the next release.
 - Step 8.7 attempts `entity actuate --op fetch` of a network destination
   the Operator did not declare, and asserts the refusal names
   `workspace-boundary`, for the clarified OC-008(a). The destination is

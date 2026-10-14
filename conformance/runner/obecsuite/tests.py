@@ -805,17 +805,33 @@ def oc007(ctx):
                 "persisted" in s_,
                 f"source {s_.get('name')!r} does not say whether it persists",
             )
+            a.truthy(
+                "class" in s_ and s_["class"] in ("structural", "mnemonic", None),
+                f"source {s_.get('name')!r} has no class, "
+                "or one outside structural, mnemonic and null",
+            )
 
-    with ctx.step("7.2", "E", "every persisted source resolves through recall"):
+    with ctx.step(
+        "7.2",
+        "E",
+        "every persisted source has a class, "
+        "and every mnemonic one resolves through recall",
+    ):
         sources = ad.call("describe", "context-sources")["sources"] or []
+        unclassed = [
+            s_["name"]
+            for s_ in sources
+            if s_.get("persisted") and s_.get("class") not in ("structural", "mnemonic")
+        ]
+        a.falsy(unclassed, f"persisted sources of no class: {unclassed}")
         offenders = [
             s_["name"]
             for s_ in sources
-            if s_.get("persisted") and s_.get("route") != "recall"
+            if s_.get("class") == "mnemonic" and s_.get("route") != "recall"
         ]
         a.falsy(
             offenders,
-            f"persisted sources reach context outside the recall path: {offenders}",
+            f"mnemonic sources reach context outside the recall path: {offenders}",
         )
 
     with ctx.step("7.3", "A", "the enumeration is complete") as s:
