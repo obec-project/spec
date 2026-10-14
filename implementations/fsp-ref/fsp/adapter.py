@@ -96,6 +96,10 @@ def describe_context_sources(flags):
     return accepted(describe.context_sources_table())
 
 
+def describe_inference_channel(flags):
+    return accepted(describe.inference_channel())
+
+
 # -- lifecycle --------------------------------------------------------------
 
 
@@ -440,6 +444,7 @@ COMMANDS = {
     ("describe", "config"): describe_config,
     ("describe", "operations"): describe_operations,
     ("describe", "context-sources"): describe_context_sources,
+    ("describe", "inference-channel"): describe_inference_channel,
     ("lifecycle", "init"): lifecycle_init,
     ("lifecycle", "start"): lifecycle_start,
     ("lifecycle", "stop"): lifecycle_stop,

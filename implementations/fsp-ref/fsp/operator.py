@@ -9,7 +9,7 @@ import json
 import os
 from pathlib import Path
 
-from . import clock, lifecycle, mil, proposals, sil
+from . import clock, config, lifecycle, mil, model, proposals, sil
 from .digest import sha256
 from .sil import Refused, log_append
 from .store import INTEGRITY, Store, canonical
@@ -646,6 +646,80 @@ def set_workspace(root: str, path: str, *, binding=None):
         )
         sil.set_operational(store, "workspace", ws)
         return {"workspace": ws, "log_records": [act]}
+
+
+def _refuse_model(store, acting, check, detail):
+    """Log a refused model change (OC-006) and raise it."""
+    rec = log_append(
+        store, "refusal", rule="OC-006", binding=acting, check=check, detail=detail
+    )
+    raise Refused(check, "OC-006", detail, [rec])
+
+
+def set_model(
+    root: str,
+    name: str,
+    *,
+    endpoint=model.DEFAULT_ENDPOINT,
+    num_ctx=model.NUM_CTX_DEFAULT,
+    binding=None,
+):
+    """Change the model in use (D87, D28): the model must answer a minimal call
+    first, and the change leaves a ``model-fingerprint`` in the log (D36)."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        if not isinstance(name, str) or not name or not model.num_ctx_valid(num_ctx):
+            _refuse_model(
+                store,
+                acting,
+                "model-setting",
+                "the model needs a name and a num_ctx within %d-%d"
+                % model.NUM_CTX_RANGE,
+            )
+        if not model.local(endpoint):
+            _refuse_model(
+                store,
+                acting,
+                "model-endpoint",
+                "endpoint %r is not on the local host" % (endpoint,),
+            )
+    # The call to the model runs outside the lock: it may take long (D87).
+    m = model.OllamaModel(
+        name, endpoint, num_ctx, config.value(store, "model_timeout_s")
+    )
+    try:
+        m.ping()
+    except model.ModelError as e:
+        with store.write_lock():
+            _refuse_model(
+                store, acting, "model", "the model %r did not answer: %s" % (name, e)
+            )
+    digest = m.digest()
+    with store.write_lock():
+        # The binding is checked again: it may have changed during the call.
+        acting = sil.acting_binding(store, binding)
+        act = sil.operator_act(
+            store,
+            "set-model",
+            binding=acting,
+            rule="OC-006",
+            model=name,
+            endpoint=endpoint,
+            num_ctx=num_ctx,
+        )
+        value = {
+            "backend": "ollama",
+            "name": name,
+            "endpoint": endpoint,
+            "num_ctx": num_ctx,
+            "digest": digest,
+        }
+        sil.set_operational(store, "model", value)
+        fp = log_append(
+            store, "model-fingerprint", rule="OC-006", binding=acting, act=act, **value
+        )
+        return {"model": value, "log_records": [act, fp]}
 
 
 def approve(root: str, proposal_id: str, *, binding=None):

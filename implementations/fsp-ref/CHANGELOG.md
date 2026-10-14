@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The inference channel** (2026-10-14, D87). `fsp/model.py` has the
+  two declared backends: `FakeModel`, scripted, and `OllamaModel`, one
+  `POST /api/chat` with the context only, through an opener that uses no
+  proxy of the environment and follows no redirect, so the context never
+  leaves the local endpoint. `operator.set_model` refuses an endpoint off
+  the local host before any call, sets the model only after it answers
+  a minimal call outside the write lock, and checks the binding again
+  after that call. The start logs the setting's fingerprint without
+  calling the server. `describe inference-channel` attests OC-006's four
+  steps.
+
 - **Phase 8 planned, and the inference channel designed** (2026-10-14,
   D87). The Operator split the phase: 8a builds cognition headless,
   tested through the API with the fake backend, and moves the suite on

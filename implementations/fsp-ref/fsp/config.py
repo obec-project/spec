@@ -89,6 +89,12 @@ SETTINGS = (
         "records the working set of a Closure Payload may name, the Resumption "
         "Record's pointer map (OP-009(e), D84)",
     ),
+    Setting(
+        "model_timeout_s",
+        120,
+        (5, 900),
+        "seconds one call to the model may take before it fails (OC-006, D87)",
+    ),
 )
 
 _BY_NAME = {s.name: s for s in SETTINGS}

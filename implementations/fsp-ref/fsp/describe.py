@@ -62,6 +62,35 @@ def operations_table():
     return {"operations": entries, "evidence": evidence_list}
 
 
+def inference_channel():
+    """``describe inference-channel``: how the model is called, from
+    ``fsp/model.py`` (D87, OC-006). Takes no store."""
+    return {
+        "channel": (
+            "The model is called by POST /api/chat of an Ollama on the local "
+            "host, with stream: false, the schema of the intents in format and "
+            "options.num_ctx on every call; or through the declared fake "
+            "backend, which returns scripted completions."
+        ),
+        "payload": (
+            "A call carries only the messages of the assembled context, the "
+            "model name and the options; never tools, never the context of "
+            "/api/generate, never credentials."
+        ),
+        "completion_path": (
+            "complete returns only after it has read the whole reply, and "
+            "nothing in fsp/model.py acts on the text of the completion."
+        ),
+        "third_party": False,
+        "evidence": [
+            evidence("fsp/model.py", "OllamaModel.payload"),
+            evidence("fsp/model.py", "OllamaModel.complete"),
+            evidence("fsp/model.py", "local"),
+            evidence("fsp/operator.py", "set_model"),
+        ],
+    }
+
+
 def context_sources_table():
     """``describe context-sources``: generated from ``context.CONTEXT_SOURCES``
     (D78)."""

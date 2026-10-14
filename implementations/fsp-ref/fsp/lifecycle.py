@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import os
 
-from . import chain, clock, config, ledger, sil, sleep
+from . import chain, clock, config, ledger, model, sil, sleep
 from . import manifest as skill_manifest
 from .digest import canonical
 from .sil import WRITER, COMMITTER, Refused, log_append
@@ -397,6 +397,18 @@ def start(root: str, *, binding=None) -> StartResult:
         from . import mil  # imported here to avoid an import cycle
 
         mil.open_session_record(store, session, sessions["last_session"])
+        in_force = model.setting(store)
+        if in_force is not None:
+            res.log_records.append(
+                log_append(
+                    store,
+                    "model-fingerprint",
+                    rule="OC-006",
+                    binding=acting,
+                    session=session,
+                    **in_force,
+                )
+            )
         res.outcome = "accepted"
         res.credential_issued = True
         res.session = session
