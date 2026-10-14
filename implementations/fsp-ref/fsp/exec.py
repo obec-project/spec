@@ -12,7 +12,7 @@ import signal
 import subprocess
 import time
 
-from . import chain, config, ledger, lifecycle, sil, vital
+from . import chain, config, ledger, lifecycle, monitor, sil, vital
 from . import manifest as skill_manifest
 from .digest import sha256, sha256_file
 from .sil import Refused, log_append
@@ -435,6 +435,7 @@ def invoke_skill(root, name, target=None, args=None):
                     intent="skill %s" % name,
                     session=session,
                 )
+            before = monitor.picture(store)
 
         env = {
             "PATH": os.environ.get("PATH", os.defpath),
@@ -468,6 +469,7 @@ def invoke_skill(root, name, target=None, args=None):
                         store, entry_id, "failed", session=session, error=launch_error
                     )
                 raise _failed(store, session, op, rel_t, launch_error)
+            findings = monitor.compare(store, before)
             if entry_id is not None:
                 ledger.resolve_entry(
                     store, entry_id, outcome, session=session, exit=proc.returncode
@@ -484,19 +486,18 @@ def invoke_skill(root, name, target=None, args=None):
                 ledger=entry_id,
                 args=args if args is not None else {},
             )
+            critical = list(findings)
             if not reaped:
-                vital._critical(
-                    store,
-                    session,
-                    [
-                        Finding(
-                            "watchdog",
-                            skill_dir,
-                            "exec",
-                            {"pid": proc.pid, "deadline_s": timeout + WATCHDOG_GRACE_S},
-                        )
-                    ],
+                critical.append(
+                    Finding(
+                        "watchdog",
+                        skill_dir,
+                        "exec",
+                        {"pid": proc.pid, "deadline_s": timeout + WATCHDOG_GRACE_S},
+                    )
                 )
+            if critical:
+                vital._critical(store, session, critical)
             return {
                 "skill": name,
                 "outcome": outcome,

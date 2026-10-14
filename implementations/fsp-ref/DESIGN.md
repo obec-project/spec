@@ -125,6 +125,7 @@ all the same (the OC-009 note in TESTS.md).
 | `fsp/model.py` | channel | `OllamaModel`, `FakeModel` | nothing |
 | `fsp/mil.py` | MIL | `mnemonic-save`, `mnemonic-recall`, GC | `mnemonic` only |
 | `fsp/exec.py` | EXEC | `file_read`/`file_write`/`file_list`, `http_fetch`, skills | the workspace only (outside the store) |
+| `fsp/monitor.py` | EXEC | the picture of the store before and after a skill, compared class by class (D73) | nothing — reads only |
 | `fsp/sil.py` | SIL | verification, commit, gates, credential, log, allowlist, passive signal, skill admission | `integrity` + `structural` (by commit only) |
 | `fsp/lifecycle.py` | SIL | the gated start, the live session, close, revocation, decommission (§8) | through `sil.py` and `store.py` |
 | `fsp/proposals.py` | SIL | proposals, approvals, windows, the commit of a proposal (D58, D59) | through `sil.py` and `store.py` |

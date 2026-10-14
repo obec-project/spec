@@ -11,6 +11,19 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **A skill is monitored** (2026-10-14, D2, D73). `invoke_skill` takes a
+  picture of the store under the lock just before the launch and another
+  just after the reaping, and `fsp/monitor.py` compares them class by
+  class: structural content and the chain identical, or `HEAD` moved to a
+  generation `verify()` accepts; the log's last record intact and the new
+  ones chained, checked by the Vital Check's sweep from that record;
+  append-only data grown and data replaced whole changed only with a record
+  in the log after the first picture, `CREDENTIAL` removed being a
+  revocation; no file without a class. Each divergence is a finding of the
+  one Critical the invocation ends in, with the watchdog's when the process
+  was not reaped; the execution is logged first. The classes come from the
+  store's `LAYOUT`, so a datum added later falls in one. Before, nothing
+  checked what a skill did to the store.
 - **A skill ends at its limit, and the watchdog bounds the path**
   (2026-10-14, OP-014(a), D72). The output is read as it arrives, the first
   64 KiB of each stream kept and the rest discarded, so a skill that prints
