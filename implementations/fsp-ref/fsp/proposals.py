@@ -122,6 +122,52 @@ def write_auth(store: Store, auth: dict) -> None:
     store.replace_json(INTEGRITY, lifecycle.AUTH, auth, writer=WRITER)
 
 
+def promotion_authorization(store: Store, root, promotion_id, request, *, session):
+    """Validate and consume the authorization of a promotion (D53, D81).
+
+    Returns ``(text, authorization, window)`` or ``None`` when the request has
+    none. An approval names the digest of the text: the Operator's edit, or the
+    request's, recomputed; a text that no longer matches is not promoted. With
+    no approval, the first open window over ``memory.semantic`` covers it, and
+    its budget is spent as a commit spends it. Called with the store lock
+    held."""
+    from . import mil  # imported here to avoid an import cycle
+
+    auth = read_auth(store)
+    entry = auth["promotions"].get(promotion_id)
+    if isinstance(entry, dict) and "rejected" in entry:
+        return None
+    request_text = {k: request[k] for k in ("slug", "category", "content")}
+    if isinstance(entry, dict) and "digest" in entry:
+        text = entry["edit"] if entry.get("edit") else request_text
+        digest = mil.promotion_digest(
+            text["slug"], text["category"], text["content"], request["supersedes"]
+        )
+        if digest != entry["digest"]:
+            return None
+        return text, entry["authorization"], None
+
+    if close_lapsed(store, clock.grant_now(root), session=session):
+        auth = read_auth(store)
+    for g in auth.get("grants", []):
+        if g.get("state") == "open" and covers(g.get("scope", ""), "memory.semantic"):
+            g["used"] = g.get("used", 0) + 1
+            if g["used"] >= g["budget"]:
+                g["state"] = "closed"
+                g["closed"] = "exhausted"
+                log_append(
+                    store,
+                    "grant-closed",
+                    rule="OC-001(b)",
+                    session=session,
+                    grant=g["id"],
+                    reason="exhausted",
+                )
+            write_auth(store, auth)
+            return request_text, g.get("authorization"), g["id"]
+    return None
+
+
 def open_window(
     store: Store,
     *,

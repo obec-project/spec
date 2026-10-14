@@ -34,6 +34,7 @@ WRITER = "sil"
 COMMITTER = "sil.commit"
 
 LOG = "integrity/log.jsonl"
+SEMANTIC_LEDGER = "integrity/semantic-ledger.jsonl"
 
 BINDING_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._@-]{0,127}\Z")
 
@@ -135,6 +136,35 @@ def log_append(store: Store, kind, *, rule=None, binding=None, session=None, **p
     return log_append_located(
         store, kind, rule=rule, binding=binding, session=session, **payload
     )["id"]
+
+
+def semantic_ledger(store: Store) -> list:
+    """The entries of the semantic ledger in order (D53, D81). A missing file
+    is empty; a line that is not a JSON object and a final fragment without its
+    newline are skipped."""
+    try:
+        data = store.read_bytes(SEMANTIC_LEDGER)
+    except FileNotFoundError:
+        return []
+    entries = []
+    # The last piece is empty, or a fragment the newline never closed.
+    for line in data.split(b"\n")[:-1]:
+        try:
+            entry = json.loads(line.decode("utf-8"))
+        except (ValueError, RecursionError):
+            continue
+        if isinstance(entry, dict):
+            entries.append(entry)
+    return entries
+
+
+def semantic_ledger_append(store: Store, entry: dict) -> None:
+    """Append ``entry`` to the semantic ledger (D53, D81), cutting and logging
+    a torn final fragment first (D61). Called with the store lock held."""
+    cut = store.cut_torn_tail(INTEGRITY, SEMANTIC_LEDGER, writer=WRITER)
+    if cut is not None:
+        log_append(store, "torn-append", rule="OC-004(a)", path=SEMANTIC_LEDGER, **cut)
+    store.append(INTEGRITY, SEMANTIC_LEDGER, entry, writer=WRITER)
 
 
 def refuse_attempt(store: Store, check, detail, **payload) -> Refused:

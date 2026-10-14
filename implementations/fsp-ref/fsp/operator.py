@@ -1012,6 +1012,45 @@ def reject_promotion(root: str, promotion_id: str, *, binding=None):
         return {"promotion": promotion_id, "log_records": [act]}
 
 
+def retract_semantic(root: str, record_id: str, *, binding=None):
+    """Retract a semantic record: an Operator act appended to the semantic
+    ledger, after which the record leaves recall (OP-009(f), D53, D81)."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        ledger = sil.semantic_ledger(store)
+        if not any(
+            e.get("kind") == "promotion" and e.get("id") == record_id for e in ledger
+        ):
+            check, detail = "semantic-unknown", "semantic record %r is not known"
+        elif any(
+            e.get("kind") == "retraction" and e.get("id") == record_id for e in ledger
+        ):
+            check, detail = "semantic-retracted", "semantic record %r is retracted"
+        else:
+            act = sil.operator_act(
+                store,
+                "retract-semantic",
+                binding=acting,
+                rule="OP-009(f)",
+                record=record_id,
+            )
+            sil.semantic_ledger_append(
+                store, {"kind": "retraction", "id": record_id, "act": act}
+            )
+            return {"record": record_id, "log_records": [act]}
+        detail = detail % (record_id,)
+        rec = log_append(
+            store,
+            "refusal",
+            rule="OP-009(f)",
+            binding=acting,
+            check=check,
+            detail=detail,
+        )
+        raise Refused(check, "OP-009(f)", detail, [rec])
+
+
 def reject(root: str, proposal_id: str, *, binding=None):
     """Reject a pending evolution proposal and withdraw its approval, if any
     (OC-001(b), D52)."""

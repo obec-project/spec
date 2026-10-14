@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Promotion writes semantic memory** (2026-10-14, D53, D81).
+  `mil.promote` writes a pending request's record and its entry in the
+  semantic ledger, a new integrity datum, in D81's order, and completes
+  an entry a crash left missing instead of writing a second record. The
+  probes and `supersedes` are checked before the authorization is
+  consumed, so a refused promotion spends no window budget; a crash after
+  the budget is spent and before the record costs that unit, and the
+  request stays pending. An approval whose text no longer matches its
+  digest promotes nothing. `operator.retract_semantic` appends the
+  Operator's retraction. Nothing calls `promote` yet: the Sleep will.
+
 - **Promotion's order and recovery designed** (2026-10-14, D81). D53
   names a promotion's parts, not their order, and the order decides what
   a crash leaves. Written ledger first, a crash would leave an entry with

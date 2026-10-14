@@ -8,7 +8,7 @@ import json
 import re
 import secrets
 
-from . import clock, lifecycle, probes, sil, vital
+from . import clock, lifecycle, probes, proposals, sil, vital
 from .digest import canonical, sha256
 from .sil import Refused, log_append
 from .store import MNEMONIC, GuardError, Store, datum_of
@@ -346,6 +346,167 @@ def request_promotion(
 def pending_promotions(store: Store) -> list:
     """The promotion requests in order (D80)."""
     return _read_records(store, PENDING)
+
+
+# -- promotion (D53, D81) -------------------------------------------------------
+
+
+def semantic_records(store: Store) -> list:
+    """The semantic records in order (D53, D81)."""
+    return _read_records(store, SEMANTIC)
+
+
+def _promotion_refusal(store: Store, session, check, detail) -> Refused:
+    rec = log_append(
+        store,
+        "refusal",
+        rule="OP-009(f)",
+        session=session,
+        check=check,
+        detail=detail,
+    )
+    return Refused(check, "OP-009(f)", detail, [rec])
+
+
+def _ledger_entry(record, promotion_id, authorization) -> dict:
+    return {
+        "kind": "promotion",
+        "id": record["id"],
+        "digest": sha256(canonical(record)),
+        "promotion": promotion_id,
+        "authorization": authorization,
+    }
+
+
+def promote(store: Store, session, promotion_id):
+    """Promote the pending request ``promotion_id`` to semantic memory and
+    return the id of the record, or None while the request stays pending
+    (D53, D81). Writes what the authorization names, once: the log record, the
+    semantic record, then the ledger entry. A promotion a crash interrupted
+    between the last two is completed, not repeated. The probes and
+    ``supersedes`` are checked before the authorization is consumed, so a
+    refused promotion spends no window budget. Called with the store lock
+    held."""
+    request = next(
+        (r for r in pending_promotions(store) if r.get("id") == promotion_id), None
+    )
+    if request is None:
+        return None
+
+    ledger = sil.semantic_ledger(store)
+    for entry in ledger:
+        if entry.get("kind") == "promotion" and entry.get("promotion") == promotion_id:
+            return entry["id"]
+    auth = proposals.read_auth(store)
+    decision = auth["promotions"].get(promotion_id)
+    decision = decision if isinstance(decision, dict) else {}
+
+    done = next(
+        (r for r in semantic_records(store) if r.get("promotion") == promotion_id),
+        None,
+    )
+    if done is not None:
+        authorized = decision.get("digest", request["digest"])
+        digest = promotion_digest(
+            done.get("slug"),
+            done.get("category"),
+            done.get("content"),
+            done.get("supersedes"),
+        )
+        if digest != authorized:
+            raise _promotion_refusal(
+                store,
+                session,
+                "semantic-ledger",
+                "the semantic record %s of promotion %s does not carry the "
+                "authorized text" % (done.get("id"), promotion_id),
+            )
+        sil.semantic_ledger_append(
+            store, _ledger_entry(done, promotion_id, done.get("authorization"))
+        )
+        return done["id"]
+
+    if "rejected" in decision:
+        return None
+
+    edit = decision.get("edit") if "digest" in decision else None
+    if edit:
+        _check_promotion(
+            store,
+            session,
+            edit["slug"],
+            edit["category"],
+            edit["content"],
+            binding=decision.get("binding"),
+        )
+    else:
+        _check_promotion(
+            store, session, request["slug"], request["category"], request["content"]
+        )
+
+    target = request["supersedes"]
+    if target is not None:
+        live = any(
+            e.get("kind") == "promotion" and e.get("id") == target for e in ledger
+        )
+        retracted = any(
+            e.get("kind") == "retraction" and e.get("id") == target for e in ledger
+        )
+        superseded = any(r.get("supersedes") == target for r in semantic_records(store))
+        if not live or retracted or superseded:
+            raise _promotion_refusal(
+                store,
+                session,
+                "supersedes",
+                "%r is not a semantic record that can be superseded" % (target,),
+            )
+
+    got = proposals.promotion_authorization(
+        store, store.root, promotion_id, request, session=session
+    )
+    if got is None:
+        return None
+    text, auth_loc, grant = got
+    authorization = auth_loc or grant
+
+    record_id = "S-" + secrets.token_hex(8)
+    log_append(
+        store,
+        "promotion",
+        rule="OP-009(f)",
+        session=session,
+        promotion=promotion_id,
+        record=record_id,
+        authorization=authorization,
+    )
+    record = {
+        "id": record_id,
+        "slug": text["slug"],
+        "category": text["category"],
+        "content": text["content"],
+        "supersedes": request["supersedes"],
+        "conversation": request["conversation"],
+        "session": request["session"],
+        "binding": decision.get("binding") if edit else None,
+        "promotion": promotion_id,
+        "authorization": authorization,
+        "at": clock.iso(),
+    }
+    cut = store.cut_torn_tail(MNEMONIC, SEMANTIC, writer=WRITER)
+    if cut is not None:
+        log_append(
+            store,
+            "torn-append",
+            rule="OC-004(a)",
+            session=session,
+            path=SEMANTIC,
+            **cut,
+        )
+    store.append(MNEMONIC, SEMANTIC, record, writer=WRITER)
+    sil.semantic_ledger_append(
+        store, _ledger_entry(record, promotion_id, authorization)
+    )
+    return record_id
 
 
 # -- recall (D11, D60, D79) -----------------------------------------------------

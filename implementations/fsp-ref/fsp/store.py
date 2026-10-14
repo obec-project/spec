@@ -84,6 +84,7 @@ LAYOUT = (
     Datum("session-state", "integrity/sessions.json", INTEGRITY, "replace"),
     Datum("skill-index", "integrity/index.json", INTEGRITY, "replace"),
     Datum("action-ledger", "integrity/ledger.jsonl", INTEGRITY, "append"),
+    Datum("semantic-ledger", "integrity/semantic-ledger.jsonl", INTEGRITY, "append"),
     Datum("session-store", "memory/session/<id>.jsonl", MNEMONIC, "append"),
     Datum("episodic-memory", "memory/episodic/records.jsonl", MNEMONIC, "append"),
     Datum("semantic-memory", "memory/semantic/records.jsonl", MNEMONIC, "append"),
