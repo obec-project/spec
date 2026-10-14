@@ -11,6 +11,20 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **A skill's monitoring designed** (2026-10-14, D73). The design compared
+  size and mtime of `integrity/` and `memory/` before and after a skill;
+  the skill runs outside the lock, so an Operator act during the run —
+  acknowledging a notice, opening a window — would have been Critical. A
+  picture of the store is now taken under the lock before the launch and
+  after the reaping and compared class by class: structural content and
+  the chain identical or moved by a commit `verify()` accepts, the log's
+  old records intact and the new ones chained, append-only files grown and
+  files replaced whole changed only with a record in the log after the
+  first picture, no file without a class. Holding the lock through the run
+  was set aside: a long skill would hold up a revocation (OC-002(b)). The
+  record asked for is any record, since a skill able to write the store can
+  forge one that chains; monitoring catches careless writes, and admitted
+  code is trusted to the Operator (D51).
 - **A skill's time limit told from the watchdog** (2026-10-14, D72). The
   design said both that a skill's timeout is a result and that it is
   Critical, and the Profile's OP-014(a) made any deadline expiring
