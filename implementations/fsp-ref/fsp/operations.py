@@ -47,6 +47,14 @@ OPERATIONS = (
         "mnemonic-save", True, False, False, mil.attempt_save, ("fsp/mil.py", "save")
     ),
     Operation(
+        "mnemonic-recall",
+        True,
+        False,
+        False,
+        mil.attempt_recall,
+        ("fsp/mil.py", "recall"),
+    ),
+    Operation(
         "file_read",
         True,
         True,

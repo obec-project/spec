@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **Episodic records belong to their conversation, and recall stays in
+  its scope** (2026-10-14, D11, D79). An episodic record now names its
+  conversation and, optionally, the latest record of a lineage in scope
+  that it supersedes; one outside the scope is refused, `recall-scope`,
+  and one already superseded, `lineage`. `mnemonic-recall` searches the
+  latest record of each lineage in the conversation's scope by every word
+  of the query, or returns a lineage's records in scope and names those
+  outside; a lineage outside is refused. Every recall leaves a record in
+  the log, and `mnemonic-recall` joins the operations table. The scope's
+  pointer map is empty until the Sleep writes one (D60).
+
 - **Recall v0 designed** (2026-10-14, D79). OP-009(c) fixes the scope and
   the lineages but not how a query matches, whether recall is logged, or
   what a misplaced `supersedes` does. A query returns the latest record of

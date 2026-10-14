@@ -55,10 +55,12 @@ def destination_of(relpath):
     return _destination_of_datum(d)
 
 
-def save(root: str, *, caller, destination, content) -> dict:
+def save(root: str, *, caller, destination, content, supersedes=None) -> dict:
     """Write an episodic record attributed to the live session (OC-003(e)),
     to the destination the caller may use (D21), after the deterministic
-    probes (D12)."""
+    probes (D12). The record names its conversation and, when given, the
+    latest record in the conversation's recall scope that it supersedes
+    (D11, D79)."""
     store = Store(root)
     with store.write_lock():
         # 1. the caller may write the destination
@@ -119,6 +121,33 @@ def save(root: str, *, caller, destination, content) -> dict:
             )
             raise Refused("self-representation", "OC-002(d)", detail, [rec])
 
+        # 4b. the conversation, and the record superseded, if any (D11, D79)
+        conversation = conversation_of(store, session)
+        if supersedes is not None:
+            scope_ids = [r.get("id") for r in _scope(store, conversation)]
+            if not isinstance(supersedes, str) or supersedes not in scope_ids:
+                detail = "%r is not in the conversation's recall scope" % (supersedes,)
+                rec = log_append(
+                    store,
+                    "refusal",
+                    rule="OP-009(c)",
+                    session=session,
+                    check="recall-scope",
+                    detail=detail,
+                )
+                raise Refused("recall-scope", "OP-009(c)", detail, [rec])
+            if any(r.get("supersedes") == supersedes for r in _episodic(store)):
+                detail = "%r is already superseded" % (supersedes,)
+                rec = log_append(
+                    store,
+                    "refusal",
+                    rule="OP-009(c)",
+                    session=session,
+                    check="lineage",
+                    detail=detail,
+                )
+                raise Refused("lineage", "OP-009(c)", detail, [rec])
+
         # 5. a torn final fragment is cut and logged before the append (D61)
         cut = store.cut_torn_tail(MNEMONIC, EPISODIC, writer=WRITER)
         if cut is not None:
@@ -137,7 +166,10 @@ def save(root: str, *, caller, destination, content) -> dict:
             "session": session,
             "at": clock.iso(),
             "content": content,
+            "conversation": conversation,
         }
+        if supersedes is not None:
+            record["supersedes"] = supersedes
         store.append(MNEMONIC, EPISODIC, record, writer=WRITER)
         return {"record": record["id"]}
 
@@ -168,6 +200,127 @@ def attempt_save(store: Store, cls, target):
                 target=target,
             )
     return resolved
+
+
+# -- recall (D11, D60, D79) -----------------------------------------------------
+
+
+def _pointer_ids(store: Store, conversation) -> set:
+    """The ids the pointer map of ``conversation`` names (D60); none until the
+    Sleep writes a Resumption Record."""
+    return set()
+
+
+def _episodic(store: Store) -> list:
+    """The episodic records in order (D11)."""
+    return _read_records(store, EPISODIC)
+
+
+def _scope(store: Store, conversation) -> list:
+    """The recall scope of ``conversation``: its own episodic records and those
+    its pointer map names, in file order (D79). A record without a
+    ``conversation`` is in no scope."""
+    named = _pointer_ids(store, conversation)
+    return [
+        r
+        for r in _episodic(store)
+        if (conversation is not None and r.get("conversation") == conversation)
+        or r.get("id") in named
+    ]
+
+
+def _superseded(records) -> set:
+    return {r["supersedes"] for r in records if isinstance(r.get("supersedes"), str)}
+
+
+def _latest(records) -> list:
+    """The records no other record of the list names in ``supersedes`` (D79)."""
+    superseded = _superseded(records)
+    return [r for r in records if r.get("id") not in superseded]
+
+
+def _lineage(records, rid) -> set:
+    """The ids linked to ``rid`` by ``supersedes``, ancestors and descendants,
+    ``rid`` included (D79)."""
+    links = {}
+    for r in records:
+        a, b = r.get("id"), r.get("supersedes")
+        if isinstance(a, str) and isinstance(b, str):
+            links.setdefault(a, set()).add(b)
+            links.setdefault(b, set()).add(a)
+    ids = {rid}
+    pending = [rid]
+    while pending:
+        for other in links.get(pending.pop(), ()):
+            if other not in ids:
+                ids.add(other)
+                pending.append(other)
+    return ids
+
+
+def recall(root: str, *, query=None, lineage=None) -> dict:
+    """Recall from the live session's recall scope, by words or by lineage,
+    and log what was returned (D79, OP-009(c)). By words it returns the latest
+    record of each lineage whose content holds every word, case-folded. By
+    lineage it returns the records of the scope that belong to the lineage of
+    the id and names the ones outside the scope without returning them."""
+    if (query is None) == (lineage is None):
+        raise ValueError("recall takes exactly one of query and lineage")
+    if query is not None and (not isinstance(query, str) or query.strip() == ""):
+        raise ValueError("recall by words requires a non-empty string query")
+    store = Store(root)
+    with store.write_lock():
+        session = vital.require_entity_session(root, "mnemonic-recall")
+        conversation = conversation_of(store, session)
+        scope = _scope(store, conversation)
+        if query is not None:
+            words = query.casefold().split()
+            returned = [
+                r
+                for r in _latest(scope)
+                if all(w in str(r.get("content", "")).casefold() for w in words)
+            ]
+            outside = []
+        else:
+            if not any(r.get("id") == lineage for r in scope):
+                detail = "%r is not in the conversation's recall scope" % (lineage,)
+                rec = log_append(
+                    store,
+                    "refusal",
+                    rule="OP-009(c)",
+                    session=session,
+                    check="recall-scope",
+                    detail=detail,
+                )
+                raise Refused("recall-scope", "OP-009(c)", detail, [rec])
+            ids = _lineage(_episodic(store), lineage)
+            returned = [r for r in scope if r.get("id") in ids]
+            in_scope = {r.get("id") for r in scope}
+            outside = sorted(ids - in_scope)
+        rec = log_append(
+            store,
+            "recall",
+            rule="OP-009(c)",
+            session=session,
+            query=query,
+            lineage=lineage,
+            returned=[r["id"] for r in returned],
+            outside=outside,
+        )
+        return {"records": returned, "outside": outside, "log_records": [rec]}
+
+
+def attempt_recall(store: Store, cls, target):
+    """mnemonic-recall's attempted write: it reads memory and writes no content
+    class of the store, so it refuses every one (D68)."""
+    raise sil.refuse_attempt(
+        store,
+        "sole-writer",
+        "mnemonic-recall reads memory and writes no content class of the store",
+        via="mnemonic-recall",
+        content_class=cls,
+        target=target,
+    )
 
 
 # -- the session store (D10, D24, D78) ------------------------------------------
