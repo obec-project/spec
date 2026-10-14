@@ -11,6 +11,14 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **Every pattern is anchored at the end of the string** (2026-10-13). A
+  pattern ending in `$` also matched before a final newline, so a skill
+  name, a binding id, an expiry or a digest ending in `\n` passed its check,
+  a file named so on disk counted as structural content, and a store path
+  so ended was taken for a datum. An `install-skill` named `"x\n"` passed
+  the proposal and failed in the middle of the commit's staging, with no
+  refusal logged. The patterns end in `\Z` now, and the input is refused
+  where it enters.
 - **A proposal changes the skills' allowlist** (2026-10-13, D70, D58).
   `allow-skill`, `deny-skill` and `unset-skill` are proposal ops of
   category `rules`. Proposing checks their form and refuses a skill named

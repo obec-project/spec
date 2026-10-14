@@ -281,7 +281,7 @@ def authorization_resolves(store: Store, body: dict) -> bool:
     auth_id = auth.get("id")
     auth_sha256 = auth.get("sha256")
     auth_offset = auth.get("offset")
-    if not isinstance(auth_id, str) or not re.match(r"^L-[0-9]{6}$", auth_id):
+    if not isinstance(auth_id, str) or not re.match(r"^L-[0-9]{6}\Z", auth_id):
         return False
     if (
         not isinstance(auth_offset, int)
@@ -347,7 +347,7 @@ def _verify_log(store: Store, r: Report, *, full_log: bool = False) -> bool:
             or not isinstance(chk, dict)
             or set(chk.keys()) != {"id", "sha256", "offset"}
             or not isinstance(chk.get("id"), str)
-            or not re.match(r"^L-[0-9]{6}$", chk["id"])
+            or not re.match(r"^L-[0-9]{6}\Z", chk["id"])
             or not isinstance(chk.get("offset"), int)
             or isinstance(chk.get("offset"), bool)
             or chk["offset"] < 0
@@ -472,7 +472,7 @@ def sweep_log(store: Store, position, max_bytes: int):
             isinstance(position, dict)
             and set(position) == {"id", "offset", "sha256"}
             and isinstance(position["id"], str)
-            and re.match(r"^L-[0-9]{6}$", position["id"])
+            and re.match(r"^L-[0-9]{6}\Z", position["id"])
             and isinstance(position["offset"], int)
             and not isinstance(position["offset"], bool)
             and position["offset"] >= 0
@@ -655,11 +655,11 @@ def _unclassified(store: Store, r: Report) -> None:
 
 def _residue(store: Store, n: int, r: Report) -> None:
     for name in store.listdir("integrity/chain"):
-        m = re.match(r"^([0-9]{6})\.json$", name)
+        m = re.match(r"^([0-9]{6})\.json\Z", name)
         if m and int(m.group(1)) > n:
             r.residue.append({"path": "integrity/chain/" + name, "kind": "uncommitted"})
     for name in store.listdir("integrity/documents"):
-        m = re.match(r"^([0-9]+)\.json$", name)
+        m = re.match(r"^([0-9]+)\.json\Z", name)
         if m and int(m.group(1)) > n:
             r.residue.append(
                 {"path": "integrity/documents/" + name, "kind": "uncommitted"}

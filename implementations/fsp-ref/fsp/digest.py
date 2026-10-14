@@ -17,7 +17,7 @@ import stat
 
 # One path segment of structural content. Deliberately narrow: names travel
 # between filesystems (case, normalization) and must hash the same everywhere.
-SEGMENT = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._-]{0,127}$")
+SEGMENT = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._-]{0,127}\Z")
 
 
 def canonical(obj) -> bytes:

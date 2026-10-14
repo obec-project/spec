@@ -35,7 +35,7 @@ COMMITTER = "sil.commit"
 
 LOG = "integrity/log.jsonl"
 
-BINDING_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._@-]{0,127}$")
+BINDING_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._@-]{0,127}\Z")
 
 DEFAULTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "defaults")
 
@@ -90,7 +90,7 @@ def _next_seq(store, last_line):
         rid = rec["id"] if isinstance(rec, dict) else None
     except (UnicodeDecodeError, ValueError, KeyError):
         rid = None
-    if isinstance(rid, str) and re.match(r"^L-[0-9]{6}$", rid):
+    if isinstance(rid, str) and re.match(r"^L-[0-9]{6}\Z", rid):
         return int(rid[2:]) + 1
     return store.read_from(LOG, 0).count(b"\n") + 1
 

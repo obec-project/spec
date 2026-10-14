@@ -58,7 +58,7 @@ class Datum:
         rx = rx.replace(re.escape("<nnnnnn>"), r"[0-9]{6}")
         rx = rx.replace(re.escape("<id>"), r"[A-Za-z0-9._-]+")
         rx = rx.replace(re.escape("<path>"), r"[A-Za-z0-9_][A-Za-z0-9._/-]*")
-        self.regex = re.compile("^" + rx + "$")
+        self.regex = re.compile("^" + rx + r"\Z")
 
 
 # Everything the implementation persists inside the store (DESIGN.md §3.1).
@@ -97,7 +97,7 @@ STRUCTURAL_FILES = (
     "rules.json",
     "probes.json",
 )
-SKILL_NAME = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
+SKILL_NAME = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}\Z")
 
 
 def structural_target(relpath) -> bool:
@@ -120,7 +120,7 @@ def structural_target(relpath) -> bool:
 MARKER = "OBEC-STORE"
 LOCK = "integrity/store.lock"
 # What `replace` names its temp file: ".<name>.tmp-<pid>".
-TEMP_NAME = re.compile(r"^\..+\.tmp-[0-9]+$")
+TEMP_NAME = re.compile(r"^\..+\.tmp-[0-9]+\Z")
 STORE_FORMAT = "fsp-store"
 STORE_FORMAT_VERSION = 1
 
@@ -473,7 +473,7 @@ class Store:
         """Remove one file, or a whole structural generation directory. Only
         the owner of the class may; append-only data is never removed."""
         _check_relpath(relpath)
-        if re.match(r"^structural/gen/[0-9]+$", relpath):
+        if re.match(r"^structural/gen/[0-9]+\Z", relpath):
             if cls != STRUCTURAL:
                 raise GuardError("content-class", "%s is structural content" % relpath)
             if writer != OWNER[STRUCTURAL][0]:
