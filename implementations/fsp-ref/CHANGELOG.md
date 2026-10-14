@@ -11,6 +11,12 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **`observe log` reads past a damaged line** (2026-10-14, D45). One line
+  of the integrity log that did not parse made `observe_log` raise, so the
+  Operator could not read the log, the Critical that reported the damage
+  included, exactly when it was damaged. A line that does not decode to a
+  record is now skipped and its offset listed in `damaged`, as the notice
+  listing already skipped one (D66).
 - **A skill is monitored** (2026-10-14, D2, D73). `invoke_skill` takes a
   picture of the store under the lock just before the launch and another
   just after the reaping, and `fsp/monitor.py` compares them class by

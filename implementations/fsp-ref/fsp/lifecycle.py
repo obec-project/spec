@@ -9,6 +9,7 @@ one store serialize and the second sees the first one's credential.
 
 from __future__ import annotations
 
+import json
 import os
 
 from . import chain, clock, config, ledger, sil
@@ -705,11 +706,30 @@ def decommission(root: str, disposition: str, *, binding=None):
 
 
 def observe_log(root: str, *, kind=None, since=None):
+    """The integrity log's records, after ``since`` and of ``kind``. A line
+    that does not decode to a record is skipped and its offset listed in
+    ``damaged``, so damage in one line hides none of the others (D45)."""
     store = Store(root)
-    records, truncated = store.read_jsonl(sil.LOG)
+    try:
+        data = store.read_bytes(sil.LOG)
+    except FileNotFoundError:
+        data = b""
+    truncated = bool(data) and not data.endswith(b"\n")
+    records, damaged = [], []
+    offset = 0
+    for line in data.split(b"\n")[:-1]:
+        try:
+            rec = json.loads(line.decode("utf-8"))
+        except (UnicodeDecodeError, ValueError):
+            rec = None
+        if isinstance(rec, dict):
+            records.append(rec)
+        else:
+            damaged.append(offset)
+        offset += len(line) + 1
     if since is not None:
         ids = [r.get("id") for r in records]
         records = records[ids.index(since) + 1 :] if since in ids else []
     if kind is not None:
         records = [r for r in records if r.get("kind") == kind]
-    return {"records": records, "truncated_tail": truncated}
+    return {"records": records, "truncated_tail": truncated, "damaged": damaged}

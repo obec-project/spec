@@ -24,11 +24,6 @@ After that: a test entity on Ollama, operated for days, measuring what
 
 ### Carried into the phases
 
-- **Phase 6b — `observe log` stops at a damaged line.** One line of the
-  integrity log that does not parse makes `lifecycle.observe_log` raise, so
-  the Operator cannot read the log, the Critical that reported the damage
-  included, exactly when it is damaged. A line that does not parse should be
-  skipped, or shown as damaged, as the notice listing does (D66).
 - **Phase 6b — a picture over a store something else is writing.** The
   monitor's pictures are taken under the lock, which keeps out fsp's own
   writers but not a process the watchdog could not reap or a descendant that

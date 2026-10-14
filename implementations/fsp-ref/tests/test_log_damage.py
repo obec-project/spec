@@ -101,3 +101,19 @@ class LogDamageTest(TempDirTest):
         record = json.loads(self.lines()[n])
         self.assertEqual(record["prev"], sha256(damaged))
         self.assertEqual(record["id"], "L-%06d" % (int(last_id[2:]) + 1))
+
+    def test_observe_log_skips_a_damaged_line_and_lists_it(self):
+        offset = sum(len(line) + 1 for line in self.lines())
+        with open(self.log_path(), "ab") as f:
+            f.write(b"junk\n")
+        with self.store.write_lock():
+            after = sil.log_append(self.store, "operator-notification", detail="x")
+        out = lifecycle.observe_log(self.S)
+        self.assertEqual(out["damaged"], [offset])
+        self.assertEqual(out["records"][-1]["id"], after)
+        self.assertEqual(
+            lifecycle.observe_log(self.S, kind="operator-notification")["records"][-1][
+                "id"
+            ],
+            after,
+        )

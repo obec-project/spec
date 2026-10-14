@@ -137,26 +137,8 @@ class MonitorTests(TempDirTest):
         with self.assertRaises(Refused) as ctx:
             execution.invoke_skill(self.S, "example")
         self.assertEqual(ctx.exception.check, "vital-critical")
-        # The log now holds a line that is not JSON, so observe_log cannot
-        # read it: the records are read line by line, skipping that line.
-        parsed = []
-        for line in self.store.read_bytes(sil.LOG).splitlines():
-            try:
-                parsed.append(json.loads(line.decode("utf-8")))
-            except ValueError:
-                pass
-        critical = [r for r in parsed if r.get("id") in ctx.exception.log_records]
-        self.assertEqual(critical[0]["kind"], "vital-critical")
-        self.assertTrue(
-            [
-                f
-                for f in critical[0]["findings"]
-                if f["target"] == "integrity/log.jsonl"
-            ],
-            critical[0]["findings"],
-        )
-        executions = [r for r in parsed if r.get("kind") == "execution"]
-        self.assertEqual(executions[-1]["outcome"], "done")
+        self.assertFinding("integrity/log.jsonl", type_=None)
+        self.assertEqual(self.last_execution()["outcome"], "done")
 
     def test_changing_a_file_replaced_whole_is_critical(self):
         self.install(run="printf '{}' > \"%s/integrity/notices.json\"\n" % self.S)
