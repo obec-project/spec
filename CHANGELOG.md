@@ -42,6 +42,16 @@ The conformance suite carries its own version line; a claim names both, as in
   Operator revokes the live session directly if it should not be running.
   Prompted by fsp-ref (D49, D65), whose deviations from the Profile are
   now none.
+- **OP-014(a)** tells an operation's own time limit from the watchdog's
+  deadline. It made every deadline expiring before the operation returned
+  Critical, so a skill that was only slow — a build, a slow network —
+  revoked the credential and escalated, and Critical became noise the
+  Operator learns to ignore. An operation may now declare a limit; the
+  execution path ends it there, and the ending is its result. The watchdog
+  bounds the path itself, its deadline past that limit, and the path not
+  returning by it stays Critical: that is the case where something holds
+  the execution beyond what ending it should take. Prompted by fsp-ref,
+  whose design said both.
 
 **Conformance suite**
 

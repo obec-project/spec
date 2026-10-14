@@ -569,8 +569,12 @@ a target outside the workspace is rejected before any other check runs.
 #### OP-014 — Execution modes
 
 **(a) Synchronous, under a watchdog.** Execution SHOULD default to synchronous:
-it blocks until it returns. A watchdog timer SHOULD run per active execution, and
-a deadline expiring before the operation returns is Critical (OP-003(b)).
+it blocks until it returns. An operation MAY declare a time limit of its own: the
+execution path ends an operation that reaches it, and that ending is the
+operation's result, recorded like any other. A watchdog timer SHOULD run per
+active execution, its deadline past any limit the operation declares, and the
+execution path not returning by that deadline is Critical (OP-003(b)) — what
+the watchdog bounds is the path, not the work it runs.
 
 **(b) Background.** An execution MAY be background: the execution is spawned, a
 running record is logged immediately and returned as the intent's resolution, and
@@ -836,7 +840,7 @@ implementation SHOULD document its default and its permitted range for each.
 | pointer-map limit | size of the Resumption Record's working set | OP-009(e) |
 | lineage age limit | conversation boundaries a lineage may be carried across; optional | OP-009(e) |
 | soft / hard context thresholds | session self-close and forced close | OP-010 |
-| watchdog deadlines | per-execution timeout | OP-014(a) |
+| operation time limits, watchdog deadlines | how long an operation runs; how long the execution path may take to return | OP-014(a) |
 | `N_boot` | consecutive recovery attempts before halt | OP-018(b) |
 
 **No configuration value may relax an invariant** (OBEC-Core §4). In particular,
