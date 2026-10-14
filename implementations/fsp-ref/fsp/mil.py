@@ -637,10 +637,53 @@ def promote(store: Store, session, promotion_id):
 # -- recall (D11, D60, D79) -----------------------------------------------------
 
 
+def pointers_path(conversation) -> str:
+    """The pointer map of ``conversation`` (D85)."""
+    return "memory/pointers/%s.json" % conversation
+
+
+def pointer_map(store: Store, conversation) -> dict:
+    """The pointer map of ``conversation`` (D85): the file when it exists and
+    has the shape, otherwise an empty map."""
+    empty = {"conversation": conversation, "entries": []}
+    try:
+        data = store.read_json(pointers_path(conversation))
+    except (OSError, ValueError, RecursionError):
+        return empty
+    if not isinstance(data, dict) or not isinstance(data.get("entries"), list):
+        return empty
+    return data
+
+
 def _pointer_ids(store: Store, conversation) -> set:
-    """The ids the pointer map of ``conversation`` names (D60); none until the
-    Sleep writes a Resumption Record."""
-    return set()
+    """The ids the pointer map of ``conversation`` names (D60, D85)."""
+    if conversation is None:
+        return set()
+    return {
+        e["id"]
+        for e in pointer_map(store, conversation)["entries"]
+        if isinstance(e, dict) and isinstance(e.get("id"), str)
+    }
+
+
+def add_pointers(store: Store, conversation, ids, *, source, via, act) -> list:
+    """Add ``ids`` to the pointer map of ``conversation`` and return the ids
+    added (D85). An id already in the conversation's scope, or repeated in
+    ``ids``, is skipped. The map is written only when something is added.
+    Called with the store lock held."""
+    held = {r.get("id") for r in _scope(store, conversation)}
+    pointers = pointer_map(store, conversation)
+    added = []
+    for i in ids:
+        if i in held or i in added:
+            continue
+        added.append(i)
+        pointers["entries"].append({"id": i, "from": source, "via": via, "act": act})
+    if added:
+        store.replace_json(
+            MNEMONIC, pointers_path(conversation), pointers, writer=WRITER
+        )
+    return added
 
 
 def _episodic(store: Store) -> list:
@@ -881,28 +924,114 @@ def open_session_record(store: Store, session, number) -> str:
     """Write the ``session-open`` record of the new session ``session``
     (number ``number``) and return its conversation (D78). The session
     continues the conversation of the most recent earlier session that has an
-    open record, unless that session left it. Called by the start with the
-    store lock held."""
+    open record, unless that session left it. A session that left naming a
+    conversation to resume is continued from that conversation's last session;
+    one that left with a verified Resumption Record seeds the new
+    conversation's pointer map (D85). Called by the start with the store lock
+    held."""
     previous = None
     for k in range(number - 1, 0, -1):
         candidate = "s-%d" % k
         if _open_record(store, candidate) is not None:
             previous = candidate
             break
+    fields = {}
     if previous is not None and not _left(store, previous):
         conversation = conversation_of(store, previous)
         continues = previous
     else:
-        conversation = "C-" + secrets.token_hex(8)
-        continues = None
+        left = None
+        if previous is not None:
+            left = [
+                r
+                for r in session_records(store, previous)
+                if r.get("kind") == "conversation-left"
+            ][-1]
+        resume = left.get("resume") if left is not None else None
+        if (
+            isinstance(resume, dict)
+            and isinstance(resume.get("conversation"), str)
+            and isinstance(resume.get("session"), str)
+        ):
+            conversation = resume["conversation"]
+            continues = resume["session"]
+        else:
+            conversation = "C-" + secrets.token_hex(8)
+            continues = None
+            seeded = _seed(store, session, previous, conversation)
+            if seeded is not None:
+                fields["seeded_by"] = seeded
     save_session(
         store,
         session,
         "session-open",
         conversation=conversation,
         continues=continues,
+        **fields,
     )
     return conversation
+
+
+def last_session_of(store: Store, conversation, before):
+    """The most recent session before number ``before`` whose ``session-open``
+    names ``conversation``, or None (D85). Scans the session records."""
+    for k in range(before - 1, 0, -1):
+        candidate = "s-%d" % k
+        if conversation_of(store, candidate) == conversation:
+            return candidate
+    return None
+
+
+def _seed(store: Store, session, previous, conversation):
+    """Seed the pointer map of the new ``conversation`` from the Resumption
+    Record of the conversation ``previous`` left with a Closure Payload, and
+    return that conversation, or None (D85, OP-009(e)). The record counts only
+    if the log record the checkpoint locates is the ``sleep-complete`` of
+    ``previous`` naming this record's digest; otherwise it is discarded and
+    logged. Called with the store lock held."""
+    if previous is None or not any(
+        r.get("kind") == "closure-payload" for r in session_records(store, previous)
+    ):
+        return None
+    prev = conversation_of(store, previous)
+    path = resumption_path(prev)
+    try:
+        data = store.read_bytes(path)
+    except OSError:
+        return None
+    rec = sil.checkpoint_record(store)
+    resumption = rec.get("resumption") if rec is not None else None
+    if not (
+        rec is not None
+        and rec.get("kind") == "sleep-complete"
+        and rec.get("session") == previous
+        and isinstance(resumption, dict)
+        and resumption.get("conversation") == prev
+        and resumption.get("sha256") == sha256(data)
+    ):
+        log_append(
+            store,
+            "resumption-discarded",
+            rule="OP-009(e)",
+            session=session,
+            conversation=prev,
+        )
+        return None
+    try:
+        working_set = json.loads(data.decode("utf-8")).get("working_set")
+    except (ValueError, AttributeError, RecursionError):
+        working_set = None
+    if not isinstance(working_set, list):
+        working_set = []
+    add_pointers(
+        store,
+        conversation,
+        [i for i in working_set if isinstance(i, str)],
+        source=prev,
+        via="resumption",
+        act=None,
+    )
+    return prev
 
 
 def conversation_of(store: Store, session):

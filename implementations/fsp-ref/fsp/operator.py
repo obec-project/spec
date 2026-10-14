@@ -1219,6 +1219,118 @@ def new_conversation(root: str, *, binding=None):
         return {**out, "log_records": [act] + out["log_records"]}
 
 
+def _refuse_conversation_act(store: Store, acting, check, detail):
+    """Log the refusal of /inject or /resume and raise it (D85, OP-009(g))."""
+    rec = log_append(
+        store,
+        "refusal",
+        rule="OP-009(g)",
+        binding=acting,
+        check=check,
+        detail=detail,
+    )
+    raise Refused(check, "OP-009(g)", detail, [rec])
+
+
+def inject_records(root: str, conversation, records=None, *, binding=None):
+    """Add the episodic records of a past conversation, all or those named, to
+    the live conversation's pointer map, as an Operator act (D85,
+    OP-009(g))."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        session = lifecycle.require_session(root, "inject")
+        current = mil.conversation_of(store, session)
+        if conversation == current:
+            _refuse_conversation_act(
+                store,
+                acting,
+                "conversation-current",
+                "conversation %r is the current one" % (conversation,),
+            )
+        own = [
+            r["id"]
+            for r in mil._episodic(store)
+            if r.get("conversation") == conversation and isinstance(r.get("id"), str)
+        ]
+        if not own:
+            _refuse_conversation_act(
+                store,
+                acting,
+                "conversation-unknown",
+                "conversation %r has no episodic record" % (conversation,),
+            )
+        if records is None:
+            ids = own
+        elif isinstance(records, list) and all(
+            isinstance(i, str) and i in own for i in records
+        ):
+            ids = records
+        else:
+            _refuse_conversation_act(
+                store,
+                acting,
+                "recall-scope",
+                "a named record was not written by conversation %r" % (conversation,),
+            )
+        act = sil.operator_act(
+            store,
+            "inject",
+            binding=acting,
+            rule="OP-009(g)",
+            session=session,
+            conversation=conversation,
+            records=ids,
+        )
+        added = mil.add_pointers(
+            store, current, ids, source=conversation, via="inject", act=act
+        )
+        return {"added": added, "log_records": [act]}
+
+
+def resume_conversation(root: str, conversation, *, binding=None):
+    """Leave the live conversation and close the session so that the next
+    start continues a past conversation's last session, as an Operator act
+    (D85, OP-009(g))."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        session = lifecycle.require_session(root, "resume")
+        current = mil.conversation_of(store, session)
+        if conversation == current:
+            _refuse_conversation_act(
+                store,
+                acting,
+                "conversation-current",
+                "conversation %r is the current one" % (conversation,),
+            )
+        last = mil.last_session_of(store, conversation, int(session[2:]))
+        if last is None:
+            _refuse_conversation_act(
+                store,
+                acting,
+                "conversation-unknown",
+                "conversation %r was never opened" % (conversation,),
+            )
+        act = sil.operator_act(
+            store,
+            "resume",
+            binding=acting,
+            rule="OP-009(g)",
+            session=session,
+            conversation=conversation,
+        )
+        mil.save_session(
+            store,
+            session,
+            "conversation-left",
+            act=act,
+            resume={"conversation": conversation, "session": last},
+        )
+        out = lifecycle.close_session(store, session, acting)
+        return {**out, "log_records": [act] + out["log_records"]}
+
+
 def acknowledge_notifications(root: str, *, binding=None):
     """Acknowledge every pending operator notice, as a recorded Operator act
     (D66). Writes nothing when no notice is pending."""

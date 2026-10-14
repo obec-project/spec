@@ -138,6 +138,23 @@ def log_append(store: Store, kind, *, rule=None, binding=None, session=None, **p
     )["id"]
 
 
+def checkpoint_record(store: Store):
+    """The log record the checkpoint locates, as a dict, or None when the
+    checkpoint, the line or the record does not hold (D45, D85). Reads one
+    line; writes nothing."""
+    try:
+        chk = store.read_json("integrity/log-checkpoint.json")
+        line = store.read_line_at(LOG, chk["offset"])
+        if line is None or sha256(line) != chk["sha256"]:
+            return None
+        record = json.loads(line.decode("utf-8"))
+    except (OSError, ValueError, KeyError, TypeError, RecursionError):
+        return None
+    if not isinstance(record, dict) or record.get("id") != chk["id"]:
+        return None
+    return record
+
+
 def write_log_checkpoint(store: Store, loc: dict) -> None:
     """Write the log checkpoint at the record ``loc`` locates (D45 (2))."""
     store.replace(

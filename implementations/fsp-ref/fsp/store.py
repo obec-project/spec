@@ -90,6 +90,7 @@ LAYOUT = (
     Datum("semantic-memory", "memory/semantic/records.jsonl", MNEMONIC, "append"),
     Datum("pending-promotions", "memory/semantic/pending.jsonl", MNEMONIC, "append"),
     Datum("resumption-record", "memory/resumption/<id>.json", MNEMONIC, "replace"),
+    Datum("pointer-map", "memory/pointers/<id>.json", MNEMONIC, "replace"),
 )
 
 # The structural data a commit may write, relative to a generation (D68).

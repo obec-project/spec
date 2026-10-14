@@ -11,6 +11,19 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 7 — memory (in progress)
 
+- **A conversation's scope crosses conversations only as the Operator
+  allows** (2026-10-14, D85). Each conversation's pointer map is a file
+  the MIL keeps, and recall's scope is the conversation's own records and
+  the ids it names. The start seeds a conversation that follows `/exit`
+  from the Resumption Record, only when the `sleep-complete` the
+  checkpoint locates names the record's current digest; otherwise it
+  logs `resumption-discarded` and the conversation starts with no working
+  set. `operator.inject_records` adds a past conversation's records, all
+  or those named; `operator.resume_conversation` leaves the current
+  conversation naming the last session of the one to resume, which the
+  next start continues, with that conversation's transcript and its
+  pointer map as it was left.
+
 - **The pointer map, `/inject` and `/resume` designed** (2026-10-14,
   D85). D60 says what each does, not where a conversation's pointer map
   lives, how the start tells a Resumption Record from a completed Sleep
