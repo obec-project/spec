@@ -12,7 +12,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **6b** | `http_fetch` under the allowlist's domains (G9), with the domain ops (D70); monitoring around each skill (D2) | — (unit tests) |
+| **6b** | `http_fetch` under the allowlist's domains (D75), with the domain ops (D70, D76) and `--op fetch` in the adapter (step 8.7); monitoring around each skill (D2, D73) | — (unit tests) |
 | **7** | session records, the conversation and its recall scope (D11, D60), `mnemonic-recall`, `mnemonic-save`'s `session` and `semantic` destinations and a record's conversation and `supersedes`, the probes over memory (D12), promotion under authorization and the semantic ledger (D53), `/resume`, `/inject` and `/retract`, Sleep | OC-007, OC-003(e), OC-002(d) |
 | **8** | CPE, `FakeModel`, `OllamaModel`, cycle, chat UI, commands, rollover, the process holding the session: `holder` and the `flock` on `CREDENTIAL` (D25), suspend (D19); the prompts, the Operator's four answers to a hold, and `/notifications` (D66), the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `describe boundaries` | OC-006, OC-009 (attested), OC-001 1.16 (attested) |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
@@ -24,6 +24,12 @@ After that: a test entity on Ollama, operated for days, measuring what
 
 ### Carried into the phases
 
+- **Phase 8 — the prompt at the boundary (D74).** A read outside the
+  workspace, a domain outside the allowlist and a skill's path argument
+  outside are held in a main session and asked about; until the UI they are
+  rejected. Open: whether a skill's `path` argument may declare itself
+  read-only in the manifest (D71), so that only those are asked about — a
+  declaration the skill's code is trusted to keep (D51), not a confinement.
 - **Phase 7 — the probes over memory tell the entity's words from others'.**
   Episodic memory records the conversation, and a first-person pattern flags
   an Operator's *I feel* as readily as the entity's. The probes of D12 must
@@ -67,10 +73,6 @@ specification in a commit of its own. Closed gaps are in the CHANGELOG.
 - **G6 — file mode outside the digest.** Largely resolved in fsp by D34 (the
   execute bit is in the integrity document).
 - **G7 — secrets vs. completeness.** The API key lives outside the store (D7).
-- **G9 — network.** OC-008 defines the workspace as a territory of files; a
-  network destination does not appear. Worker skills make it concrete: an
-  agent that reads files and fetches URLs can send what it read out in a URL,
-  so fsp bounds `http_fetch` by the allowlist's destinations (D64).
 - **G12 — "exactly one path" for mnemonic.** Resolved in fsp (D21) with a
   single operation. The specification could say that destinations within a
   class (session, episodic, semantic) are legitimate parameters of the single

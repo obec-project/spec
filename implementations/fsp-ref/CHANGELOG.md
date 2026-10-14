@@ -11,6 +11,23 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 6b — the allowlist (in progress)
 
+- **The network as territory designed; G9 closed** (2026-10-14, D74 – D76).
+  OC-008 spoke of paths only, so `http_fetch` had no declared territory to
+  stay inside; OC-008(a) is clarified, and OP-016 follows. The workspace is
+  the declared folder and the domains the allowlist allows: a domain entry
+  is territory, a skill entry admission, so a domain outside is held at the
+  boundary, `workspace-boundary`, not by the rule. A target outside may wait
+  for the Operator in a main session — reads only, the target shown as
+  resolved, never the store or `~/.fsp` — while only the asking cycle waits
+  and the act resumes from the first check; elsewhere, and in v0 until the
+  UI, it is rejected. `http_fetch` reads one URL over HTTPS on 443, or in
+  clear from a host named `http://`, from a name whose every address is
+  public, connecting to the address checked, with no proxy, no header or
+  cookie of the entity's, no compression, five redirects each checked
+  again, a 1 MiB body and `http_timeout_s` as a result; the URL is logged,
+  since it is where an exfiltration would show. A domain entry names one
+  host exactly, with no wildcard: `*.github.io` is a channel out anyone can
+  open.
 - **A file that vanishes mid-picture is absent from it** (2026-10-14, D73).
   The monitor's pictures are taken under the lock, which keeps out fsp's
   own writers but not a process the watchdog could not reap or a
