@@ -100,6 +100,10 @@ def describe_inference_channel(flags):
     return accepted(describe.inference_channel())
 
 
+def describe_boundaries(flags):
+    return accepted(describe.boundaries())
+
+
 # -- lifecycle --------------------------------------------------------------
 
 
@@ -445,6 +449,7 @@ COMMANDS = {
     ("describe", "operations"): describe_operations,
     ("describe", "context-sources"): describe_context_sources,
     ("describe", "inference-channel"): describe_inference_channel,
+    ("describe", "boundaries"): describe_boundaries,
     ("lifecycle", "init"): lifecycle_init,
     ("lifecycle", "start"): lifecycle_start,
     ("lifecycle", "stop"): lifecycle_stop,

@@ -11,6 +11,17 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The cognitive cycle** (2026-10-14, D89). `cycle.respond` records the
+  Operator's text as a stimulus and runs the chain. Each cycle assembles
+  the context, calls the model outside the write lock, logs the call as
+  `inference`, parses the completion and dispatches every intent to its
+  owner's own function, which checks and records as for any caller. A
+  completion that does not parse aborts the cycle with nothing
+  dispatched. Results continue the chain, replies alone end it, and
+  `chain_limit` (8) ends it with a logged record. `describe boundaries`
+  declares the four crossings loggable and points to the escalation path
+  that never traverses cognition, which attests OC-009 and step 1.16.
+
 - **The cycle designed** (2026-10-14, D89). OP-001 says what a cycle is,
   not how fsp tells a chain to go on or stop, nor what a malformed
   completion does. One call, then every intent dispatched in order to its

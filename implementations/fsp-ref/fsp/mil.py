@@ -41,6 +41,7 @@ SESSION_KINDS = (
     "reply",
     "results",
     "context-truncated",
+    "cycle",
 )
 SESSION_ID = re.compile(r"^s-[0-9]+\Z")
 

@@ -91,6 +91,70 @@ def inference_channel():
     }
 
 
+def boundaries():
+    """``describe boundaries``: the four crossings of cognition and the path of
+    escalation that never traverses it (D89, OC-001(c)). Takes no store."""
+    entries = [
+        {
+            "name": "cognition-integrity",
+            "mechanism": (
+                "Proposals go through proposals.propose, which checks them, and "
+                "the SIL records each one in the integrity log."
+            ),
+            "loggable": True,
+            "evidence": [
+                evidence("fsp/proposals.py", "propose"),
+                evidence("fsp/sil.py", "log_append"),
+            ],
+        },
+        {
+            "name": "cognition-model",
+            "mechanism": (
+                "One call to the model per cycle, by complete, recorded as an "
+                "inference record in the integrity log."
+            ),
+            "loggable": True,
+            "evidence": [
+                evidence("fsp/cycle.py", "respond"),
+                evidence("fsp/model.py", "OllamaModel.complete"),
+            ],
+        },
+        {
+            "name": "cognition-knowledge",
+            "mechanism": (
+                "The MIL's save and recall, which check and record as for any "
+                "caller, and the assembly of the context from the stores."
+            ),
+            "loggable": True,
+            "evidence": [
+                evidence("fsp/mil.py", "save"),
+                evidence("fsp/mil.py", "recall"),
+                evidence("fsp/context.py", "assemble"),
+            ],
+        },
+        {
+            "name": "cognition-host",
+            "mechanism": (
+                "The primitives and the skills of fsp/exec.py, which check the "
+                "workspace boundary first and are recorded in the integrity log "
+                "and under the Action Ledger."
+            ),
+            "loggable": True,
+            "evidence": [
+                evidence("fsp/exec.py", "boundary"),
+                evidence("fsp/ledger.py", "open_entry"),
+            ],
+        },
+    ]
+    listed = [e for entry in entries for e in entry["evidence"]]
+    listed += [
+        evidence("fsp/lifecycle.py", "_notify"),
+        evidence("fsp/vital.py", "_critical"),
+        evidence("fsp/sil.py", "raise_passive_signal"),
+    ]
+    return {"boundaries": entries, "evidence": listed}
+
+
 def context_sources_table():
     """``describe context-sources``: generated from ``context.CONTEXT_SOURCES``
     (D78)."""

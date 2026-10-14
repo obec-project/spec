@@ -102,6 +102,13 @@ SETTINGS = (
         "tokens of the model's window kept for its answer when context is "
         "assembled (D88)",
     ),
+    Setting(
+        "chain_limit",
+        8,
+        (1, 64),
+        "cycles one stimulus may run in a chain before it is ended "
+        "(OP-001(b), OP-002(c), D89)",
+    ),
 )
 
 _BY_NAME = {s.name: s for s in SETTINGS}
