@@ -13,30 +13,20 @@ is in four steps.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **8b-2** | rollover (§6.3); the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `/allow` and `/deny`; the proposal op for structural parameters | — |
+| **8b-2** | the Closure in three phases (D83): `closing` and the phase records; Sleep (MIL); Endure (SIL), which commits every authorized proposal, with an interrupted commit finished or undone at the start (D94); Integrity; rollover and decommission's final Closure (D94); promotions recorded with the payload and decided at `/exit` (D53, D80, D81); the UI rolling over when an authorized proposal waits (D95); `/allow` and `/deny` as the Operator's proposal and approval, and `set-parameter` (D96); `ui.choose` and the review as menus — at the open, `/review`, `/exit`, `fsp review` — with the commits windows made (D97); the closure without a current turn (D98); a test that the entity is told past the pending cap (D52) | — |
 | **8b-3** | the Operator Channel's prompts in the UI: a hold's four answers (D66), *allow for this session*, the prompt at the boundary (D74) | — |
 | **8b-4** | preemption and queueing (OP-002(a)(b)(c)); `/compact`; OP-010's thresholds and the restart they cause, on rollover's mechanism; the token estimate calibrated by `prompt_eval_count` (D88) | — |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
-| **10** | a complete interactive `fsp init`, the first activation through `fsp run` (D29), including a name already in use (D54), `fsp endure` (D32), `~/.fsp/config.json`/`credentials.json`, `notify_command` (D66) | — (the Operator's tooling; a real 3.2 through `endure clone` on a VM) |
-| **11** | the agenda (D62): `agenda.json`, `/agenda` and `fsp agenda`, the `agenda` proposal op, items' scoped authorizations; `fsp tick` and its host entry installed by `fsp init`/`endure`, the auto session and the main start suspending it (D63); worker skills, run in the background (D64) | — (unit tests) |
+| **10** | a complete interactive `fsp init`, the first activation through `fsp run` (D29), including a name already in use (D54), `fsp repo` (D32), `~/.fsp/config.json`/`credentials.json`, `notify_command` (D66) | — (the Operator's tooling; a real 3.2 through `repo clone` on a VM) |
+| **11** | the agenda (D62): `agenda.json`, `/agenda` and `fsp agenda`, the `agenda` proposal op, items' scoped authorizations; `fsp tick` and its host entry installed by `fsp init`/`repo`, the auto session and the main start suspending it (D63); worker skills, run in the background (D64) | — (unit tests) |
 
 After that: a test entity on Ollama, operated for days, measuring what
 [open question 1](../../design/OPEN-QUESTIONS.md) asks for.
 
 ### Carried into the phases
 
-- **Phase 8b-2 — `/exit` with no stimulus since the last clear.**
-  `context.assemble` raises when the transcript has no turn, so the
-  Closure Payload's emission (D91) fails with an exception, not a
-  refusal, and the UI takes it as a crash. A cycle always has its
-  stimulus; the closure need not. To decide: assemble the closure
-  without a current turn, or refuse the exit (`closure-emission`).
-- **Phase 8b-2 — a proposal op for structural parameters.** The window
-  category `parameters` exists and no op writes `config.json`, so
-  `always_loaded` keeps its default (D82). The op checks what it writes:
-  `always_loaded` a list of distinct categories (D77).
 - **Phase 10 — the entity folder** (`.git`, `.gitignore`, `.gitattributes`,
-  D27) is scaffolded by `fsp init`/`endure`; the store's own scaffolding is
+  D27) is scaffolded by `fsp init`/`repo`; the store's own scaffolding is
   done.
 - **Phase 10 — D30 against the registered stores** of `~/.fsp/config.json`.
   Until the registry exists, a workspace is checked against its own store and

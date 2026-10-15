@@ -11,6 +11,35 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The Closure, rollover, the review and the Operator's structural acts
+  designed** (2026-10-15, D83, D94–D98; D53, D80, D81 revised; ADR 0004).
+  Every normal close is followed by a Closure of three phases with one owner
+  each, after the Profile's OP-022: Sleep, the MIL's, only when the
+  conversation ends; Endure, the SIL's, the commit of every authorized
+  proposal; Integrity, the SIL's, always, removing the credential last. The
+  one Sleep of D83 promoted memory in every close, a rollover's included,
+  against OP-022's "commits only"; the phases end that, and a rollover is
+  now a close, Endure, Integrity and a start. `sessions.json`'s `sleep`
+  becomes `closing`, which names the phases done, so a crash resumes at the
+  first one not done. A promotion request is recorded with its payload and
+  decided in the `/exit` review, before the close, and promoted in that
+  Closure's Sleep or never: a request authorized later had no Sleep to be
+  promoted in. Endure drops a proposal whose commit is refused, with a
+  notice, since one left authorized would roll over forever. A crash
+  between the rename of `HEAD` and `auth.json` left a committed proposal
+  still authorized, which a re-run would commit again: the proposal is
+  marked with the entry it will take, and the start finishes or undoes the
+  mark before the Closure resumes. Decommission runs a final Closure of
+  Endure and Integrity, as OP-023 asks. The UI rolls over whenever an
+  authorized proposal waits, one rule for an approval here, in another
+  terminal, with no session, or by a window. `/allow` and `/deny` record a
+  proposal and its approval together (D14), an Endure like any other, and
+  `set-parameter` gives `always_loaded` its op. Every decision in the UI is
+  a menu chosen with the arrow keys, by the Operator's choice: no answer is
+  typed, so `/review approve ID` does not exist. The closure is assembled
+  without a current turn, since refusing `/exit` would leave `/new`, which
+  keeps nothing. `fsp endure` (D32) becomes `fsp repo`, since Endure now
+  names the evolution protocol.
 - **The live session and the line REPL** (2026-10-15, D92, D93).
   `lifecycle.start(hold=True)` names the process as `holder` and takes
   the credential's lock before the session is recorded; `suspend` ends
