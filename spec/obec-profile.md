@@ -32,9 +32,9 @@ describing *how* implementations have realized those guarantees, rather than
 *what* must be true of them.
 
 They are stated because they are good. Each was written against a failure an
-implementation actually hits — an interrupted Sleep, a context window exhausted
-mid-task, an irreversible operation whose result never returned — and an
-implementer who ignores them will meet those failures again. But meeting them
+implementation actually hits — an interrupted Closure, a context window
+exhausted mid-task, an irreversible operation whose result never returned — and
+an implementer who ignores them will meet those failures again. But meeting them
 differently is not non-conformance, and the core should not have said otherwise.
 
 ### 1.2 Conformance language
@@ -56,8 +56,9 @@ what would be at risk if the mechanism were dropped and nothing replaced it.
 ### 1.3 What deviation costs
 
 Deviating costs nothing in conformance and something in expectation. Two
-implementations that both pass the ten tests but realize Sleep differently are
-both conformant, and neither can predict the other's behavior at session close.
+implementations that both pass the ten tests but realize the Closure
+differently are both conformant, and neither can predict the other's behavior
+at session close.
 This matters for tooling and for the Cognitive Mesh Interface (CMI) extension.
 It does not make a store portable between implementations: OBEC-Core OC-003(b)
 guarantees portability across hosts under the same implementation, and another
@@ -214,8 +215,9 @@ its episodic records and the consolidation — as it is written, and not on the
 whole transcript: an Operator's words are not the entity's drift. What they
 flag is recorded in the **Semantic Digest**, an incrementally updated record
 held as integrity content, so that cognition cannot alter it (OC-005). The
-digest SHOULD be evaluated against the thresholds of OP-004 in every Sleep, so
-that a conversation never ended is still checked.
+digest SHOULD be evaluated against the thresholds of OP-004 in the Integrity
+phase of every Closure (OP-022), so that a conversation never ended is still
+checked.
 
 The probes SHOULD also run on content requested for promotion before it is
 offered for authorization (OP-009(f)): content they flag is not offered, and
@@ -321,8 +323,9 @@ is current at a time (OC-003(d)).
 
 Only an Operator leaves the current conversation, in one of three ways:
 
-- **ending it with a Closure Payload** (d). The conversation ends when the Sleep
-  that processes the payload completes; a crash before then leaves it open.
+- **ending it with a Closure Payload** (d). The conversation ends when the
+  Closure that processes the payload completes; a crash before then leaves it
+  open.
 - **starting a new one.** No payload is emitted, and the new conversation starts
   with no working set.
 - **resuming a past one** (g).
@@ -366,14 +369,15 @@ them and sets the next steps; and, when the conversation produced learnings
 worth persisting, the requested promotion of episodic records into semantic
 memory.
 
-The payload SHOULD be written among the session records **on emission**, which
-is what makes Sleep re-executable from it after a crash (OP-018). During that
-Sleep the memory path processes it: it writes the consolidation as an episodic
-record of the conversation, produces the Resumption Record (e), and records the
-promotion requests (f).
+The payload is emitted before the close, while the credential is still valid,
+and SHOULD be written among the session records **on emission**, which is what
+makes the Closure re-executable from it after a crash (OP-018). In the
+Closure's Sleep phase (OP-022) the memory path processes it: it writes the
+consolidation as an episodic record of the conversation, produces the
+Resumption Record (e), and promotes the requests the Operator authorized (f).
 
 **(e) The Resumption Record.** A **Resumption Record** SHOULD be produced during
-the Sleep that processes the payload, carrying three things: a pointer map
+the Sleep phase that processes the payload, carrying three things: a pointer map
 naming the working set — the latest record of each lineage, within a limit
 declared in configuration; the message that contextualizes it and sets the next
 steps; and the conversation's consolidation. Nothing is copied: a record stays
@@ -390,7 +394,7 @@ content without naming the record it supersedes.
 Retrieval against the record follows the normal recall path — it is a pointer
 map, not a second source of knowledge. It SHOULD be loaded at the start of the
 next conversation only if the integrity log holds the completion record of the
-Sleep that produced it; otherwise it is discarded and logged, and the
+Closure that produced it; otherwise it is discarded and logged, and the
 conversation starts with no working set.
 
 **(f) Semantic memory.** Semantic memory is refined knowledge, and the only
@@ -402,11 +406,14 @@ authorization names the digest of the content it covers, so what is promoted is
 exactly what was authorized. The probes of OP-005 run first: content they flag
 is not offered for authorization, and the failure is logged.
 
-A promotion waiting for its authorization does not hold up the rest of Sleep.
-One refused, or never authorized, leaves the content in its conversation,
-reachable only through a pointer. How many pointer maps have named a lineage
-MAY be used to propose promotions or to order them for review; it never
-replaces the authorization.
+A requested promotion is authorized, or not, when the conversation ends: a
+standing grant covers it, or the Operator decides it once the payload is
+emitted and before the Closure begins. The Closure's Sleep phase promotes what
+was authorized. A request not authorized then — refused, or left undecided — is
+not promoted: its content stays in its conversation, reachable only through a
+pointer, and no request waits for a later Closure. How many pointer maps have named a lineage MAY be used to
+propose promotions or to order them for review; it never replaces the
+authorization.
 
 What the entity knows is protected against edit, as its structure is. Each
 semantic record SHOULD have a canonical serialization, declared by the
@@ -470,8 +477,9 @@ sequence still fits the window; it SHOULD be sized together with the Vital Check
 cadence, so that a breach is detected while the guarantee still holds.
 
 A threshold breach is a **capacity condition, not an anomaly**: OP-003(b)'s state
-is unaffected. Either way the session closes normally, a Sleep that executes
-commits only follows (OP-022), and the start sequence runs immediately after.
+is unaffected. Either way the session closes normally, a Closure follows that
+runs only its Endure and Integrity phases (OP-022), and the start sequence runs
+immediately after.
 The new session continues the conversation (OP-009(a)): no Closure Payload is
 emitted, and cognition recovers its working context through recall.
 
@@ -505,7 +513,8 @@ integrity path alone, without input from cognition.
 held for explicit Operator review, logged, and the session continues. A held
 proposal commits only after a recorded approval. A proposal originated under a
 grant but not committed before the grant closes falls back to per-proposal
-approval: closure withdraws the standing authority, not the proposal's validity.
+approval: the grant's closing withdraws the standing authority, not the
+proposal's validity.
 
 **(d) Scope categories.** The categories a standing grant's scope may name
 SHOULD be declared by the implementation, on its configuration surface; the
@@ -517,9 +526,16 @@ that a mistyped scope is not a grant that silently covers nothing.
 
 ---
 
-#### OP-012 — The staged commit pipeline
+#### OP-012 — The Endure Protocol
 
-Authorized proposals SHOULD be executed during Sleep as a staged pipeline:
+The **Endure Protocol** is how structural content changes: a proposal
+(OP-011), its authorization, and its commit. Every structural change goes
+through it, whatever its origin — a proposal cognition originates, or an
+Operator's own structural act, which is a proposal recorded on the Operator's
+direct instruction together with its approval (OP-011(a)).
+
+Authorized proposals SHOULD be executed in the Closure's Endure phase (OP-022)
+as a staged pipeline:
 **staging → validation → snapshot → atomic commit → resumption**.
 
 The atomic commit writes all structural files, the updated integrity baseline and
@@ -644,12 +660,13 @@ authorization to run code is an authorization to run that code.
 
 ---
 
-#### OP-017 — First activation
+#### OP-017 — The First Activation Protocol
 
-First activation runs exactly once, on an empty store: it establishes the
-Operator binding, assembles the initial structural state, generates the integrity
-baseline, and writes the Genesis Anchor. It issues no credential: the first
-session, like every other, begins with a start that passes every gate (OC-010).
+The **First Activation Protocol** (FAP) runs exactly once, on an empty store,
+in this order: it establishes the Operator binding, assembles the initial
+structural state, generates the integrity baseline, and writes the Genesis
+Anchor, last. It issues no credential: the first session, like every other,
+begins with a start that passes every gate (OC-010).
 
 It SHOULD be atomic with respect to its own outputs — it either completes fully
 or reverts every write it made, leaving the store uninitialized. A failed first
@@ -666,19 +683,21 @@ no chain connecting it to the old one.
 #### OP-018 — Crash recovery
 
 **(a) Detection and re-execution.** A normal close SHOULD remove the session
-credential artifact at Sleep completion, so that its presence at start signals a
-crash. **The start sequence is itself the recovery procedure; no special mode
-exists.**
+credential artifact only when its Closure completes (OP-022), so that its
+presence at start signals a crash. **The start sequence is itself the recovery
+procedure; no special mode exists.**
 
-If the integrity log holds a Sleep completion record, the entity resumes from
-that boundary. If not, the pre-commit snapshot is restored, discarding any
-partial commit, and Sleep re-executes from the start, from the Closure Payload
-held among the session records if one was emitted (OP-009(d)).
+If the integrity log holds the Closure's completion record, the entity resumes
+from that boundary. If not, the Closure re-executes from the first phase that
+did not complete: a partial commit is discarded by restoring the pre-commit
+snapshot, and the Sleep phase works from the Closure Payload held among the
+session records, if one was emitted (OP-009(d)). Each phase SHOULD record its
+completion and be safe to run again.
 
 A crash leaves the conversation open (OP-009(a)), and the next start continues
 it: the transcript and the episodic records the crashed session wrote are in
 scope, and only what it had not yet written is lost. A conversation whose
-ending Sleep did not complete ends when the re-executed Sleep does.
+ending Closure did not complete ends when the re-executed Closure does.
 
 **(b) Attempt threshold.** Consecutive recovery attempts SHOULD be counted in the
 integrity log. At a threshold `N_boot` declared in configuration, the passive
@@ -729,13 +748,13 @@ it should not be running.
 **(a) Close modes.** A session ends one of three ways:
 
 - **Normal close** — an Operator signal, a close intent from cognition, or a
-  condition declared in configuration (OP-010's thresholds are one such). Sleep
-  follows, preceded by the Closure Payload when the close ends the conversation
-  with one (OP-009(a)).
-- **Critical** — escalation happens before any Sleep may run.
+  condition declared in configuration (OP-010's thresholds are one such). The
+  Closure follows (OP-022), the Closure Payload emitted before the close when
+  it ends the conversation with one (OP-009(a)(d)).
+- **Critical** — escalation happens before any Closure may run.
 - **Direct intervention** — the Operator removes the credential artifact from the
   store, with no component involved. The entity halts immediately, with no
-  Closure Payload and no automatic Sleep.
+  Closure Payload and no automatic Closure.
 
 **(b) Revocation mid-cycle.** On revocation mid-cycle, the active cycle aborts
 without commit. Executions in progress are discarded with no result logged or
@@ -746,43 +765,53 @@ start.
 
 ---
 
-#### OP-022 — Sleep
+#### OP-022 — Closure
 
-**(a) Stages.** Sleep SHOULD run after every normal close, in three stages, never
-concurrently:
+**(a) Phases.** A **Closure** SHOULD follow every normal close. It begins when
+the integrity path receives the close signal and revokes the credential — from
+then on no intent is processed (OP-020) — and runs three phases in this order,
+never concurrently, each under the authority of one part (OP-024):
 
-1. **consolidation** — the Closure Payload is processed (OP-009(d)), in a Sleep
-   that follows one;
-2. **garbage collection** (OP-009(h)), in a Sleep that follows the Operator
-   leaving a conversation;
-3. **commit execution** — queued authorized proposals commit through OP-012, or
-   the stage is skipped if none are queued.
+1. **Sleep**, the memory path's — the Closure Payload is consolidated
+   (OP-009(d)), the promotions the Operator authorized are written to semantic
+   memory (OP-009(f)), and garbage collection runs when the Operator left the
+   conversation (OP-009(h)). Skipped when the close does not end the
+   conversation.
+2. **Endure**, the integrity path's — queued authorized proposals commit
+   through the Endure Protocol (OP-012). Skipped when none are queued.
+3. **Integrity**, the integrity path's, and always run — semantic drift is
+   evaluated from the digest (OP-005(a)), the Closure's completion is recorded
+   in the integrity log, and the credential artifact is removed, last.
 
-A Sleep between two sessions of one conversation therefore executes commits
-only. Semantic drift is evaluated from the digest in every Sleep (OP-005(a)).
-The credential is revoked before Sleep begins; the artifact is removed only at
-Sleep completion, serving as the crash indicator throughout (OP-018(a)).
+Memory goes first, under the structure the session ran with; the structural
+change follows, for the sessions after it; the Integrity phase seals both. A
+Closure between two sessions of one conversation therefore runs Endure and
+Integrity only. The credential is revoked at the close signal; its artifact
+stays until the Integrity phase removes it, serving as the crash indicator
+throughout (OP-018(a)).
 
-**(b) Maintenance authority.** During Sleep no intent is generated and no
-stimulus is processed: cognition is inactive. Maintenance operations run under
-integrity authority, independent of the credential — including maintenance
-executions performed under direct integrity instruction.
+**(b) Authority.** During a Closure no intent is generated and no stimulus is
+processed: cognition is inactive. Each phase runs under its part's authority,
+independent of the credential — the memory path's in Sleep, the integrity
+path's in Endure and Integrity — including maintenance executions performed
+under direct integrity instruction.
 
-*Serves:* OC-004(b), OC-005(c), OC-007.
+*Serves:* OC-004(b), OC-005(c), OC-007, OC-009.
 
 ---
 
 #### OP-023 — Decommission
 
-Decommission requires explicit Operator authorization. A final Sleep SHOULD
-execute first, committing queued authorized proposals; then the credential
-artifact is removed, the chain is closed by a final entry recording the
-decommission, and the store is destroyed or archived at the Operator's choice.
+Decommission requires explicit Operator authorization. A final Closure SHOULD
+run first, with its Endure and Integrity phases: queued authorized proposals
+commit and the credential artifact is removed. Then the chain is closed by a
+final entry recording the decommission, and the store is destroyed or archived
+at the Operator's choice.
 
 No Closure Payload is emitted. The current conversation's memory is already in
 the Memory Store, written as the entity worked (OP-009(c)), and no conversation
-follows to carry a working set to. Pending promotions are not processed; an
-archived store keeps them as records.
+follows to carry a working set to, so the Closure's Sleep phase does not
+run.
 
 The orderly path is not the only one: the Operator can always halt the entity
 directly (OP-021(a)) and dispose of the store with no component's cooperation.

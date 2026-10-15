@@ -607,10 +607,10 @@ MUST still satisfy every invariant of §2.
 The operational machinery — cognitive cycles and cycle chains, Operator
 preemption, the heartbeat and its Vital Check states, drift classification and
 probes, the Closure Payload and consolidation, the Resumption Record,
-context-window thresholds, background execution, the Action Ledger, Sleep
-staging, and crash-recovery detail — belongs to the **Implementation Profile**
-(the Appendix), where it is stated as SHOULD and RECOMMENDED. None of it is
-deleted; it stops being a barrier to conformance.
+context-window thresholds, background execution, the Action Ledger, the
+Closure and its phases, and crash-recovery detail — belongs to the
+**Implementation Profile** (the Appendix), where it is stated as SHOULD and
+RECOMMENDED. None of it is deleted; it stops being a barrier to conformance.
 
 ---
 
@@ -871,6 +871,10 @@ their mechanism is not required for conformance.
 **Action Ledger** *(Profile)* — the write-ahead record covering irreversible
 operations; entries append before execution and resolve after (OP-015).
 
+**Closure** *(Profile)* — what follows a normal close: the credential revoked
+at the close signal, then the Sleep, Endure and Integrity phases, the
+credential artifact removed last (OP-022).
+
 **Closure Payload** *(Profile)* — cognition's output when an Operator ends a
 conversation, and its instrument of coherence across conversations (OP-009(d)).
 
@@ -895,6 +899,10 @@ condition may weaken one, and the set is closed (§4).
 **Drift** *(Profile)* — unauthorized divergence from the entity's authorized
 state, in three categories: identity, semantic, and evolutionary (OP-004).
 
+**Endure Protocol** *(Profile)* — how structural content changes: a proposal,
+its authorization and the staged commit, executed in the Closure's Endure
+phase. An Operator's own structural act goes through it too (OP-011, OP-012).
+
 **Entity** — an agent, in the broad sense, whose identity, authority and
 boundaries are verifiable from its own portable state: its identity is its
 Entity Store and the chain in it (OC-003, OC-004), not the model it runs on.
@@ -905,6 +913,9 @@ and integrity content. Portable and host-agnostic (OC-003).
 **Evolution proposal** — an inert record of proposed structural change.
 Cognition may originate one at any time; originating one changes nothing, and a
 proposal commits only under a valid Operator authorization (OC-001(b), OP-011).
+
+**First Activation Protocol (FAP)** *(Profile)* — the one-time establishment
+of an entity on an empty store, ending in the Genesis Anchor (OP-017).
 
 **Genesis Anchor** — the record of the entity's complete structural state at
 first activation, written once and never modified; the root of the integrity
@@ -969,10 +980,9 @@ manifest-valid (OC-008(c)).
 **Skill Index** — the session-scoped list built at start from verified structural
 content; admission to it is what makes a skill executable (OC-008(c)).
 
-**Sleep** *(Profile)* — the maintenance stage between session close and removal
-of the credential artifact: commit execution, garbage collection when an
-Operator leaves a conversation, and consolidation when the conversation ends
-with a Closure Payload (OP-022).
+**Sleep** *(Profile)* — the Closure's memory phase: consolidation of the
+Closure Payload, the promotions the Operator authorized, and garbage collection
+when an Operator leaves a conversation (OP-022).
 
 **Standing grant** — an Operator authorization bounded simultaneously by expiry,
 commit budget and declared scope, under which in-scope proposals commit with no
@@ -1024,7 +1034,7 @@ and RECOMMENDED, describing mechanism rather than guarantee, in eight sections:
 | 4 | **Memory** — conversations and their memory, context-window thresholds | OP-009 – OP-010 |
 | 5 | **Evolution** — the proposal, the staged commit pipeline | OP-011 – OP-012 |
 | 6 | **Execution** — gate order, execution modes, the Action Ledger, operational rules | OP-013 – OP-016 |
-| 7 | **Lifecycle** — first activation, crash recovery, start cost, the credential, session close, Sleep, decommission | OP-017 – OP-023 |
+| 7 | **Lifecycle** — first activation, crash recovery, start cost, the credential, session close, the Closure, decommission | OP-017 – OP-023 |
 | 8 | **Reference architecture in operation** — operation ownership | OP-024 |
 
 Every Profile rule names the invariant it serves, so that an implementer can see

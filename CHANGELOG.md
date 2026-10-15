@@ -81,6 +81,26 @@ The conformance suite carries its own version line; a claim names both, as in
   content informs cognition as what the entity is, authorized by commit,
   not as knowledge it acquired. The kernel is untouched. Prompted by
   fsp-ref's Phase 7 (its G25).
+- The Profile's **Sleep becomes the Closure**, in three phases with one
+  authority each (ADR 0004). OP-022 ran consolidation, garbage collection
+  and commit execution as one stage "under integrity authority", against
+  OP-024, which gives the first two to the memory path; and each step had
+  its own condition, so a reader had to work out which a close ran — the
+  reference implementation promoted memory in a Sleep that was to commit
+  only. The Closure begins when the integrity path revokes the credential
+  at the close signal, then runs **Sleep** (memory: consolidation,
+  authorized promotions, garbage collection), **Endure** (integrity: the
+  queued commits) and **Integrity** (drift from the digest, the completion
+  record, the credential artifact removed last), each skipped when it has
+  nothing to do but the last. The evolution protocol of OP-011 and OP-012
+  is named the **Endure Protocol**, and an Operator's own structural act
+  goes through it as a proposal with its approval. A promotion is
+  authorized when the conversation ends, before the Closure, and promoted
+  in its Sleep, or not at all: a request authorized later had no Sleep to
+  be promoted in. OP-017 names the **First Activation Protocol**. OP-005,
+  OP-009, OP-010, OP-011(c), OP-018, OP-021 and OP-023 follow, and the
+  Core's glossary gains Closure, Endure Protocol and FAP. The kernel and
+  the suite are untouched.
 
 **Conformance suite**
 
