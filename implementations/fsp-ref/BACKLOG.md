@@ -8,12 +8,11 @@ done is in [CHANGELOG.md](CHANGELOG.md).
 ## 1. Phases
 
 Each phase ends with `run.py --only …` green on its invariants
-([AGENTS.md](AGENTS.md)). Phases 0–5, 6a, 6b, 7 and 8a are done; 8b is in
-four steps.
+([AGENTS.md](AGENTS.md)). Phases 0–5, 6a, 6b, 7, 8a and 8b-1 are done; 8b
+is in four steps.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **8b-1** | the process holding the session and the line REPL (D92, D93): `bin/fsp run`, `holder` and the `flock` on `CREDENTIAL` (D25), suspend on a signal or the end of input (D19); the commands of §6.2 whose function exists; the pending notices and the transcript at open | — |
 | **8b-2** | rollover (§6.3); the rest of the review (D52): `fsp review` and `/review`, approval mid-session triggering a rollover, the review at `/exit` and before the first stimulus, the pending count in the UI, the entity told past the pending cap, proposals a window committed shown in the review; `/allow` and `/deny`; the proposal op for structural parameters | — |
 | **8b-3** | the Operator Channel's prompts in the UI: a hold's four answers (D66), *allow for this session*, the prompt at the boundary (D74) | — |
 | **8b-4** | preemption and queueing (OP-002(a)(b)(c)); `/compact`; OP-010's thresholds and the restart they cause, on rollover's mechanism; the token estimate calibrated by `prompt_eval_count` (D88) | — |
@@ -26,6 +25,12 @@ After that: a test entity on Ollama, operated for days, measuring what
 
 ### Carried into the phases
 
+- **Phase 8b-2 — `/exit` with no stimulus since the last clear.**
+  `context.assemble` raises when the transcript has no turn, so the
+  Closure Payload's emission (D91) fails with an exception, not a
+  refusal, and the UI takes it as a crash. A cycle always has its
+  stimulus; the closure need not. To decide: assemble the closure
+  without a current turn, or refuse the exit (`closure-emission`).
 - **Phase 8b-2 — a proposal op for structural parameters.** The window
   category `parameters` exists and no op writes `config.json`, so
   `always_loaded` keeps its default (D82). The op checks what it writes:

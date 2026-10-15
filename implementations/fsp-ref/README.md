@@ -24,8 +24,10 @@ Operator's authorization and its ledger, the Sleep after every close and its
 re-run after a crash, `/exit` with a Closure Payload, `/new`, `/resume` and
 `/inject`. So is cognition without a UI: the inference channel to a local
 Ollama or a declared fake, context assembled by priority within a budget,
-the cycle and its chain, and the Closure Payload emitted by the model. The
-live session and the chat are not.
+the cycle and its chain, and the Closure Payload emitted by the model. So
+is the live session: `bin/fsp run`, a line REPL whose process holds the
+session and suspends it on a signal or the end of input. Rollover, the
+review in the chat and the Operator Channel's prompts are not.
 
 Python 3.10+, standard library only, Linux or macOS.
 
@@ -33,6 +35,7 @@ Python 3.10+, standard library only, Linux or macOS.
 python3 -m unittest discover -s tests          # the implementation's own tests
 ./obec-adapter lifecycle init --store /tmp/S --operator op-1
 ./obec-adapter lifecycle verify --store /tmp/S
+cd ~/project && /path/to/fsp-ref/bin/fsp run --store /tmp/S   # the chat; ~/project is the workspace
 ```
 
 The adapter implements the [conformance adapter contract](../../conformance/ADAPTER.md)
@@ -53,7 +56,7 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/chain.py` | the Genesis Anchor, chain entries, `HEAD` |
 | `fsp/verify.py` | verification, returning findings |
 | `fsp/sil.py` | the integrity log, first activation, bindings, the passive signal, the commit pipeline |
-| `fsp/lifecycle.py` | the gated start, the live session, close, revocation, decommission |
+| `fsp/lifecycle.py` | the gated start, the live session and the process holding it, suspend, close, revocation, decommission |
 | `fsp/operator.py` | the Operator's acts: bindings, the workspace, approvals, windows |
 | `fsp/proposals.py` | proposals, the authorization state, the commit of a proposal |
 | `fsp/exec.py` | the native primitives `file_read`, `file_write`, `file_list` and `http_fetch`, inside the workspace and outside the store, and skills under the watchdog |
@@ -72,5 +75,6 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/clock.py` | the clock, and the one windows are judged by, which a test build can advance |
 | `fsp/operations.py` | the operations the code has, and an attempted write through each |
 | `fsp/describe.py` | introspection for `describe`, generated from the tables the code runs on |
+| `fsp/ui.py`, `bin/fsp` | `fsp run`: the line REPL and its `/…` commands |
 | `fsp/adapter.py`, `obec-adapter` | the conformance adapter |
 | `fsp_testing/` | test builds only: fault injection, the start's hooks, the fixture skill |

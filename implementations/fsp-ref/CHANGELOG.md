@@ -11,6 +11,19 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The live session and the line REPL** (2026-10-15, D92, D93).
+  `lifecycle.start(hold=True)` names the process as `holder` and takes
+  the credential's lock before the session is recorded; `suspend` ends
+  the session the process holds, with the skills it runs, and no Sleep.
+  `bin/fsp run` opens a session from the project's folder, refusing one
+  D30 refuses, and reads the Operator's lines on the main thread while
+  every act runs on a worker; a signal suspends under the store's lock
+  and exits holding it, and end of input suspends too. The commands of
+  §6.2 whose function exists are wired; the rest say they are not
+  available yet. This closes step 8b-1. The UI exposed a defect from
+  8a: `/exit` with no stimulus since the last clear raises in context
+  assembly instead of refusing, now in the BACKLOG for 8b-2.
+
 - **The live session and the line REPL designed** (2026-10-15, D92,
   D93). Phase 8b is split into four steps, since its pieces depend on
   each other: the process and the REPL first, then rollover and the

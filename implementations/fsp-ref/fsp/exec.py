@@ -14,6 +14,7 @@ import signal
 import socket
 import ssl
 import subprocess
+import threading
 import time
 from urllib.parse import urljoin, urlsplit
 
@@ -435,6 +436,22 @@ def _end_group(pid):
         pass
 
 
+# The process groups of the skills running now, which a suspend ends (D92).
+_RUNNING = set()
+_RUNNING_LOCK = threading.Lock()
+
+
+def end_running() -> int:
+    """End the group of every skill running and forget them (D92, D51).
+    Returns how many."""
+    with _RUNNING_LOCK:
+        pids = list(_RUNNING)
+        _RUNNING.clear()
+    for pid in pids:
+        _end_group(pid)
+    return len(pids)
+
+
 def _run(proc, timeout, launch):
     """Read the output of ``proc`` as it arrives, keeping ``OUTPUT_CAP`` bytes of
     each stream, until ``launch + timeout``; end its group if that comes first,
@@ -687,11 +704,15 @@ def invoke_skill(root, name, target=None, args=None):
         except OSError as e:
             launch_error = str(e)
         else:
+            with _RUNNING_LOCK:
+                _RUNNING.add(proc.pid)
             launch = time.monotonic()
             try:
                 out, err, outcome, reaped = _run(proc, timeout, launch)
             finally:
                 _end_group(proc.pid)
+                with _RUNNING_LOCK:
+                    _RUNNING.discard(proc.pid)
 
         with store.write_lock():
             if launch_error is not None:

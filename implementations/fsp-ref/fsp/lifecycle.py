@@ -16,7 +16,7 @@ from . import chain, clock, config, ledger, model, sil, sleep
 from . import manifest as skill_manifest
 from .digest import canonical
 from .sil import WRITER, COMMITTER, Refused, log_append
-from .store import INTEGRITY, STRUCTURAL, Store
+from .store import INTEGRITY, STRUCTURAL, LockUnavailable, Store
 from .verify import store_state, verify
 
 CREDENTIAL = "CREDENTIAL"
@@ -42,6 +42,20 @@ class CannotStart(Exception):
     """No entity to start: absent, foreign or never activated."""
 
 
+class Holder:
+    """The credential's lock, held by the process whose session it is
+    (D92). ``release()`` unlocks and closes it, once."""
+
+    def __init__(self, store: Store, fd: int):
+        self._store = store
+        self._fd = fd
+
+    def release(self):
+        fd, self._fd = self._fd, None
+        if fd is not None:
+            self._store.release_lock(fd)
+
+
 class StartResult:
     def __init__(self):
         self.outcome = None  # accepted | aborted | refused
@@ -53,6 +67,7 @@ class StartResult:
         self.refusal = None
         self.log_records = []
         self.excluded_skills = []
+        self.holder = None
 
     def gate(self, name, outcome, **extra):
         g = {"gate": name, "outcome": outcome, "rule": RULE[name]}
@@ -136,7 +151,7 @@ def _read_credential(store: Store):
 # -- the start (OC-010) ---------------------------------------------------------
 
 
-def start(root: str, *, binding=None) -> StartResult:
+def start(root: str, *, binding=None, hold=False) -> StartResult:
     root = os.path.abspath(root)
     state = store_state(root)
     if state != "active":
@@ -378,10 +393,21 @@ def start(root: str, *, binding=None) -> StartResult:
         sessions["last_session"] += 1
         session = "s-%d" % sessions["last_session"]
         cred = {"session": session, "issued_at": clock.iso(), "binding": acting}
+        if hold:
+            cred["holder"] = {"pid": os.getpid()}
         if not store.create_exclusive(
             INTEGRITY, CREDENTIAL, canonical(cred), writer=WRITER
         ):
             return abort("crash-recovery", "a credential appeared during the start")
+        if hold:
+            try:
+                fd = store.hold_lock(CREDENTIAL)
+            except LockUnavailable:
+                fd = None
+            if fd is None:
+                _drop_credential(store)
+                return abort("crash-recovery", "credential-lock")
+            res.holder = Holder(store, fd)
         sessions["open_session"] = session
         _write_sessions(store, sessions)
         res.log_records.append(
@@ -653,6 +679,55 @@ def revoke_credential(root: str, *, binding=None):
         sessions["open_session"] = None
         _write_sessions(store, sessions)
     return {"log_records": [rec]}
+
+
+def suspend(root: str, *, signal, chain) -> dict:
+    """End the session this process holds, without a Sleep (D92, D83,
+    OP-021(a)): the skills it runs are ended, the session state is cleared,
+    the close is logged and the credential removed. A credential another
+    process holds is left alone."""
+    from . import exec as execution  # imported here to avoid an import cycle
+
+    store = Store(root)
+    with store.write_lock():
+        cred = _read_credential(store)
+        try:
+            sessions = _read_sessions(store)
+        except (OSError, ValueError):
+            sessions = None
+        holder = cred.get("holder") if isinstance(cred, dict) else None
+        if isinstance(holder, dict) and holder.get("pid") == os.getpid():
+            ended = execution.end_running()
+            session = cred["session"]
+            if sessions is not None:
+                sessions["open_session"] = None
+                sessions["consecutive_recoveries"] = 0
+                _write_sessions(store, sessions)
+            binding = cred.get("binding")
+            if not isinstance(binding, str):
+                binding = sil.owner_binding(store)
+            rec = log_append(
+                store,
+                "session-close",
+                rule="OP-021(a)",
+                binding=binding,
+                session=session,
+                mode="suspend",
+                signal=signal,
+                chain=chain,
+                skills_ended=ended,
+            )
+            _drop_credential(store)
+            return {"suspended": True, "session": session, "log_records": [rec]}
+        if cred is None and sessions is not None and sessions["open_session"]:
+            opened = sessions["open_session"]
+            rec = log_append(
+                store, "credential-removed-directly", rule="OC-002(b)", session=opened
+            )
+            sessions["open_session"] = None
+            _write_sessions(store, sessions)
+            return {"suspended": False, "session": opened, "log_records": [rec]}
+        return {"suspended": False, "session": None, "log_records": []}
 
 
 def clear_passive_signal(root: str, *, binding=None):

@@ -615,32 +615,43 @@ def ownership_withdraw(root: str, *, binding=None):
         return {"log_records": [loc["id"]]}
 
 
+def workspace_crossing(store: Store, path: str):
+    """``(ws, limit)`` for the first limit the workspace ``path`` crosses
+    (D30), with ``ws`` its real path, or ``None``. Writes nothing."""
+    ws = os.path.realpath(os.path.abspath(path))
+    limits = [
+        os.path.realpath(store.root),
+        os.path.realpath(os.path.expanduser("~/.fsp")),
+    ]
+    for limit in limits:
+        if _crosses_boundary(ws, limit):
+            return ws, limit
+    return None
+
+
 def set_workspace(root: str, path: str, *, binding=None):
     """Declare the workspace boundary (D28, D30, OC-008(a)(b))."""
     store = Store(root)
     with store.write_lock():
         acting = sil.acting_binding(store, binding)
+        crossing = workspace_crossing(store, path)
+        if crossing is not None:
+            ws, limit = crossing
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-008(b)",
+                binding=acting,
+                check="workspace-boundary",
+                detail="workspace %r crosses boundary %r" % (ws, limit),
+            )
+            raise Refused(
+                "workspace-boundary",
+                "OC-008(b)",
+                "workspace %r crosses boundary %r" % (ws, limit),
+                [rec],
+            )
         ws = os.path.realpath(os.path.abspath(path))
-        limits = [
-            os.path.realpath(store.root),
-            os.path.realpath(os.path.expanduser("~/.fsp")),
-        ]
-        for limit in limits:
-            if _crosses_boundary(ws, limit):
-                rec = log_append(
-                    store,
-                    "refusal",
-                    rule="OC-008(b)",
-                    binding=acting,
-                    check="workspace-boundary",
-                    detail="workspace %r crosses boundary %r" % (ws, limit),
-                )
-                raise Refused(
-                    "workspace-boundary",
-                    "OC-008(b)",
-                    "workspace %r crosses boundary %r" % (ws, limit),
-                    [rec],
-                )
         act = sil.operator_act(
             store, "set-workspace", binding=acting, rule="OC-008(a)", workspace=ws
         )

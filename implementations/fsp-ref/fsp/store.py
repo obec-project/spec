@@ -547,6 +547,29 @@ class Store:
         finally:
             os.close(fd)
 
+    def hold_lock(self, relpath):
+        """Take the flock on the existing file ``relpath`` and keep it (D92):
+        the open descriptor, or ``None`` if another process holds the lock.
+        ``LockUnavailable`` if the filesystem will not say. The caller holds
+        the write lock, and ends the hold with ``release_lock``."""
+        fd = os.open(self.path(relpath), os.O_RDWR)
+        try:
+            taken = flock_exclusive(fd, blocking=False)
+        except BaseException:
+            os.close(fd)
+            raise
+        if not taken:
+            os.close(fd)
+            return None
+        return fd
+
+    def release_lock(self, fd: int) -> None:
+        """Unlock and close a descriptor ``hold_lock`` returned."""
+        try:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        finally:
+            os.close(fd)
+
     def destroy(self, *, writer) -> None:
         """Remove the whole store: decommission with ``destroy`` (OP-023)."""
         if writer != OWNER[INTEGRITY][0]:
