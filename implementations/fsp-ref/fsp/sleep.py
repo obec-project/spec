@@ -14,9 +14,11 @@ def run(store: Store, session, *, rerun=False):
 
     The stages are the consolidation of a Closure Payload (D84), the garbage
     collection when the session's records end the conversation, which keeps
-    everything (D84, OP-009(h)), and promotion (D81): each pending request the
-    semantic ledger does not name yet goes through ``mil.promote``. A refused
-    promotion is recorded and the Sleep goes on; any other failure propagates.
+    everything (D84, OP-009(h)), and promotion (D81): each request of the
+    payload consolidated that the semantic ledger does not name yet goes
+    through ``mil.promote``, and with no payload nothing is promoted (D80). A
+    refused promotion is recorded and the Sleep goes on; any other failure
+    propagates.
     ``sleep-complete`` names whether this is a re-run, what was promoted and
     refused, the payload consolidated and the digest of the Resumption Record.
     The log checkpoint belongs to the Integrity phase (D83).
@@ -40,8 +42,11 @@ def run(store: Store, session, *, rerun=False):
     }
     promoted = []
     refused = []
+    payload_id = consolidated["closure"] if consolidated else None
     for request in mil.pending_promotions(store):
         pid = request["id"]
+        if payload_id is None or request.get("closure") != payload_id:
+            continue
         if pid in done:
             continue
         try:

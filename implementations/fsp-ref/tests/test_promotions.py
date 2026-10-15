@@ -137,8 +137,18 @@ class PromotionTests(TempDirTest):
         self.assertEqual(ctx.exception.check, "promotion-unknown")
 
     def test_the_review_lists_undecided_promotions(self):
-        a = self.request()
-        b = self.request(slug="other")
+        promotion = {
+            "slug": "short answers",
+            "category": "guidance",
+            "content": "The Operator prefers short answers.",
+        }
+        payload = {
+            "consolidation": "We talked.",
+            "working_set": [],
+            "message": "Next.",
+            "promotions": [promotion, {**promotion, "slug": "other"}],
+        }
+        a, b = operator.record_closure(self.S, payload)["requests"]
         operator.reject_promotion(self.S, a)
         listed = operator.review_list(self.S)["promotions"]
         self.assertEqual([p["promotion"] for p in listed], [b])

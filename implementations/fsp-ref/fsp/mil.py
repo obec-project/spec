@@ -1180,7 +1180,8 @@ def check_closure_payload(store: Store, session, payload) -> None:
     pointer-map limit (OP-009(e)), the working set against the latest records
     in the conversation's scope (OP-009(c)), then the probes on the
     consolidation and the message (OC-002(d)). The promotions' own checks and
-    probes run at the Sleep. Called with the store lock held."""
+    probes run when their requests are recorded (D80). Called with the store
+    lock held."""
 
     def refuse(rule, check, detail, **extra):
         rec = log_append(
@@ -1238,14 +1239,51 @@ def check_closure_payload(store: Store, session, payload) -> None:
             )
 
 
+def record_requests(store: Store, session, closure_id, payload):
+    """Record the promotion requests of a Closure Payload, ``closure_id`` being
+    its session record, and return ``(requests, refused)``: the request ids in
+    index order and the indexes refused (D80, D84). A request already recorded
+    for ``(closure_id, index)`` is reused; a refused one is logged by
+    ``request_promotion`` and skipped. Called with the store lock held."""
+    requests = []
+    refused = []
+    for i, p in enumerate(payload["promotions"]):
+        existing = next(
+            (
+                r["id"]
+                for r in pending_promotions(store)
+                if r.get("closure") == closure_id and r.get("index") == i
+            ),
+            None,
+        )
+        if existing is None:
+            try:
+                existing = request_promotion(
+                    store,
+                    session,
+                    slug=p["slug"],
+                    category=p["category"],
+                    content=p["content"],
+                    supersedes=p.get("supersedes"),
+                    sources=p.get("sources", ()),
+                    closure=closure_id,
+                    index=i,
+                )
+            except Refused:
+                refused.append(i)
+                continue
+        requests.append(existing)
+    return requests, refused
+
+
 def consolidate(store: Store, session):
     """Consolidate the Closure Payload of ``session``, if its records hold one
     (D84), and return what was written, or None. Each thing is written once,
     however many times the Sleep runs: the consolidation as an episodic record
-    naming the payload in ``closure``, each promotion as a request naming the
-    payload and its index, and the Resumption Record, replaced whole. A
-    refused promotion is logged and skipped. Then ``conversation-left`` is
-    written if the records lack it. Called with the store lock held."""
+    naming the payload in ``closure``, and the Resumption Record, replaced
+    whole. The payload's promotion requests were recorded with it (D80) and
+    are found, not recorded. Then ``conversation-left`` is written if the
+    records lack it. Called with the store lock held."""
     payloads = [
         r for r in session_records(store, session) if r.get("kind") == "closure-payload"
     ]
@@ -1280,32 +1318,9 @@ def consolidate(store: Store, session):
         store.append(MNEMONIC, EPISODIC, record, writer=WRITER)
         consolidation = record["id"]
 
-    requests = []
-    for i, p in enumerate(payload["promotions"]):
-        existing = next(
-            (
-                r["id"]
-                for r in pending_promotions(store)
-                if r.get("closure") == pid and r.get("index") == i
-            ),
-            None,
-        )
-        if existing is None:
-            try:
-                existing = request_promotion(
-                    store,
-                    session,
-                    slug=p["slug"],
-                    category=p["category"],
-                    content=p["content"],
-                    supersedes=p.get("supersedes"),
-                    sources=p.get("sources", ()),
-                    closure=pid,
-                    index=i,
-                )
-            except Refused:
-                continue
-        requests.append(existing)
+    found = [r for r in pending_promotions(store) if r.get("closure") == pid]
+    found.sort(key=lambda r: r["index"])
+    requests = [r["id"] for r in found]
 
     rr = {
         "conversation": conversation,

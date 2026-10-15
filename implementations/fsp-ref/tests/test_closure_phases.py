@@ -101,7 +101,15 @@ class PhasesTests(Base):
             lifecycle.stop(self.S)
         self.assertEqual(
             seen,
-            [{"session": "s-1", "mode": "normal", "done": [], "consolidated": None}],
+            [
+                {
+                    "session": "s-1",
+                    "mode": "normal",
+                    "done": [],
+                    "ran": [],
+                    "consolidated": None,
+                }
+            ],
         )
 
     def test_the_credential_goes_after_the_checkpoint(self):

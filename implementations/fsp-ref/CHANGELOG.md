@@ -11,6 +11,19 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **Promotions decided before the close** (2026-10-15, D80, D81, D83,
+  D84, D94). `/exit` is now two acts: `operator.record_closure` records
+  the payload and its promotion requests, the probes run on them there,
+  and the session stays live for the Operator to decide them;
+  `operator.close_conversation` closes, refused without a payload. The
+  Sleep promotes only the requests of the payload it consolidates, so a
+  request of an earlier payload, or of a session suspended during the
+  review, is never promoted, and the review lists only the live
+  session's last payload's requests. `exit_conversation` is both in a
+  row. `closing` keeps the phases that ran, so `closure-complete` no
+  longer reads the log, and decommission finishes or undoes an
+  interrupted commit before its Endure, since it needs no start.
+
 - **The Closure in three phases, and the Endure phase** (2026-10-15, D83,
   D94). Every normal close now writes `closing` before any record, logs
   `session-close` and `closure-begin`, and runs Sleep when the conversation

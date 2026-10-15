@@ -940,7 +940,8 @@ def revoke_grant(root: str, *, binding=None):
 
 def review_list(root: str, *, binding=None):
     """Pending evolution proposals, approved or not, in order of origination
-    (D52). Read-only."""
+    (D52), and the undecided promotion requests of the live session's last
+    Closure Payload (D80). Read-only."""
     store = Store(root)
     with store.write_lock():
         try:
@@ -966,6 +967,13 @@ def review_list(root: str, *, binding=None):
                 }
             )
         items.sort(key=lambda it: it["record"])
+        live = lifecycle.live_session(root)
+        payloads = [
+            r["id"]
+            for r in (mil.session_records(store, live) if live else [])
+            if r.get("kind") == "closure-payload"
+        ]
+        closure = payloads[-1] if payloads else None
         promotions = [
             {
                 "promotion": r["id"],
@@ -978,7 +986,9 @@ def review_list(root: str, *, binding=None):
                 "conversation": r["conversation"],
             }
             for r in mil.pending_promotions(store)
-            if r.get("id") not in auth["promotions"]
+            if closure is not None
+            and r.get("closure") == closure
+            and r.get("id") not in auth["promotions"]
         ]
         return {"proposals": items, "promotions": promotions}
 
@@ -1272,11 +1282,12 @@ def clear_transcript(root: str, *, binding=None):
         return {"record": rid, "log_records": [act]}
 
 
-def exit_conversation(root: str, payload, *, binding=None):
-    """End the live session's conversation with a Closure Payload (D84,
-    OP-009(a)(d)(e)). The payload is checked before anything is written; a
-    refusal leaves the session live. Otherwise the act and the payload are
-    recorded, then the session closes and its Sleep consolidates."""
+def record_closure(root: str, payload, *, binding=None):
+    """Record the live session's Closure Payload and its promotion requests,
+    leaving the session live (D80, D84, OP-009(a)(d)(e)). The payload is
+    checked before anything is written; a refusal leaves the session live and
+    records nothing. Otherwise the act, the payload and the requests are
+    recorded under one lock; the close is ``close_conversation``'s."""
     store = Store(root)
     with store.write_lock():
         acting = sil.acting_binding(store, binding)
@@ -1288,8 +1299,56 @@ def exit_conversation(root: str, payload, *, binding=None):
         rid = mil.save_session(
             store, session, "closure-payload", payload=payload, act=act
         )
+        requests, refused = mil.record_requests(store, session, rid, payload)
+        return {
+            "session": session,
+            "closure": rid,
+            "requests": requests,
+            "refused": refused,
+            "log_records": [act],
+        }
+
+
+def close_conversation(root: str, *, binding=None):
+    """Close the live session whose conversation ended with a recorded Closure
+    Payload and run its Closure (D83, D84, OP-009(d)). A session whose records
+    hold no payload is refused and stays live."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        session = lifecycle.require_session(root, "exit")
+        payloads = [
+            r
+            for r in mil.session_records(store, session)
+            if r.get("kind") == "closure-payload"
+        ]
+        if not payloads:
+            detail = "the conversation ends with a Closure Payload; none is recorded"
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OP-009(d)",
+                binding=acting,
+                session=session,
+                check="closure-missing",
+                detail=detail,
+            )
+            raise Refused("closure-missing", "OP-009(d)", detail, [rec])
         out = lifecycle.close_session(store, session, acting)
-        return {**out, "closure": rid, "log_records": [act] + out["log_records"]}
+        return {**out, "closure": payloads[-1]["id"], "log_records": out["log_records"]}
+
+
+def exit_conversation(root: str, payload, *, binding=None):
+    """End the live session's conversation with a Closure Payload (D84,
+    OP-009(a)(d)(e)): ``record_closure``, then ``close_conversation``. A
+    refusal of the payload leaves the session live."""
+    recorded = record_closure(root, payload, binding=binding)
+    closed = close_conversation(root, binding=binding)
+    return {
+        **closed,
+        "requests": recorded["requests"],
+        "log_records": recorded["log_records"] + closed["log_records"],
+    }
 
 
 def exit_with_closure(root: str, *, channel=None, binding=None, date=None):

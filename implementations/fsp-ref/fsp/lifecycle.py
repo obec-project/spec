@@ -114,12 +114,15 @@ def _closing_shape(c):
     """Whether ``c`` is a ``closing`` marker of ``sessions.json`` (D83)."""
     return c is None or (
         isinstance(c, dict)
-        and set(c) == {"session", "mode", "done", "consolidated"}
+        and set(c) == {"session", "mode", "done", "ran", "consolidated"}
         and isinstance(c["session"], str)
         and c["mode"] in MODES
         and isinstance(c["done"], list)
         and all(p in PHASES for p in c["done"])
         and len(set(c["done"])) == len(c["done"])
+        and isinstance(c["ran"], list)
+        and all(p in PHASES for p in c["ran"])
+        and len(set(c["ran"])) == len(c["ran"])
         and (c["consolidated"] is None or isinstance(c["consolidated"], dict))
     )
 
@@ -663,6 +666,7 @@ def close_session(store: Store, session, acting, *, mode="normal"):
         "session": session,
         "mode": mode,
         "done": [],
+        "ran": [],
         "consolidated": None,
     }
     _write_sessions(store, sessions)
@@ -685,28 +689,6 @@ def close_session(store: Store, session, acting, *, mode="normal"):
         "endure": out["endure"],
         "consolidation": out["consolidation"],
     }
-
-
-def _phases_ran(store: Store, session):
-    """The phases of ``session``'s Closure that ran, not skipped, in order,
-    read from the records the Closure logged after its ``closure-begin``. The
-    Integrity phase is the one being completed (D83)."""
-    records = observe_log(store.root)["records"]
-    begin = max(
-        (
-            i
-            for i, r in enumerate(records)
-            if r.get("kind") == "closure-begin" and r.get("session") == session
-        ),
-        default=-1,
-    )
-    kinds = {r.get("kind") for r in records[begin + 1 :] if r.get("session") == session}
-    ran = [
-        phase
-        for phase, kind in (("sleep", "sleep-complete"), ("endure", "endure-complete"))
-        if kind in kinds
-    ]
-    return ran + ["integrity"]
 
 
 def _endure(store: Store, session):
@@ -745,15 +727,18 @@ def _run_closure(store: Store, acting, *, rerun=False):
         "consolidation": None,
     }
 
-    def finish(phase):
+    def finish(phase, ran=True):
         closing["done"].append(phase)
+        if ran:
+            closing["ran"].append(phase)
         _write_sessions(store, sessions)
 
     if "sleep" not in closing["done"]:
-        if any(
+        sleeps = any(
             r.get("kind") in ("closure-payload", "conversation-left")
             for r in mil.session_records(store, session)
-        ):
+        )
+        if sleeps:
             slept = sleep.run(store, session, rerun=rerun)
             out["log_records"] += slept["log_records"]
             out["sleep"] = {"promoted": slept["promoted"], "refused": slept["refused"]}
@@ -762,14 +747,14 @@ def _run_closure(store: Store, acting, *, rerun=False):
                 "closure": slept["closure"],
                 "resumption": slept["resumption"],
             }
-        finish("sleep")
+        finish("sleep", sleeps)
 
     if "endure" not in closing["done"]:
-        ran = _endure(store, session)
-        if ran is not None:
-            out["endure"], record = ran
+        endured = _endure(store, session)
+        if endured is not None:
+            out["endure"], record = endured
             out["log_records"].append(record)
-        finish("endure")
+        finish("endure", endured is not None)
 
     if "integrity" not in closing["done"]:
         consolidated = closing["consolidated"] or {}
@@ -779,13 +764,13 @@ def _run_closure(store: Store, acting, *, rerun=False):
             rule="OP-022(a)",
             session=session,
             mode=closing["mode"],
-            phases=_phases_ran(store, session),
+            phases=closing["ran"] + ["integrity"],
             closure=consolidated.get("closure"),
             resumption=consolidated.get("resumption"),
         )
         sil.write_log_checkpoint(store, loc)
         out["log_records"].append(loc["id"])
-        finish("integrity")
+        finish("integrity", False)
     if store.exists(CREDENTIAL):
         _drop_credential(store)
     sessions["closing"] = None
@@ -894,6 +879,8 @@ def clear_passive_signal(root: str, *, binding=None):
 def decommission(root: str, disposition: str, *, binding=None):
     """Close the chain with a terminal entry, then keep the store as an
     archive or destroy it (OP-023, OC-002(c))."""
+    from . import proposals  # imported here to avoid an import cycle
+
     if disposition not in ("archive", "destroy"):
         raise Refused("disposition", "OC-002(c)", "disposition is archive or destroy")
     store = Store(root)
@@ -951,6 +938,7 @@ def decommission(root: str, disposition: str, *, binding=None):
                     reason="decommission",
                 )
             )
+        records += proposals.resolve_interrupted(store)
         ran = _endure(store, revoked)
         if ran is not None:
             records.append(ran[1])

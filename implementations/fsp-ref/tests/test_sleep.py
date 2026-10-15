@@ -12,7 +12,13 @@ from fsp import lifecycle, mil, operator, sil
 from fsp.store import INTEGRITY, Store
 
 
-MARKER = {"session": "s-1", "mode": "normal", "done": [], "consolidated": None}
+MARKER = {
+    "session": "s-1",
+    "mode": "normal",
+    "done": [],
+    "ran": [],
+    "consolidated": None,
+}
 
 
 class SleepTests(TempDirTest):
@@ -23,15 +29,29 @@ class SleepTests(TempDirTest):
         self.store = Store(self.S)
         lifecycle.start(self.S)
 
-    def request(self, **kw):
-        fields = {
-            "slug": "short answers",
-            "category": "guidance",
-            "content": "The Operator prefers short answers.",
-            **kw,
+    def payload(self, *promotions):
+        return {
+            "consolidation": "We planned the release.",
+            "working_set": [],
+            "message": "Next: tag it.",
+            "promotions": list(promotions),
         }
-        with self.store.write_lock():
-            return mil.request_promotion(self.store, "s-1", **fields)
+
+    def requests(self, *overrides):
+        promotions = [
+            {
+                "slug": "short answers",
+                "category": "guidance",
+                "content": "The Operator prefers short answers.",
+                **kw,
+            }
+            for kw in overrides
+        ]
+        return operator.record_closure(self.S, self.payload(*promotions))["requests"]
+
+    def request(self, **kw):
+        (pid,) = self.requests(kw)
+        return pid
 
     def approved(self, **kw):
         pid = self.request(**kw)
@@ -65,7 +85,7 @@ class SleepTests(TempDirTest):
 
     def test_the_sleep_promotes_authorized_requests(self):
         self.approved()
-        out = operator.new_conversation(self.S)
+        out = operator.close_conversation(self.S)
         records = mil.semantic_records(self.store)
         self.assertEqual(len(records), 1)
         self.assertEqual(out["sleep"]["promoted"], [records[0]["id"]])
@@ -75,15 +95,18 @@ class SleepTests(TempDirTest):
 
     def test_an_unauthorized_request_stays_pending(self):
         self.request()
-        out = operator.new_conversation(self.S)
+        out = operator.close_conversation(self.S)
         self.assertEqual(out["sleep"], {"promoted": [], "refused": []})
         self.assertEqual(mil.semantic_records(self.store), [])
         self.assertEqual(sil.semantic_ledger(self.store), [])
 
     def test_a_refused_promotion_does_not_stop_the_sleep(self):
-        first = self.approved(slug="first", supersedes="S-0000")
-        self.approved(slug="second")
-        out = operator.new_conversation(self.S)
+        first, second = self.requests(
+            {"slug": "first", "supersedes": "S-0000"}, {"slug": "second"}
+        )
+        operator.approve_promotion(self.S, first)
+        operator.approve_promotion(self.S, second)
+        out = operator.close_conversation(self.S)
         self.assertEqual(out["sleep"]["refused"], [first])
         self.assertEqual(len(out["sleep"]["promoted"]), 1)
         self.assertEqual(len(self.log("sleep-complete")), 1)
@@ -91,11 +114,19 @@ class SleepTests(TempDirTest):
 
     def test_a_request_is_promoted_once_across_sleeps(self):
         self.approved()
-        operator.new_conversation(self.S)
+        operator.close_conversation(self.S)
         lifecycle.start(self.S)
         out = lifecycle.stop(self.S)
         self.assertEqual(out["sleep"]["promoted"], [])
         self.assertEqual(len(mil.semantic_records(self.store)), 1)
+
+    def test_a_request_of_an_earlier_payload_is_not_promoted(self):
+        self.approved()
+        operator.record_closure(self.S, self.payload())
+        out = operator.close_conversation(self.S)
+        self.assertEqual(out["sleep"], {"promoted": [], "refused": []})
+        self.assertEqual(mil.semantic_records(self.store), [])
+        self.assertEqual(sil.semantic_ledger(self.store), [])
 
     def test_the_session_is_closed_before_the_sleep(self):
         self.approved()
@@ -105,7 +136,7 @@ class SleepTests(TempDirTest):
             seen.append((self.sessions(), self.store.exists(lifecycle.CREDENTIAL)))
 
         with mock.patch.object(mil, "promote", side_effect=capture):
-            operator.new_conversation(self.S)
+            operator.close_conversation(self.S)
         (sessions, credential) = seen[0]
         self.assertIsNone(sessions["open_session"])
         self.assertEqual(sessions["closing"]["session"], "s-1")
@@ -115,7 +146,7 @@ class SleepTests(TempDirTest):
         self.approved()
         with mock.patch.object(mil, "promote", side_effect=OSError("crash")):
             with self.assertRaises(OSError):
-                operator.new_conversation(self.S)
+                operator.close_conversation(self.S)
         self.assertTrue(self.store.exists(lifecycle.CREDENTIAL))
         self.assertEqual(self.sessions()["closing"]["session"], "s-1")
         res = lifecycle.start(self.S)
