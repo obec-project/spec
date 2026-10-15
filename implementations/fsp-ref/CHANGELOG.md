@@ -11,6 +11,22 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The Closure in three phases, and the Endure phase** (2026-10-15, D83,
+  D94). Every normal close now writes `closing` before any record, logs
+  `session-close` and `closure-begin`, and runs Sleep when the conversation
+  ends, Endure when an authorized proposal waits, and Integrity always,
+  which logs `closure-complete`, writes the checkpoint, removes the
+  credential and clears `closing` last; a crash resumes at the first phase
+  not done, and the seeding of the next conversation reads
+  `closure-complete`. The Endure phase commits every authorized proposal in
+  order of origination, drops one refused for its content with a notice,
+  and notifies a commit under a window. A commit marks its proposal before
+  `HEAD` can move, and the start finishes or undoes the mark before the
+  Closure resumes. `lifecycle.rollover` closes for a rollover; decommission
+  runs Endure before its terminal entry. Still to do in 8b-2: the phases
+  that ran are read from the log, a cost that grows with the log, and a
+  decommission with no start after a crash does not resolve the mark.
+
 - **The Closure, rollover, the review and the Operator's structural acts
   designed** (2026-10-15, D83, D94–D98; D53, D80, D81 revised; ADR 0004).
   Every normal close is followed by a Closure of three phases with one owner

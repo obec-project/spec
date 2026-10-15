@@ -701,6 +701,52 @@ def _rules_change(store, head, changes, ops, session):
     return canonical(rules)
 
 
+def _window_open(grant, now_iso: str) -> bool:
+    """Whether ``grant`` is open and neither expired nor exhausted at
+    ``now_iso``, without closing it (D59)."""
+    if grant.get("state") != "open":
+        return False
+    if grant.get("expires") and grant["expires"] <= now_iso:
+        return False
+    return grant.get("used", 0) < grant.get("budget", 0)
+
+
+def _authorization(store: Store, auth: dict, prop: dict, now: datetime, *, proposal_id):
+    """The authorization that covers ``prop`` now: ``(record, authorization,
+    grant)`` — ``grant`` the covering window, or ``None`` for an approval — or
+    ``None`` when nothing covers it. An approval naming the proposal's digest
+    comes first, then the first open window over every category the proposal
+    touches (D50, D58, D59). Writes and logs nothing."""
+    appr = auth.get("approvals", {}).get(proposal_id)
+    if appr is not None and appr.get("digest") == prop["digest"]:
+        return appr["record"], appr.get("authorization"), None
+    categories = set(CATEGORIES.get(op.get("op")) for op in prop["ops"])
+    if "persona" in categories or None in categories:
+        return None
+    now_iso = clock.iso(now)
+    for g in auth.get("grants", []):
+        if _window_open(g, now_iso) and all(
+            covers(g.get("scope", ""), cat) for cat in categories
+        ):
+            return g["id"], g.get("authorization"), g
+    return None
+
+
+def _refusal_detail(auth: dict, prop: dict, closed_now: list) -> str:
+    """Why nothing authorizes ``prop``, as ``commit`` refuses it (D58)."""
+    categories = set(CATEGORIES.get(op.get("op")) for op in prop["ops"])
+    reasons = ["no per-proposal approval"]
+    if closed_now:
+        reasons.append("windows closed: %s" % ", ".join(closed_now))
+    if "persona" in categories:
+        reasons.append("persona cannot be authorized by a window")
+    elif any(g.get("state") == "open" for g in auth.get("grants", [])):
+        reasons.append("no open window covers categories %s" % sorted(list(categories)))
+    else:
+        reasons.append("no open window")
+    return "; ".join(reasons)
+
+
 def commit(root: str, proposal_id: str) -> dict:
     """Commit an authorized proposal (D57, D58, OC-001(b))."""
     session = vital.require_entity_session(root, "commit")
@@ -742,120 +788,259 @@ def commit(root: str, proposal_id: str) -> dict:
             )
 
         # Authorization check precedes any content check (D58, D59)
+        now = clock.grant_now(root)
+        closed_now = []
         appr = auth.get("approvals", {}).get(proposal_id)
-        covering_grant = None
-        auth_record = None
-        auth_loc = None
-
-        if appr is not None and appr.get("digest") == prop["digest"]:
-            auth_record = appr["record"]
-            auth_loc = appr.get("authorization")
-        else:
-            now_dt = clock.grant_now(root)
-            closed_now = close_lapsed(store, now_dt, session=session)
+        if not (appr is not None and appr.get("digest") == prop["digest"]):
+            closed_now = close_lapsed(store, now, session=session)
             if closed_now:
                 auth = read_auth(store)
-
-            prop_categories = set(CATEGORIES.get(op.get("op")) for op in prop["ops"])
-            can_cover = ("persona" not in prop_categories) and (
-                None not in prop_categories
+                prop = auth["proposals"][proposal_id]
+        if _authorization(store, auth, prop, now, proposal_id=proposal_id) is None:
+            detail = _refusal_detail(auth, prop, closed_now)
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                session=session,
+                check="authorization",
+                detail=detail,
             )
-            if can_cover:
-                for g in auth.get("grants", []):
-                    if g.get("state") == "open":
-                        scope = g.get("scope", "")
-                        if all(covers(scope, cat) for cat in prop_categories):
-                            covering_grant = g
-                            auth_record = g["id"]
-                            auth_loc = g.get("authorization")
-                            break
+            raise Refused("authorization", "OC-001(b)", detail, [rec])
 
-            if auth_record is None:
-                reasons = ["no per-proposal approval"]
-                if closed_now:
-                    reasons.append("windows closed: %s" % ", ".join(closed_now))
-                if "persona" in prop_categories:
-                    reasons.append("persona cannot be authorized by a window")
-                elif any(g.get("state") == "open" for g in auth.get("grants", [])):
-                    reasons.append(
-                        "no open window covers categories %s"
-                        % sorted(list(prop_categories))
-                    )
-                else:
-                    reasons.append("no open window")
-                detail = "; ".join(reasons)
+        return _commit(store, proposal_id, session=session)
+
+
+def _commit(store: Store, proposal_id: str, *, session) -> dict:
+    """The commit of an authorized proposal, with the write lock held (D58,
+    D94): ``commit`` and the Endure phase both call it. The proposal is marked
+    in ``auth.json`` before ``HEAD`` can move (D94)."""
+    auth = read_auth(store)
+    prop = auth.get("proposals", {}).get(proposal_id)
+    authorized = None
+    if prop is not None:
+        authorized = _authorization(
+            store, auth, prop, clock.grant_now(store.root), proposal_id=proposal_id
+        )
+    if authorized is None:
+        detail = "proposal %r has no authorization" % (proposal_id,)
+        rec = log_append(
+            store,
+            "refusal",
+            rule="OC-001(b)",
+            session=session,
+            check="authorization",
+            detail=detail,
+        )
+        raise Refused("authorization", "OC-001(b)", detail, [rec])
+    auth_record, auth_loc, covering_grant = authorized
+
+    changes = {}
+    head = sil.read_head(store)
+    existing_skills = set(store.listdir(chain.gen_relpath(head["entry"]) + "/skills"))
+
+    for op in prop["ops"]:
+        op_name = op["op"]
+        if op_name == "set-persona":
+            changes["persona.md"] = op["content"].encode("utf-8")
+        elif op_name == "install-skill":
+            name = op["name"]
+            if name in existing_skills:
                 rec = log_append(
                     store,
                     "refusal",
                     rule="OC-001(b)",
                     session=session,
-                    check="authorization",
-                    detail=detail,
+                    check="skill-exists",
+                    detail="skill %r already exists" % (name,),
                 )
-                raise Refused("authorization", "OC-001(b)", detail, [rec])
+                raise Refused(
+                    "skill-exists",
+                    "OC-001(b)",
+                    "skill %r already exists" % (name,),
+                    [rec],
+                )
+            for file_path, text in op["files"].items():
+                changes["skills/%s/%s" % (name, file_path)] = text.encode("utf-8")
 
-        changes = {}
-        head = sil.read_head(store)
-        existing_skills = set(
-            store.listdir(chain.gen_relpath(head["entry"]) + "/skills")
-        )
+    rule_ops = [op for op in prop["ops"] if op["op"] in RULE_OPS]
+    if rule_ops:
+        changes["rules.json"] = _rules_change(store, head, changes, rule_ops, session)
 
-        for op in prop["ops"]:
-            op_name = op["op"]
-            if op_name == "set-persona":
-                changes["persona.md"] = op["content"].encode("utf-8")
-            elif op_name == "install-skill":
-                name = op["name"]
-                if name in existing_skills:
-                    rec = log_append(
-                        store,
-                        "refusal",
-                        rule="OC-001(b)",
-                        session=session,
-                        check="skill-exists",
-                        detail="skill %r already exists" % (name,),
-                    )
-                    raise Refused(
-                        "skill-exists",
-                        "OC-001(b)",
-                        "skill %r already exists" % (name,),
-                        [rec],
-                    )
-                for file_path, text in op["files"].items():
-                    changes["skills/%s/%s" % (name, file_path)] = text.encode("utf-8")
-
-        rule_ops = [op for op in prop["ops"] if op["op"] in RULE_OPS]
-        if rule_ops:
-            changes["rules.json"] = _rules_change(
-                store, head, changes, rule_ops, session
-            )
-
+    prop["committing"] = {
+        "entry": head["entry"] + 1,
+        "grant": covering_grant["id"] if covering_grant is not None else None,
+    }
+    write_auth(store, auth)
+    try:
         out = sil.commit_generation(
             store, changes=changes, authorization=auth_loc, session=session
         )
-
-        log_records = [out["log_record"]]
-        if covering_grant is not None:
-            covering_grant["used"] = covering_grant.get("used", 0) + 1
-            if covering_grant["used"] >= covering_grant["budget"]:
-                covering_grant["state"] = "closed"
-                covering_grant["closed"] = "exhausted"
-                rec_closed = log_append(
-                    store,
-                    "grant-closed",
-                    rule="OC-001(b)",
-                    session=session,
-                    grant=covering_grant["id"],
-                    reason="exhausted",
-                )
-                log_records.append(rec_closed)
-
-        auth["proposals"].pop(proposal_id, None)
-        auth["approvals"].pop(proposal_id, None)
+    except Refused:
+        del prop["committing"]
         write_auth(store, auth)
+        raise
 
-        return {
-            "authorization": auth_record,
-            "entry": out["entry"],
-            "log_records": log_records,
-        }
+    log_records = [out["log_record"]]
+    if covering_grant is not None:
+        rec_closed = _spend(store, covering_grant, session)
+        if rec_closed is not None:
+            log_records.append(rec_closed)
+
+    auth["proposals"].pop(proposal_id, None)
+    auth["approvals"].pop(proposal_id, None)
+    write_auth(store, auth)
+
+    return {
+        "authorization": auth_record,
+        "entry": out["entry"],
+        "log_records": log_records,
+    }
+
+
+def _spend(store: Store, grant: dict, session):
+    """Spend one use of ``grant``'s budget and close it when exhausted
+    (D59). Returns the id of the ``grant-closed`` record, or ``None``."""
+    grant["used"] = grant.get("used", 0) + 1
+    if grant["used"] < grant["budget"]:
+        return None
+    grant["state"] = "closed"
+    grant["closed"] = "exhausted"
+    return log_append(
+        store,
+        "grant-closed",
+        rule="OC-001(b)",
+        session=session,
+        grant=grant["id"],
+        reason="exhausted",
+    )
+
+
+def resolve_interrupted(store: Store) -> list:
+    """Finish or undo the commits a crash interrupted, with the write lock
+    held, and return the ids of the records logged (D94). A proposal marked
+    ``committing`` whose entry ``HEAD`` has reached was committed: its
+    bookkeeping is finished as ``commit`` finishes it. Otherwise the mark is
+    cleared and the proposal waits."""
+    auth = read_auth(store)
+    marked = [
+        pid
+        for pid, prop in auth["proposals"].items()
+        if isinstance(prop, dict) and "committing" in prop
+    ]
+    if not marked:
+        return []
+    head_entry = sil.read_head(store)["entry"]
+    records = []
+    for pid in marked:
+        mark = auth["proposals"][pid]["committing"]
+        if not (
+            isinstance(mark, dict)
+            and type(mark.get("entry")) is int
+            and (mark.get("grant") is None or isinstance(mark["grant"], str))
+        ):
+            raise ValueError("commit mark of proposal %r is malformed" % (pid,))
+        if head_entry < mark["entry"]:
+            del auth["proposals"][pid]["committing"]
+            continue
+        grant = None
+        if mark["grant"] is not None:
+            grant = next(
+                (g for g in auth["grants"] if g.get("id") == mark["grant"]), None
+            )
+        if grant is not None:
+            closed = _spend(store, grant, None)
+            if closed is not None:
+                records.append(closed)
+        auth["proposals"].pop(pid)
+        auth["approvals"].pop(pid, None)
+        records.append(
+            log_append(
+                store,
+                "commit-recovered",
+                rule="OC-004(b)",
+                proposal=pid,
+                entry=mark["entry"],
+            )
+        )
+    write_auth(store, auth)
+    return records
+
+
+def _by_origination(auth: dict) -> list:
+    """The ids of the pending proposals, in order of their origination
+    records."""
+    return sorted(
+        auth["proposals"],
+        key=lambda pid: (
+            len(auth["proposals"][pid]["record"]),
+            auth["proposals"][pid]["record"],
+        ),
+    )
+
+
+def endure(store: Store, session) -> dict:
+    """The Endure phase, with the write lock held (D94): commit, in order of
+    origination, every proposal that is authorized. A commit refused for its
+    content drops the proposal and its approval; a proposal that is not
+    authorized waits and logs nothing."""
+    close_lapsed(store, clock.grant_now(store.root), session=session)
+    committed = []
+    dropped = []
+    for pid in _by_origination(read_auth(store)):
+        auth = read_auth(store)
+        prop = auth["proposals"].get(pid)
+        if prop is None:
+            continue
+        now = clock.grant_now(store.root)
+        authorized = _authorization(store, auth, prop, now, proposal_id=pid)
+        if authorized is None:
+            continue
+        window = authorized[2]
+        try:
+            out = _commit(store, pid, session=session)
+        except Refused as e:
+            auth = read_auth(store)
+            auth["proposals"].pop(pid, None)
+            auth["approvals"].pop(pid, None)
+            write_auth(store, auth)
+            fields = {"proposal": pid, "check": e.check, "detail": e.detail}
+            log_append(
+                store,
+                "proposal-dropped",
+                rule="OC-001(b)",
+                session=session,
+                **fields,
+            )
+            lifecycle._notify(store, sil.owner_binding(store), "commit-refused", fields)
+            dropped.append(fields)
+            continue
+        committed.append(
+            {
+                "proposal": pid,
+                "entry": out["entry"],
+                "authorization": out["authorization"],
+            }
+        )
+        if window is not None:
+            lifecycle._notify(
+                store,
+                sil.owner_binding(store),
+                "window-commit",
+                {"proposal": pid, "grant": window["id"], "entry": out["entry"]},
+            )
+    return {"committed": committed, "dropped": dropped}
+
+
+def waiting(store: Store) -> list:
+    """The ids of the proposals the Endure phase would commit now, in order
+    of origination (D94). Writes and logs nothing: a window past its expiry or
+    its budget counts as closed without being closed."""
+    auth = read_auth(store)
+    now = clock.grant_now(store.root)
+    return [
+        pid
+        for pid in _by_origination(auth)
+        if _authorization(store, auth, auth["proposals"][pid], now, proposal_id=pid)
+        is not None
+    ]

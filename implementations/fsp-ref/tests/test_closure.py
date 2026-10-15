@@ -165,7 +165,7 @@ class ClosureTests(TempDirTest):
         lifecycle.stop(self.S)
         lifecycle.start(self.S)
         self.assertEqual(self.log("gc"), [])
-        (complete,) = self.log("sleep-complete")
+        (complete,) = self.log("closure-complete")
         self.assertIsNone(complete["closure"])
         self.assertIsNone(complete["resumption"])
         self.assertEqual(

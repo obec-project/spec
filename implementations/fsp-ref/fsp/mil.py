@@ -1042,7 +1042,7 @@ def _seed(store: Store, session, previous, conversation):
     """Seed the pointer map of the new ``conversation`` from the Resumption
     Record of the conversation ``previous`` left with a Closure Payload, and
     return that conversation, or None (D85, OP-009(e)). The record counts only
-    if the log record the checkpoint locates is the ``sleep-complete`` of
+    if the log record the checkpoint locates is the ``closure-complete`` of
     ``previous`` naming this record's digest; otherwise it is discarded and
     logged. Called with the store lock held."""
     if previous is None or not any(
@@ -1059,7 +1059,7 @@ def _seed(store: Store, session, previous, conversation):
     resumption = rec.get("resumption") if rec is not None else None
     if not (
         rec is not None
-        and rec.get("kind") == "sleep-complete"
+        and rec.get("kind") == "closure-complete"
         and rec.get("session") == previous
         and isinstance(resumption, dict)
         and resumption.get("conversation") == prev

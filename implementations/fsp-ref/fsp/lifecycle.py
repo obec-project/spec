@@ -103,8 +103,25 @@ _NO_SESSIONS = {
     "open_session": None,
     "consecutive_recoveries": 0,
     "ledger_offset": 0,
-    "sleep": None,
+    "closing": None,
 }
+
+PHASES = ("sleep", "endure", "integrity")
+MODES = ("normal", "rollover")
+
+
+def _closing_shape(c):
+    """Whether ``c`` is a ``closing`` marker of ``sessions.json`` (D83)."""
+    return c is None or (
+        isinstance(c, dict)
+        and set(c) == {"session", "mode", "done", "consolidated"}
+        and isinstance(c["session"], str)
+        and c["mode"] in MODES
+        and isinstance(c["done"], list)
+        and all(p in PHASES for p in c["done"])
+        and len(set(c["done"])) == len(c["done"])
+        and (c["consolidated"] is None or isinstance(c["consolidated"], dict))
+    )
 
 
 def _read_sessions(store: Store):
@@ -121,7 +138,7 @@ def _read_sessions(store: Store):
         and isinstance(s["ledger_offset"], int)
         and not isinstance(s["ledger_offset"], bool)
         and s["ledger_offset"] >= 0
-        and (s["sleep"] is None or isinstance(s["sleep"], str))
+        and _closing_shape(s["closing"])
     ):
         raise ValueError("session state has the wrong shape")
     return s
@@ -195,10 +212,10 @@ def start(root: str, *, binding=None, hold=False) -> StartResult:
             return abort("crash-recovery", "session state unreadable: %s" % e)
         residue = verify(root).residue
         cred = _read_credential(store)
-        recover = bool(residue) or sessions["sleep"] is not None
+        recover = bool(residue) or sessions["closing"] is not None
         evidence = {"residue": [r["path"] for r in residue]}
-        if sessions["sleep"] is not None:
-            evidence["sleep"] = sessions["sleep"]
+        if sessions["closing"] is not None:
+            evidence["closing"] = sessions["closing"]["session"]
         if store.exists(CREDENTIAL):
             lock = store.probe_lock(CREDENTIAL) or sil.LOCK_FREE
             holder = cred.get("holder") if isinstance(cred, dict) else None
@@ -349,8 +366,10 @@ def start(root: str, *, binding=None, hold=False) -> StartResult:
                 )
         from . import proposals
 
-        # D59: expired or exhausted windows close here.
+        # D94: a commit a crash interrupted is finished or undone first. D59:
+        # expired or exhausted windows close here.
         try:
+            res.log_records += proposals.resolve_interrupted(store)
             proposals.close_lapsed(store, clock.grant_now(root))
         except (OSError, ValueError) as e:
             return abort(
@@ -358,13 +377,13 @@ def start(root: str, *, binding=None, hold=False) -> StartResult:
             )
         res.gate("authorization-state", "pass")
 
-        # D83: a Sleep a crash interrupted runs again, once the structure and
-        # the authorizations it uses are verified.
-        if sessions["sleep"] is not None:
-            out = sleep.run(store, sessions["sleep"], rerun=True)
+        # D83: a Closure a crash interrupted resumes at the first phase not
+        # done, once the structure and the authorizations it uses are
+        # verified.
+        if sessions["closing"] is not None:
+            out = _run_closure(store, acting, rerun=True)
             res.log_records += out["log_records"]
-            sessions["sleep"] = None
-            _write_sessions(store, sessions)
+            sessions = _read_sessions(store)
 
         # 6. Skill Index build.
         if "index" in forced:
@@ -613,42 +632,165 @@ def require_session(root: str, what: str):
 
 
 def stop(root: str, *, binding=None):
-    """Normal close, then the Sleep (D83, OP-021(a), OP-022). The credential
-    is removed after ``sleep-complete``, and the ``sleep`` marker cleared
-    after it."""
+    """Normal close, then its Closure (D83, OP-021(a), OP-022). The
+    credential is removed in the Integrity phase, after ``closure-complete``,
+    and the ``closing`` marker cleared after it."""
     session = require_session(root, "stop")
     store = Store(root)
     with store.write_lock():
         acting = binding or sil.owner_binding(store)
-        return close_session(store, session, acting)
+        return close_session(store, session, acting, mode="normal")
 
 
-def close_session(store: Store, session, acting):
-    """Close ``session`` normally and run its Sleep (D83, D84). Called with
-    the write lock held."""
+def rollover(root: str, *, binding=None):
+    """Close the session this process holds for a rollover and run its
+    Closure; the caller starts the next session (D94, D9)."""
+    session = require_session(root, "rollover")
+    store = Store(root)
+    with store.write_lock():
+        acting = binding or sil.owner_binding(store)
+        return close_session(store, session, acting, mode="rollover")
+
+
+def close_session(store: Store, session, acting, *, mode="normal"):
+    """Close ``session`` and run its Closure (D83, D84, D94). Called with the
+    write lock held. ``sessions.json`` names the Closure before any record of
+    the close is logged."""
     sessions = _read_sessions(store)
     sessions["open_session"] = None
     sessions["consecutive_recoveries"] = 0
-    sessions["sleep"] = session
+    sessions["closing"] = {
+        "session": session,
+        "mode": mode,
+        "done": [],
+        "consolidated": None,
+    }
     _write_sessions(store, sessions)
-    loc = sil.log_append_located(
+    close = sil.log_append_located(
         store,
         "session-close",
         rule="OP-021(a)",
         binding=acting,
         session=session,
-        mode="normal",
+        mode=mode,
     )
-    out = sleep.run(store, session)
-    _drop_credential(store)
-    sessions["sleep"] = None
-    _write_sessions(store, sessions)
+    begin = log_append(
+        store, "closure-begin", rule="OP-022(a)", session=session, mode=mode
+    )
+    out = _run_closure(store, acting)
     return {
         "session": session,
-        "log_records": [loc["id"]] + out["log_records"],
-        "sleep": {"promoted": out["promoted"], "refused": out["refused"]},
+        "log_records": [close["id"], begin] + out["log_records"],
+        "sleep": out["sleep"],
+        "endure": out["endure"],
         "consolidation": out["consolidation"],
     }
+
+
+def _phases_ran(store: Store, session):
+    """The phases of ``session``'s Closure that ran, not skipped, in order,
+    read from the records the Closure logged after its ``closure-begin``. The
+    Integrity phase is the one being completed (D83)."""
+    records = observe_log(store.root)["records"]
+    begin = max(
+        (
+            i
+            for i, r in enumerate(records)
+            if r.get("kind") == "closure-begin" and r.get("session") == session
+        ),
+        default=-1,
+    )
+    kinds = {r.get("kind") for r in records[begin + 1 :] if r.get("session") == session}
+    ran = [
+        phase
+        for phase, kind in (("sleep", "sleep-complete"), ("endure", "endure-complete"))
+        if kind in kinds
+    ]
+    return ran + ["integrity"]
+
+
+def _endure(store: Store, session):
+    """The Endure phase when an authorized proposal waits: ``(result,
+    endure-complete record id)``, or ``None`` when none does (D94). Called
+    with the write lock held."""
+    from . import proposals  # imported here to avoid an import cycle
+
+    if not proposals.waiting(store):
+        return None
+    result = proposals.endure(store, session)
+    record = log_append(
+        store,
+        "endure-complete",
+        rule="OP-022(a)",
+        session=session,
+        committed=[c["proposal"] for c in result["committed"]],
+        dropped=[d["proposal"] for d in result["dropped"]],
+    )
+    return result, record
+
+
+def _run_closure(store: Store, acting, *, rerun=False):
+    """Run each phase of ``PHASES`` the ``closing`` marker does not list as
+    done, in order, and clear the marker last (D83, D94). A phase skipped is
+    done like one that ran. Called with the write lock held."""
+    from . import mil  # imported here to avoid an import cycle
+
+    sessions = _read_sessions(store)
+    closing = sessions["closing"]
+    session = closing["session"]
+    out = {
+        "log_records": [],
+        "sleep": {"promoted": [], "refused": []},
+        "endure": {"committed": [], "dropped": []},
+        "consolidation": None,
+    }
+
+    def finish(phase):
+        closing["done"].append(phase)
+        _write_sessions(store, sessions)
+
+    if "sleep" not in closing["done"]:
+        if any(
+            r.get("kind") in ("closure-payload", "conversation-left")
+            for r in mil.session_records(store, session)
+        ):
+            slept = sleep.run(store, session, rerun=rerun)
+            out["log_records"] += slept["log_records"]
+            out["sleep"] = {"promoted": slept["promoted"], "refused": slept["refused"]}
+            out["consolidation"] = slept["consolidation"]
+            closing["consolidated"] = {
+                "closure": slept["closure"],
+                "resumption": slept["resumption"],
+            }
+        finish("sleep")
+
+    if "endure" not in closing["done"]:
+        ran = _endure(store, session)
+        if ran is not None:
+            out["endure"], record = ran
+            out["log_records"].append(record)
+        finish("endure")
+
+    if "integrity" not in closing["done"]:
+        consolidated = closing["consolidated"] or {}
+        loc = sil.log_append_located(
+            store,
+            "closure-complete",
+            rule="OP-022(a)",
+            session=session,
+            mode=closing["mode"],
+            phases=_phases_ran(store, session),
+            closure=consolidated.get("closure"),
+            resumption=consolidated.get("resumption"),
+        )
+        sil.write_log_checkpoint(store, loc)
+        out["log_records"].append(loc["id"])
+        finish("integrity")
+    if store.exists(CREDENTIAL):
+        _drop_credential(store)
+    sessions["closing"] = None
+    _write_sessions(store, sessions)
+    return out
 
 
 def revoke_credential(root: str, *, binding=None):
@@ -682,7 +824,7 @@ def revoke_credential(root: str, *, binding=None):
 
 
 def suspend(root: str, *, signal, chain) -> dict:
-    """End the session this process holds, without a Sleep (D92, D83,
+    """End the session this process holds, without a Closure (D92, D83,
     OP-021(a)): the skills it runs are ended, the session state is cleared,
     the close is logged and the credential removed. A credential another
     process holds is left alone."""
@@ -792,7 +934,10 @@ def decommission(root: str, disposition: str, *, binding=None):
             disposition=disposition,
         )
         records.append(loc["id"])
+        revoked = None
         if store.exists(CREDENTIAL):
+            cred = _read_credential(store)
+            revoked = cred["session"] if cred else None
             _drop_credential(store)
             sessions = _read_sessions(store)
             sessions["open_session"] = None
@@ -806,6 +951,9 @@ def decommission(root: str, disposition: str, *, binding=None):
                     reason="decommission",
                 )
             )
+        ran = _endure(store, revoked)
+        if ran is not None:
+            records.append(ran[1])
         out = sil.commit_generation(
             store, changes={}, authorization=loc, kind="decommission"
         )

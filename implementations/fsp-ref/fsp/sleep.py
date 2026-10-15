@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Jonas Orrico
-"""The Sleep that follows every normal close (D83, OP-022)."""
+"""The Sleep phase of the Closure that follows a normal close (D83, OP-022)."""
 
 from __future__ import annotations
 
@@ -17,15 +17,12 @@ def run(store: Store, session, *, rerun=False):
     everything (D84, OP-009(h)), and promotion (D81): each pending request the
     semantic ledger does not name yet goes through ``mil.promote``. A refused
     promotion is recorded and the Sleep goes on; any other failure propagates.
-    ``sleep-complete`` names what was promoted and refused, the payload
-    consolidated and the digest of the Resumption Record, and the log
-    checkpoint is written at it.
+    ``sleep-complete`` names whether this is a re-run, what was promoted and
+    refused, the payload consolidated and the digest of the Resumption Record.
+    The log checkpoint belongs to the Integrity phase (D83).
     """
     from . import mil  # imported here to avoid an import cycle
 
-    begin = log_append(
-        store, "sleep-begin", rule="OP-022(a)", session=session, rerun=rerun
-    )
     consolidated = mil.consolidate(store, session)
     if mil.conversation_left(store, session):
         log_append(
@@ -54,20 +51,24 @@ def run(store: Store, session, *, rerun=False):
             continue
         if sid is not None:
             promoted.append(sid)
+    closure = consolidated["closure"] if consolidated else None
+    resumption = consolidated["resumption"] if consolidated else None
     loc = sil.log_append_located(
         store,
         "sleep-complete",
         rule="OP-022(a)",
         session=session,
+        rerun=rerun,
         promoted=promoted,
         refused=refused,
-        closure=consolidated["closure"] if consolidated else None,
-        resumption=consolidated["resumption"] if consolidated else None,
+        closure=closure,
+        resumption=resumption,
     )
-    sil.write_log_checkpoint(store, loc)
     return {
         "promoted": promoted,
         "refused": refused,
         "consolidation": consolidated,
-        "log_records": [begin, loc["id"]],
+        "closure": closure,
+        "resumption": resumption,
+        "log_records": [loc["id"]],
     }

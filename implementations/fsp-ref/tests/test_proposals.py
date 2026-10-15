@@ -244,8 +244,8 @@ class ProposalsTests(Base):
         lifecycle.start(self.S)
         out_p = proposals.propose(self.S, [{"op": "set-persona", "content": "Helpful"}])
         pid = out_p["proposal"]
-        operator.approve(self.S, pid)
         lifecycle.stop(self.S)
+        operator.approve(self.S, pid)
 
         # Commit without session
         with self.assertRaises(Refused) as ctx:

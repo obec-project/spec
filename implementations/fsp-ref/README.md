@@ -20,8 +20,9 @@ which a proposal changes one entry at a time, with typed arguments, under
 a watchdog and the monitor of what an execution touched. So are the
 allowlist's domains and `http_fetch`, and memory: the session store and the
 conversation, recall by words and by lineage, semantic promotion under the
-Operator's authorization and its ledger, the Sleep after every close and its
-re-run after a crash, `/exit` with a Closure Payload, `/new`, `/resume` and
+Operator's authorization and its ledger, the Closure after every close — Sleep,
+Endure, Integrity — resumed after a crash, with an interrupted commit finished
+or undone, and rollover, `/exit` with a Closure Payload, `/new`, `/resume` and
 `/inject`. So is cognition without a UI: the inference channel to a local
 Ollama or a declared fake, context assembled by priority within a budget,
 the cycle and its chain, and the Closure Payload emitted by the model. So
@@ -56,15 +57,15 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/chain.py` | the Genesis Anchor, chain entries, `HEAD` |
 | `fsp/verify.py` | verification, returning findings |
 | `fsp/sil.py` | the integrity log, first activation, bindings, the passive signal, the commit pipeline |
-| `fsp/lifecycle.py` | the gated start, the live session and the process holding it, suspend, close, revocation, decommission |
+| `fsp/lifecycle.py` | the gated start, the live session and the process holding it, suspend, close and its Closure, rollover, revocation, decommission |
 | `fsp/operator.py` | the Operator's acts: bindings, the workspace, approvals, windows |
-| `fsp/proposals.py` | proposals, the authorization state, the commit of a proposal |
+| `fsp/proposals.py` | proposals, the authorization state, the commit of a proposal, the Closure's Endure phase |
 | `fsp/exec.py` | the native primitives `file_read`, `file_write`, `file_list` and `http_fetch`, inside the workspace and outside the store, and skills under the watchdog |
 | `fsp/monitor.py` | the picture of what an execution touched, compared after it |
 | `fsp/manifest.py` | a skill's manifest, checked at the start and before it runs, and its digest |
 | `fsp/ledger.py` | the Action Ledger, and the entries a crash left open surfaced at the start |
 | `fsp/mil.py` | the memory path: the session store and the conversation, `mnemonic-save` and `mnemonic-recall`, promotion and the semantic ledger, the consolidation, the pointer map |
-| `fsp/sleep.py` | the Sleep after every normal close |
+| `fsp/sleep.py` | the Closure's Sleep phase: consolidation, garbage collection, promotion |
 | `fsp/model.py` | the inference channel: the `ollama` and `fake` backends |
 | `fsp/cycle.py` | the cognitive cycle, its chain, and the Closure Payload's emission |
 | `fsp/context.py` | the sources of assembled context, and its assembly |
