@@ -11,6 +11,25 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The live session and the line REPL designed** (2026-10-15, D92,
+  D93). Phase 8b is split into four steps, since its pieces depend on
+  each other: the process and the REPL first, then rollover and the
+  review, the Operator Channel's prompts, and stimuli and capacity. A
+  process holds its session by the credential's `flock` and names
+  itself as `holder`, so a dead process reads as a crash and a live one
+  as a conflict (D25). A signal suspends: the handler takes the store's
+  write lock, so no write is cut, and exits without releasing it, so the
+  worker thread never writes after the suspend; the skills the process
+  runs are ended with it. Ctrl+C always suspends, as D19 says, and does
+  not interrupt a chain: preemption comes from a typed line (8b-4), and
+  a suspend loses nothing. `fsp run` in a folder D30 refuses is refused
+  before the start, since keeping the last workspace would put the
+  Operator to work in another folder unawares. A skill's path argument
+  outside the workspace stays held as D74 says, with no read-only
+  declaration in the manifest: it would trust the skill's code (D51), not
+  confine it. The token estimate's calibration moves to the step of
+  OP-010's thresholds, which depend on it.
+
 - **`/exit` with a Closure Payload the model emits** (2026-10-14, D91).
   `cycle.emit_closure` asks the model for the payload in a call of its
   own, logged as an `inference` with `closure` and recorded as a cycle;
