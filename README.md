@@ -98,6 +98,7 @@ is a revision of the specification, under a new version.
 | [design/0001](design/0001-obec-restructure.md) | Why the set is shaped this way. Not needed to implement. | no |
 | [design/0002](design/0002-invariant-titles.md) | Why each invariant's title states its guarantee, and why OC-001 and OC-002 exchanged places. Not needed to implement. | no |
 | [design/0003](design/0003-conversation-scoped-memory.md) | Why episodic memory belongs to the conversation that writes it, and how the working set reaches the next one. Not needed to implement. | no |
+| [design/0004](design/0004-closure-phases.md) | Why what follows a session's close is a Closure of three phases, each under one authority, and why promotions are decided when the conversation ends. Not needed to implement. | no |
 | [design/OPEN-QUESTIONS](design/OPEN-QUESTIONS.md) | What the author is least sure about, and what would settle each. | no |
 
 Four audiences. Someone new reads the Primer. An implementer reads the Core. A
