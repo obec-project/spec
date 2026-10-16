@@ -40,6 +40,7 @@ SESSION_KINDS = (
     "closure-payload",
     "reply",
     "results",
+    "results-discarded",
     "context-truncated",
     "cycle",
     "model-fingerprint",

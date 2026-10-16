@@ -11,6 +11,23 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **Operator input preempts a chain at the cycle boundary** (2026-10-16,
+  D100). A line typed while a chain runs is held, and the chain stops after
+  the next cycle's intents have dispatched, never mid-cycle, logging
+  `chain-interrupted`. The Operator keeps the results in view, and the next
+  cycle answers the line with them, or discards them, with a
+  `results-discarded` session record that takes them out of the context
+  and a `chain-discarded` log record. A close discards a chain still
+  interrupted. The UI reads stdin through its own line reader when it is
+  not a terminal, so no buffered reader holds a line out of sight. D100 was
+  amended to take input in order: what stdin holds when a chain starts is
+  input typed ahead, read by the menus the chain asks and then by the
+  prompt, and it never preempts. As first written, a script sent all at
+  once had a line answer a hold's menu or preempt the chain depending on
+  which thread ran first. A line read as the chain ends is held too,
+  because on a terminal one left in the reader's buffer was lost unseen.
+  This closes step 8b-4a.
+
 - **Preemption and compaction designed** (2026-10-15, D100, D101). A line
   the Operator types during a chain stops it at the next cycle boundary;
   the dispatched intents resolve, and the Operator keeps their results in

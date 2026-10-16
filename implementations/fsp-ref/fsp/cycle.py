@@ -6,7 +6,8 @@ from __future__ import annotations
 
 import json
 
-from . import channel, clock, config, context, mil, model, proposals, sil, vital
+from . import channel, clock, config, context, lifecycle, mil, model, proposals
+from . import sil, vital
 from . import exec as execution
 from .sil import Refused, log_append
 from .store import Store
@@ -323,12 +324,15 @@ def _run_intents(root, cid, intents):
     return replies, outcomes
 
 
-def respond(root, text, *, channel=None, date=None):
+def respond(root, text, *, channel=None, date=None, interrupt=None):
     """Record ``text`` as the Operator's stimulus and run the chain it starts
     (D89, OP-001): each cycle is one call to the model and the joint dispatch
     of its intents; results continue the chain, a reply ends it, and
     ``chain_limit`` ends it with a record. The call to the model is made
-    without the write lock."""
+    without the write lock. ``interrupt``, a callable, is asked only where a
+    chain would continue, after the cycle's results are saved; when it returns
+    true the chain stops there with a ``chain-interrupted`` record (D100,
+    OP-002(a))."""
     store = Store(root)
     session = vital.require_entity_session(root, "respond")
     num_ctx = model.NUM_CTX_DEFAULT
@@ -342,8 +346,9 @@ def respond(root, text, *, channel=None, date=None):
     cycles = []
     replies = []
     aborted = None
+    interrupted = None
     continuing = False
-    for _ in range(limit):
+    for turn in range(limit):
         continuing = False
         with store.write_lock():
             n = 1 + sum(
@@ -414,13 +419,26 @@ def respond(root, text, *, channel=None, date=None):
                     store, session, "reply", text="\n\n".join(said), cycle=cid
                 )
             if outcomes:
-                mil.save_session(
+                results = mil.save_session(
                     store, session, "results", text=render(outcomes), cycle=cid
                 )
         replies.extend(said)
         if not outcomes:
             break
         continuing = True
+        if turn + 1 < limit and interrupt is not None and interrupt():
+            continuing = False
+            interrupted = {"cycle": cid, "results": results}
+            with store.write_lock():
+                log_append(
+                    store,
+                    "chain-interrupted",
+                    rule="OP-002(a)",
+                    session=session,
+                    cycle=cid,
+                    results=results,
+                )
+            break
 
     if continuing:
         with store.write_lock():
@@ -437,7 +455,29 @@ def respond(root, text, *, channel=None, date=None):
         "cycles": cycles,
         "replies": replies,
         "aborted": aborted,
+        "interrupted": interrupted,
     }
+
+
+def discard_results(root, cycle_id, results_record):
+    """Take an interrupted chain's ``results`` record out of the context
+    (D100, OP-002(c)): the session record ``results-discarded`` and the log
+    record ``chain-discarded``. Returns ``{"record", "log"}``, their ids."""
+    store = Store(root)
+    session = lifecycle.require_session(root, "discard")
+    with store.write_lock():
+        record = mil.save_session(
+            store, session, "results-discarded", record=results_record
+        )
+        logged = log_append(
+            store,
+            "chain-discarded",
+            rule="OP-002(c)",
+            session=session,
+            cycle=cycle_id,
+            results=results_record,
+        )
+    return {"record": record, "log": logged}
 
 
 def _refuse_emission(store, session, cid, inference, reason):

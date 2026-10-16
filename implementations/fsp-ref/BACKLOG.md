@@ -8,12 +8,11 @@ done is in [CHANGELOG.md](CHANGELOG.md).
 ## 1. Phases
 
 Each phase ends with `run.py --only …` green on its invariants
-([AGENTS.md](AGENTS.md)). Phases 0–5, 6a, 6b, 7, 8a and 8b-1 to 8b-3
-are done; 8b is in four steps.
+([AGENTS.md](AGENTS.md)). Phases 0–5, 6a, 6b, 7, 8a, 8b-1 to 8b-3 and
+8b-4a are done; 8b is in four steps.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **8b-4a** | preemption at the cycle boundary (D100): stdin read while a chain runs, `interrupt` in `cycle.respond`, *Keep* or *Discard* the interrupted chain's results, `results-discarded` and `chain-discarded` | — |
 | **8b-4b** | compaction (D101): `cycle.compact`, the `compaction` cut and its summary in context, `/compact`, utilization and the `context_soft`/`context_hard` thresholds, the hard restart and `cycle.resume`, calibration from the `cycle` records | — |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, the first activation through `fsp run` (D29), including a name already in use (D54), `fsp repo` (D32), `~/.fsp/config.json`/`credentials.json`, `notify_command` (D66) | — (the Operator's tooling; a real 3.2 through `repo clone` on a VM) |
@@ -30,6 +29,12 @@ After that: a test entity on Ollama, operated for days, measuring what
 - **Phase 10 — D30 against the registered stores** of `~/.fsp/config.json`.
   Until the registry exists, a workspace is checked against its own store and
   `~/.fsp`.
+- **Phase 10 — type-ahead at a terminal menu.** On a terminal, a line the
+  Operator types while a chain runs that is still in the tty's queue when a
+  menu opens is read by the menu as keys (D100's reader holds one line; the
+  menu reads the descriptor in cbreak mode), so its Enter picks the
+  highlighted option. The menu is to discard or set aside what was typed
+  before it opened, with a record, not answer with it.
 - **Phase 11 — the periodicity of an item** has no format yet (D62).
 - **Phase 11 — *Allow once* per dispatch.** `fsp/channel.py` keeps one once
   set for the process, cleared when an intent's dispatch ends (D99); with

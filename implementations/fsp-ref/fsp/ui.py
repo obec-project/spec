@@ -104,6 +104,77 @@ def _on_terminal():
         return False
 
 
+class _LineReader:
+    """The lines of one descriptor, read with ``os.read`` into a buffer (D100):
+    nothing buffers a line the UI cannot see."""
+
+    def __init__(self, fd):
+        self.fd = fd
+        self.buffer = b""
+        self.eof = False
+
+    def has_line(self):
+        return b"\n" in self.buffer
+
+    def fill(self):
+        """One ``os.read`` into the buffer; the end of input is remembered."""
+        try:
+            data = os.read(self.fd, 65536)
+        except OSError:
+            data = b""
+        if data:
+            self.buffer += data
+        else:
+            self.eof = True
+
+    def drain(self):
+        """Read what the descriptor already holds, without waiting (D100)."""
+        while not self.eof and select.select([self.fd], [], [], 0)[0]:
+            self.fill()
+
+    def take(self):
+        """The first complete line of the buffer, without its newline."""
+        line, _, self.buffer = self.buffer.partition(b"\n")
+        return line.decode(getattr(sys.stdin, "encoding", None) or "utf-8", "replace")
+
+    def readline(self):
+        """The next line, waiting for it. ``EOFError`` at the end of input."""
+        while not self.has_line() and not self.eof:
+            self.fill()
+        if self.has_line():
+            return self.take()
+        if self.buffer:
+            self.buffer += b"\n"
+            return self.take()
+        raise EOFError
+
+    def ready(self, timeout):
+        """Whether a complete line is buffered, or arrives within ``timeout``
+        seconds."""
+        if not self.has_line() and not self.eof:
+            if select.select([self.fd], [], [], timeout)[0]:
+                self.fill()
+        return self.has_line()
+
+
+_stdin = _LineReader(0)
+
+
+def _input(prompt):
+    """A line from the Operator: the line the reader holds, else ``input()``
+    on a terminal, else the line reader over descriptor 0 (D100).
+    ``EOFError`` at the end of input."""
+    if _stdin.has_line():
+        sys.stdout.write(prompt)
+        sys.stdout.flush()
+        return _stdin.take()
+    if _on_terminal():
+        return input(prompt)
+    sys.stdout.write(prompt)
+    sys.stdout.flush()
+    return _stdin.readline()
+
+
 def _read_key(fd):
     """One key from ``fd``: a byte, or an escape sequence; ``EOFError`` at the
     end of input."""
@@ -173,7 +244,7 @@ def choose(question, options) -> int:
         _say("  %d) %s" % (i + 1, option))
     count = len(options)
     while True:
-        answer = input("choose [1-%d]: " % count).strip()
+        answer = _input("choose [1-%d]: " % count).strip()
         if answer.isdigit() and 1 <= int(answer) <= count:
             return int(answer) - 1
         _say("System: choose a number from 1 to %d" % count)
@@ -189,7 +260,7 @@ def ask_text(prompt, prefill) -> str:
         finally:
             readline.set_startup_hook()
     _say("(current: %s)" % prefill)
-    return input(prompt) or prefill
+    return _input(prompt) or prefill
 
 
 def _flags(args, names):
@@ -221,6 +292,8 @@ class _Ui:
         self.responding = threading.Event()
         self.requests = queue.Queue()
         self.direct = False
+        self.pending_line = None
+        self.interrupted = None
 
     # -- suspend and exit (D92) ------------------------------------------
 
@@ -246,6 +319,11 @@ class _Ui:
             os._exit(code)
         name = signal.Signals(signum).name if signum else None
         with Store(self.root).write_lock():
+            if self.interrupted is not None:
+                try:
+                    cycle.discard_results(self.root, *self.interrupted)
+                except Exception:
+                    pass
             out = lifecycle.suspend(
                 self.root, signal=name, chain=self.responding.is_set()
             )
@@ -272,10 +350,15 @@ class _Ui:
                 box["error"] = e
 
         t = threading.Thread(target=target, daemon=True)
+        _stdin.drain()
         t.start()
         while t.is_alive():
             try:
-                request = self.requests.get(timeout=0.2)
+                if self.watching():
+                    self.hold_line()
+                    request = self.requests.get_nowait()
+                else:
+                    request = self.requests.get(timeout=0.2)
             except queue.Empty:
                 continue
             self.answer(*request)
@@ -285,6 +368,22 @@ class _Ui:
             self.release()
             return 1
         return box.get("value")
+
+    def watching(self):
+        """Whether stdin is watched for a line: a chain runs, no line is held
+        or read and waiting, and input has not ended (D100)."""
+        return (
+            self.responding.is_set()
+            and self.pending_line is None
+            and not _stdin.eof
+            and not _stdin.has_line()
+        )
+
+    def hold_line(self):
+        """Hold one line of stdin for the chain's boundary, waiting up to the
+        wait loop's 0.2 s for it (D100). At most one line is held."""
+        if _stdin.ready(0.2):
+            self.pending_line = _stdin.take()
 
     def answer(self, kind, args, reply):
         """Answer a worker's request on the main thread. The end of input is a
@@ -600,7 +699,9 @@ class _Ui:
         before = self._to_review()
         self.responding.set()
         try:
-            out = cycle.respond(self.root, text)
+            out = cycle.respond(
+                self.root, text, interrupt=lambda: self.pending_line is not None
+            )
         finally:
             self.responding.clear()
         for reply in out["replies"]:
@@ -610,7 +711,30 @@ class _Ui:
         proposed = len(self._to_review() - before)
         if proposed:
             _say("System: the entity proposed %d change(s) — /review" % proposed)
+        if out["interrupted"]:
+            self._interrupted(out["interrupted"])
         return None
+
+    def _interrupted(self, stop):
+        """The Operator keeps or discards the results of the chain that
+        stopped at a cycle boundary (D100, OP-002(a)(c))."""
+        _say("System: the chain stopped at %s" % stop["cycle"])
+        self.interrupted = (stop["cycle"], stop["results"])
+        try:
+            keep = self.ask(
+                "choose",
+                "The interrupted chain's results",
+                ["Keep them in view", "Discard them"],
+            )
+            discarded = keep == 1
+            with Store(self.root).write_lock():
+                if discarded:
+                    cycle.discard_results(self.root, *self.interrupted)
+                self.interrupted = None
+            if discarded:
+                _say("System: results discarded")
+        finally:
+            self.interrupted = None
 
     # -- the commands (§6.2) ---------------------------------------------
 
@@ -806,11 +930,14 @@ def main(argv=None) -> int:
     try:
         code = ui.work(ui.begin)
         while code is None:
-            try:
-                raw = input("> ")
-            except EOFError:
-                ui.suspend_and_exit(None)
-                return 0
+            if ui.pending_line is not None:
+                raw, ui.pending_line = ui.pending_line, None
+            else:
+                try:
+                    raw = _input("> ")
+                except EOFError:
+                    ui.suspend_and_exit(None)
+                    return 0
             code = ui.work(lambda raw=raw: ui.line(raw))
     except Exception:
         traceback.print_exc()

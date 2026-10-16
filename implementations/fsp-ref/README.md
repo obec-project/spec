@@ -31,7 +31,8 @@ session and suspends it on a signal or the end of input, its decisions as
 menus chosen with the arrow keys: the review of proposals, the promotions
 decided at `/exit`, rollover whenever an authorized change waits, and the
 prompt at a held act — allow once, for this chat, add to the allowlist, or
-deny. Preemption and `/compact` are not.
+deny. A line typed while a chain runs stops it at the next cycle boundary,
+its results kept in view or discarded. `/compact` is not yet done.
 
 Python 3.10+, standard library only, Linux or macOS.
 

@@ -77,12 +77,18 @@ def tokens(text) -> int:
 def turns(records) -> list:
     """The turns of a transcript (D88): each a ``stimulus`` and the ``reply``
     and ``results`` records after it, up to the next ``stimulus``. Records
-    before the first stimulus, and of other kinds, are left out."""
+    before the first stimulus, and of other kinds, are left out, as is a
+    ``results`` record a ``results-discarded`` record names (D100)."""
+    discarded = {
+        r.get("record") for r in records if r.get("kind") == "results-discarded"
+    }
     found = []
     for record in records:
         kind = record.get("kind")
         if kind == "stimulus":
             found.append([record])
+        elif kind == "results" and record.get("id") in discarded:
+            continue
         elif kind in ("reply", "results") and found:
             found[-1].append(record)
     return found
