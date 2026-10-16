@@ -13,7 +13,7 @@ Each phase ends with `run.py --only …` green on its invariants
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **8b-4b** | compaction (D101): `cycle.compact`, the `compaction` cut and its summary in context, `/compact`, utilization and the `context_soft`/`context_hard` thresholds, the hard restart and `cycle.resume`, calibration from the `cycle` records | — |
+| **8b-4b** | the OP-010 thresholds (D101): calibration from the `cycle` records, utilization and the `context_soft`/`context_hard` thresholds, the hard restart and `cycle.resume`, the cut with no summary and `compaction-failed`. Compaction itself and `/compact` are done | — |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, the first activation through `fsp run` (D29), including a name already in use (D54), `fsp repo` (D32), `~/.fsp/config.json`/`credentials.json`, `notify_command` (D66) | — (the Operator's tooling; a real 3.2 through `repo clone` on a VM) |
 | **11** | the agenda (D62), with the queue of its stimuli behind an active chain and the pre-session buffer (OP-002(b)(d)): `agenda.json`, `/agenda` and `fsp agenda`, the `agenda` proposal op, items' scoped authorizations; `fsp tick` and its host entry installed by `fsp init`/`repo`, the auto session and the main start suspending it (D63); worker skills, run in the background (D64) | — (unit tests) |

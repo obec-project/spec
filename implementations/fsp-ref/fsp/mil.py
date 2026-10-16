@@ -36,6 +36,7 @@ SESSION_KINDS = (
     "session-open",
     "stimulus",
     "transcript-cleared",
+    "compaction",
     "conversation-left",
     "closure-payload",
     "reply",
@@ -1099,9 +1100,13 @@ def conversation_of(store: Store, session):
     return record.get("conversation")
 
 
-def transcript(store: Store, session) -> list:
+def _cut_transcript(store: Store, session):
     """The records of ``session``'s conversation, oldest session first, after
-    the last ``transcript-cleared`` (D13, D78)."""
+    the last cut, and the record that cut (D13, D78, D101): a
+    ``transcript-cleared`` keeps what follows it; a ``compaction`` keeps what
+    follows it, or, when its ``keep_from`` names a record before it in the
+    transcript, the records from that one on, the ``compaction`` included.
+    The cut is ``None`` when there is none."""
     record = _open_record(store, session)
     chain = [session]
     if record is not None:
@@ -1119,10 +1124,47 @@ def transcript(store: Store, session) -> list:
     records = []
     for s in reversed(chain):
         records.extend(session_records(store, s))
-    for i in range(len(records) - 1, -1, -1):
-        if records[i].get("kind") == "transcript-cleared":
-            return records[i + 1 :]
-    return records
+    kept = []
+    cut = None
+    for r in records:
+        kind = r.get("kind")
+        if kind == "transcript-cleared":
+            kept = []
+            cut = r
+        elif kind == "compaction":
+            keep_from = r.get("keep_from")
+            at = next(
+                (
+                    i
+                    for i, x in enumerate(kept)
+                    if isinstance(keep_from, str) and x.get("id") == keep_from
+                ),
+                None,
+            )
+            kept = [] if at is None else kept[at:] + [r]
+            cut = r
+        else:
+            kept.append(r)
+    return kept, cut
+
+
+def transcript(store: Store, session) -> list:
+    """The records of ``session``'s conversation, oldest session first, after
+    the last ``transcript-cleared`` or ``compaction`` (D13, D78, D101)."""
+    return _cut_transcript(store, session)[0]
+
+
+def compaction_summary(store: Store, session):
+    """The summary of the ``compaction`` that cuts ``session``'s transcript, or
+    ``None`` when the cut is a ``transcript-cleared``, there is none, or the
+    summary is not a non-empty string (D101)."""
+    cut = _cut_transcript(store, session)[1]
+    if cut is None or cut.get("kind") != "compaction":
+        return None
+    summary = cut.get("summary")
+    if not isinstance(summary, str) or summary.strip() == "":
+        return None
+    return summary
 
 
 def stimulate(root: str, text: str) -> dict:

@@ -61,6 +61,7 @@ _TITLES = (
     "Persona",
     "Instructions",
     "Session",
+    "Earlier in this conversation",
     "Always loaded",
     "Working set",
     "This conversation's memory",
@@ -185,6 +186,8 @@ def assemble(
         "model: %s" % (chosen["name"] if chosen is not None else "none"),
         "date: %s" % date,
     ]
+    summary = mil.compaction_summary(store, session)
+    sections["Earlier in this conversation"] = [summary] if summary is not None else []
     used = sum(_section_cost(t, sections[t]) for t in _TITLES)
     if first is not None:
         used += _turn_cost(first)

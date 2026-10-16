@@ -35,6 +35,7 @@ _USAGE = {
     "work": "/work set PATH",
     "grant": "/grant SCOPE --for T --budget N",
     "clear": "/clear",
+    "compact": "/compact",
     "new": "/new",
     "resume": "/resume ID",
     "inject": "/inject ID [RECORD...]",
@@ -46,7 +47,7 @@ _USAGE = {
     "exit": "/exit",
     "help": "/help",
 }
-_NOT_YET = ("agenda", "compact")
+_NOT_YET = ("agenda",)
 _REPLAY_TURNS = 3
 _PERSONA_CHARS = 200
 _DIGEST_CHARS = 12
@@ -807,6 +808,15 @@ class _Ui:
             raise _Usage
         operator.clear_transcript(self.root, binding=self.binding)
         _say("System: transcript cleared")
+
+    def cmd_compact(self, args):
+        if args:
+            raise _Usage
+        out = cycle.compact(self.root, reason="operator")
+        done = sum(1 for o in out["saves"] if o.get("outcome") == "done")
+        _say(
+            "System: compacted: %d saved, %d refused" % (done, len(out["saves"]) - done)
+        )
 
     def cmd_new(self, args):
         if args:

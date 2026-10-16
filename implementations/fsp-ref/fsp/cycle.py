@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 
 from . import channel, clock, config, context, lifecycle, mil, model, proposals
-from . import sil, vital
+from . import probes, sil, vital
 from . import exec as execution
 from .sil import Refused, log_append
 from .store import Store
@@ -93,6 +93,47 @@ category is one of: """
     + """.
 The entity does not describe itself as conscious or sentient."""
 )
+
+COMPACTION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "saves": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "content": {"type": "string"},
+                    "supersedes": {"type": "string"},
+                    "quotes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "record": {"type": "string"},
+                                "text": {"type": "string"},
+                            },
+                            "required": ["record", "text"],
+                        },
+                    },
+                },
+                "required": ["content"],
+            },
+        },
+        "summary": {"type": "string"},
+    },
+    "required": ["saves", "summary"],
+}
+
+COMPACTION_INSTRUCTIONS = """\
+The context is being compacted: the transcript before this point will be \
+replaced by your summary. Respond only with one JSON object with these fields:
+- saves: what in the transcript is worth keeping as episodic memory. Each is \
+an object with content, and optionally supersedes (the id of the latest \
+record of a lineage it replaces) and quotes (a list of objects with record \
+and text: literal parts of the Operator's stimuli).
+- summary: what this conversation has covered so far — the decisions, the \
+open threads, what comes next — for the context that follows.
+The entity does not describe itself as conscious or sentient."""
 
 RESULT_CAP = 16000
 HOLD_LIMIT = 8  # holds put to the Operator for one intent (D99)
@@ -565,3 +606,170 @@ def emit_closure(root, *, channel=None, date=None):
             closure=True,
         )
     return {"payload": payload, "cycle": cid}
+
+
+def _refuse_compaction(store, session, cid, inference, reason):
+    """Record the aborted compaction cycle and raise the refusal of the
+    compaction (D101, OP-009(c))."""
+    aborted = _abort(store, session, cid, inference, reason)
+    raise Refused("compaction", "OP-009(c)", reason, [aborted])
+
+
+def compact(root, *, reason, keep_from=None, channel=None, date=None):
+    """Compact the transcript (D101, OP-009(a)(c)): one call of its own, as the
+    closure's (D91), in which the entity gives the episodic records to save
+    and a summary. Each save goes through ``mil.save`` as the entity's
+    ``mnemonic-save`` does; a refused one is skipped. The summary passes the
+    probes before any save; then the ``cycle`` record and the ``compaction``
+    record, which cuts the transcript, are written. Returns ``{"cycle",
+    "record", "saves", "summary"}``; any abort is recorded as a
+    ``cycle-aborted`` and refused, ``check: compaction``, with nothing saved
+    or cut. The call to the model is made without the write lock."""
+    store = Store(root)
+    session = vital.require_entity_session(root, "compact")
+    num_ctx = model.NUM_CTX_DEFAULT
+    if channel is None:
+        channel, num_ctx = _channel(root, store, session)
+    if date is None:
+        date = clock.iso()[:10]
+
+    empty = None
+    with store.write_lock():
+        if not context.turns(mil.transcript(store, session)):
+            detail = "nothing to compact since the last cut"
+            empty = (
+                detail,
+                log_append(
+                    store,
+                    "refusal",
+                    rule="OP-009(c)",
+                    session=session,
+                    check="compaction",
+                    detail=detail,
+                ),
+            )
+        else:
+            n = 1 + sum(
+                1
+                for r in mil.session_records(store, session)
+                if r.get("kind") == "cycle"
+            )
+            cid = "%s/c-%d" % (session, n)
+            try:
+                assembled = context.assemble(
+                    store,
+                    session,
+                    num_ctx=num_ctx,
+                    date=date,
+                    instructions=COMPACTION_INSTRUCTIONS,
+                    answering=False,
+                )
+                context.record_truncation(store, session, assembled)
+            except Refused:
+                assembled = None
+    if empty is not None:
+        raise Refused("compaction", "OP-009(c)", empty[0], [empty[1]])
+    if assembled is None:
+        _refuse_compaction(store, session, cid, None, "context-budget")
+
+    try:
+        completion = channel.complete(assembled["messages"], schema=COMPACTION_SCHEMA)
+    except model.ModelError as e:
+        _refuse_compaction(store, session, cid, None, "model: %s" % (e,))
+
+    with store.write_lock():
+        fingerprint = None
+        for r in mil.session_records(store, session):
+            if r.get("kind") == "model-fingerprint":
+                fingerprint = r.get("record")
+        inf = log_append(
+            store,
+            "inference",
+            rule="OC-006",
+            session=session,
+            cycle=cid,
+            fingerprint=fingerprint,
+            model=completion["model"],
+            estimate=assembled["estimate"],
+            prompt_eval_count=completion["prompt_eval_count"],
+            compaction=True,
+        )
+
+    try:
+        payload = json.loads(completion["text"])
+    except (ValueError, RecursionError, TypeError):
+        payload = None
+    if (
+        not isinstance(payload, dict)
+        or set(payload) != set(COMPACTION_SCHEMA["required"])
+        or not isinstance(payload["saves"], list)
+        or not isinstance(payload["summary"], str)
+        or payload["summary"].strip() == ""
+    ):
+        _refuse_compaction(
+            store, session, cid, inf, "the completion is not a compaction"
+        )
+    saves = payload["saves"]
+    summary = payload["summary"]
+
+    try:
+        probe_set = sil.committed_probes(store)
+    except (OSError, ValueError, KeyError):
+        _refuse_compaction(
+            store, session, cid, inf, "the committed probe set cannot be read"
+        )
+    matches = probes.scan(probe_set, summary)
+    if matches:
+        _refuse_compaction(
+            store,
+            session,
+            cid,
+            inf,
+            "the summary represents the entity as experiencing sentience, "
+            "consciousness or subjective continuity (probe %s)" % matches[0]["id"],
+        )
+
+    outcomes = []
+    for item in saves:
+        if isinstance(item, dict):
+            outcomes.append(
+                dispatch(
+                    root,
+                    cid,
+                    {
+                        "op": "mnemonic-save",
+                        "content": item.get("content"),
+                        "supersedes": item.get("supersedes"),
+                        "quotes": item.get("quotes"),
+                    },
+                )
+            )
+        else:
+            outcomes.append(
+                {
+                    "op": "mnemonic-save",
+                    "outcome": "invalid",
+                    "detail": "a save is an object",
+                }
+            )
+
+    with store.write_lock():
+        mil.save_session(
+            store,
+            session,
+            "cycle",
+            cycle=cid,
+            inference=inf,
+            intents=["mnemonic-save"] * len(saves),
+            compaction=True,
+        )
+        record = mil.save_session(
+            store,
+            session,
+            "compaction",
+            summary=summary,
+            cycle=cid,
+            reason=reason,
+            keep_from=keep_from,
+        )
+    return {"cycle": cid, "record": record, "saves": outcomes, "summary": summary}

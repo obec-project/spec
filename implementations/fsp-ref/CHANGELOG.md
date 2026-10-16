@@ -11,6 +11,20 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **Compaction and `/compact`** (2026-10-16, D101; D88, D93 revised).
+  `cycle.compact` makes one call of its own, as the closure does. In it the
+  entity names what to save as episodic memory and writes a summary. Each
+  save passes the checks and probes of an entity `mnemonic-save`, and a
+  refused one is skipped. A `compaction` session record then cuts the
+  transcript, as `/clear` does, and its summary goes into every later
+  context, always in, under *Earlier in this conversation*. The summary is
+  probed before any save, so a refused compaction leaves no saves from a
+  cut that did not happen. A transcript with no turn since the last cut is
+  refused before the call. A `keep_from` that an earlier cut removed keeps
+  nothing, so a cleared record cannot return. `/compact` runs it between
+  lines. The OP-010 thresholds that compact on their own come next, in
+  8b-4b.
+
 - **Operator input preempts a chain at the cycle boundary** (2026-10-16,
   D100). A line typed while a chain runs is held, and the chain stops after
   the next cycle's intents have dispatched, never mid-cycle, logging

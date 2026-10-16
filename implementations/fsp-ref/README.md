@@ -32,7 +32,9 @@ menus chosen with the arrow keys: the review of proposals, the promotions
 decided at `/exit`, rollover whenever an authorized change waits, and the
 prompt at a held act — allow once, for this chat, add to the allowlist, or
 deny. A line typed while a chain runs stops it at the next cycle boundary,
-its results kept in view or discarded. `/compact` is not yet done.
+its results kept in view or discarded, and `/compact` has the entity save
+what to keep and summarize the transcript, which the summary replaces. The
+context thresholds of OP-010 are not yet done.
 
 Python 3.10+, standard library only, Linux or macOS.
 
