@@ -19,7 +19,7 @@ import threading
 import traceback
 import tty
 
-from . import context, cycle, lifecycle, mil, model, operator, proposals
+from . import channel, context, cycle, lifecycle, mil, model, operator, proposals
 from .sil import Refused
 from .store import Store
 
@@ -232,6 +232,7 @@ class _Ui:
         if self.suspending:
             return
         self.suspending = True
+        channel.clear()
         for s in _SIGNALS:
             signal.signal(s, signal.SIG_IGN)
         saved = _saved_termios
@@ -346,6 +347,7 @@ class _Ui:
             return 1
         self.holder = res.holder
         self.session = res.session
+        channel.register(self._answer_hold)
         workspace = None
         try:
             workspace = operator.set_workspace(
@@ -379,6 +381,47 @@ class _Ui:
         if code is not None:
             return code
         return self._offer_review()
+
+    # -- a hold (D99) ------------------------------------------------------
+
+    def _answer_hold(self, hold):
+        """Put a hold of the execution path to the Operator, from the worker
+        that dispatches the act, and apply the answer (D99). Returns the
+        answer."""
+        _say("System: hold %s" % hold["id"])
+        _say("System:   asked by: %s" % _plain(hold["asker"]))
+        _say("System:   operation: %s" % _plain(hold["op"]))
+        _say("System:   target: %s" % _plain(hold["resolved"]))
+        if hold["kind"] == "skill-path":
+            _say("System:   its code may read or write there")
+        listed = hold["kind"] in ("domain", "skill")
+        answers = ["once", "chat"] + (["allowlist"] if listed else []) + ["deny"]
+        labels = {
+            "once": "Allow once",
+            "chat": "Allow for this chat",
+            "allowlist": "Add to the allowlist",
+            "deny": "Deny",
+        }
+        choice = self.ask(
+            "choose", "Hold %s" % hold["id"], [labels[a] for a in answers]
+        )
+        answer = answers[choice]
+        try:
+            operator.answer_hold(self.root, hold, answer, binding=self.binding)
+        except Refused as e:
+            _refused(e)
+            return "deny"
+        key = hold["key"]
+        if answer == "chat":
+            channel.allow_chat(key)
+        elif answer in ("once", "allowlist"):
+            channel.allow_once(key)
+        if answer == "allowlist":
+            try:
+                operator.allow(self.root, hold["kind"], key[1], binding=self.binding)
+            except Refused as e:
+                _refused(e)
+        return answer
 
     # -- the review and the rollover (D95, D97) --------------------------
 
@@ -645,6 +688,7 @@ class _Ui:
         if args:
             raise _Usage
         out = operator.new_conversation(self.root, binding=self.binding)
+        channel.clear()
         _say("System: session %s closed; a new conversation begins" % out["session"])
         self.release()
         return self.open()
@@ -653,6 +697,7 @@ class _Ui:
         if len(args) != 1:
             raise _Usage
         out = operator.resume_conversation(self.root, args[0], binding=self.binding)
+        channel.clear()
         _say(
             "System: session %s closed; resuming conversation %s"
             % (out["session"], args[0])
@@ -714,6 +759,7 @@ class _Ui:
         self._review_proposals()
         self._review_promotions()
         out = operator.close_conversation(self.root, binding=self.binding)
+        channel.clear()
         _say("System: session %s closed" % out["session"])
         self.release()
         return 0

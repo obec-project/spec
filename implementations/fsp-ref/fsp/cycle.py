@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import json
 
-from . import clock, config, context, mil, model, proposals, sil, vital
+from . import channel, clock, config, context, mil, model, proposals, sil, vital
 from . import exec as execution
 from .sil import Refused, log_append
 from .store import Store
@@ -94,6 +94,7 @@ The entity does not describe itself as conscious or sentient."""
 )
 
 RESULT_CAP = 16000
+HOLD_LIMIT = 8  # holds put to the Operator for one intent (D99)
 
 
 class Aborted(Exception):
@@ -155,24 +156,75 @@ def _dispatch_to_owner(root, cycle_id, intent):
     raise KeyError(op)
 
 
+def _refused_outcome(op, check, rule, detail):
+    return {
+        "op": op,
+        "outcome": "refused",
+        "check": check,
+        "rule": rule,
+        "detail": detail,
+    }
+
+
+def _refuse_held(root, cycle_id, held, check, rule, detail, **extra):
+    """Log the refusal of an act stopped at a hold (D99) and return its
+    outcome."""
+    with sil.originated_by(cycle_id):
+        log_append(
+            Store(root),
+            "refusal",
+            rule=rule,
+            check=check,
+            detail=detail,
+            op=held["op"],
+            target=held["target"],
+            **extra,
+        )
+    return _refused_outcome(held["op"], check, rule, detail)
+
+
 def dispatch(root, cycle_id, intent):
     """The outcome of one intent other than ``reply``, from the function of the
     owner it names, which checks, refuses and records as for any caller (D89).
-    Returns ``{"op", "outcome", ...}``."""
+    An act stopped at a hold is put to the Operator and, allowed, dispatched
+    again from its first check, up to ``HOLD_LIMIT`` holds (D99). Returns
+    ``{"op", "outcome", ...}``."""
     op = intent["op"]
-    try:
-        with sil.originated_by(cycle_id):
-            result = _dispatch_to_owner(root, cycle_id, intent)
-    except Refused as e:
-        return {
-            "op": op,
-            "outcome": "refused",
-            "check": e.check,
-            "rule": e.rule,
-            "detail": e.detail,
-        }
-    except (KeyError, TypeError, AttributeError, ValueError) as e:
-        return {"op": op, "outcome": "invalid", "detail": str(e)}
+    holds = 0
+    while True:
+        try:
+            with sil.originated_by(cycle_id):
+                result = _dispatch_to_owner(root, cycle_id, intent)
+        except channel.Held as e:
+            hold = e.hold
+            if holds == HOLD_LIMIT:
+                return _refuse_held(
+                    root,
+                    cycle_id,
+                    hold,
+                    "hold-limit",
+                    "OC-001(c)",
+                    "more than %d holds for one intent" % HOLD_LIMIT,
+                    hold=hold["id"],
+                )
+            holds += 1
+            if channel.ask(hold) == "deny":
+                return _refuse_held(
+                    root,
+                    cycle_id,
+                    hold,
+                    hold["check"],
+                    hold["rule"],
+                    "the Operator denied it",
+                    reason="denied",
+                    hold=hold["id"],
+                )
+            continue
+        except Refused as e:
+            return _refused_outcome(op, e.check, e.rule, e.detail)
+        except (KeyError, TypeError, AttributeError, ValueError) as e:
+            return {"op": op, "outcome": "invalid", "detail": str(e)}
+        break
     body = {k: v for k, v in result.items() if k != "log_records"}
     return {"op": op, "outcome": "done", **body}
 

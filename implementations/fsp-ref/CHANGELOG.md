@@ -11,6 +11,19 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **A hold in a main session is a prompt** (2026-10-15, D99). The four
+  holds of D74 and D16 — a read and a skill's path argument outside the
+  workspace, a domain outside the allowlist, a skill the rules do not
+  allow — now log a `hold` and raise out of the store's lock when the UI
+  of `fsp run` can ask; `cycle.dispatch` puts it to the Operator as a menu
+  and dispatches the act again from its first check, up to eight holds per
+  intent. The answer is an Operator act; *Allow for this chat* lasts until
+  `/exit`, `/new`, `/resume` or a suspend, through rollovers; *Add to the
+  allowlist* lets the act go and records `/allow`. Without the UI every
+  hold is the refusal it was. *Allow once* still ends at the first check
+  it passes, so an act with two holds asks again; it is to last the
+  intent's dispatch (D99, revised).
+
 - **The prompt at a hold designed** (2026-10-15, D99; D66, D74 revised).
   In a main session the act stops where D74 and D16 hold, logs the hold
   and raises out of the store's lock; the cycle asks the Operator through

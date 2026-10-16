@@ -18,7 +18,8 @@ import threading
 import time
 from urllib.parse import urljoin, urlsplit
 
-from . import __version__, chain, config, ledger, lifecycle, monitor, sil, vital
+from . import __version__, chain, channel, config, ledger, lifecycle, monitor, sil
+from . import vital
 from . import manifest as skill_manifest
 from .digest import sha256, sha256_file
 from .sil import Refused, log_append
@@ -60,11 +61,49 @@ def _refuse(store, op, target, check, rule, detail, **extra):
     return Refused(check, rule, detail, [rec])
 
 
-def boundary(store, op, target):
+def _hold(store, key, *, op, target, resolved, asker, kind, check, rule, session=None):
+    """Whether an extension lets the held check pass (D99). When none does and
+    the Operator can be asked, the hold is logged and ``Held`` is raised;
+    otherwise ``False``, and the caller refuses."""
+    if channel.allowed(key):
+        return True
+    if not channel.can_ask():
+        return False
+    hold_id = log_append(
+        store,
+        "hold",
+        rule=rule,
+        session=session,
+        op=op,
+        target=target,
+        resolved=resolved,
+        asker=asker,
+        hold_kind=kind,
+        check=check,
+    )
+    raise channel.Held(
+        {
+            "id": hold_id,
+            "op": op,
+            "target": target,
+            "resolved": resolved,
+            "asker": asker,
+            "kind": kind,
+            "check": check,
+            "rule": rule,
+            "key": key,
+        }
+    )
+
+
+def boundary(store, op, target, hold=False, skill=None):
     """The workspace boundary, the first check of every act on the host
     (OC-008(a)(b), step 8.6). Returns ``(real, rel)``: the resolved target and
-    its path relative to the workspace. It runs before the session check and
-    before the Vital Check."""
+    its path relative to the workspace, or the resolved target itself when the
+    Operator allowed it outside (D99). It runs before the session check and
+    before the Vital Check. With ``hold``, a target outside the workspace is
+    held (D74); ``skill`` is the ``(name, digest)`` of the skill whose path
+    argument it is."""
     ws = workspace_of(store)
     if ws is None:
         raise _refuse(
@@ -91,6 +130,26 @@ def boundary(store, op, target):
             "%r is inside the Entity Store" % target,
         )
     if not _inside(real, ws_real):
+        home = os.path.realpath(os.path.expanduser("~/.fsp"))
+        if hold and not _inside(real, home):
+            if skill is None:
+                kind, key, asker = "path", ("path", real), op
+            else:
+                kind = "skill-path"
+                key = ("skill-path", skill[0], skill[1], real)
+                asker = "skill %s (%s)" % skill
+            if _hold(
+                store,
+                key,
+                op=op,
+                target=target,
+                resolved=real,
+                asker=asker,
+                kind=kind,
+                check="workspace-boundary",
+                rule="OC-008(a)",
+            ):
+                return real, real
         raise _refuse(
             store,
             op,
@@ -127,7 +186,7 @@ def file_read(root, target):
     the adapter reports only the size and the digest (D15)."""
     store = Store(root)
     with store.write_lock():
-        real, rel = boundary(store, "file_read", target)
+        real, rel = boundary(store, "file_read", target, hold=True)
         session = vital.require_entity_session(root, "file_read")
         try:
             with open(real, "rb") as f:
@@ -192,7 +251,7 @@ def file_list(root, target):
     """List the names in a directory inside the workspace, sorted."""
     store = Store(root)
     with store.write_lock():
-        real, rel = boundary(store, "file_list", target)
+        real, rel = boundary(store, "file_list", target, hold=True)
         session = vital.require_entity_session(root, "file_list")
         try:
             names = sorted(os.listdir(real))
@@ -231,11 +290,12 @@ def _public(address):
     return ip.is_global and not ip.is_multicast
 
 
-def _network_boundary(store, op, url):
+def _network_boundary(store, op, url, session=None):
     """The boundary of a network target (OC-008(a), D74, D75). Returns
     ``(scheme, host, port, path, key)``, where ``key`` is the allowlist entry
     the target falls under (D76). Called with the write lock held; every check
-    runs before any name is resolved."""
+    runs before any name is resolved. A domain the allowlist does not name is
+    held (D99)."""
 
     def refuse(detail):
         return _refuse(store, op, url, "workspace-boundary", "OC-008(a)", detail)
@@ -278,7 +338,18 @@ def _network_boundary(store, op, url):
     verdict = entry.get("rule") if isinstance(entry, dict) else None
     if verdict == "deny":
         raise refuse("%r is denied" % (key,))
-    if verdict != "allow":
+    if verdict != "allow" and not _hold(
+        store,
+        ("domain", key),
+        op=op,
+        target=url,
+        resolved=url,
+        asker=op,
+        kind="domain",
+        check="workspace-boundary",
+        rule="OC-008(a)",
+        session=session,
+    ):
         raise _refuse(
             store,
             op,
@@ -372,7 +443,9 @@ def http_fetch(root, url):
                             )
                     current = urljoin(current, location)
                     with store.write_lock():
-                        info = _network_boundary(store, "http_fetch", current)
+                        info = _network_boundary(
+                            store, "http_fetch", current, session=session
+                        )
                     continue
                 # the response closes its socket once the body is complete
                 while not resp.isclosed():
@@ -504,6 +577,20 @@ def _run(proc, timeout, launch):
     return bytes(bufs[proc.stdout]), bytes(bufs[proc.stderr]), outcome, reaped
 
 
+def _skill_identity(store, name):
+    """``(name, digest)`` of the installed skill ``name``, the digest as the
+    Operator's rule check computes it (D16), or ``None`` when the index does
+    not give it."""
+    try:
+        index = store.read_json(lifecycle.INDEX)
+        entry = next((s for s in index["skills"] if s["name"] == name), None)
+        if entry is None:
+            return None
+        return name, skill_manifest.skill_digest(entry["files"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
 def invoke_skill(root, name, target=None, args=None):
     """Invoke the skill ``name`` from a verified copy, under the Operator's rule,
     its process group ended with it, with its typed arguments (OC-008, D51, D16,
@@ -516,9 +603,16 @@ def invoke_skill(root, name, target=None, args=None):
             real_t, rel_t = boundary(store, op, target if target is not None else ".")
             marked = {}
             if isinstance(args, dict):
-                for k in sorted(args, key=str):
-                    if skill_manifest.is_marked_path(args[k]):
-                        marked[k] = boundary(store, op, args[k]["path"])[0]
+                paths = [
+                    k
+                    for k in sorted(args, key=str)
+                    if skill_manifest.is_marked_path(args[k])
+                ]
+                skill = _skill_identity(store, name) if paths else None
+                for k in paths:
+                    marked[k] = boundary(
+                        store, op, args[k]["path"], hold=skill is not None, skill=skill
+                    )[0]
             ws_real = os.path.realpath(workspace_of(store))
             session = vital.require_entity_session(root, op)
 
@@ -651,18 +745,30 @@ def invoke_skill(root, name, target=None, args=None):
                         skill=name,
                         digest=digest,
                     )
-                raise _refuse(
+                if not _hold(
                     store,
-                    op,
-                    name,
-                    "operator-rule",
-                    "OC-008(c)",
-                    "%r at %s is held: the Operator's rules do not allow it, "
-                    "and no one can answer" % (name, digest),
-                    reason="hold",
-                    skill=name,
-                    digest=digest,
-                )
+                    ("skill", name, digest),
+                    op=op,
+                    target=name,
+                    resolved=name,
+                    asker="skill %s (%s)" % (name, digest),
+                    kind="skill",
+                    check="operator-rule",
+                    rule="OC-008(c)",
+                    session=session,
+                ):
+                    raise _refuse(
+                        store,
+                        op,
+                        name,
+                        "operator-rule",
+                        "OC-008(c)",
+                        "%r at %s is held: the Operator's rules do not allow it, "
+                        "and no one can answer" % (name, digest),
+                        reason="hold",
+                        skill=name,
+                        digest=digest,
+                    )
 
             values = {"skill": copy, "workspace": ws_real, "target": real_t}
             for k, spec in schema.items():

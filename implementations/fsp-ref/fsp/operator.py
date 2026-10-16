@@ -838,6 +838,23 @@ def deny(root: str, kind, target, *, binding=None):
     return _structural_act(root, "deny", kind, target, binding)
 
 
+def answer_hold(root: str, hold, answer, *, binding=None):
+    """Record the Operator's answer to a hold of the execution path (D99,
+    OC-001(c)). Returns the act's id."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        return sil.operator_act(
+            store,
+            "hold-answer",
+            binding=acting,
+            rule="OC-001(c)",
+            hold=hold["id"],
+            answer=answer,
+            target=hold["resolved"],
+        )
+
+
 def grant(root: str, *, expiry=None, budget=None, scope=None, binding=None):
     """Open an authorization window (D17, D59, OC-001(b))."""
     store = Store(root)
