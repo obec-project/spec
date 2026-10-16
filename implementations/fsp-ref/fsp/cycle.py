@@ -419,6 +419,7 @@ def emit_closure(root, *, channel=None, date=None):
                 num_ctx=num_ctx,
                 date=date,
                 instructions=CLOSURE_INSTRUCTIONS,
+                answering=False,
             )
             context.record_truncation(store, session, assembled)
         except Refused:

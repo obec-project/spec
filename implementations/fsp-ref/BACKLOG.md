@@ -8,12 +8,11 @@ done is in [CHANGELOG.md](CHANGELOG.md).
 ## 1. Phases
 
 Each phase ends with `run.py --only …` green on its invariants
-([AGENTS.md](AGENTS.md)). Phases 0–5, 6a, 6b, 7, 8a and 8b-1 are done; 8b
-is in four steps.
+([AGENTS.md](AGENTS.md)). Phases 0–5, 6a, 6b, 7, 8a, 8b-1 and 8b-2 are
+done; 8b is in four steps.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **8b-2** | the UI rolling over when an authorized proposal waits (D95); `ui.choose` and the review as menus — at the open, `/review`, `/exit`, `fsp review` — with the commits windows made (D97); the closure without a current turn (D98) | — |
 | **8b-3** | the Operator Channel's prompts in the UI: a hold's four answers (D66), *allow for this session*, the prompt at the boundary (D74) | — |
 | **8b-4** | preemption and queueing (OP-002(a)(b)(c)); `/compact`; OP-010's thresholds and the restart they cause, on rollover's mechanism; the token estimate calibrated by `prompt_eval_count` (D88) | — |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |

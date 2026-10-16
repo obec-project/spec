@@ -146,7 +146,9 @@ def _refuse_budget(store: Store, session, needed, budget) -> Refused:
     return Refused("context-budget", "OC-007", detail, [rec])
 
 
-def assemble(store: Store, session, *, num_ctx, date, instructions="") -> dict:
+def assemble(
+    store: Store, session, *, num_ctx, date, instructions="", answering=True
+) -> dict:
     """The messages of one call, by priority within a budget (D88, OC-007).
 
     What always goes in is the persona, the instructions, the session's meta,
@@ -154,12 +156,13 @@ def assemble(store: Store, session, *, num_ctx, date, instructions="") -> dict:
     refused, ``context-budget``. Then, while they fit: the always-loaded
     semantic records (dropped as D77 says), the working set, the other turns
     newest first, the conversation's memory as an index, the semantic index.
+    With ``answering`` false and no turn, no turn goes in (D98).
     Deterministic; writes only a refusal."""
     budget = num_ctx - config.value(store, "answer_reserve")
     ts = turns(mil.transcript(store, session))
-    if not ts:
+    if not ts and answering:
         raise ValueError("the session %s has no stimulus to answer" % session)
-    first, current = ts[0], ts[-1]
+    first, current = (ts[0], ts[-1]) if ts else (None, None)
     conversation = mil.conversation_of(store, session)
     chosen = model.setting(store)
     persona = store.read_bytes(
@@ -177,7 +180,8 @@ def assemble(store: Store, session, *, num_ctx, date, instructions="") -> dict:
         "date: %s" % date,
     ]
     used = sum(_section_cost(t, sections[t]) for t in _TITLES)
-    used += _turn_cost(first)
+    if first is not None:
+        used += _turn_cost(first)
     if current is not first:
         used += _turn_cost(current)
     if used > budget:
@@ -270,7 +274,9 @@ def assemble(store: Store, session, *, num_ctx, date, instructions="") -> dict:
     system = "\n\n".join(
         "# %s\n%s" % (t, "\n".join(sections[t])) for t in _TITLES if sections[t]
     )
-    messages = [{"role": "system", "content": system}] + render(first)
+    messages = [{"role": "system", "content": system}]
+    if first is not None:
+        messages.extend(render(first))
     for turn in taken:
         messages.extend(render(turn))
     if current is not first:

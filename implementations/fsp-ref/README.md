@@ -27,8 +27,11 @@ or undone, and rollover, `/exit` with a Closure Payload, `/new`, `/resume` and
 Ollama or a declared fake, context assembled by priority within a budget,
 the cycle and its chain, and the Closure Payload emitted by the model. So
 is the live session: `bin/fsp run`, a line REPL whose process holds the
-session and suspends it on a signal or the end of input. Rollover, the
-review in the chat and the Operator Channel's prompts are not.
+session and suspends it on a signal or the end of input, its decisions as
+menus chosen with the arrow keys: the review of proposals, the promotions
+decided at `/exit`, and rollover whenever an authorized change waits. The
+Operator Channel's prompts for a held act, preemption and `/compact` are
+not.
 
 Python 3.10+, standard library only, Linux or macOS.
 
@@ -37,6 +40,7 @@ python3 -m unittest discover -s tests          # the implementation's own tests
 ./obec-adapter lifecycle init --store /tmp/S --operator op-1
 ./obec-adapter lifecycle verify --store /tmp/S
 cd ~/project && /path/to/fsp-ref/bin/fsp run --store /tmp/S   # the chat; ~/project is the workspace
+/path/to/fsp-ref/bin/fsp review --store /tmp/S                # the review, from a shell
 ```
 
 The adapter implements the [conformance adapter contract](../../conformance/ADAPTER.md)

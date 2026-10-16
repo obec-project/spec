@@ -11,6 +11,21 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The review as menus, rollover from the UI, and the closure without a
+  turn** (2026-10-15, D95, D96, D97, D98). Every decision the Operator
+  makes in the UI is a menu: on a terminal an inline one, arrows and
+  Enter, in cbreak so Ctrl+C still suspends, the terminal restored on
+  every exit and on the suspend path; elsewhere numbered. The review
+  logic runs in the worker and asks the main thread through a queue,
+  never holding the store's lock. The review opens at the open behind
+  *Review now* or *Later*, with `/review`, at `/exit` — after the payload
+  is emitted and recorded, the proposals and then each promotion with
+  *Approve*, *Edit and approve* or *Reject* — and as `fsp review` from a
+  shell. After the open and after every line the UI rolls over when an
+  authorized proposal waits, and says what was applied. `/allow` and
+  `/deny` work in the chat. The closure's context needs no turn, so
+  `/exit` right after a clear works. This closes step 8b-2.
+
 - **The Operator's `/allow` and `/deny`, and `set-parameter`** (2026-10-15,
   D96, D52). `operator.allow` and `operator.deny` record a proposal with
   `origin: operator` and its approval in one act, with no session and no

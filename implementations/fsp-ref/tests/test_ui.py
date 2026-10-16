@@ -37,11 +37,14 @@ class _Fake(http.server.BaseHTTPRequestHandler):
 
     def _send(self, status, body):
         data = json.dumps(body).encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
     def do_GET(self):
         if self.path == "/api/tags":
@@ -215,12 +218,12 @@ class UiTest(TempDirTest):
         self.assertEqual([r["text"] for r in stimuli], ["hi"])
 
     def test_a_double_slash_is_a_stimulus_and_commands_are_not(self):
-        code, out, err = self.run_fsp("//x\n/foo\n/review\n", '{"intents":[]}')
+        code, out, err = self.run_fsp("//x\n/foo\n/agenda\n", '{"intents":[]}')
         self.assertEqual(code, 0, err)
         stimuli = self.session_records("s-1", "stimulus")
         self.assertEqual([r["text"] for r in stimuli], ["/x"])
         self.assertIn("unknown command /foo", out)
-        self.assertIn("/review is not available yet", out)
+        self.assertIn("/agenda is not available yet", out)
 
     def test_a_known_command_with_wrong_arguments_prints_its_usage(self):
         acts = [r["act"] for r in self.log("operator-act")]
