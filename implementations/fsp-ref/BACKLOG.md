@@ -13,10 +13,11 @@ are done; 8b is in four steps.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **8b-4** | preemption and queueing (OP-002(a)(b)(c)); `/compact`; OP-010's thresholds and the restart they cause, on rollover's mechanism; the token estimate calibrated by `prompt_eval_count` (D88) | — |
+| **8b-4a** | preemption at the cycle boundary (D100): stdin read while a chain runs, `interrupt` in `cycle.respond`, *Keep* or *Discard* the interrupted chain's results, `results-discarded` and `chain-discarded` | — |
+| **8b-4b** | compaction (D101): `cycle.compact`, the `compaction` cut and its summary in context, `/compact`, utilization and the `context_soft`/`context_hard` thresholds, the hard restart and `cycle.resume`, calibration from the `cycle` records | — |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, the first activation through `fsp run` (D29), including a name already in use (D54), `fsp repo` (D32), `~/.fsp/config.json`/`credentials.json`, `notify_command` (D66) | — (the Operator's tooling; a real 3.2 through `repo clone` on a VM) |
-| **11** | the agenda (D62): `agenda.json`, `/agenda` and `fsp agenda`, the `agenda` proposal op, items' scoped authorizations; `fsp tick` and its host entry installed by `fsp init`/`repo`, the auto session and the main start suspending it (D63); worker skills, run in the background (D64) | — (unit tests) |
+| **11** | the agenda (D62), with the queue of its stimuli behind an active chain and the pre-session buffer (OP-002(b)(d)): `agenda.json`, `/agenda` and `fsp agenda`, the `agenda` proposal op, items' scoped authorizations; `fsp tick` and its host entry installed by `fsp init`/`repo`, the auto session and the main start suspending it (D63); worker skills, run in the background (D64) | — (unit tests) |
 
 After that: a test entity on Ollama, operated for days, measuring what
 [open question 1](../../design/OPEN-QUESTIONS.md) asks for.

@@ -11,6 +11,21 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **Preemption and compaction designed** (2026-10-15, D100, D101). A line
+  the Operator types during a chain stops it at the next cycle boundary;
+  the dispatched intents resolve, and the Operator keeps their results in
+  view — the chain resumed with the Operator's input — or discards them
+  with a record. Ctrl+C stays a suspend. The queue of other stimuli and
+  the pre-session buffer move to Phase 11: the agenda is their only
+  source. In fsp the transcript spans sessions, so OP-010's restart alone
+  frees no room: a compaction does — the entity saves what to keep and
+  summarizes, and the summary replaces the transcript before it. `/compact`
+  is that between lines; past the soft threshold the chain compacts and
+  goes on, a declared deviation, since cognition has no intent that
+  closes; past the hard one it compacts and restarts, and the chain
+  resumes. Calibration reads the estimate and Ollama's count from the
+  cycle records, so the same store gives the same context.
+
 - ***Allow once* lasts the intent's dispatch** (2026-10-15, D99). It ended
   at the first check it passed, so an act with two holds, or a redirect to
   the same domain, asked again until the hold limit refused it; and one
