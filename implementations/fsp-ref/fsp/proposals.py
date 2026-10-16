@@ -24,6 +24,7 @@ CATEGORIES = {
     "allow-domain": "rules",
     "deny-domain": "rules",
     "unset-domain": "rules",
+    "set-parameter": "parameters",
 }
 
 DOMAIN_OPS = ("allow-domain", "deny-domain", "unset-domain")
@@ -239,235 +240,184 @@ def revoke_windows(store: Store, record: str) -> list[str]:
     return closed_ids
 
 
+def _refuse_ops(store: Store, rule, check, detail, *, session, binding):
+    rec = log_append(
+        store,
+        "refusal",
+        rule=rule,
+        session=session,
+        binding=binding,
+        check=check,
+        detail=detail,
+    )
+    raise Refused(check, rule, detail, [rec])
+
+
+def _validate_ops(store: Store, ops, *, session=None, binding=None) -> list:
+    """Validate ``ops`` as a proposal's ops and return them normalized,
+    logging and raising the refusal of the first that fails, with the store's
+    write lock held (D57, D96)."""
+    from . import mil  # imported here to avoid an import cycle
+
+    def refuse(rule, check, detail):
+        _refuse_ops(store, rule, check, detail, session=session, binding=binding)
+
+    # 1. ops is a non-empty list of dicts each with an "op" string
+    if not (
+        isinstance(ops, list)
+        and len(ops) > 0
+        and all(isinstance(op, dict) and isinstance(op.get("op"), str) for op in ops)
+    ):
+        refuse("OC-001(b)", "ops", "invalid ops format")
+
+    # 2. binding set cannot be targeted
+    if any(op.get("op") in ("add-binding", "remove-binding") for op in ops):
+        refuse(
+            "OC-001(a)",
+            "binding-set",
+            "a proposal cannot change the Operator binding set",
+        )
+
+    # 3. validate each op
+    for op in ops:
+        op_name = op["op"]
+        if op_name not in CATEGORIES:
+            refuse("OC-001(b)", "op-unknown", "unknown operation %r" % (op_name,))
+        if op_name == "set-persona":
+            content = op.get("content")
+            if not isinstance(content, str):
+                refuse("OC-001(b)", "ops", "set-persona requires a string content")
+        elif op_name == "install-skill":
+            name = op.get("name")
+            if not (isinstance(name, str) and SKILL_NAME.match(name)):
+                refuse("OC-001(b)", "ops", "install-skill has invalid skill name")
+            files = op.get("files")
+            if not (
+                isinstance(files, dict)
+                and len(files) > 0
+                and all(
+                    isinstance(k, str) and isinstance(v, str) for k, v in files.items()
+                )
+            ):
+                refuse(
+                    "OC-001(b)",
+                    "ops",
+                    "install-skill requires a non-empty files dict of strings",
+                )
+            for file_path in files:
+                if not _is_valid_skill_path(file_path):
+                    refuse(
+                        "OC-001(b)",
+                        "ops",
+                        "invalid skill file path %r" % (file_path,),
+                    )
+        elif op_name in DOMAIN_OPS:
+            domain = op.get("domain")
+            if not (isinstance(domain, str) and DOMAIN_ENTRY.match(domain)):
+                refuse("OC-001(b)", "ops", "%s has invalid domain" % (op_name,))
+        elif op_name in RULE_OPS:
+            name = op.get("name")
+            if not (isinstance(name, str) and SKILL_NAME.match(name)):
+                refuse("OC-001(b)", "ops", "%s has invalid skill name" % (op_name,))
+            if op_name == "allow-skill":
+                digest = op.get("digest")
+                if not (isinstance(digest, str) and DIGEST_RE.match(digest)):
+                    refuse("OC-001(b)", "ops", "allow-skill requires a sha256 digest")
+        elif op_name == "set-parameter":
+            value = op.get("value")
+            if not (
+                op.get("name") == "always_loaded"
+                and isinstance(value, list)
+                and len(value) > 0
+                and all(isinstance(c, str) and c in mil.CATEGORIES for c in value)
+                and len(set(value)) == len(value)
+            ):
+                refuse(
+                    "OC-001(b)",
+                    "ops",
+                    "set-parameter requires the name always_loaded and a non-empty "
+                    "list of distinct categories",
+                )
+
+    # 4. no duplicate write targets
+    targets = set()
+    rule_targets = set()
+    for op in ops:
+        op_name = op["op"]
+        if op_name == "set-persona":
+            target = "persona.md"
+            if target in targets:
+                refuse("OC-001(b)", "ops", "duplicate write target %r" % (target,))
+            targets.add(target)
+        elif op_name == "install-skill":
+            name = op["name"]
+            for file_path in op["files"]:
+                target = "skills/%s/%s" % (name, file_path)
+                if target in targets:
+                    refuse("OC-001(b)", "ops", "duplicate write target %r" % (target,))
+                targets.add(target)
+        elif op_name in DOMAIN_OPS:
+            domain = op["domain"]
+            if ("domain", domain) in rule_targets:
+                refuse(
+                    "OC-001(b)",
+                    "rule-target",
+                    "domain %r is named by more than one op" % (domain,),
+                )
+            rule_targets.add(("domain", domain))
+        elif op_name in RULE_OPS:
+            name = op["name"]
+            if ("skill", name) in rule_targets:
+                refuse(
+                    "OC-001(b)",
+                    "rule-target",
+                    "skill %r is named by more than one op" % (name,),
+                )
+            rule_targets.add(("skill", name))
+
+    # 7. normalize ops
+    normalized = []
+    for op in ops:
+        op_name = op["op"]
+        if op_name == "set-persona":
+            normalized.append({"op": "set-persona", "content": op["content"]})
+        elif op_name == "install-skill":
+            normalized.append(
+                {
+                    "op": "install-skill",
+                    "name": op["name"],
+                    "files": dict(op["files"]),
+                }
+            )
+        elif op_name == "allow-skill":
+            normalized.append(
+                {
+                    "op": "allow-skill",
+                    "name": op["name"],
+                    "digest": op["digest"],
+                }
+            )
+        elif op_name in ("deny-skill", "unset-skill"):
+            normalized.append({"op": op_name, "name": op["name"]})
+        elif op_name in DOMAIN_OPS:
+            normalized.append({"op": op_name, "domain": op["domain"]})
+        elif op_name == "set-parameter":
+            normalized.append(
+                {
+                    "op": "set-parameter",
+                    "name": op["name"],
+                    "value": list(op["value"]),
+                }
+            )
+    return normalized
+
+
 def propose(root: str, ops: list) -> dict:
     """Originate an evolution proposal from ops (D57, D58, OC-001(b))."""
     store = Store(root)
     with store.write_lock():
-        # 1. ops is a non-empty list of dicts each with an "op" string
-        if not (
-            isinstance(ops, list)
-            and len(ops) > 0
-            and all(
-                isinstance(op, dict) and isinstance(op.get("op"), str) for op in ops
-            )
-        ):
-            rec = log_append(
-                store,
-                "refusal",
-                rule="OC-001(b)",
-                check="ops",
-                detail="invalid ops format",
-            )
-            raise Refused("ops", "OC-001(b)", "invalid ops format", [rec])
-
-        # 2. binding set cannot be targeted
-        if any(op.get("op") in ("add-binding", "remove-binding") for op in ops):
-            rec = log_append(
-                store,
-                "refusal",
-                rule="OC-001(a)",
-                check="binding-set",
-                detail="a proposal cannot change the Operator binding set",
-            )
-            raise Refused(
-                "binding-set",
-                "OC-001(a)",
-                "a proposal cannot change the Operator binding set",
-                [rec],
-            )
-
-        # 3. validate each op
-        for op in ops:
-            op_name = op["op"]
-            if op_name not in CATEGORIES:
-                rec = log_append(
-                    store,
-                    "refusal",
-                    rule="OC-001(b)",
-                    check="op-unknown",
-                    detail="unknown operation %r" % (op_name,),
-                )
-                raise Refused(
-                    "op-unknown",
-                    "OC-001(b)",
-                    "unknown operation %r" % (op_name,),
-                    [rec],
-                )
-            if op_name == "set-persona":
-                content = op.get("content")
-                if not isinstance(content, str):
-                    rec = log_append(
-                        store,
-                        "refusal",
-                        rule="OC-001(b)",
-                        check="ops",
-                        detail="set-persona requires a string content",
-                    )
-                    raise Refused(
-                        "ops",
-                        "OC-001(b)",
-                        "set-persona requires a string content",
-                        [rec],
-                    )
-            elif op_name == "install-skill":
-                name = op.get("name")
-                if not (isinstance(name, str) and SKILL_NAME.match(name)):
-                    rec = log_append(
-                        store,
-                        "refusal",
-                        rule="OC-001(b)",
-                        check="ops",
-                        detail="install-skill has invalid skill name",
-                    )
-                    raise Refused(
-                        "ops",
-                        "OC-001(b)",
-                        "install-skill has invalid skill name",
-                        [rec],
-                    )
-                files = op.get("files")
-                if not (
-                    isinstance(files, dict)
-                    and len(files) > 0
-                    and all(
-                        isinstance(k, str) and isinstance(v, str)
-                        for k, v in files.items()
-                    )
-                ):
-                    rec = log_append(
-                        store,
-                        "refusal",
-                        rule="OC-001(b)",
-                        check="ops",
-                        detail=(
-                            "install-skill requires a non-empty files dict of strings"
-                        ),
-                    )
-                    raise Refused(
-                        "ops",
-                        "OC-001(b)",
-                        "install-skill requires a non-empty files dict of strings",
-                        [rec],
-                    )
-                for file_path in files:
-                    if not _is_valid_skill_path(file_path):
-                        rec = log_append(
-                            store,
-                            "refusal",
-                            rule="OC-001(b)",
-                            check="ops",
-                            detail="invalid skill file path %r" % (file_path,),
-                        )
-                        raise Refused(
-                            "ops",
-                            "OC-001(b)",
-                            "invalid skill file path %r" % (file_path,),
-                            [rec],
-                        )
-            elif op_name in DOMAIN_OPS:
-                domain = op.get("domain")
-                if not (isinstance(domain, str) and DOMAIN_ENTRY.match(domain)):
-                    detail = "%s has invalid domain" % (op_name,)
-                    rec = log_append(
-                        store,
-                        "refusal",
-                        rule="OC-001(b)",
-                        check="ops",
-                        detail=detail,
-                    )
-                    raise Refused("ops", "OC-001(b)", detail, [rec])
-            elif op_name in RULE_OPS:
-                name = op.get("name")
-                if not (isinstance(name, str) and SKILL_NAME.match(name)):
-                    detail = "%s has invalid skill name" % (op_name,)
-                    rec = log_append(
-                        store,
-                        "refusal",
-                        rule="OC-001(b)",
-                        check="ops",
-                        detail=detail,
-                    )
-                    raise Refused("ops", "OC-001(b)", detail, [rec])
-                if op_name == "allow-skill":
-                    digest = op.get("digest")
-                    if not (isinstance(digest, str) and DIGEST_RE.match(digest)):
-                        detail = "allow-skill requires a sha256 digest"
-                        rec = log_append(
-                            store,
-                            "refusal",
-                            rule="OC-001(b)",
-                            check="ops",
-                            detail=detail,
-                        )
-                        raise Refused("ops", "OC-001(b)", detail, [rec])
-
-        # 4. no duplicate write targets
-        targets = set()
-        rule_targets = set()
-        for op in ops:
-            op_name = op["op"]
-            if op_name == "set-persona":
-                target = "persona.md"
-                if target in targets:
-                    rec = log_append(
-                        store,
-                        "refusal",
-                        rule="OC-001(b)",
-                        check="ops",
-                        detail="duplicate write target %r" % (target,),
-                    )
-                    raise Refused(
-                        "ops",
-                        "OC-001(b)",
-                        "duplicate write target %r" % (target,),
-                        [rec],
-                    )
-                targets.add(target)
-            elif op_name == "install-skill":
-                name = op["name"]
-                for file_path in op["files"]:
-                    target = "skills/%s/%s" % (name, file_path)
-                    if target in targets:
-                        rec = log_append(
-                            store,
-                            "refusal",
-                            rule="OC-001(b)",
-                            check="ops",
-                            detail="duplicate write target %r" % (target,),
-                        )
-                        raise Refused(
-                            "ops",
-                            "OC-001(b)",
-                            "duplicate write target %r" % (target,),
-                            [rec],
-                        )
-                    targets.add(target)
-            elif op_name in DOMAIN_OPS:
-                domain = op["domain"]
-                if ("domain", domain) in rule_targets:
-                    detail = "domain %r is named by more than one op" % (domain,)
-                    rec = log_append(
-                        store,
-                        "refusal",
-                        rule="OC-001(b)",
-                        check="rule-target",
-                        detail=detail,
-                    )
-                    raise Refused("rule-target", "OC-001(b)", detail, [rec])
-                rule_targets.add(("domain", domain))
-            elif op_name in RULE_OPS:
-                name = op["name"]
-                if ("skill", name) in rule_targets:
-                    detail = "skill %r is named by more than one op" % (name,)
-                    rec = log_append(
-                        store,
-                        "refusal",
-                        rule="OC-001(b)",
-                        check="rule-target",
-                        detail=detail,
-                    )
-                    raise Refused("rule-target", "OC-001(b)", detail, [rec])
-                rule_targets.add(("skill", name))
+        # 1-4, 7. validate and normalize the ops
+        normalized = _validate_ops(store, ops)
 
         # 5. require live session
         session = vital.require_entity_session(root, "propose")
@@ -491,13 +441,13 @@ def propose(root: str, ops: list) -> dict:
                 [rec],
             )
 
-        # 6b. pending cap (D52)
+        # 6b. pending cap (D52, D96)
         cap = config.value(store, "pending_cap")
-        if len(auth["proposals"]) >= cap:
-            detail = "%d proposals pending; the cap is %d" % (
-                len(auth["proposals"]),
-                cap,
-            )
+        own = sum(
+            1 for p in auth["proposals"].values() if p.get("origin") != "operator"
+        )
+        if own >= cap:
+            detail = "%d proposals pending; the cap is %d" % (own, cap)
             rec = log_append(
                 store,
                 "refusal",
@@ -507,33 +457,6 @@ def propose(root: str, ops: list) -> dict:
                 detail=detail,
             )
             raise Refused("pending-cap", "OC-001(b)", detail, [rec])
-
-        # 7. normalize ops
-        normalized = []
-        for op in ops:
-            op_name = op["op"]
-            if op_name == "set-persona":
-                normalized.append({"op": "set-persona", "content": op["content"]})
-            elif op_name == "install-skill":
-                normalized.append(
-                    {
-                        "op": "install-skill",
-                        "name": op["name"],
-                        "files": dict(op["files"]),
-                    }
-                )
-            elif op_name == "allow-skill":
-                normalized.append(
-                    {
-                        "op": "allow-skill",
-                        "name": op["name"],
-                        "digest": op["digest"],
-                    }
-                )
-            elif op_name in ("deny-skill", "unset-skill"):
-                normalized.append({"op": op_name, "name": op["name"]})
-            elif op_name in DOMAIN_OPS:
-                normalized.append({"op": op_name, "domain": op["domain"]})
 
         digest = sha256(canonical(normalized))
         pid = "P-" + secrets.token_hex(8)
@@ -564,6 +487,49 @@ def propose(root: str, ops: list) -> dict:
 
         # 10. return
         return {"proposal": pid, "log_records": [rec]}
+
+
+def record_operator_proposal(store: Store, ops: list, *, binding: str) -> dict:
+    """Record the Operator's own structural act: a proposal and its approval,
+    with the write lock held (D96, OP-011(a)). Needs no session, counts
+    against no cap and commits nothing."""
+    normalized = _validate_ops(store, ops, binding=binding)
+    auth = read_auth(store)
+    digest = sha256(canonical(normalized))
+    pid = "P-" + secrets.token_hex(8)
+    categories = sorted(list(set(CATEGORIES[op["op"]] for op in normalized)))
+    rec = log_append(
+        store,
+        "proposal",
+        rule="OC-001(b)",
+        binding=binding,
+        proposal=pid,
+        digest=digest,
+        categories=categories,
+        ops=normalized,
+        origin="operator",
+    )
+    auth["proposals"][pid] = {
+        "digest": digest,
+        "ops": normalized,
+        "record": rec,
+        "session": None,
+        "origin": "operator",
+        "binding": binding,
+    }
+    if sil.current_cycle() is not None:
+        auth["proposals"][pid]["cycle"] = sil.current_cycle()
+    write_auth(store, auth)
+    loc = sil.operator_act_located(
+        store,
+        "approve",
+        binding=binding,
+        rule="OC-001(b)",
+        proposal=pid,
+        digest=digest,
+    )
+    record_approval(store, pid, digest, loc["id"], binding, authorization=loc)
+    return {"proposal": pid, "digest": digest, "log_records": [rec, loc["id"]]}
 
 
 def attempt_propose(store: Store, cls, target):
@@ -619,6 +585,18 @@ def _skill_files(document, changes, name):
                 "exec": existing["exec"] if existing is not None else False,
             }
     return sorted(entries.values(), key=lambda f: f["path"])
+
+
+def head_skill_digest(store: Store, name: str):
+    """The digest of skill ``name`` in the head generation, computed as a
+    commit computes it (D16, D70), or ``None`` when the head holds no file of
+    that skill."""
+    gen = chain.gen_relpath(sil.read_head(store)["entry"])
+    document = integrity_document(store.path(gen))[0]
+    files = _skill_files(document, {}, name)
+    if not files:
+        return None
+    return skill_manifest.skill_digest(files)
 
 
 def _refuse_rule(store: Store, session, detail: str):
@@ -699,6 +677,36 @@ def _rules_change(store, head, changes, ops, session):
                 )
             del skills[name]
     return canonical(rules)
+
+
+def _config_change(store, head, ops, session):
+    """Apply the proposal's ``set-parameter`` ops, in order, to the
+    ``config.json`` of the generation being committed and return its new
+    bytes (D96)."""
+    gen = chain.gen_relpath(head["entry"])
+    try:
+        settings = store.read_json(gen + "/config.json")
+    except (OSError, ValueError):
+        settings = None
+    if not isinstance(settings, dict):
+        rec = log_append(
+            store,
+            "refusal",
+            rule="OC-001(b)",
+            session=session,
+            check="parameter-target",
+            detail="the config of generation %d cannot be read as settings"
+            % (head["entry"],),
+        )
+        raise Refused(
+            "parameter-target",
+            "OC-001(b)",
+            "the config of generation %d cannot be read as settings" % (head["entry"],),
+            [rec],
+        )
+    for op in ops:
+        settings[op["name"]] = list(op["value"])
+    return canonical(settings)
 
 
 def _window_open(grant, now_iso: str) -> bool:
@@ -866,6 +874,9 @@ def _commit(store: Store, proposal_id: str, *, session) -> dict:
     rule_ops = [op for op in prop["ops"] if op["op"] in RULE_OPS]
     if rule_ops:
         changes["rules.json"] = _rules_change(store, head, changes, rule_ops, session)
+    parameter_ops = [op for op in prop["ops"] if op["op"] == "set-parameter"]
+    if parameter_ops:
+        changes["config.json"] = _config_change(store, head, parameter_ops, session)
 
     prop["committing"] = {
         "entry": head["entry"] + 1,

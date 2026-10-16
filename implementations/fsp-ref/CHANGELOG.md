@@ -11,6 +11,19 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The Operator's `/allow` and `/deny`, and `set-parameter`** (2026-10-15,
+  D96, D52). `operator.allow` and `operator.deny` record a proposal with
+  `origin: operator` and its approval in one act, with no session and no
+  Vital Check, and the next Closure's Endure commits it; `/allow skill`
+  carries the skill's digest in the head generation, and a skill the head
+  lacks is refused. The validation of ops is one function for the
+  entity's proposals and the Operator's, so a domain not in D76's form is
+  refused either way. The entity's cap counts only its own proposals.
+  `set-parameter` writes `always_loaded` into the structural
+  `config.json`, the other keys kept, under an approval or a window on
+  `parameters`. A test shows the entity told past the cap in the next
+  cycle's results.
+
 - **Promotions decided before the close** (2026-10-15, D80, D81, D83,
   D84, D94). `/exit` is now two acts: `operator.record_closure` records
   the payload and its promotion requests, the probes run on them there,

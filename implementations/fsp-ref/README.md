@@ -58,7 +58,7 @@ been built, and [AGENTS.md](AGENTS.md) the rules for working on it.
 | `fsp/verify.py` | verification, returning findings |
 | `fsp/sil.py` | the integrity log, first activation, bindings, the passive signal, the commit pipeline |
 | `fsp/lifecycle.py` | the gated start, the live session and the process holding it, suspend, close and its Closure, rollover, revocation, decommission |
-| `fsp/operator.py` | the Operator's acts: bindings, the workspace, approvals, windows |
+| `fsp/operator.py` | the Operator's acts: bindings, the workspace, approvals, windows, `/allow` and `/deny` |
 | `fsp/proposals.py` | proposals, the authorization state, the commit of a proposal, the Closure's Endure phase |
 | `fsp/exec.py` | the native primitives `file_read`, `file_write`, `file_list` and `http_fetch`, inside the workspace and outside the store, and skills under the watchdog |
 | `fsp/monitor.py` | the picture of what an execution touched, compared after it |

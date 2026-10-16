@@ -789,6 +789,55 @@ def approve(root: str, proposal_id: str, *, binding=None):
         return {"log_records": [loc["id"]]}
 
 
+def _structural_act(root: str, verb: str, kind, target, binding):
+    """The Operator's own rule act: the rule op of ``verb`` and ``kind``,
+    recorded as a proposal and its approval for the next Endure (D96)."""
+    store = Store(root)
+    with store.write_lock():
+        acting = sil.acting_binding(store, binding)
+        if kind == "domain":
+            op = {"op": verb + "-domain", "domain": target}
+        elif kind == "skill":
+            op = {"op": verb + "-skill", "name": target}
+            if verb == "allow":
+                digest = proposals.head_skill_digest(store, target)
+                if digest is None:
+                    detail = "skill %r is not installed" % (target,)
+                    rec = log_append(
+                        store,
+                        "refusal",
+                        rule="OC-008(c)",
+                        binding=acting,
+                        check="skill-unknown",
+                        detail=detail,
+                    )
+                    raise Refused("skill-unknown", "OC-008(c)", detail, [rec])
+                op["digest"] = digest
+        else:
+            detail = "%s takes domain or skill, not %r" % (verb, kind)
+            rec = log_append(
+                store,
+                "refusal",
+                rule="OC-001(b)",
+                binding=acting,
+                check="ops",
+                detail=detail,
+            )
+            raise Refused("ops", "OC-001(b)", detail, [rec])
+        out = proposals.record_operator_proposal(store, [op], binding=acting)
+        return {"proposal": out["proposal"], "log_records": out["log_records"]}
+
+
+def allow(root: str, kind, target, *, binding=None):
+    """Allow a domain or a skill: the Operator's own structural act (D96)."""
+    return _structural_act(root, "allow", kind, target, binding)
+
+
+def deny(root: str, kind, target, *, binding=None):
+    """Deny a domain or a skill: the Operator's own structural act (D96)."""
+    return _structural_act(root, "deny", kind, target, binding)
+
+
 def grant(root: str, *, expiry=None, budget=None, scope=None, binding=None):
     """Open an authorization window (D17, D59, OC-001(b))."""
     store = Store(root)

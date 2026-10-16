@@ -13,7 +13,7 @@ is in four steps.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **8b-2** | the UI rolling over when an authorized proposal waits (D95); `/allow` and `/deny` as the Operator's proposal and approval, and `set-parameter` (D96); `ui.choose` and the review as menus — at the open, `/review`, `/exit`, `fsp review` — with the commits windows made (D97); the closure without a current turn (D98); a test that the entity is told past the pending cap (D52) | — |
+| **8b-2** | the UI rolling over when an authorized proposal waits (D95); `ui.choose` and the review as menus — at the open, `/review`, `/exit`, `fsp review` — with the commits windows made (D97); the closure without a current turn (D98) | — |
 | **8b-3** | the Operator Channel's prompts in the UI: a hold's four answers (D66), *allow for this session*, the prompt at the boundary (D74) | — |
 | **8b-4** | preemption and queueing (OP-002(a)(b)(c)); `/compact`; OP-010's thresholds and the restart they cause, on rollover's mechanism; the token estimate calibrated by `prompt_eval_count` (D88) | — |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
