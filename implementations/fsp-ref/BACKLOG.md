@@ -8,12 +8,11 @@ done is in [CHANGELOG.md](CHANGELOG.md).
 ## 1. Phases
 
 Each phase ends with `run.py --only …` green on its invariants
-([AGENTS.md](AGENTS.md)). Phases 0–5, 6a, 6b, 7, 8a, 8b-1 and 8b-2 are
-done; 8b is in four steps.
+([AGENTS.md](AGENTS.md)). Phases 0–5, 6a, 6b, 7, 8a and 8b-1 to 8b-3
+are done; 8b is in four steps.
 
 | Phase | Scope | Suite |
 |---|---|---|
-| **8b-3** | *Allow once* scoped to the intent's dispatch, retries included, cleared when it ends (D99) | — |
 | **8b-4** | preemption and queueing (OP-002(a)(b)(c)); `/compact`; OP-010's thresholds and the restart they cause, on rollover's mechanism; the token estimate calibrated by `prompt_eval_count` (D88) | — |
 | **9** | the full suite; 3.2 on a VM or remote machine; claim | **the trigger for announcing the repository** |
 | **10** | a complete interactive `fsp init`, the first activation through `fsp run` (D29), including a name already in use (D54), `fsp repo` (D32), `~/.fsp/config.json`/`credentials.json`, `notify_command` (D66) | — (the Operator's tooling; a real 3.2 through `repo clone` on a VM) |
@@ -31,6 +30,10 @@ After that: a test entity on Ollama, operated for days, measuring what
   Until the registry exists, a workspace is checked against its own store and
   `~/.fsp`.
 - **Phase 11 — the periodicity of an item** has no format yet (D62).
+- **Phase 11 — *Allow once* per dispatch.** `fsp/channel.py` keeps one once
+  set for the process, cleared when an intent's dispatch ends (D99); with
+  worker skills running beside the main cycle (D64) it is to be keyed by
+  the dispatch, so one ending cannot clear another's.
 - **Phase 11 — a run's outcome reaches the Operator** through the Operator
   Channel (D63), and no channel outside the UI is decided: an auto session
   has no UI.

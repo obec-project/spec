@@ -191,42 +191,45 @@ def dispatch(root, cycle_id, intent):
     ``{"op", "outcome", ...}``."""
     op = intent["op"]
     holds = 0
-    while True:
-        try:
-            with sil.originated_by(cycle_id):
-                result = _dispatch_to_owner(root, cycle_id, intent)
-        except channel.Held as e:
-            hold = e.hold
-            if holds == HOLD_LIMIT:
-                return _refuse_held(
-                    root,
-                    cycle_id,
-                    hold,
-                    "hold-limit",
-                    "OC-001(c)",
-                    "more than %d holds for one intent" % HOLD_LIMIT,
-                    hold=hold["id"],
-                )
-            holds += 1
-            if channel.ask(hold) == "deny":
-                return _refuse_held(
-                    root,
-                    cycle_id,
-                    hold,
-                    hold["check"],
-                    hold["rule"],
-                    "the Operator denied it",
-                    reason="denied",
-                    hold=hold["id"],
-                )
-            continue
-        except Refused as e:
-            return _refused_outcome(op, e.check, e.rule, e.detail)
-        except (KeyError, TypeError, AttributeError, ValueError) as e:
-            return {"op": op, "outcome": "invalid", "detail": str(e)}
-        break
-    body = {k: v for k, v in result.items() if k != "log_records"}
-    return {"op": op, "outcome": "done", **body}
+    try:
+        while True:
+            try:
+                with sil.originated_by(cycle_id):
+                    result = _dispatch_to_owner(root, cycle_id, intent)
+            except channel.Held as e:
+                hold = e.hold
+                if holds == HOLD_LIMIT:
+                    return _refuse_held(
+                        root,
+                        cycle_id,
+                        hold,
+                        "hold-limit",
+                        "OC-001(c)",
+                        "more than %d holds for one intent" % HOLD_LIMIT,
+                        hold=hold["id"],
+                    )
+                holds += 1
+                if channel.ask(hold) == "deny":
+                    return _refuse_held(
+                        root,
+                        cycle_id,
+                        hold,
+                        hold["check"],
+                        hold["rule"],
+                        "the Operator denied it",
+                        reason="denied",
+                        hold=hold["id"],
+                    )
+                continue
+            except Refused as e:
+                return _refused_outcome(op, e.check, e.rule, e.detail)
+            except (KeyError, TypeError, AttributeError, ValueError) as e:
+                return {"op": op, "outcome": "invalid", "detail": str(e)}
+            break
+        body = {k: v for k, v in result.items() if k != "log_records"}
+        return {"op": op, "outcome": "done", **body}
+    finally:
+        channel.end_intent()
 
 
 def _json_default(value):

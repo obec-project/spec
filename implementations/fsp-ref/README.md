@@ -29,9 +29,9 @@ the cycle and its chain, and the Closure Payload emitted by the model. So
 is the live session: `bin/fsp run`, a line REPL whose process holds the
 session and suspends it on a signal or the end of input, its decisions as
 menus chosen with the arrow keys: the review of proposals, the promotions
-decided at `/exit`, and rollover whenever an authorized change waits. The
-Operator Channel's prompts for a held act, preemption and `/compact` are
-not.
+decided at `/exit`, rollover whenever an authorized change waits, and the
+prompt at a held act — allow once, for this chat, add to the allowlist, or
+deny. Preemption and `/compact` are not.
 
 Python 3.10+, standard library only, Linux or macOS.
 

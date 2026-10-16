@@ -417,6 +417,21 @@ class HoldTests(TempDirTest):
             self.holds[0]["key"], ("skill-path", "example", digest, self.secret)
         )
 
+    def test_a_skill_held_with_a_marked_path_runs_on_one_allow_once_each(self):
+        self.install(
+            run=ECHO,
+            argv=["sh", "{skill}/run.sh", "{args.out}"],
+            args={"out": {"type": "path"}},
+        )
+        self.start()
+        self.script = ["once", "once"]
+        out = self.dispatch(
+            "invoke-skill", skill="example", args={"out": {"path": self.secret}}
+        )
+        self.assertEqual(out["outcome"], "done")
+        self.assertEqual(out["stdout"].decode().splitlines(), [self.secret])
+        self.assertEqual(len(self.holds), 2)
+
     def test_a_marked_path_outside_of_a_skill_not_installed_is_refused_as_today(self):
         self.start()
         out = self.dispatch(
@@ -476,6 +491,13 @@ class HoldTests(TempDirTest):
         self.assertEqual(out["outcome"], "refused")
         self.assertEqual(out["check"], "no-session")
         self.assertEqual(self.log("execution"), [])
+        self.start()
+        channel.register(self.asker)
+        self.script = ["deny"]
+        again = self.dispatch("file_read", path=self.secret)
+        self.assertEqual(again["outcome"], "refused")
+        self.assertEqual(len(self.holds), 2)
+        self.assertEqual(self.holds[1]["key"], ("path", self.secret))
 
     def test_the_asker_is_called_with_the_store_unlocked(self):
         self.start()
@@ -499,6 +521,60 @@ class HoldTests(TempDirTest):
         self.dispatch("file_read", path=self.secret)
         self.assertEqual(free, [True])
 
+    def test_the_once_set_is_empty_after_any_dispatch(self):
+        self.start()
+        self.script = ["once"]
+        out = self.dispatch("file_read", path=self.secret)
+        self.assertEqual(out["outcome"], "done")
+        self.assertFalse(channel.allowed(("path", self.secret)))
+
+        def owner(root, cycle_id, intent):
+            raise channel.Held(
+                {
+                    "id": "L-000000",
+                    "op": "file_read",
+                    "target": "t",
+                    "resolved": "/t",
+                    "asker": "file_read",
+                    "kind": "path",
+                    "check": "workspace-boundary",
+                    "rule": "OC-008(a)",
+                    "key": ("path", "/t"),
+                }
+            )
+
+        self.script = ["once"] * 8
+        with mock.patch.object(cycle, "_dispatch_to_owner", owner):
+            out = self.dispatch("file_read", path="/t")
+        self.assertEqual(out["check"], "hold-limit")
+        self.assertFalse(channel.allowed(("path", "/t")))
+
+        calls = []
+
+        def raising(root, cycle_id, intent):
+            calls.append(intent)
+            if len(calls) == 1:
+                raise channel.Held(
+                    {
+                        "id": "L-000001",
+                        "op": "file_read",
+                        "target": "u",
+                        "resolved": "/u",
+                        "asker": "file_read",
+                        "kind": "path",
+                        "check": "workspace-boundary",
+                        "rule": "OC-008(a)",
+                        "key": ("path", "/u"),
+                    }
+                )
+            raise RuntimeError("the act failed")
+
+        self.script = ["once"]
+        with mock.patch.object(cycle, "_dispatch_to_owner", raising):
+            with self.assertRaises(RuntimeError):
+                self.dispatch("file_read", path="/u")
+        self.assertFalse(channel.allowed(("path", "/u")))
+
     # -- the channel -----------------------------------------------------
 
     def test_clear_empties_both_sets(self):
@@ -512,6 +588,8 @@ class HoldTests(TempDirTest):
         channel.allow_once(("path", "/a"))
         channel.allow_chat(("path", "/b"))
         self.assertTrue(channel.allowed(("path", "/a")))
+        self.assertTrue(channel.allowed(("path", "/a")))
+        channel.end_intent()
         self.assertFalse(channel.allowed(("path", "/a")))
         self.assertTrue(channel.allowed(("path", "/b")))
         self.assertTrue(channel.allowed(("path", "/b")))

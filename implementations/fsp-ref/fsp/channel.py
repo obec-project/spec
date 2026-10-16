@@ -50,15 +50,10 @@ def can_ask():
 
 
 def allowed(key) -> bool:
-    """Whether an extension lets ``key`` pass: the chat's, or the once set's,
-    which it consumes (D99)."""
+    """Whether an extension lets ``key`` pass: the chat's, or the once set's
+    (D99)."""
     with _LOCK:
-        if key in _CHAT:
-            return True
-        if key in _ONCE:
-            _ONCE.discard(key)
-            return True
-    return False
+        return key in _CHAT or key in _ONCE
 
 
 def allow_once(key):
@@ -69,6 +64,12 @@ def allow_once(key):
 def allow_chat(key):
     with _LOCK:
         _CHAT.add(key)
+
+
+def end_intent():
+    """End the once extensions of the intent being dispatched (D99)."""
+    with _LOCK:
+        _ONCE.clear()
 
 
 def clear():

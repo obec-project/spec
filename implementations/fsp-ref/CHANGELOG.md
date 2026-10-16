@@ -11,6 +11,14 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- ***Allow once* lasts the intent's dispatch** (2026-10-15, D99). It ended
+  at the first check it passed, so an act with two holds, or a redirect to
+  the same domain, asked again until the hold limit refused it; and one
+  whose retried act was refused before the check stayed in the process,
+  letting a later act on the same target pass unasked. It now lasts the
+  intent's dispatch, retries included, and a `finally` clears it however
+  the dispatch ends. This closes step 8b-3.
+
 - **A hold in a main session is a prompt** (2026-10-15, D99). The four
   holds of D74 and D16 — a read and a skill's path argument outside the
   workspace, a domain outside the allowlist, a skill the rules do not
