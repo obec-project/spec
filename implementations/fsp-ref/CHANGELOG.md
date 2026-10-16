@@ -11,6 +11,18 @@ Decision numbers (`Dnn`) and gap numbers (`Gnn`) refer to
 
 ## Phase 8 — cognition and the UI (in progress)
 
+- **The prompt at a hold designed** (2026-10-15, D99; D66, D74 revised).
+  In a main session the act stops where D74 and D16 hold, logs the hold
+  and raises out of the store's lock; the cycle asks the Operator through
+  the UI's menu and dispatches the act again from its first check, since
+  anything may have changed meanwhile. Without the UI the hold is the
+  refusal it was. *Allow for this chat* replaces "for this session": a
+  rollover or an OP-010 restart opens a new session the Operator does not
+  see, and a permission that ended there would ask again for nothing.
+  *Add to the allowlist* lets the act go now and records the Operator's
+  proposal and approval, committed at the rollover after the line, since
+  the commit cannot run while the chain does.
+
 - **The review as menus, rollover from the UI, and the closure without a
   turn** (2026-10-15, D95, D96, D97, D98). Every decision the Operator
   makes in the UI is a menu: on a terminal an inline one, arrows and
