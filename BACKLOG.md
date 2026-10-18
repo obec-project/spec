@@ -47,7 +47,26 @@ steps go with evidence and review; step 3.2 requires a real second host;
   use* ([CONTRIBUTING §1](CONTRIBUTING.md#1-guiding-principles)): the Kernel,
   the Core and the Profile. In them a reference that names where a term is
   defined satisfies the rule, and a changed Kernel sentence is an editorial
-  revision, made in the Core's §2 in the same commit.
+  revision, made in the Core's §2 in the same commit. Known defects:
+  - **The Primer teaches Profile machinery as OBEC.** It says structural
+    change lands at close and never mid-session (§5, §9), and it describes
+    the Heartbeat and its states (§8) and conversations across sessions
+    (§6.1), without saying any of it is the Profile's. It also points ahead
+    to §9 in §5, with the close not yet explained.
+  - **Undefined terms.** "Deterministic probe layer" and "consolidated
+    content" (OC-002(d)) and "drift digests" (OC-003(c), OC-005(a)) have no
+    entry in the Core's glossary. The Kernel does not point to that
+    glossary at all.
+  - **A dangling reference.** OC-004(c) cites `(§4)`, which the Kernel does
+    not have.
+  - **The bold promise of Core §1.** *Expiry* and *commit budget* are bold
+    at first use but are not in §7. *Endure Protocol*, *FAP* and *Sleep* are
+    in §7 but appear nowhere in the Core's body.
+  - **The lock in OP-012.** It covers "structural content only", yet the
+    commit also writes the baseline and the chain entry (OC-003(d)).
+  - **"Commit" for a cycle.** OP-003(b) and OP-021(b) use it, where cycles
+    dispatch intents. OP-005(a) also uses OP-009's terms with no pointer to
+    them.
 - **Not verifiable from inside the repository:** whether the repository
   description (153 characters) reads well; whether the "proposal" framing is
   calibrated — it may be too modest, since the architecture has run twice and
