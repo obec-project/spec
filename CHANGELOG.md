@@ -137,6 +137,24 @@ The conformance suite carries its own version line; a claim names both, as in
   A hardening revision, so the minor version advances at the next release.
   Before 1.0 there is no entity to migrate.
 
+- **Editorial revision: the part that reasons is the reasoning path**
+  (ADR 0007). The specification used *cognition* for the one part of the
+  entity the invariants bound, and *cognitive* for the entity as a whole
+  (Core §1). Read in the broad sense, "no operation reachable from
+  cognition writes integrity content" would cover the whole entity, and
+  the sentence would lose its meaning. *Cognitive* now describes the
+  entity, and the part is the reasoning path, whose engine is the model.
+  - **Kernel:** OC-001(c), OC-003(c), OC-005(b)(c), OC-006 and its title,
+    OC-007 and OC-009 name the reasoning path, and Core §2 verbatim.
+  - **Rest of the Core:** §3's Cognitive Processing Engine is the
+    Reasoning Interface Layer (RIL). The glossary replaces *Cognition* and
+    *Cognitive cycle* with *Cognitive*, *Cycle* and *Reasoning path*.
+  - **Profile:** §2 is *Reasoning*, OP-001's cognitive cycle is the
+    cycle, and OP-024's table names the RIL.
+  - **Primer and README** follow.
+
+  No requirement changes.
+
 **Conformance suite**
 
 - Steps 7.1 and 7.2 read each context source's class. Step 7.2 required
@@ -232,6 +250,14 @@ The conformance suite carries its own version line; a claim names both, as in
   passed without validating anything at the moment of execution.
   A change to what conformance means, so the suite's version moves at the
   next release.
+
+- **The adapter contract follows ADR 0007.** `describe operations`
+  reports `reachable_from_reasoning`, and the four required boundaries are
+  `reasoning-integrity`, `reasoning-model`, `reasoning-knowledge` and
+  `reasoning-host`. TESTS.md, the runner and the stub follow. An adapter
+  reporting the old names fails steps 1.9, 5.1 to 5.3, 8.11, 9.1 and 9.2,
+  so the suite's version moves at the next release. fsp-ref-profile,
+  frozen, keeps the old names and its claim against 0.12.0.
 
 **Repository**
 

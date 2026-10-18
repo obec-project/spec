@@ -83,7 +83,7 @@ The word *cognition* is no longer used for a part. *Cognitive cycle* becomes
 | Was | Becomes |
 |---|---|
 | *cognition*, the part | *the reasoning path* |
-| *cognitive operation*, an operation reachable from cognition | an operation reachable from the reasoning path |
+| *cognitive operation*, an operation reachable from cognition | in OC-005(b), "nothing the reasoning path does"; elsewhere, an operation reachable from the reasoning path |
 | *Cognitive Processing Engine (CPE)*, Core §3 | **Reasoning Interface Layer (RIL)**, beside the Memory Interface Layer |
 | *cognitive cycle* | *cycle* |
 | OC-006's category, *cognition* | *reasoning* |

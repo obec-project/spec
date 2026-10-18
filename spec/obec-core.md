@@ -125,30 +125,31 @@ Every proposal MUST be logged at origination, and every commit MUST be logged
 with the identity of the authorization that covered it.
 
 **(c) The Operator is reachable.** There MUST exist a path by which any part of
-the implementation reaches the Operator **without passing through cognition** —
-which may be compromised, or may simply have no part in the condition being
-reported. That path MUST provide a **passive signal**: a persistent,
-network-independent record in the Entity Store, written when live delivery has
-failed a declared number of attempts or the condition requires a halt. The
-passive signal MUST be directly readable by the Operator with nothing running,
-MUST be checked as the first gate of every start, and while it is present **no
-session credential may be issued**. Clearing it is an explicit, logged Operator
-act. How delivery is realized — terminal, file, message transport — is
-implementation-defined; that it does not traverse cognition is not.
+the implementation reaches the Operator **without passing through the reasoning
+path** (OC-006) — which may be compromised, or may simply have no part in the
+condition being reported. That path MUST provide a **passive signal**: a
+persistent, network-independent record in the Entity Store, written when live
+delivery has failed a declared number of attempts or the condition requires a
+halt. The passive signal MUST be directly readable by the Operator with nothing
+running, MUST be checked as the first gate of every start, and while it is
+present **no session credential may be issued**. Clearing it is an explicit,
+logged Operator act. How delivery is realized — terminal, file, message
+transport — is implementation-defined; that it does not traverse the reasoning
+path is not.
 
 *Test.* **(a)** Remove every binding in turn: the removal of the last one must
 be refused, and a start that follows must issue a credential. Inspect any
-session log; every Operator act must name a
-binding. Attempt a proposal targeting the binding set; it must be refused.
-**(b)** Attempt a structural commit with no authorization, with an expired grant,
-with an exhausted budget, with an out-of-scope change, and with an authorization
-produced by the implementation rather than by an Operator; all five must be
-refused and logged. Let a grant expire mid-operation; the next in-scope proposal
-must fall back to per-proposal approval with no intervention. **(c)** Escalate a
-condition with cognition disabled; the Operator must still be reached.
-Write a passive signal and start; the start must suspend before any credential is
-issued. Confirm the signal is readable as a plain artifact with nothing running,
-and that clearing it is logged.
+session log; every Operator act must name a binding. Attempt a proposal
+targeting the binding set; it must be refused. **(b)** Attempt a structural
+commit with no authorization, with an expired grant, with an exhausted budget,
+with an out-of-scope change, and with an authorization produced by the
+implementation rather than by an Operator; all five must be refused and logged.
+Let a grant expire mid-operation; the next in-scope proposal must fall back to
+per-proposal approval with no intervention. **(c)** Escalate a condition with
+the reasoning path disabled; the Operator must still be reached. Write a passive
+signal and start; the start must suspend before any credential is issued.
+Confirm the signal is readable as a plain artifact with nothing running, and
+that clearing it is logged.
 
 *Note (non-normative).* (c) and OC-002(b) are complements: OC-002(b) guarantees
 that an Operator act always lands; (c) guarantees the Operator always learns
@@ -253,7 +254,7 @@ content** is how an Operator runs the entity: where it may act, what it may do
 there, the model it uses, and its operating limits. It is changed only by an
 Operator act: no proposal may originate a change to it, no standing grant may
 cover one, and it is not part of the structural state the chain verifies.
-Cognition MAY read it.
+The reasoning path MAY read it.
 
 No operation may exist whose parameters allow it to write outside its own class:
 a request that would reach another class MUST be rejected whatever operation
@@ -375,37 +376,37 @@ not survive is a weakening — see §4, which is where the distinction is drawn.
 credential, authorization state, drift digests — MUST have exactly one write
 path.
 
-**(b) Unreachable from cognition.** No cognitive operation may reach integrity
-state, by any operation and by any parameter of any operation.
+**(b) Unreachable from the reasoning path.** Nothing the reasoning path does may
+reach integrity state, by any operation and by any parameter of any operation.
 
 **(c) Binding decisions.** Integrity decisions — credential issuance and
-revocation, verification results, halts — bind cognition and MUST NOT be
-reversible, suspendable, or conditionable by it.
+revocation, verification results, halts — bind the reasoning path and MUST NOT
+be reversible, suspendable, or conditionable by it.
 
 Integrity content is not itself subject to OC-001(b): it implements OC-001(b),
 and gating it by itself would be circular. That exemption is precisely why this
 rule is required — without it, the machinery that judges the entity would be the
 one part of the store no invariant defends.
 
-*Test.* Enumerate every operation reachable from cognition and, for
+*Test.* Enumerate every operation reachable from the reasoning path and, for
 each, the state it can write and whose decision it can reverse; any that touches
 integrity state or reverses an integrity decision is a failure. Attempt to reach
 integrity content through parameter manipulation of a permitted operation — a
-path, an identifier, a target selector; all must be rejected and logged. Revoke a
-credential mid-operation and confirm cognition cannot restore it.
+path, an identifier, a target selector; all must be rejected and logged. Revoke
+a credential mid-operation and confirm the reasoning path cannot restore it.
 
-*Note (non-normative).* This rule names no component. An implementation may place
-the single write path anywhere, so long as nothing reachable from cognition
-shares it.
+*Note (non-normative).* This rule names no component. An implementation may
+place the single write path anywhere, so long as nothing reachable from the
+reasoning path shares it.
 
 ---
 
-### OC-006 — The model is cognition's stateless engine, and it only answers
+### OC-006 — The model is the reasoning path's stateless engine, and it only answers
 
-Cognition MUST reach the model exclusively as a stateless inference call:
-assembled context in, one completion out. No tool-use authority, memory access,
-or host capability travels with the call. Nothing acts on the completion until it
-has returned and been routed to the owner of the operation it names.
+The reasoning path MUST reach the model exclusively as a stateless inference
+call: assembled context in, one completion out. No tool-use authority, memory
+access, or host capability travels with the call. Nothing acts on the completion
+until it has returned and been routed to the owner of the operation it names.
 
 *Test.* Inspect the call construction: the payload carries context only. Confirm
 no path exists by which the channel acts before the completion returns. Where the
@@ -417,41 +418,42 @@ third-party product — is a free choice. Verifying that it delivers a clean
 completion, without the channel's own agent behavior and within its terms of
 service, is the implementation's standing responsibility, not a one-time check.
 This rule is what makes OC-004 survive model replacement: no entity state lives
-in the model, so a new model changes the quality of cognition and not the
+in the model, so a new model changes the quality of the reasoning and not the
 identity of the entity.
 
 ---
 
 ### OC-007 — What the entity has learned comes only from its memory
 
-All persisted knowledge that informs cognition MUST originate from the **Memory
-Store**, through the mnemonic recall path. No external source substitutes for it.
-Transient session input is operational context, not consolidated knowledge.
+All persisted knowledge that informs the reasoning path MUST originate from the
+**Memory Store**, through the mnemonic recall path. No external source
+substitutes for it. Transient session input is operational context, not
+consolidated knowledge.
 
 *Test.* Trace every source of content that enters assembled context. Anything
-persisted that informs cognition without having passed through recall is a
-failure.
+persisted that informs the reasoning path without having passed through recall
+is a failure.
 
 *Note (non-normative).* The mnemonic recall path is the memory path's reading
 side: recall, and the assembly of the current conversation's transcript, which
-is mnemonic content (OC-003(c)) that recall never returns and that reaches
-cognition only in the assembled context. Structural content — the persona above
-all — also informs cognition, as what the entity is, authorized by the Operator
-through commit (OC-001(b)), not as knowledge the entity acquired; OC-007 governs
-knowledge. Operational content informs cognition the same way, as how the
-Operator runs the entity (OC-003(c)).
+is mnemonic content (OC-003(c)) that recall never returns and that reaches the
+reasoning path only in the assembled context. Structural content — the persona
+above all — also informs the reasoning path, as what the entity is, authorized
+by the Operator through commit (OC-001(b)), not as knowledge the entity
+acquired; OC-007 governs knowledge. Operational content informs the reasoning
+path the same way, as how the Operator runs the entity (OC-003(c)).
 
 *Note (non-normative).* Peer-sourced content under the Cognitive Mesh Interface
 (CMI) extension enters as a stimulus, never as knowledge: what an entity retains
 from a shared space is its own decision, executed through its own write paths.
 
 *Note (non-normative).* OC-007 governs what the entity keeps in its store. The
-workspace is host territory the Operator declared (OC-008(a)): what cognition
-reads there arrives as an execution result, transient input, even when the
-entity wrote it in an earlier session. What the entity keeps in the workspace is
-between the Operator and the entity; the specification provides the declaration
-that bounds it and the record of every write and read (OC-008(d)), not a rule on
-its use.
+workspace is host territory the Operator declared (OC-008(a)): what the
+reasoning path reads there arrives as an execution result, transient input, even
+when the entity wrote it in an earlier session. What the entity keeps in the
+workspace is between the Operator and the entity; the specification provides the
+declaration that bounds it and the record of every write and read (OC-008(d)),
+not a rule on its use.
 
 ---
 
@@ -521,10 +523,11 @@ boundary. Where no one can answer, a hold is a rejection.
 
 ### OC-009 — The entity is auditable by design: every boundary crossing leaves a record
 
-Every boundary this specification requires — between cognition and integrity
-state (OC-005(b)), between cognition and the model (OC-006), between cognition
-and persisted knowledge (OC-007), between cognition and the host (OC-008) — MUST
-be crossable only by a signal that is observable and loggable.
+Every boundary this specification requires — between the reasoning path and
+integrity state (OC-005(b)), between the reasoning path and the model (OC-006),
+between the reasoning path and persisted knowledge (OC-007), between the
+reasoning path and the host (OC-008) — MUST be crossable only by a signal that
+is observable and loggable.
 
 No required boundary may be crossed by shared mutable state, by a direct
 reference into another part's internals, or by any path that leaves no record.
@@ -585,18 +588,19 @@ against degradation is worth nothing if a degraded entity can simply start.
 The invariants constrain authority boundaries, not structure. An implementation
 MAY satisfy them with any decomposition. **No invariant names a component.**
 
-That said, the set is not structure-neutral in what it *suggests*. OC-005 through
-OC-008 are four domain boundaries — integrity, cognition, memory, host — and
-OC-009 is the constraint on what coordinates them. An implementation that assigns
-one part to each domain and routes their signals through neutral infrastructure
-is not making an arbitrary choice; it is realizing the invariants in the most
-direct way available. That is why the decomposition below is RECOMMENDED rather
-than merely permitted, and it is the one the reference platform implements:
+That said, the set is not structure-neutral in what it *suggests*. OC-005
+through OC-008 are four domain boundaries — integrity, reasoning, memory, host —
+and OC-009 is the constraint on what coordinates them. An implementation that
+assigns one part to each domain and routes their signals through neutral
+infrastructure is not making an arbitrary choice; it is realizing the invariants
+in the most direct way available. That is why the decomposition below is
+RECOMMENDED rather than merely permitted, and it is the one the reference
+platform implements:
 
 | Part | Domain | Invariant it realizes |
 |---|---|---|
 | **System Integrity Layer (SIL)** | integrity: verification, skill admission, commit, credential | OC-005 |
-| **Cognitive Processing Engine (CPE)** | cognition: turns stimuli into intents | OC-006 |
+| **Reasoning Interface Layer (RIL)** | reasoning: turns stimuli into intents | OC-006 |
 | **Memory Interface Layer (MIL)** | memory: recall, session writes, consolidation | OC-007 |
 | **Execution Layer (EXEC)** | host: native primitives and skill execution | OC-008 |
 | **Orchestrator** | routing, context assembly, lifecycle sequencing | OC-009 — infrastructure, no operations, no authority |
@@ -607,7 +611,7 @@ OP-024 of the [Implementation Profile](obec-profile.md), which states the
 operation ownership the decomposition implies. An implementation not claiming it
 MUST still satisfy every invariant of §2.
 
-The operational machinery — cognitive cycles and cycle chains, Operator
+The operational machinery — cycles and cycle chains, Operator
 preemption, the heartbeat and its Vital Check states, drift classification and
 probes, the Closure Payload and consolidation, the Resumption Record,
 context-window thresholds, background execution, the Action Ledger, the
@@ -630,17 +634,17 @@ or operational condition may relax any member.
 | **OC-003** | Everything the entity is resides in its store, travels with it, and has one writer per class | state |
 | **OC-004** | The entity's identity is proven by an unbroken chain back to its Genesis Anchor | identity |
 | **OC-005** | Integrity guards the entity, and nothing in the entity can disarm it | integrity |
-| **OC-006** | The model is cognition's stateless engine, and it only answers | cognition |
+| **OC-006** | The model is the reasoning path's stateless engine, and it only answers | reasoning |
 | **OC-007** | What the entity has learned comes only from its memory | knowledge |
 | **OC-008** | The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits | action |
 | **OC-009** | The entity is auditable by design: every boundary crossing leaves a record | audit |
 | **OC-010** | The entity starts verified, or does not start | start |
 
 The set is ordered as an argument. OC-001 and OC-002 establish who governs the
-entity and what it is not; OC-003 through OC-005 establish what it is, how that is
-verified, and what keeps the verification out of its own reach; OC-006 through
-OC-009 bound what reaches cognition and what cognition reaches, inbound then
-outbound; OC-010 governs the transition into operation.
+entity and what it is not; OC-003 through OC-005 establish what it is, how that
+is verified, and what keeps the verification out of its own reach; OC-006
+through OC-009 bound what reaches the reasoning path and what it reaches,
+inbound then outbound; OC-010 governs the transition into operation.
 
 **Extension contract.** An extension MAY add operations and artifacts, and MAY
 harden an invariant — narrowing a permission, making an optional verification
@@ -725,7 +729,7 @@ Two profiles exist so that partial adoption has a name:
 | Profile | Invariants | For |
 |---|---|---|
 | **OBEC-Attest** | OC-001 – OC-005, OC-009, OC-010 | An existing runtime adding auditable identity and authorization without changing how it reasons, remembers, or acts. Covers the Operator, the store, the chain, integrity isolation, boundary discipline, and verified start. |
-| **OBEC-Core** | all ten | A system built to these boundaries end to end. The three it adds — OC-006, OC-007, OC-008 — are the operational containment of cognition, memory, and host. |
+| **OBEC-Core** | all ten | A system built to these boundaries end to end. The three it adds — OC-006, OC-007, OC-008 — are the operational containment of reasoning, memory, and host. |
 
 OBEC-Attest establishes identity and authority, not containment: that the entity
 is the one activated, that every structural change was authorized, and that no
@@ -761,10 +765,10 @@ the store, so relocation cannot change a verification result (OC-003(b)).
 (OC-003(c)), so an unauthorized write is always attributable to a boundary
 violation rather than to ambiguity about who was allowed to make it.
 
-**Integrity isolation.** Nothing reachable from cognition can write integrity
-content or reverse an integrity decision (OC-005), and escalation reaches the
-Operator without passing through cognition (OC-001(c)) — so compromised
-cognition cannot suppress the report of its own compromise.
+**Integrity isolation.** Nothing reachable from the reasoning path can write
+integrity content or reverse an integrity decision (OC-005), and escalation
+reaches the Operator without passing through the reasoning path (OC-001(c)) — so
+a compromised reasoning path cannot suppress the report of its own compromise.
 
 **Mediated actuation.** Nothing reaches the host except through one execution
 path, inside a declared boundary disjoint from the store (OC-008).
@@ -780,11 +784,11 @@ skill invoked with adversarial arguments passes every check.** Argument-level
 validation belongs to the skill implementation and to host-level sandboxing.
 
 **Worker skill results.** A skill that invokes a stateless inference engine
-returns unverified inference output into cognition's context as an ordinary
-execution result. An adversarial completion is a self-inflicted injection: the
-entity's own pipeline delivers it, and no check inspects results. Deployments
-using such skills on sensitive tasks should validate output at the skill
-implementation level.
+returns unverified inference output into the reasoning path's context as an
+ordinary execution result. An adversarial completion is a self-inflicted
+injection: the entity's own pipeline delivers it, and no check inspects results.
+Deployments using such skills on sensitive tasks should validate output at the
+skill implementation level.
 
 **The workspace as memory.** A stimulus can instruct the entity to write
 content to the workspace and read it back in a later conversation, outside the
@@ -802,18 +806,18 @@ deployments that need enforcement rather than detection should run skills under
 an operating-system sandbox, which this specification does not require because
 it is not portable.
 
-**Evolution proposal content.** OC-001(b) verifies that a proposal is authorized;
-it does not interpret what the proposal does. Under per-proposal sign-off, the
-Operator's review is the content check. Under a standing grant, an in-scope
-adversarial proposal commits with no content inspection beyond the one OC-002(d)
-requires, which refuses structural content directing the entity to present
-itself as alive and nothing else. The Profile's drift detection runs on memory,
-not on structure: it can catch the effect in what the entity writes afterwards,
-never prevent the commit. Deployments requiring
-pre-commit content review should keep grants narrow in scope, short in expiry and
-small in budget, or not open them. Cognition probing a grant's boundary —
-originating proposals to observe which are covered — leaves a logged trail, since
-every proposal is logged at origination.
+**Evolution proposal content.** OC-001(b) verifies that a proposal is
+authorized; it does not interpret what the proposal does. Under per-proposal
+sign-off, the Operator's review is the content check. Under a standing grant, an
+in-scope adversarial proposal commits with no content inspection beyond the one
+OC-002(d) requires, which refuses structural content directing the entity to
+present itself as alive and nothing else. The Profile's drift detection runs on
+memory, not on structure: it can catch the effect in what the entity writes
+afterwards, never prevent the commit. Deployments requiring pre-commit content
+review should keep grants narrow in scope, short in expiry and small in budget,
+or not open them. The reasoning path probing a grant's boundary — originating
+proposals to observe which are covered — leaves a logged trail, since every
+proposal is logged at origination.
 
 **Earlier copies of the store.** Verification establishes that a store
 descends unbroken from its Genesis Anchor, not that it is the only copy or the
@@ -878,16 +882,12 @@ operations; entries append before execution and resolve after (OP-015).
 at the close signal, then the Sleep, Endure and Integrity phases, the
 credential artifact removed last (OP-022).
 
-**Closure Payload** *(Profile)* — cognition's output when an Operator ends a
-conversation, and its instrument of coherence across conversations (OP-009(d)).
+**Closure Payload** *(Profile)* — the reasoning path's output when an Operator
+ends a conversation, and its instrument of coherence across conversations
+(OP-009(d)).
 
-**Cognitive cycle** *(Profile)* — the atomic unit of cognition: one stimulus
-assembled into context, one stateless inference, the resulting intents dispatched
-together (OP-001).
-
-**Cognition** — the reasoning activity of the entity, whatever realizes it. This
-specification constrains what reaches it and what it reaches; it constrains
-nothing about how it works.
+**Cognitive** — said of the entity as a whole, never of one of its parts. The
+part that turns a context into an intent is the reasoning path.
 
 **Configuration** — structural content that shapes the entity: its probes, the
 parameters that shape its memory. Distinct from operational content.
@@ -897,6 +897,10 @@ one; episodic memory belongs to the conversation that wrote it (OP-009(a)).
 
 **Core Invariant** — a rule of §2. No extension, configuration, or operational
 condition may weaken one, and the set is closed (§4).
+
+**Cycle** *(Profile)* — the atomic unit of reasoning: one stimulus assembled
+into context, one stateless inference, the resulting intents dispatched together
+(OP-001).
 
 **Drift** *(Profile)* — unauthorized divergence from the entity's authorized
 state, in three categories: identity, semantic, and evolutionary (OP-004).
@@ -912,9 +916,10 @@ Entity Store and the chain in it (OC-003, OC-004), not the model it runs on.
 **Entity Store** — the entity's complete persistent state: structural, mnemonic,
 integrity and operational content. Portable and host-agnostic (OC-003).
 
-**Evolution proposal** — an inert record of proposed structural change.
-Cognition may originate one at any time; originating one changes nothing, and a
-proposal commits only under a valid Operator authorization (OC-001(b), OP-011).
+**Evolution proposal** — an inert record of proposed structural change. The
+reasoning path may originate one at any time; originating one changes nothing,
+and a proposal commits only under a valid Operator authorization (OC-001(b),
+OP-011).
 
 **First Activation Protocol (FAP)** *(Profile)* — the one-time establishment
 of an entity on an empty store, ending in the Genesis Anchor (OP-017).
@@ -934,12 +939,12 @@ and the authorization that covered it (OC-004(a)).
 authorization state, and drift digests. One of the four content classes; written
 through the single path of OC-005(a).
 
-**Intent** — a request emitted by cognition naming one operation of one owner. An
-intent has no effect until its owner accepts it.
+**Intent** — a request emitted by the reasoning path naming one operation of one
+owner. An intent has no effect until its owner accepts it.
 
 **Memory Store** — session records, episodic records of past sessions and
 accumulated semantic knowledge; the sole origin of persisted knowledge that
-informs cognition (OC-007).
+informs the reasoning path (OC-007).
 
 **Mnemonic content** — session records and consolidated memory. One of the four
 content classes; written only through the mnemonic operations (OC-003(c)).
@@ -951,7 +956,7 @@ structure that addresses them: the version-bound layer, published as
 **Operational content** — how an Operator runs the entity: the workspace, the
 Operator's operational rules, the model, operating limits such as timeouts. One
 of the four content classes; changed only by an Operator act, outside the
-verified structural state, and readable by cognition (OC-003(c)).
+verified structural state, and readable by the reasoning path (OC-003(c)).
 
 **Operator** — a human holding final authority over the entity. Every entity is
 bound to at least one, and every authorization originates with one (OC-001).
@@ -962,6 +967,11 @@ a session credential until an Operator act clears it (OC-001(c)).
 
 **Per-proposal approval** — a recorded Operator decision on one specific
 proposal; one of the two forms of valid authorization (OC-001(b)).
+
+**Reasoning path** — the part of the entity that turns an assembled context
+into one intent, with the model as its stateless engine (OC-006), whatever
+realizes it. This specification constrains what reaches it and what it
+reaches; it constrains nothing about how it reasons.
 
 **Resumption Record** *(Profile)* — the digest of the Closure Payload, carrying
 the pointer map, contextualizing message and consolidation the next conversation
@@ -991,8 +1001,8 @@ commit budget and declared scope, under which in-scope proposals commit with no
 per-proposal step; reverts to per-proposal approval automatically on expiry or
 budget exhaustion (OC-001(b)).
 
-**Stimulus** — the unit of input to cognition: direct Operator input, an
-Operator-authorized scheduled trigger, a component response, or a chain's
+**Stimulus** — the unit of input to the reasoning path: direct Operator input,
+an Operator-authorized scheduled trigger, a component response, or a chain's
 internal result.
 
 **Structural content** — persona, skills, configuration and Operator bindings.
@@ -1031,7 +1041,7 @@ and RECOMMENDED, describing mechanism rather than guarantee, in eight sections:
 
 | § | Subject | Rules |
 |---|---|---|
-| 2 | **Cognition** — the cognitive cycle, chains, Operator preemption, stimulus routing | OP-001 – OP-002 |
+| 2 | **Reasoning** — the cycle, chains, Operator preemption, stimulus routing | OP-001 – OP-002 |
 | 3 | **Integrity, drift and escalation** — Vital Checks, drift categories, probes, index pruning, record retention, escalation | OP-003 – OP-008 |
 | 4 | **Memory** — conversations and their memory, context-window thresholds | OP-009 – OP-010 |
 | 5 | **Evolution** — the proposal, the staged commit pipeline | OP-011 – OP-012 |

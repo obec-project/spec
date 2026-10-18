@@ -43,7 +43,7 @@ title and its clauses differ, the clauses govern.
 | **OC-003** | Everything the entity is resides in its store, travels with it, and has one writer per class | state |
 | **OC-004** | The entity's identity is proven by an unbroken chain back to its Genesis Anchor | identity |
 | **OC-005** | Integrity guards the entity, and nothing in the entity can disarm it | integrity |
-| **OC-006** | The model is cognition's stateless engine, and it only answers | cognition |
+| **OC-006** | The model is the reasoning path's stateless engine, and it only answers | reasoning |
 | **OC-007** | What the entity has learned comes only from its memory | knowledge |
 | **OC-008** | The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits | action |
 | **OC-009** | The entity is auditable by design: every boundary crossing leaves a record | audit |
@@ -89,15 +89,15 @@ Every proposal MUST be logged at origination, and every commit MUST be logged
 with the identity of the authorization that covered it.
 
 **(c) The Operator is reachable.** There MUST exist a path by which any part of
-the implementation reaches the Operator **without passing through cognition** —
-which may be compromised, or may simply have no part in the condition being
-reported. That path MUST provide a **passive signal**: a persistent,
-network-independent record in the Entity Store, written when live delivery has
-failed a declared number of attempts or the condition requires a halt. The
-passive signal MUST be directly readable by the Operator with nothing running,
-MUST be checked as the first gate of every start, and while it is present **no
-session credential may be issued**. Clearing it is an explicit, logged Operator
-act.
+the implementation reaches the Operator **without passing through the reasoning
+path** (OC-006) — which may be compromised, or may simply have no part in the
+condition being reported. That path MUST provide a **passive signal**: a
+persistent, network-independent record in the Entity Store, written when live
+delivery has failed a declared number of attempts or the condition requires a
+halt. The passive signal MUST be directly readable by the Operator with nothing
+running, MUST be checked as the first gate of every start, and while it is
+present **no session credential may be issued**. Clearing it is an explicit,
+logged Operator act.
 
 ---
 
@@ -147,7 +147,7 @@ content** is how an Operator runs the entity: where it may act, what it may do
 there, the model it uses, and its operating limits. It is changed only by an
 Operator act: no proposal may originate a change to it, no standing grant may
 cover one, and it is not part of the structural state the chain verifies.
-Cognition MAY read it.
+The reasoning path MAY read it.
 
 No operation may exist whose parameters allow it to write outside its own class:
 a request that would reach another class MUST be rejected whatever operation
@@ -213,32 +213,33 @@ be recorded: continuity does not survive it (§4).
 credential, authorization state, drift digests — MUST have exactly one write
 path.
 
-**(b) Unreachable from cognition.** No cognitive operation may reach integrity
-state, by any operation and by any parameter of any operation.
+**(b) Unreachable from the reasoning path.** Nothing the reasoning path does may
+reach integrity state, by any operation and by any parameter of any operation.
 
 **(c) Binding decisions.** Integrity decisions — credential issuance and
-revocation, verification results, halts — bind cognition and MUST NOT be
-reversible, suspendable, or conditionable by it.
+revocation, verification results, halts — bind the reasoning path and MUST NOT
+be reversible, suspendable, or conditionable by it.
 
 Integrity content is not itself subject to OC-001(b): it implements OC-001(b),
 and gating it by itself would be circular.
 
 ---
 
-## OC-006 — The model is cognition's stateless engine, and it only answers
+## OC-006 — The model is the reasoning path's stateless engine, and it only answers
 
-Cognition MUST reach the model exclusively as a stateless inference call:
-assembled context in, one completion out. No tool-use authority, memory access,
-or host capability travels with the call. Nothing acts on the completion until it
-has returned and been routed to the owner of the operation it names.
+The reasoning path MUST reach the model exclusively as a stateless inference
+call: assembled context in, one completion out. No tool-use authority, memory
+access, or host capability travels with the call. Nothing acts on the completion
+until it has returned and been routed to the owner of the operation it names.
 
 ---
 
 ## OC-007 — What the entity has learned comes only from its memory
 
-All persisted knowledge that informs cognition MUST originate from the **Memory
-Store**, through the mnemonic recall path. No external source substitutes for it.
-Transient session input is operational context, not consolidated knowledge.
+All persisted knowledge that informs the reasoning path MUST originate from the
+**Memory Store**, through the mnemonic recall path. No external source
+substitutes for it. Transient session input is operational context, not
+consolidated knowledge.
 
 ---
 
@@ -279,10 +280,11 @@ be logged; every result MUST be logged.
 
 ## OC-009 — The entity is auditable by design: every boundary crossing leaves a record
 
-Every boundary this specification requires — between cognition and integrity
-state (OC-005(b)), between cognition and the model (OC-006), between cognition
-and persisted knowledge (OC-007), between cognition and the host (OC-008) — MUST
-be crossable only by a signal that is observable and loggable.
+Every boundary this specification requires — between the reasoning path and
+integrity state (OC-005(b)), between the reasoning path and the model (OC-006),
+between the reasoning path and persisted knowledge (OC-007), between the
+reasoning path and the host (OC-008) — MUST be crossable only by a signal that
+is observable and loggable.
 
 No required boundary may be crossed by shared mutable state, by a direct
 reference into another part's internals, or by any path that leaves no record.

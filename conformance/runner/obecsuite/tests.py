@@ -140,8 +140,8 @@ def oc001(ctx):
     with ctx.step("1.9", "E", "no operation manufactures an authorization"):
         store = st.fresh("mkauth")
         ops = ad.call("describe", "operations")["operations"] or []
-        reachable = [o for o in ops if o.get("reachable_from_cognition")]
-        a.truthy(reachable, "no cognition-reachable operations reported")
+        reachable = [o for o in ops if o.get("reachable_from_reasoning")]
+        a.truthy(reachable, "no operations reachable from the reasoning path reported")
         for op in reachable:
             res = ad.call(
                 "entity",
@@ -256,7 +256,7 @@ def oc001(ctx):
             "the start did not proceed after the signal was cleared",
         )
 
-    with ctx.step("1.16", "A", "escalation does not traverse cognition") as s:
+    with ctx.step("1.16", "A", "escalation does not traverse the reasoning path") as s:
         res = ad.call("describe", "boundaries")
         s.evidence = {
             "boundaries": res["boundaries"],
@@ -657,24 +657,24 @@ def oc004(ctx):
 def oc005(ctx):
     ad, st = ctx.adapter, ctx.stores
 
-    with ctx.step("5.1", "E", "no cognition-reachable operation writes integrity"):
+    with ctx.step("5.1", "E", "nothing reachable from reasoning writes integrity"):
         ops = ad.call("describe", "operations")["operations"] or []
         offenders = [
             o["name"]
             for o in ops
-            if o.get("reachable_from_cognition")
+            if o.get("reachable_from_reasoning")
             and "integrity" in (o.get("writes_classes") or [])
         ]
         a.falsy(
             offenders,
-            f"cognition-reachable operations write integrity content: {offenders}",
+            f"operations reachable from reasoning write integrity: {offenders}",
         )
 
-    with ctx.step("5.2", "E", "integrity is unreachable from cognition"):
+    with ctx.step("5.2", "E", "integrity is unreachable from the reasoning path"):
         store = st.fresh("integrity")
         ops = ad.call("describe", "operations")["operations"] or []
-        reachable = [o for o in ops if o.get("reachable_from_cognition")]
-        a.truthy(reachable, "no cognition-reachable operations reported")
+        reachable = [o for o in ops if o.get("reachable_from_reasoning")]
+        a.truthy(reachable, "no operations reachable from the reasoning path reported")
         target = _data_of(ad, store, "integrity")[0]
         for o in reachable:
             res = ad.call(
@@ -690,7 +690,7 @@ def oc005(ctx):
     with ctx.step("5.3", "E", "parameter shape opens no path"):
         store = st.fresh("paramshape")
         ops = ad.call("describe", "operations")["operations"] or []
-        reachable = [o for o in ops if o.get("reachable_from_cognition")]
+        reachable = [o for o in ops if o.get("reachable_from_reasoning")]
         shapes = (
             os.path.join(store, "integrity", "log"),
             "integrity-log",
@@ -708,7 +708,7 @@ def oc005(ctx):
                 )
                 a.refused(ctx, res, why=f"{o['name']} with target {shape!r}")
 
-    with ctx.step("5.4", "E", "cognition cannot reverse an integrity decision"):
+    with ctx.step("5.4", "E", "reasoning cannot reverse an integrity decision"):
         store, ws = st.with_workspace("revoke")
         ad.call("lifecycle", "start", store=store)
         ad.call("operator", "revoke-credential", store=store)
@@ -736,7 +736,7 @@ def oc005(ctx):
 
 
 # --------------------------------------------------------------------------
-# OC-006 — The model is cognition's stateless engine, and it only answers
+# OC-006 — The model is the reasoning path's stateless engine, and it only answers
 #          (attested in full)
 # --------------------------------------------------------------------------
 
@@ -1006,7 +1006,7 @@ def oc008(ctx):
     with ctx.step("8.11", "E", "installing a skill requires a commit"):
         store, ws = prepared("install")
         ops = ad.call("describe", "operations")["operations"] or []
-        for o in [o for o in ops if o.get("reachable_from_cognition")]:
+        for o in [o for o in ops if o.get("reachable_from_reasoning")]:
             res = ad.call(
                 "entity",
                 "attempt-write",
@@ -1040,10 +1040,10 @@ def oc008(ctx):
 # --------------------------------------------------------------------------
 
 REQUIRED_BOUNDARIES = (
-    "cognition-integrity",
-    "cognition-model",
-    "cognition-knowledge",
-    "cognition-host",
+    "reasoning-integrity",
+    "reasoning-model",
+    "reasoning-knowledge",
+    "reasoning-host",
 )
 
 
@@ -1195,7 +1195,11 @@ TESTS = [
         "Integrity guards the entity, and nothing in the entity can disarm it",
         oc005,
     ),
-    ("OC-006", "The model is cognition's stateless engine, and it only answers", oc006),
+    (
+        "OC-006",
+        "The model is the reasoning path's stateless engine, and it only answers",
+        oc006,
+    ),
     ("OC-007", "What the entity has learned comes only from its memory", oc007),
     (
         "OC-008",

@@ -71,17 +71,17 @@ the implementation that wrote it did differently.
 
 ---
 
-## 2. Cognition
+## 2. Reasoning
 
-The core constrains what reaches cognition and what cognition reaches. It says
-nothing about how cognition advances. This section describes the cycle model
+The core constrains what reaches the reasoning path and what it reaches. It says
+nothing about how reasoning advances. This section describes the cycle model
 these rules assume.
 
 ---
 
-#### OP-001 — The cognitive cycle
+#### OP-001 — The cycle
 
-**(a) The cycle.** Cognition SHOULD advance in **cognitive cycles**, each the
+**(a) The cycle.** Reasoning SHOULD advance in **cycles**, each the
 atomic unit: one stimulus assembled into context, one stateless inference, and
 the resulting intents dispatched together.
 
@@ -95,10 +95,10 @@ not have seen it either.
 An aborted cycle emits nothing: no partial output is observable, and nothing
 persists except through a dispatched intent.
 
-**(b) Chains.** A sequence of cycles continuing one cognitive operation with no
-new external stimulus between them — each cycle's resolved results serving as the
-next cycle's internal stimulus — is a **cycle chain**. Every cycle in a chain
-remains individually atomic under (a).
+**(b) Chains.** A sequence of cycles continuing one line of reasoning with no
+new external stimulus between them — each cycle's resolved results serving as
+the next cycle's internal stimulus — is a **cycle chain**. Every cycle in a
+chain remains individually atomic under (a).
 
 *Serves:* OC-006 (the inference is the atomic step), OC-009 (intents cross
 boundaries as signals).
@@ -135,9 +135,10 @@ the session's first stimuli after the credential is issued.
 
 ## 3. Integrity, drift and escalation
 
-The core requires that integrity be verifiable, beyond cognition's reach, and
-that the Operator be reachable. It does not say how often to look, what to do
-about a partial failure, or how the report travels. This section does.
+The core requires that integrity be verifiable, beyond the reasoning path's
+reach, and that the Operator be reachable. It does not say how often to look,
+what to do about a partial failure, or how the report travels. This section
+does.
 
 ---
 
@@ -162,23 +163,23 @@ paying for it.
   verifier re-verifies **externally**. Verified resolution returns to Nominal;
   failed re-verification, or an anomaly that cannot be externally verified,
   escalates to Critical.
-- **Critical** — beyond correction, or involving cognition or the verifier
-  itself. The session credential is revoked immediately and the condition
-  escalates through OP-008.
+- **Critical** — beyond correction, or involving the reasoning path or the
+  verifier itself. The session credential is revoked immediately and the
+  condition escalates through OP-008.
 
-An anomaly in cognition itself classifies as **Critical, never Degraded**. The
-Degraded corrections that resemble cognitive self-repair in fact target the
-transient state around it — assembled context discarded and rebuilt, or an active
-cycle aborted without committing. Neither leaves a trace that cognition could
-attest to, and external re-verification is what confirms the correction, never
-the correcting side's own report.
+An anomaly in the reasoning path itself classifies as **Critical, never
+Degraded**. The Degraded corrections that resemble self-repair of the reasoning
+path in fact target the transient state around it — assembled context discarded
+and rebuilt, or an active cycle aborted without committing. Neither leaves a
+trace that the reasoning path could attest to, and external re-verification is
+what confirms the correction, never the correcting side's own report.
 
 Transient isolated faults are noise. A condition becomes an anomaly only when it
 persists after a corrective attempt, cannot be externally verified, or has no
 valid correction path.
 
-*Serves:* OC-004, OC-005 (integrity decisions bind cognition and are not
-self-attested).
+*Serves:* OC-004, OC-005 (integrity decisions bind the reasoning path and are
+not self-attested).
 
 ---
 
@@ -212,9 +213,9 @@ a direct violation of OC-004.
 with the initial structural state at first activation and updated only through
 authorized commits. The probes SHOULD run on what the entity writes to memory —
 its episodic records and the consolidation — as it is written, and not on the
-whole transcript: an Operator's words are not the entity's drift. What they
-flag is recorded in the **Semantic Digest**, an incrementally updated record
-held as integrity content, so that cognition cannot alter it (OC-005). The
+whole transcript: an Operator's words are not the entity's drift. What they flag
+is recorded in the **Semantic Digest**, an incrementally updated record held as
+integrity content, so that the reasoning path cannot alter it (OC-005). The
 digest SHOULD be evaluated against the thresholds of OP-004 in the Integrity
 phase of every Closure (OP-022), so that a conversation never ended is still
 checked.
@@ -330,44 +331,45 @@ Only an Operator leaves the current conversation, in one of three ways:
   with no working set.
 - **resuming a past one** (g).
 
-Cognition may close a session, and never leaves a conversation. An Operator may
-also **clear the transcript** (b); the conversation, with its memory, continues.
+The reasoning path may close a session, and never leaves a conversation. An
+Operator may also **clear the transcript** (b); the conversation, with its
+memory, continues.
 
 **(b) The Memory Store.** The Memory Store holds three kinds of mnemonic
 content: the **session records** — each session's transcript, intents, results
 and events, and the Closure Payload — episodic memory, and semantic memory. The
 mnemonic operations write all three, and are the one path through which any of
-them reaches cognition.
+them reaches the reasoning path.
 
-The context assembled for cognition carries the current conversation's
+The context assembled for the reasoning path carries the current conversation's
 transcript since its last clear, as much of it as the context budget admits,
 keeping the most recent turns; what does not fit stays in the store. That is the
-only way a transcript reaches cognition: recall never returns one, from before a
-clear or from another conversation. What the entity means to keep beyond a
-clear, it saves as episodic memory.
+only way a transcript reaches the reasoning path: recall never returns one, from
+before a clear or from another conversation. What the entity means to keep
+beyond a clear, it saves as episodic memory.
 
 **(c) Episodic memory.** Episodic memory SHOULD be written during the session,
-as cognition works, so that work saved survives a context lost to a compaction
-restart or a crash. A record belongs to the conversation that wrote it. A
-conversation's **recall scope** is the episodic records it wrote and those its
-pointer map names ((e), (g)); a recall that would return a record outside it is
-refused and logged.
+as the reasoning path works, so that work saved survives a context lost to a
+compaction restart or a crash. A record belongs to the conversation that wrote
+it. A conversation's **recall scope** is the episodic records it wrote and those
+its pointer map names ((e), (g)); a recall that would return a record outside it
+is refused and logged.
 
 A record is never edited: an authorization that names its digest (f) holds only
-if it stays as written. To update what it knows, cognition writes a new record
-naming the one it **supersedes**. Following those links from any record gives
-its **lineage**, back to its root. Recall returns the latest record of each
-lineage in scope; asking for a lineage returns its earlier records in scope, and
-names, without returning, those outside it.
+if it stays as written. To update what it knows, the reasoning path writes a new
+record naming the one it **supersedes**. Following those links from any record
+gives its **lineage**, back to its root. Recall returns the latest record of
+each lineage in scope; asking for a lineage returns its earlier records in
+scope, and names, without returning, those outside it.
 
-**(d) The Closure Payload.** Consolidation SHOULD be a cognitive act. When an
-Operator ends a conversation with a Closure Payload, cognition — the only part
-able to structure memory coherently for its own later use — emits the
-**Closure Payload**, carrying: the conversation's consolidation; the working
-set, the records the next conversation needs; the message that contextualizes
-them and sets the next steps; and, when the conversation produced learnings
-worth persisting, the requested promotion of episodic records into semantic
-memory.
+**(d) The Closure Payload.** Consolidation SHOULD be an act of the reasoning
+path. When an Operator ends a conversation with a Closure Payload, the reasoning
+path — the only part able to structure memory coherently for its own later use —
+emits the **Closure Payload**, carrying: the conversation's consolidation; the
+working set, the records the next conversation needs; the message that
+contextualizes them and sets the next steps; and, when the conversation produced
+learnings worth persisting, the requested promotion of episodic records into
+semantic memory.
 
 The payload is emitted before the close, while the credential is still valid,
 and SHOULD be written among the session records **on emission**, which is what
@@ -388,8 +390,8 @@ Configuration MAY declare a maximum age for a lineage, counted in conversation
 boundaries — a conversation ended, started or resumed — since its root was
 written. The pointer map does not name a lineage past the limit: it stays where
 it is, reachable by (g), or it is promoted (f). The limit keeps stale records
-from being carried indefinitely; it does not bound a cognition that restates
-content without naming the record it supersedes.
+from being carried indefinitely; it does not bound a reasoning path that
+restates content without naming the record it supersedes.
 
 Retrieval against the record follows the normal recall path — it is a pointer
 map, not a second source of knowledge. It SHOULD be loaded at the start of the
@@ -446,7 +448,7 @@ provides directly to the Operator, in one of two ways:
   (b), and its recall scope is what it was when it was left. Records written by
   later conversations, including those that supersede its own, are not in it.
 
-Nothing cognition writes adds to its scope except its own records.
+Nothing the reasoning path writes adds to its scope except its own records.
 
 **(h) Retention and collection.** The session records and episodic memory of
 conversations other than the current one SHOULD be kept under retention rules
@@ -465,10 +467,11 @@ OC-010.
 
 #### OP-010 — Context-window thresholds
 
-Cognition SHOULD report its context-window utilization as a health signal,
-evaluated against two thresholds declared in configuration:
+The reasoning path SHOULD report its context-window utilization as a health
+signal, evaluated against two thresholds declared in configuration:
 
-- past the **soft** threshold, cognition SHOULD close the session itself;
+- past the **soft** threshold, the reasoning path SHOULD close the session
+  itself;
 - past the **hard** threshold, it is signaled to stop current processing and
   persist the working context worth keeping as episodic memory (OP-009(c)).
 
@@ -476,12 +479,12 @@ The headroom above the hard threshold is the reserve that guarantees this
 sequence still fits the window; it SHOULD be sized together with the Vital Check
 cadence, so that a breach is detected while the guarantee still holds.
 
-A threshold breach is a **capacity condition, not an anomaly**: OP-003(b)'s state
-is unaffected. Either way the session closes normally, a Closure follows that
-runs only its Endure and Integrity phases (OP-022), and the start sequence runs
-immediately after.
-The new session continues the conversation (OP-009(a)): no Closure Payload is
-emitted, and cognition recovers its working context through recall.
+A threshold breach is a **capacity condition, not an anomaly**: OP-003(b)'s
+state is unaffected. Either way the session closes normally, a Closure follows
+that runs only its Endure and Integrity phases (OP-022), and the start sequence
+runs immediately after. The new session continues the conversation (OP-009(a)):
+no Closure Payload is emitted, and the reasoning path recovers its working
+context through recall.
 
 This restart continues the same Operator-initiated operation and is not
 self-activation (OC-002(a)).
@@ -500,14 +503,14 @@ does not say what a proposal looks like or how a commit is staged.
 #### OP-011 — The proposal
 
 **(a) The record.** An **evolution proposal** SHOULD be an inert record carrying
-the proposed operations plus a human-readable description. Cognition may
-originate one at any time, or one may be recorded on the Operator's direct
+the proposed operations plus a human-readable description. The reasoning path
+may originate one at any time, or one may be recorded on the Operator's direct
 instruction. Every proposal is logged when originated. A proposal targeting the
 Operator binding set is invalid regardless of origin (OC-001(a)).
 
 **(b) Classification.** Whether a recorded approval exists, or whether the
 proposal falls within a standing grant's scope, SHOULD be determined by the
-integrity path alone, without input from cognition.
+integrity path alone, without input from the reasoning path.
 
 **(c) Held proposals.** A proposal outside a standing grant's scope SHOULD be
 held for explicit Operator review, logged, and the session continues. A held
@@ -528,11 +531,11 @@ that a mistyped scope is not a grant that silently covers nothing.
 
 #### OP-012 — The Endure Protocol
 
-The **Endure Protocol** is how structural content changes: a proposal
-(OP-011), its authorization, and its commit. Every structural change goes
-through it, whatever its origin — a proposal cognition originates, or an
-Operator's own structural act, which is a proposal recorded on the Operator's
-direct instruction together with its approval (OP-011(a)).
+The **Endure Protocol** is how structural content changes: a proposal (OP-011),
+its authorization, and its commit. Every structural change goes through it,
+whatever its origin — a proposal the reasoning path originates, or an Operator's
+own structural act, which is a proposal recorded on the Operator's direct
+instruction together with its approval (OP-011(a)).
 
 Authorized proposals SHOULD be executed in the Closure's Endure phase (OP-022)
 as a staged pipeline:
@@ -573,7 +576,7 @@ The order of checks on the execution path SHOULD be fixed:
 4. manifest validation
 
 Every rejection carries the gate that produced it and is logged; every result is
-returned to cognition and logged.
+returned to the reasoning path and logged.
 
 The boundary check first is not arbitrary: it is what OC-008(a) requires, so that
 a target outside the workspace is rejected before any other check runs.
@@ -593,16 +596,16 @@ execution path not returning by that deadline is Critical (OP-003(b)) — what
 the watchdog bounds is the path, not the work it runs.
 
 **(b) Background.** An execution MAY be background: the execution is spawned, a
-running record is logged immediately and returned as the intent's resolution, and
-the next cycle proceeds without blocking. A terminal record is appended when the
-execution completes within its session, and surfaces to cognition as a stimulus
-queued under OP-002(b).
+running record is logged immediately and returned as the intent's resolution,
+and the next cycle proceeds without blocking. A terminal record is appended when
+the execution completes within its session, and surfaces to the reasoning path
+as a stimulus queued under OP-002(b).
 
 A background execution with no terminal record when the session ends is
-incomplete: the next start SHOULD surface it to cognition as a reprocessing
-stimulus. Background manifests SHOULD declare a handle — a process or job
-identifier — and a time-to-live, so that the start can probe or expire the
-execution instead of blindly reprocessing it.
+incomplete: the next start SHOULD surface it to the reasoning path as a
+reprocessing stimulus. Background manifests SHOULD declare a handle — a process
+or job identifier — and a time-to-live, so that the start can probe or expire
+the execution instead of blindly reprocessing it.
 
 **(c) No state between executions.** The execution path SHOULD retain no state
 between executions.
@@ -747,10 +750,10 @@ it should not be running.
 
 **(a) Close modes.** A session ends one of three ways:
 
-- **Normal close** — an Operator signal, a close intent from cognition, or a
-  condition declared in configuration (OP-010's thresholds are one such). The
-  Closure follows (OP-022), the Closure Payload emitted before the close when
-  it ends the conversation with one (OP-009(a)(d)).
+- **Normal close** — an Operator signal, a close intent from the reasoning path,
+  or a condition declared in configuration (OP-010's thresholds are one such).
+  The Closure follows (OP-022), the Closure Payload emitted before the close
+  when it ends the conversation with one (OP-009(a)(d)).
 - **Critical** — escalation happens before any Closure may run.
 - **Direct intervention** — the Operator removes the credential artifact from the
   store, with no component involved. The entity halts immediately, with no
@@ -791,10 +794,10 @@ stays until the Integrity phase removes it, serving as the crash indicator
 throughout (OP-018(a)).
 
 **(b) Authority.** During a Closure no intent is generated and no stimulus is
-processed: cognition is inactive. Each phase runs under its part's authority,
-independent of the credential — the memory path's in Sleep, the integrity
-path's in Endure and Integrity — including maintenance executions performed
-under direct integrity instruction.
+processed: the reasoning path is inactive. Each phase runs under its part's
+authority, independent of the credential — the memory path's in Sleep, the
+integrity path's in Endure and Integrity — including maintenance executions
+performed under direct integrity instruction.
 
 *Serves:* OC-004(b), OC-005(c), OC-007, OC-009.
 
@@ -837,7 +840,7 @@ implementation; skills are the only per-entity extension of capability.
 
 | Part | Owns |
 |---|---|
-| **CPE** | cognition: turns stimuli into intents. Owns no operation on the store or the host |
+| **RIL** | reasoning: turns stimuli into intents. Owns no operation on the store or the host |
 | **MIL** | the mnemonic operations — session writes, episodic writes, recall, consolidation, promotion, garbage collection — over the Memory Store |
 | **EXEC** | the host operations: native primitives and skill execution |
 | **SIL** | the integrity operations: store verification, skill admission, the Heartbeat, the commit pipeline, the standing-grant lifecycle, credential issuance and revocation; and the write of operational content on an Operator act |

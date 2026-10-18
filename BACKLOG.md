@@ -74,12 +74,6 @@ steps go with evidence and review; step 3.2 requires a real second host;
   *Heartbeat* and *Sleep* renamed in the Profile and the Core; the Primer's
   passages rewritten. It touches no kernel sentence. Done before fsp-ref-min
   writes the text it sends to the model, its Phase 3.
-- **Apply [ADR 0007](design/0007-cognition.md):** *cognition* as a part
-  becomes *the reasoning path*, in the kernel and Core §2 together, the rest
-  of the Core, the Profile, the Primer and the README; the adapter contract,
-  the runner and the stub take the new field and boundary names, and the
-  suite's version moves. Done before fsp-ref-min's first phase, whose
-  adapter answers `describe operations`.
 - **Apply [ADR 0008](design/0008-assembled-context.md):** a harden of
   OC-003(a): everything in the assembled context is content of the store or
   transient input, and an implementation's instructions are structural
@@ -128,7 +122,7 @@ steps go with evidence and review; step 3.2 requires a real second host;
   quoting each kernel sentence before its code, with a test that both quotes
   match their sources. The walkthrough was the recommendation. fsp-ref-min is
   written in restricted Python so that this stays open.
-- **Run step 1.16 partially:** stop cognition, cause an escalation,
+- **Run step 1.16 partially:** stop the reasoning path, cause an escalation,
   observe the passive signal.
 - **An OBEC-Attest adapter for an existing runtime** — a LangGraph
   checkpointer, for example — after the reference implementation. Nobody has

@@ -146,10 +146,10 @@ structural change, and no configuration that adds one.
 
 **The Operator is reachable.** This is the face people forget. Authority that
 cannot be informed is authority in name only. So OBEC requires a path to the
-Operator that **does not pass through the entity's cognition**, the part of it
-that reasons with the model — because cognition is the part most likely to be
-compromised, and a component that can suppress the report of its own compromise
-is not being watched.
+Operator that **does not pass through the entity's reasoning path**, the part of
+it that reasons with the model — because the reasoning path is the part most
+likely to be compromised, and a component that can suppress the report of its
+own compromise is not being watched.
 
 That path includes a **passive signal**: a plain record written into the store,
 readable with nothing running, that stops the entity from starting until a human
@@ -340,7 +340,7 @@ part. The part corrects itself; the verifier re-checks **externally**. That
 external re-check is the point: a component's own report that it fixed itself is
 not evidence.
 
-**Critical** — beyond correction, or involving cognition or the
+**Critical** — beyond correction, or involving the reasoning path or the
 verifier itself. The **session credential**, without which a session can do
 nothing, is revoked immediately and the Operator is told.
 
@@ -409,15 +409,15 @@ conversation ended cleanly what it carried forward.
 ## 10. What OBEC does not do
 
 **It is not an architecture.** OBEC describes a reference decomposition — four
-domains for integrity, cognition, memory and host — and marks it RECOMMENDED. No
+domains for integrity, reasoning, memory and host — and marks it RECOMMENDED. No
 requirement names a component. This is deliberate: it means an existing runtime
 can become conformant by satisfying the boundaries, without being rewritten
 around someone else's structure.
 
-**It does not specify cognition.** How the entity thinks, what algorithms it
+**It does not specify reasoning.** How the entity reasons, what algorithms it
 uses, how it structures a prompt — all implementation-defined. OBEC constrains
-what reaches the thinking and what the thinking reaches, and says nothing about
-the thinking.
+what reaches the reasoning and what the reasoning reaches, and says nothing
+about the reasoning itself.
 
 **It does not solve prompt injection.** A crafted input can produce requests that
 are structurally valid and semantically hostile. The checks verify an operation's

@@ -39,15 +39,16 @@ classes — its **structure** (instructions, skills, configuration, and its
 bindings to Operators), its **memory** (what it records and learns), its
 **integrity** records, which prove the structure untampered and decide whether
 the entity may run, and its **operational** settings (where its Operator lets it
-act, and on which model). Each class has one writer: a single path allowed to change
-it. The **Genesis Anchor** is written once, at first activation, and every
-authorized change to the structure adds an entry to a **chain** that leads back
-to it. **Cognition** is the part that reasons, and the model is its engine, a
-**stateless** one: context in, one answer out, nothing kept between calls. The
-entity acts only through **skills** — packaged operations its Operator admits —
-and only inside its **workspace**, the part of the host its Operator declares.
-Cognition is kept apart from the model, from memory, from the integrity records
-and from the host; passing between any of them is a **boundary crossing**.
+act, and on which model). Each class has one writer: a single path allowed to
+change it. The **Genesis Anchor** is written once, at first activation, and
+every authorized change to the structure adds an entry to a **chain** that leads
+back to it. The **reasoning path** is the part that reasons, and the model is
+its engine, a **stateless** one: context in, one answer out, nothing kept
+between calls. The entity acts only through **skills** — packaged operations its
+Operator admits — and only inside its **workspace**, the part of the host its
+Operator declares. The reasoning path is kept apart from the model, from memory,
+from the integrity records and from the host; passing between any of them is a
+**boundary crossing**.
 
 | | Invariant | Domain |
 |---|---|---|
@@ -56,7 +57,7 @@ and from the host; passing between any of them is a **boundary crossing**.
 | **OC-003** | Everything the entity is resides in its store, travels with it, and has one writer per class | state |
 | **OC-004** | The entity's identity is proven by an unbroken chain back to its Genesis Anchor | identity |
 | **OC-005** | Integrity guards the entity, and nothing in the entity can disarm it | integrity |
-| **OC-006** | The model is cognition's stateless engine, and it only answers | cognition |
+| **OC-006** | The model is the reasoning path's stateless engine, and it only answers | reasoning |
 | **OC-007** | What the entity has learned comes only from its memory | knowledge |
 | **OC-008** | The entity acts only inside an isolated workspace its Operator declares, through skills its Operator admits | action |
 | **OC-009** | The entity is auditable by design: every boundary crossing leaves a record | audit |
@@ -69,12 +70,12 @@ Read in sequence, the ten titles are OBEC in one paragraph:
 > directed to act as if it were. Everything the entity is resides in its store,
 > travels with it, and has one writer per class. The entity's identity is proven
 > by an unbroken chain back to its Genesis Anchor. Integrity guards the entity,
-> and nothing in the entity can disarm it. The model is cognition's stateless
-> engine, and it only answers. What the entity has learned comes only from its
-> memory. The entity acts only inside an isolated workspace its Operator
-> declares, through skills its Operator admits. The entity is auditable by
-> design: every boundary crossing leaves a record. The entity starts verified,
-> or does not start.
+> and nothing in the entity can disarm it. The model is the reasoning path's
+> stateless engine, and it only answers. What the entity has learned comes only
+> from its memory. The entity acts only inside an isolated workspace its
+> Operator declares, through skills its Operator admits. The entity is auditable
+> by design: every boundary crossing leaves a record. The entity starts
+> verified, or does not start.
 
 No configuration, operational condition, or extension — a document that adds
 operations or stricter rules on top of the specification — may weaken any of
