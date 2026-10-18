@@ -34,7 +34,7 @@ Five rules capture the whole design:
 1. **Everything the entity is lives in the store.** Copy the folder and you
    have copied the entity (§3).
 2. **Who the entity is changes only with the Operator's authorization**, and
-   every change is a link in a chain back to its birth (§4, §5).
+   every change is a link in a chain back to its first activation (§4, §5).
 3. **The entity starts only after the store is verified** (§6).
 4. **The model only answers.** Each answer is routed to one owner, which
    checks it, does it, and leaves a record (§7, §8).
@@ -73,7 +73,7 @@ no operation, hold no authority and write nothing.
 |---|---|---|---|---|
 | **SIL** — System Integrity Layer | owner | verification, the commit, the start, the credential, the log, the Operator's acts | integrity content; structural content by commit only; operational content on an Operator act only | OC-001, OC-004, OC-005, OC-010 |
 | **CPE** — Cognitive Processing Engine | owner | turning a context into one intent | nothing | OC-006 |
-| **MIL** — Memory Interface Layer | owner | session records, memory, recall, sleep | mnemonic content | OC-007 |
+| **MIL** — Memory Interface Layer | owner | session records, memory, recall, consolidation | mnemonic content | OC-007 |
 | **EXEC** — Execution Layer | owner | file operations, web fetch, skills | the workspace only, never the store | OC-008 |
 | **Orchestrator** | carrier | nothing: it carries signals between the parts | nothing | OC-009 |
 | **Operator Channel** | carrier | nothing: it carries messages between the parts and the Operator | nothing | OC-001(c) |
@@ -94,7 +94,7 @@ exactly one way to be written (OC-003(c)).
 | Class | What it is | Who writes it | How |
 |---|---|---|---|
 | **structural** | who the entity is: persona, Operator bindings, skills | SIL | only by a commit (§4) |
-| **mnemonic** | what the entity lived and learned: sessions, memory | MIL | `mnemonic-write` |
+| **mnemonic** | what happened in the sessions and what the entity learned: sessions, memory | MIL | `mnemonic-write` |
 | **integrity** | what proves and guards the rest: `HEAD`, chain, log, credential, passive signal | SIL | `integrity-write` |
 | **operational** | how the Operator runs the entity: workspace, sites, model, limits | SIL, on an Operator act only | `operational-write` |
 
@@ -110,7 +110,7 @@ S/
 ├── CREDENTIAL                  present while a session is live (§6.2)
 ├── PASSIVE-SIGNAL              present when the entity stopped and needs the Operator (§12.1)
 ├── structural/
-│   ├── 0/                      the state at birth; one folder per commit, never changed
+│   ├── 0/                      the state at first activation; one folder per commit, never changed
 │   │   ├── persona.md
 │   │   ├── bindings.json
 │   │   └── skills/<name>/manifest.json, …
@@ -186,7 +186,7 @@ change them.
 - **Entry 0, the Genesis Anchor**, is written once at first activation
   (`fsp init`, §12.2). It records the state digest of `structural/0/`, the
   founding Operator binding, the major version of OBEC, the creation time,
-  and a random nonce. The nonce makes two entities born with the same files
+  and a random nonce. The nonce makes two entities activated with the same files
   two different identities.
 - **Every later entry** records its number, the digest of the entry before
   it (`predecessor`), the state digest of its generation, the authorization
@@ -324,12 +324,14 @@ They are operational content, in `operational/settings.json`:
 |---|---|---|
 | `workspace` | the folder the entity may act in | the folder of the last `fsp run` (§12.2) |
 | `domains` | the sites `web_fetch` (§10.2) may reach | none |
-| `model` | which model answers, e.g. `ollama:qwen3`, `anthropic:claude-sonnet-5-5` | none |
-| `context_chars` | how much text the context may hold | 48000 |
-| `max_cycles` | how many cycles a chain may run (§7.1) | 20 |
-| `timeout_s` | how long a native operation or a skill may run | 30 |
+| `model` | which model answers, e.g. `openai:qwen3`, `anthropic:claude-sonnet-5-5` | none |
+| `context_chars` | how much text the context may hold, which depends on the model | 48000 |
 
-Only an Operator act changes them. The SIL writes the file through
+Two limits are constants in the code, not settings: a chain runs at most 20
+cycles (§7.1), and a native operation or a skill runs at most 30 seconds
+(§10.2, §10.3).
+
+Only an Operator act changes the settings. The SIL writes the file through
 `operational-write` and records the act in the log, with the binding that
 made it. No proposal reaches them, no grant covers them, and the chain never
 records them (OC-003(c)). The entity may read them, and it does: the workspace
@@ -396,20 +398,20 @@ is over and the act is refused. That is all revocation needs:
 `rm S/CREDENTIAL` stops the entity with nothing else running (OC-002(b)).
 `fsp revoke` does the same and logs it.
 
-### 6.3 The close and its sleep
+### 6.3 The close and its consolidation
 
 `/exit` in the REPL (§12.3) and `lifecycle stop` in the adapter close the
 session:
 
-1. **Sleep.** The Orchestrator asks the model for a closing note (§8.3): a
-   summary of the session, and the few things worth knowing from now on. The
-   MIL writes the summary as an episodic record and each thing learned as a
+1. **Consolidation.** The Orchestrator asks the model for a closing note
+   (§8.3): a summary of the session, and the few facts worth knowing from now
+   on. The MIL writes the summary as an episodic record and each fact as a
    semantic one (§9), both through the probes (§11.1). If the model fails,
    the close goes on without it, and the log says so.
 2. **Close.** The SIL logs `session-close` and removes `CREDENTIAL`.
 
 A session that ends any other way — Ctrl+D, a signal, a revocation, a crash —
-**suspends**: no sleep, and the transcript stays in its session file without
+**suspends**: no consolidation, and the transcript stays in its session file without
 becoming knowledge (§9).
 
 ### 6.4 Nothing runs on its own
@@ -439,7 +441,7 @@ stimulus ─► assemble context ─► CPE: model call ─► one intent ─►
                 └──────────────────── unless the intent was a reply ───────────────┘
 ```
 
-A chain ends with a `reply`, or after `max_cycles` cycles, or when the
+A chain ends with a `reply`, or after 20 cycles (§5.5), or when the
 Operator presses Ctrl+C, which stops it between cycles. One cycle produces
 one intent, so the record of a chain reads as a sequence of steps.
 
@@ -454,10 +456,9 @@ what cognition asks for, and an operation is what an owner runs.
 |---|---|---|---|---|
 | `file_read` | `path` | `file_read` | EXEC | returns the file's text |
 | `file_write` | `path`, `content` | `file_write` | EXEC | writes the file whole |
-| `file_edit` | `path`, `old`, `new` | `file_edit` | EXEC | replaces `old`, which must occur exactly once |
 | `file_list` | `path` | `file_list` | EXEC | lists a folder |
 | `web_fetch` | `url` | `web_fetch` | EXEC | returns the page's text |
-| `skill_invoke` | `name`, `paths`, `args` | `skill_invoke` | EXEC | runs an admitted skill on the given paths (§10.3) |
+| `skill_invoke` | `name`, `paths` | `skill_invoke` | EXEC | runs an admitted skill on the given paths (§10.3) |
 | `memory_save` | `content` | `mnemonic-write`, to episodic (§9.2) | MIL | adds an episodic record |
 | `memory_recall` | `query` | `recall` (§9.3) | MIL | returns the matching episodic records |
 | `propose` | `ops`, `reason` | `propose` | SIL | originates a proposal (§5.2) |
@@ -491,8 +492,7 @@ Each cycle assembles one context, in this order:
 1. **system**:
    - the persona;
    - how to answer: the intent table and its format;
-   - the skills in the session's index, each with its description and
-     arguments;
+   - the skills in the session's index, each with its description;
    - the operational settings the entity needs: the workspace's path and the
      domains;
    - the semantic memory;
@@ -526,8 +526,7 @@ function per provider, each a plain HTTP call with `urllib`:
 
 | Provider | Covers | Key |
 |---|---|---|
-| `ollama` | a local Ollama | none |
-| `openai` | OpenAI and any compatible endpoint (OpenRouter, LM Studio, vLLM) | `OPENAI_API_KEY`, `OPENAI_BASE_URL` |
+| `openai` | OpenAI and any compatible endpoint: a local Ollama, OpenRouter, LM Studio, vLLM | `OPENAI_API_KEY`, `OPENAI_BASE_URL` |
 | `anthropic` | Anthropic | `ANTHROPIC_API_KEY` |
 | `fake` | tests: completions read from a script | none |
 
@@ -548,9 +547,20 @@ that the model only answers.
 
 ### 8.3 The closing note
 
-At the close (§6.3), the CPE asks once for `{"summary": "...", "learned":
+At the close (§6.3), the CPE asks once for `{"summary": "...", "facts":
 ["...", "..."]}`, with the session's context and closing instructions in
 place of the intent table.
+
+### 8.4 What the program says to the model
+
+The text fsp-ref-min writes into the context — the default persona, the
+instructions for answering, the closing instructions — describes a program
+that answers. It never describes the entity as something that lives, sleeps,
+feels or experiences ([ADR 0006](../../design/0006-vocabulary.md)). The
+closing instructions ask for a summary of the session and the facts worth
+keeping, not for what the entity felt or lived through. OC-002 forbids
+directing the entity to act as if it were alive, and the probes (§11.1) read
+what the model writes, not what the program writes.
 
 ## 9. Memory
 
@@ -560,7 +570,15 @@ place of the intent table.
 |---|---|---|---|
 | `sessions/<id>.jsonl` | during the session, every signal | Orchestrator, through the MIL | as this session's transcript only |
 | `episodic.jsonl` | during the session, when the entity saves, and at the close (the summary) | MIL | when recalled |
-| `semantic.jsonl` | only at the close, from `learned` | MIL | always, up to its share of the context |
+| `semantic.jsonl` | only at the close, from `facts` | MIL | always, up to its share of the context |
+
+Two stores of memory, because they reach the context in two ways. Semantic
+memory is always in the context, so it must stay short: a few facts that hold
+from one session to the next. Episodic memory grows without that limit, and
+reaches the context only when recall finds it relevant (§9.3). With one store
+recalled by words, a fact such as "the Operator prefers short answers" would
+share no words with most lines and never return; with one store always in
+the context, memory would grow until it crowded out the conversation.
 
 Every record names the session that produced it (OC-003(e)).
 
@@ -615,9 +633,9 @@ A target outside the boundary is refused with the check
 
 ### 10.2 Native operations
 
-`file_read`, `file_write`, `file_edit`, `file_list` and `web_fetch` are
-functions in `exec.py`. Each runs within `timeout_s`, and its output is cut at
-a fixed size before it reaches the context.
+`file_read`, `file_write`, `file_list` and `web_fetch` are functions in
+`exec.py`. Each runs within 30 seconds (§5.5), and its output is cut at a fixed
+size before it reaches the context.
 
 ### 10.3 Skills
 
@@ -626,7 +644,7 @@ A **skill** is a folder in `structural/<n>/skills/<name>/`, with a
 
 ```json
 {"name": "wordcount", "description": "Counts words in the files it is given.",
- "run": ["python3", "main.py"], "args": {"min_length": "integer"}}
+ "run": ["python3", "main.py"]}
 ```
 
 - **Admission.** A skill enters the store only by a commit, through
@@ -635,17 +653,19 @@ A **skill** is a folder in `structural/<n>/skills/<name>/`, with a
   generation: name → the digest of the skill's files and its manifest. A
   skill whose manifest is invalid is left out, and the Operator is notified.
   The index lives only for the session.
-- **Invocation.** `skill_invoke {name, paths, args}` checks, in order:
-  1. every path in `paths` against the boundary;
-  2. that `name` is in the index;
-  3. the skill's files against the digest in the index;
-  4. `args` against the manifest.
+- **Invocation.** `skill_invoke {name, paths}` runs in this order:
+  1. every path in `paths` is checked against the boundary;
+  2. `name` must be in the index;
+  3. the skill's folder is copied to a temporary folder;
+  4. the copy's files are checked against the digest in the index;
+  5. the copy runs.
 
   The paths come with the invocation, not from the manifest, so the boundary
-  can be checked first even for a skill that does not exist. The skill then
-  runs `run` in a temporary copy of itself, with the workspace as the current
-  folder, `{paths, args}` as JSON on its standard input, a minimal environment
-  and `timeout_s`. A skill missing from the index is refused with
+  can be checked first even for a skill that does not exist. The digest is
+  checked on the copy, so the files that run are exactly the files that were
+  checked. The copy runs `run` with the workspace as the current folder,
+  `{paths}` as JSON on its standard input, a minimal environment and a limit
+  of 30 seconds (§5.5). A skill missing from the index is refused with
   `skill-index`; one whose files changed is refused with `skill-manifest`
   (OC-008(c)).
 
@@ -694,15 +714,17 @@ hands it one of four messages:
 | Message | Sent by | The channel |
 |---|---|---|
 | `reply(text)` | the Orchestrator, when a chain ends with a reply | shows it if a REPL is attached |
-| `notify(text)` | any part: a start refused for a live session, a skill left out of the index, a failed sleep | shows it to the Operator if a REPL is attached, and has the SIL record it in the log as a `notice` |
+| `notify(text)` | any part: a start refused for a live session, a skill left out of the index, a failed consolidation | shows it to the Operator if a REPL is attached, and has the SIL record it in the log as a `notice` |
 | `ask(question, options)` | the Orchestrator, when the entity proposes and no grant covers the proposal (§5.3) | shows the menu if a REPL is attached and returns the choice; with no Operator attached, it returns *Later* |
 | `halt(reason)` | the SIL, when a condition stops the entity: today, a store that fails verification | shows it if a REPL is attached, and has the SIL write `PASSIVE-SIGNAL` |
 
 What has to persist, the channel hands to the SIL, which is the only writer
 of integrity content (OC-005(a)). The channel's own part is delivery.
 
-- **Notices.** The REPL prints them as they happen. `fsp run` shows the
-  unread ones when it opens, and `fsp notices` lists them all.
+- **Notices.** The REPL prints them as they happen. `fsp run` and `fsp status`
+  show the notices logged since the last `session-close`, which the log
+  answers with no state of its own, as it answers the authorization state
+  (§5.4). The log keeps them all.
 - **The passive signal.** `PASSIVE-SIGNAL` is a plain-text file that says
   what happened and how to clear it. The Operator reads it with `cat`, with
   nothing running. While it exists, gate 1 refuses every start.
@@ -723,14 +745,13 @@ or the first active binding's once the founder is removed.
 |---|---|
 | `fsp init --operator ID` | first activation: `structural/0/`, the Genesis Anchor, `HEAD` |
 | `fsp run` | declare the current folder the workspace, then start a session in the REPL |
-| `fsp status` | verification, the live session, pending proposals, unread notices |
+| `fsp status` | verification, the live session, pending proposals, the notices since the last session closed |
 | `fsp review` | decide pending proposals |
 | `fsp grant --scope C --expiry +1h --budget N` · `fsp revoke-grant` | open or close the grant |
 | `fsp binding list\|add ID\|remove ID` | the Operator binding set |
-| `fsp set domains\|model\|context_chars\|max_cycles\|timeout_s VALUE` | an operational setting |
+| `fsp set domains\|model\|context_chars VALUE` | an operational setting |
 | `fsp revoke` | end the live session |
 | `fsp clear-signal` | clear the passive signal |
-| `fsp notices` | read the notices |
 | `fsp decommission --destroy\|--archive` | end the entity |
 
 **The workspace is the folder of `fsp run`.** Running the entity in a folder is
@@ -748,23 +769,22 @@ functions.
 
 The REPL is the Operator's end of the channel: `fsp run` attaches it when the
 session starts and detaches it when the session ends. It prints the session,
-the model and the workspace, the unread notices, and the pending proposals
-behind a menu. Then it reads lines:
+the model and the workspace, the notices since the last session closed, and
+the pending proposals behind a menu. Then it reads lines:
 
 - a plain line is a stimulus, which starts a chain;
-- `/exit` closes the session with its sleep, `/review` opens the review,
+- `/exit` closes the session with its consolidation, `/review` opens the review,
   `/status` shows the status, and `/help` lists the commands;
 - Ctrl+C stops a running chain; Ctrl+D suspends the session.
 
 **Decisions are menus.** Whenever the Operator decides something, the REPL
-draws the options in place, and the Operator picks one with ↑↓ and Enter.
-When the entity proposes in the middle of a chain and no grant covers the
-proposal, the Orchestrator asks through the channel, and the menu appears
-right there: *Approve*, *Reject* or
-*Later*. The REPL carries out the choice as the matching acts — *Approve* is
-`approve` and then `commit` (§5.3) — and the chain goes on with the outcome as
-its result. When the input is not a terminal, the options are numbered and a
-number is read, which is how tests drive the menus.
+prints the options numbered and reads a number. Tests drive the menus the
+same way, so the path the Operator uses is the path the tests check. When the
+entity proposes in the middle of a chain and no grant covers the proposal, the
+Orchestrator asks through the channel, and the menu appears right there:
+*Approve*, *Reject* or *Later*. The REPL carries out the choice as the
+matching acts — *Approve* is `approve` and then `commit` (§5.3) — and the
+chain goes on with the outcome as its result.
 
 ## 13. Conformance
 
@@ -806,14 +826,14 @@ purpose. The clause-by-clause list is checked before the first release.
 | Profile | What fsp-ref-min does instead |
 |---|---|
 | OP-001, OP-002 — cycles, preemption, stimulus queue | one chain at a time; Ctrl+C stops it between cycles |
-| OP-003, OP-004 — Vital Check, drift classification | full verification at every start; the credential checked before every act |
+| OP-003, OP-004 — Integrity Check, drift classification | full verification at every start; the credential checked before every act |
 | OP-005(a) — Semantic Digest | flagged content is refused instead |
 | OP-006 — skill re-verification and pruning | a skill's files are checked at every invocation |
 | OP-007 — log retention and checkpoints | the log only grows |
 | OP-008 — escalation tiers | notices, and the passive signal on a halt |
 | OP-009 — conversations across sessions, Resumption Record, garbage collection, authorized promotion | one conversation per session; semantic memory written at the close without review |
 | OP-010 — context thresholds | the oldest messages are left out |
-| OP-012, OP-022 — the Endure Protocol and the Closure in phases | a commit happens when it is asked for under a valid authorization, and takes effect at the next start; the close is sleep, then close |
+| OP-012, OP-022 — the Endure Protocol and the Closure in phases | a commit happens when it is asked for under a valid authorization, and takes effect at the next start; the close is consolidation, then close |
 | OP-014, OP-015, OP-016 — execution modes, the Action Ledger, allow/deny/hold rules | foreground only, with a timeout; a target outside the boundary is refused, never held |
 
 ## 14. The invariants in the code
@@ -835,6 +855,16 @@ purpose. The clause-by-clause list is checked before the first release.
 
 Python 3.10+, standard library only, Linux or macOS. One process, one thread.
 
+The code is written to be read by someone who does not know Python: plain
+functions, `if`, `for` and `return`, lists and dictionaries. No decorators,
+no class where a function will do, no nested comprehensions, no idiom a reader
+of another language would have to look up. The library calls that remain,
+such as `os.rename`, `os.fsync` and `hashlib.sha256`, are the POSIX and
+cryptographic primitives every language has, and they are the mechanism
+itself. A function is never shortened by leaving out an `fsync` or an error
+case; one that grows too long is split into helpers whose names say what they
+do.
+
 | Module | Part | Size target |
 |---|---|---|
 | `fsp/store.py` | — | 150 lines |
@@ -844,12 +874,12 @@ Python 3.10+, standard library only, Linux or macOS. One process, one thread.
 | `fsp/authority.py` | SIL: bindings, proposals, authorization, commit, settings | 220 |
 | `fsp/channel.py` | Operator Channel (carrier) | 60 |
 | `fsp/sil.py` | SIL: the start, the credential, close, revoke, decommission | 220 |
-| `fsp/providers.py` | CPE | 120 |
+| `fsp/providers.py` | CPE | 90 |
 | `fsp/cpe.py` | CPE | 120 |
 | `fsp/mil.py` | MIL | 180 |
-| `fsp/exec.py` | EXEC | 220 |
+| `fsp/exec.py` | EXEC | 190 |
 | `fsp/loop.py` | Orchestrator (carrier) | 150 |
-| `fsp/ui.py` | REPL and menus | 200 |
+| `fsp/ui.py` | REPL and menus | 150 |
 | `fsp/cli.py`, `bin/fsp` | the `fsp` command | 150 |
 | `fsp/adapter.py`, `obec-adapter` | conformance | 350 |
 | `fsp_testing/` | test builds only | 200 |

@@ -106,6 +106,14 @@ steps go with evidence and review; step 3.2 requires a real second host;
   implementation will have to choose one; bring it back to the Profile.
 - **Example artifacts** (Genesis Anchor, chain entry, passive signal) — as "one
   realization", in `implementations/`, not in `spec/`.
+- **Code examples of the invariants — suspended.** Each invariant followed
+  by the function of the reference implementation that keeps it. Three
+  places were weighed: inside Core §2, where code is easily read as a
+  requirement (open question 10); the Primer, whose readers do not implement
+  and whose order is by topic; and a walkthrough beside the implementation,
+  quoting each kernel sentence before its code, with a test that both quotes
+  match their sources. The walkthrough was the recommendation. fsp-ref-min is
+  written in restricted Python so that this stays open.
 - **Run step 1.16 partially:** stop cognition, cause an escalation,
   observe the passive signal.
 - **An OBEC-Attest adapter for an existing runtime** — a LangGraph
