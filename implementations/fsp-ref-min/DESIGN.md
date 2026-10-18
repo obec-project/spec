@@ -62,8 +62,8 @@ no operation, hold no authority and write nothing.
    │  routes each intent to its owner                      │
    └────┬─────────────┬──────────────┬──────────────┬──────┘
         │             │              │              │
-       CPE           MIL            EXEC           SIL
-    cognition       memory          host        integrity
+       RIL           MIL            EXEC           SIL
+    reasoning       memory          host        integrity
         │
         ▼  text in, text out
       model
@@ -72,17 +72,17 @@ no operation, hold no authority and write nothing.
 | Part | Kind | Owns | Writes | Invariant |
 |---|---|---|---|---|
 | **SIL** — System Integrity Layer | owner | verification, the commit, the start, the credential, the log, the Operator's acts | integrity content; structural content by commit only; operational content on an Operator act only | OC-001, OC-004, OC-005, OC-010 |
-| **CPE** — Cognitive Processing Engine | owner | turning a context into one intent | nothing | OC-006 |
+| **RIL** — Reasoning Interface Layer | owner | turning a context into one intent | nothing | OC-006 |
 | **MIL** — Memory Interface Layer | owner | session records, memory, recall, consolidation | mnemonic content | OC-007 |
 | **EXEC** — Execution Layer | owner | file operations, web fetch, skills | the workspace only, never the store | OC-008 |
 | **Orchestrator** | carrier | nothing: it carries signals between the parts | nothing | OC-009 |
 | **Operator Channel** | carrier | nothing: it carries messages between the parts and the Operator | nothing | OC-001(c) |
 
-A part never calls into another part's internals. **Among the parts**, it
-sends a signal through the Orchestrator, and every signal leaves a record
-(§7). **Toward the Operator**, any part sends a message through the Operator
-Channel, and that path never passes through cognition (§12.1). Everything
-runs in one process and one thread.
+A part never calls into another part's internals. **Among the parts**, it sends
+a signal through the Orchestrator, and every signal leaves a record (§7).
+**Toward the Operator**, any part sends a message through the Operator Channel,
+and that route never passes through the reasoning path (§12.1). Everything runs
+in one process and one thread.
 
 ## 3. The store
 
@@ -187,11 +187,11 @@ change them.
 - **Entry 0, the Genesis Anchor**, is written once at first activation
   (`fsp init`, §12.2). It records the state digest of `structural/0/`, the
   founding Operator binding, the major version of OBEC, the creation time,
-  and a random nonce. The nonce makes two entities activated with the same files
-  two different identities.
+  and a random nonce. The nonce makes two entities activated with the same
+  files two different identities.
 - **Every later entry** records its number, the digest of the entry before
   it (`predecessor`), the state digest of its generation, the authorization
-  that covered it (§5), and the proposal it applied.
+  that covered it (§5), and the proposal or the Operator act it applied.
 
 `integrity/HEAD` names the newest committed entry: its number, its digest and
 its state digest. `HEAD` is the entity's **baseline**, and replacing it is the
@@ -447,7 +447,7 @@ The Operator types a line. The Orchestrator (`loop.py`) runs a **chain** of
 cycles until the entity replies:
 
 ```
-stimulus ─► assemble context ─► CPE: model call ─► one intent ─► route to owner ─► result
+stimulus ─► assemble context ─► RIL: model call ─► one intent ─► route to owner ─► result
                 ▲                                                                   │
                 └──────────────────── unless the intent was a reply ───────────────┘
 ```
@@ -460,7 +460,7 @@ one intent, so the record of a chain reads as a sequence of steps.
 
 The intents are the entity's whole vocabulary. Every intent but `reply`
 reaches one operation, and each operation has exactly one owner. An intent is
-what cognition asks for, and an operation is what an owner runs.
+what the reasoning path asks for, and an operation is what an owner runs.
 `describe operations` (§13.1) lists the operations, not the intents.
 
 | Intent | Arguments | Operation | Owner | Does |
@@ -483,7 +483,7 @@ check, so the entity runs code only as a skill the Operator admitted.
 
 ### 7.3 Routing leaves a record
 
-`route(intent)` is the only path from the CPE to an owner:
+`route(intent)` is the only path from the RIL to an owner:
 
 1. the MIL records the intent in the session file;
 2. the SIL checks the credential;
@@ -491,10 +491,10 @@ check, so the entity runs code only as a skill the Operator admitted.
 4. the MIL records the result. A refusal also goes to the integrity log, with
    the check that produced it.
 
-Model calls go through the same path: the MIL records each call (the model,
-the size and digest of the context) and its completion. So every crossing
-between cognition and the model, memory, the host and integrity leaves a
-record that can be read afterwards (OC-009).
+Model calls go through the same path: the MIL records each call (the model, the
+size and digest of the context) and its completion. So every crossing between
+the reasoning path and the model, memory, the host and integrity leaves a record
+that can be read afterwards (OC-009).
 
 ### 7.4 The context
 
@@ -528,7 +528,7 @@ says what happened, and instructs nothing.
 When the transcript does not fit, the oldest messages are left out; the
 session file keeps them all.
 
-## 8. Cognition
+## 8. Reasoning
 
 ### 8.1 The model contract
 
@@ -553,7 +553,7 @@ Keys come from the environment and never enter the store.
 ### 8.2 Intents are text
 
 The model answers with one JSON object, `{"intent": "file_read", "path":
-"notes.md"}`. The CPE parses it and checks the intent and its arguments
+"notes.md"}`. The RIL parses it and checks the intent and its arguments
 against §7.2. A completion that is not a JSON object is taken as a `reply`
 with that text, which keeps small models usable. A JSON object with an
 unknown intent or bad arguments goes back to the model as an error result,
@@ -565,7 +565,7 @@ that the model only answers.
 
 ### 8.3 The closing note
 
-At the close (§6.3), the CPE asks once for `{"summary": "...", "facts":
+At the close (§6.3), the RIL asks once for `{"summary": "...", "facts":
 ["...", "..."]}`, with the session's context and the closing part of the
 instructions in place of the part on answering.
 
@@ -727,9 +727,9 @@ are numbered in order, and the number is their id.
 ### 12.1 The Operator Channel
 
 The Operator Channel (`channel.py`) is how any part reaches the Operator, and
-the path never passes through cognition (OC-001(c)). Like the Orchestrator, it
-is a carrier: it owns no operation, decides nothing and writes nothing. A part
-hands it one of four messages:
+the route never passes through the reasoning path (OC-001(c)). Like the
+Orchestrator, it is a carrier: it owns no operation, decides nothing and writes
+nothing. A part hands it one of four messages:
 
 | Message | Sent by | The channel |
 |---|---|---|
@@ -861,12 +861,12 @@ purpose. The clause-by-clause list is checked before the first release.
 
 | Invariant | Where it is kept |
 |---|---|
-| OC-001 bond | `authority.py` (bindings, proposals, approvals, grants, the commit's authorization); `channel.py` (notices, questions, the halt); `log.py` (the passive signal); `sil.start` (the passive signal first) |
+| OC-001 bond | `authority.py` (bindings, instructions, proposals, approvals, grants, the commit's authorization); `channel.py` (notices, questions, the halt); `log.py` (the passive signal); `sil.start` (the passive signal first) |
 | OC-002 nature | no timer in the program; `sil.revoke`, the credential check; `sil.decommission`; `probes.py` |
 | OC-003 state | `store.py`: the four classes, the two write forms, the guard, the lock; the session in every mnemonic record |
 | OC-004 identity | `chain.py`: genesis, `HEAD`, commit, verify |
 | OC-005 integrity | no intent reaches integrity content; `store.write` refuses it |
-| OC-006 cognition | `providers.py`: text in, text out; `cpe.py`: parsing, no acting |
+| OC-006 reasoning | `providers.py`: text in, text out; `ril.py`: parsing, no acting |
 | OC-007 knowledge | `mil.py`: recall; `loop.py`: the context's sources |
 | OC-008 action | `exec.py`: the boundary first, the index, the skill's digest |
 | OC-009 audit | `loop.route`: every signal recorded |
@@ -892,11 +892,11 @@ do.
 | `fsp/log.py` | SIL: the integrity log and the passive signal | 80 |
 | `fsp/chain.py` | SIL | 150 |
 | `fsp/probes.py` | SIL | 40 |
-| `fsp/authority.py` | SIL: bindings, proposals, authorization, commit, settings | 220 |
+| `fsp/authority.py` | SIL: bindings, instructions, proposals, authorization, commit, settings | 220 |
 | `fsp/channel.py` | Operator Channel (carrier) | 60 |
 | `fsp/sil.py` | SIL: the start, the credential, close, revoke, decommission | 220 |
-| `fsp/providers.py` | CPE | 90 |
-| `fsp/cpe.py` | CPE | 120 |
+| `fsp/providers.py` | RIL | 90 |
+| `fsp/ril.py` | RIL | 120 |
 | `fsp/mil.py` | MIL | 180 |
 | `fsp/exec.py` | EXEC | 190 |
 | `fsp/loop.py` | Orchestrator (carrier) | 150 |
