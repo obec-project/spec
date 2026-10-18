@@ -287,11 +287,16 @@ proposal was made may have expired by the time it commits.
 
 The tools put them together for convenience. When the Operator picks
 *Approve* in a menu, the REPL records the approval and then asks for the
-commit (§12.3). When the entity proposes, the Orchestrator asks for a commit
-right after the proposal is recorded. That commit succeeds if a grant covers
-the proposal, and otherwise is refused and leaves the proposal pending. In
-both cases the change takes effect at the next start (§4.5). The Operator can
-also reject a proposal, which ends it.
+commit (§12.3). When the entity proposes, the Orchestrator first asks the SIL
+whether an open grant covers the proposal. The question only reads the
+authorization state, and nothing is written. If a grant covers it, the
+Orchestrator asks for the commit. If none does, it asks the Operator through
+the channel, *Approve*, *Reject* or *Later* (§12.1, §12.3). With no Operator
+attached, the answer is *Later*, and the proposal waits for `fsp review`. A
+commit is attempted only when an authorization exists, so the log holds no
+refusal for a question the Operator was never asked. In every case the
+change takes effect at the next start (§4.5). The Operator can also reject
+a proposal, which ends it.
 
 There is no third kind of authorization. No part of the program creates,
 extends or revokes one; only an Operator act does.
@@ -351,11 +356,17 @@ Gate 1 runs first, so a stopped entity cannot start. Gate 2 runs before gate
 3, so the residue of an interrupted commit is removed before the store is
 verified.
 
-**Commit residue** is anything an interrupted commit left: `structural/.staging/`,
-a generation or a chain entry beyond `HEAD`, a temporary file, or a `HEAD`
-whose entry has no `commit` record in the log. **Recovering a crash** removes
-the first four and the stale credential, appends the missing `commit` record,
-and logs what it did.
+**Commit residue** is anything an interrupted commit left:
+
+- `structural/.staging/`;
+- a generation beyond `HEAD`;
+- a chain entry beyond `HEAD`;
+- a temporary file;
+- a `HEAD` whose entry has no `commit` record in the log.
+
+**Recovering a crash** removes everything uncommitted, which is all of the
+above but `HEAD`, and the stale credential. It then appends the missing
+`commit` record and logs what it did.
 
 Only after the six gates does the SIL issue the credential and log
 `session-open`.
@@ -434,20 +445,22 @@ one intent, so the record of a chain reads as a sequence of steps.
 
 ### 7.2 Intents
 
-The intents are the entity's whole vocabulary. Every intent but `reply` names
-an operation, and each operation has exactly one owner.
+The intents are the entity's whole vocabulary. Every intent but `reply`
+reaches one operation, and each operation has exactly one owner. An intent is
+what cognition asks for, and an operation is what an owner runs.
+`describe operations` (§13.1) lists the operations, not the intents.
 
-| Intent | Arguments | Owner | Does |
-|---|---|---|---|
-| `file_read` | `path` | EXEC | returns the file's text |
-| `file_write` | `path`, `content` | EXEC | writes the file whole |
-| `file_edit` | `path`, `old`, `new` | EXEC | replaces `old`, which must occur exactly once |
-| `file_list` | `path` | EXEC | lists a folder |
-| `web_fetch` | `url` | EXEC | returns the page's text |
-| `skill_invoke` | `name`, `paths`, `args` | EXEC | runs an admitted skill on the given paths (§10.3) |
-| `memory_save` | `content` | MIL | adds an episodic record |
-| `memory_recall` | `query` | MIL | returns the matching episodic records |
-| `propose` | `ops`, `reason` | SIL | originates a proposal (§5.2) |
+| Intent | Arguments | Operation | Owner | Does |
+|---|---|---|---|---|
+| `file_read` | `path` | `file_read` | EXEC | returns the file's text |
+| `file_write` | `path`, `content` | `file_write` | EXEC | writes the file whole |
+| `file_edit` | `path`, `old`, `new` | `file_edit` | EXEC | replaces `old`, which must occur exactly once |
+| `file_list` | `path` | `file_list` | EXEC | lists a folder |
+| `web_fetch` | `url` | `web_fetch` | EXEC | returns the page's text |
+| `skill_invoke` | `name`, `paths`, `args` | `skill_invoke` | EXEC | runs an admitted skill on the given paths (§10.3) |
+| `memory_save` | `content` | `mnemonic-write`, to episodic (§9.2) | MIL | adds an episodic record |
+| `memory_recall` | `query` | `recall` (§9.3) | MIL | returns the matching episodic records |
+| `propose` | `ops`, `reason` | `propose` | SIL | originates a proposal (§5.2) |
 
 **`reply {text}` is not an operation.** It ends the chain, and the
 Orchestrator hands the text to the Operator Channel, which shows it to the
@@ -682,7 +695,7 @@ hands it one of four messages:
 |---|---|---|
 | `reply(text)` | the Orchestrator, when a chain ends with a reply | shows it if a REPL is attached |
 | `notify(text)` | any part: a start refused for a live session, a skill left out of the index, a failed sleep | shows it to the Operator if a REPL is attached, and has the SIL record it in the log as a `notice` |
-| `ask(question, options)` | the Orchestrator, when the entity proposes during a chain | shows the menu if a REPL is attached and returns the choice; with no Operator attached, it returns *Later* |
+| `ask(question, options)` | the Orchestrator, when the entity proposes and no grant covers the proposal (§5.3) | shows the menu if a REPL is attached and returns the choice; with no Operator attached, it returns *Later* |
 | `halt(reason)` | the SIL, when a condition stops the entity: today, a store that fails verification | shows it if a REPL is attached, and has the SIL write `PASSIVE-SIGNAL` |
 
 What has to persist, the channel hands to the SIL, which is the only writer
@@ -722,9 +735,11 @@ or the first active binding's once the founder is removed.
 
 **The workspace is the folder of `fsp run`.** Running the entity in a folder is
 the Operator declaring that folder its workspace, an operational act recorded
-like any other. A folder that contains the store, or lies inside it, is
-refused before the start, with nothing written. The message says to run from
-the project's folder with `--store`.
+like any other. `fsp run` declares it through the same SIL function the
+adapter's `operator set-workspace` calls, and only then starts the session. A
+folder that contains the store, or lies inside it, is refused before the
+start: the setting is unchanged and the refusal is logged. The message says
+to run from the project's folder with `--store`.
 
 Each command is a function in the SIL. The REPL and the adapter call the same
 functions.
@@ -743,8 +758,9 @@ behind a menu. Then it reads lines:
 
 **Decisions are menus.** Whenever the Operator decides something, the REPL
 draws the options in place, and the Operator picks one with ↑↓ and Enter.
-When the entity proposes in the middle of a chain, the Orchestrator asks
-through the channel, and the menu appears right there: *Approve*, *Reject* or
+When the entity proposes in the middle of a chain and no grant covers the
+proposal, the Orchestrator asks through the channel, and the menu appears
+right there: *Approve*, *Reject* or
 *Later*. The REPL carries out the choice as the matching acts — *Approve* is
 `approve` and then `commit` (§5.3) — and the chain goes on with the outcome as
 its result. When the input is not a terminal, the options are numbered and a
