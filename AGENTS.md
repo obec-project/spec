@@ -63,6 +63,8 @@ specification's shape that changed.
 - **Python is formatted by ruff, within 88 columns** ([ruff.toml](ruff.toml)
   pins the version). The formatter does not break strings or comments: those
   are broken by hand, never with a `noqa`.
+- **Markdown prose is wrapped at 80 columns.** Tables, headings and code
+  blocks are not wrapped. No tool enforces it.
 - **Everything is written in English.**
 
 ## Operational facts
