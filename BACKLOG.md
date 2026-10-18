@@ -74,6 +74,12 @@ steps go with evidence and review; step 3.2 requires a real second host;
   *Heartbeat* and *Sleep* renamed in the Profile and the Core; the Primer's
   passages rewritten. It touches no kernel sentence. Done before fsp-ref-min
   writes the text it sends to the model, its Phase 3.
+- **Apply [ADR 0007](design/0007-cognition.md):** *cognition* as a part
+  becomes *the reasoning path*, in the kernel and Core §2 together, the rest
+  of the Core, the Profile, the Primer and the README; the adapter contract,
+  the runner and the stub take the new field and boundary names, and the
+  suite's version moves. Done before fsp-ref-min's first phase, whose
+  adapter answers `describe operations`.
 - **Not verifiable from inside the repository:** whether the repository
   description (153 characters) reads well; whether the "proposal" framing is
   calibrated — it may be too modest, since the architecture has run twice and
