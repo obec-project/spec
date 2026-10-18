@@ -53,7 +53,7 @@ This is written once here and referred to as **the refusal triple**.
 
 ### 0.2 Why a step is attested
 
-Twelve of the seventy-eight steps are attested. They are not one kind of
+Twelve of the seventy-nine steps are attested. They are not one kind of
 concession, and a claim should not be read as if they were:
 
 | Kind | Steps | Why no input sequence establishes it |

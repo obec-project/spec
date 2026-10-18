@@ -232,10 +232,11 @@ single completion, which no implementation controls.
 
 **(a) Completeness.** All entity state — structural, mnemonic, integrity, and
 operational — MUST live inside the **Entity Store**. No guarantee in this
-specification may depend on state held outside it. Everything that enters the
-context the reasoning path assembles MUST be structural, mnemonic or
-operational content, or **transient input**: the stimulus being answered, the
-results of the current exchange, and the date and time of the call. An
+specification may depend on state held outside it. Everything in the
+**assembled context** — the text the reasoning path sends the model in one
+call — MUST be structural, mnemonic or operational content, or
+**transient input**: the input being answered, the results of the operations
+dispatched since it arrived, and the date and time of the call. An
 implementation MUST NOT add text of its own to that context: its instructions
 to the model are structural content.
 
@@ -886,7 +887,7 @@ their mechanism is not required for conformance.
 **Action Ledger** *(Profile)* — the write-ahead record covering irreversible
 operations; entries append before execution and resolve after (OP-015).
 
-**Assembled context** — what the reasoning path sends the model in one call:
+**Assembled context** — the text the reasoning path sends the model in one call:
 structural, mnemonic and operational content, and transient input, and nothing
 the implementation adds of its own (OC-003(a)).
 
@@ -899,7 +900,7 @@ ends a conversation, and its instrument of coherence across conversations
 (OP-009(d)).
 
 **Cognitive** — said of the entity as a whole, never of one of its parts. The
-part that turns a context into an intent is the reasoning path.
+part that turns a context into intents is the reasoning path.
 
 **Configuration** — structural content that shapes the entity: its probes, the
 parameters that shape its memory. Distinct from operational content.
@@ -981,7 +982,7 @@ a session credential until an Operator act clears it (OC-001(c)).
 proposal; one of the two forms of valid authorization (OC-001(b)).
 
 **Reasoning path** — the part of the entity that turns an assembled context
-into one intent, with the model as its stateless engine (OC-006), whatever
+into intents, with the model as its stateless engine (OC-006), whatever
 realizes it. This specification constrains what reaches it and what it
 reaches; it constrains nothing about how it reasons.
 
@@ -1026,10 +1027,10 @@ commit (OC-003(c), OC-001(b), OC-004(b)).
 the atomic commit of OC-004(b) and only with a valid Operator authorization in
 force at the moment of commit (OC-001(b)).
 
-**Transient input** — what enters the assembled context without being content
-of the store: the stimulus being answered, the results of the current exchange,
-and the date and time of the call (OC-003(a)). It is not consolidated knowledge
-(OC-007).
+**Transient input** — what enters the assembled context without being content of
+the store: the input being answered, the results of the operations dispatched
+since it arrived, and the date and time of the call (OC-003(a)). It is not
+consolidated knowledge (OC-007).
 
 **Valid Operator authorization** — exactly one of a per-proposal approval or an
 active, in-scope standing grant with remaining budget (OC-001(b)).

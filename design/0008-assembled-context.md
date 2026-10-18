@@ -12,7 +12,7 @@ This record closes the one source of the assembled context that no rule
 governs: the text an implementation writes into it on its own behalf, its
 instructions to the model. Everything that enters the context is now content
 of the store, with the class, writer and authority that content already has,
-or transient input of the current exchange. An implementation's instructions
+or transient input. An implementation's instructions
 are structural content. The change hardens the kernel.
 
 ---
@@ -57,14 +57,15 @@ The specification also uses "operational context" for transient input
 
 ### 2.1 What enters the context
 
-Everything that enters the context the reasoning path assembles is one of:
+Everything that enters the assembled context, the text the reasoning path sends
+the model in one call, is one of:
 
 | Source | Class | Writer | Authority |
 |---|---|---|---|
 | the persona, the implementation's instructions, the admitted skills' descriptions | structural | the commit | the Operator, by approval, grant, or a direct act |
 | the workspace, the domains, the model | operational | an Operator act | the Operator |
 | memory, and the transcript of the conversation | mnemonic | the mnemonic operations | reaches the context through recall (OC-007) |
-| the stimulus being answered, the results of the current exchange, and the date and time of the call | none: transient input | — | — |
+| the input being answered, the results of the operations dispatched since it arrived, and the date and time of the call | none: transient input | — | — |
 
 Nothing else. **An implementation adds no text of its own.** A refusal or an
 error the model receives is a result: it reports what happened, and

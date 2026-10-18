@@ -94,8 +94,9 @@ A claim MUST provide:
 2. **Suite output** — the result of every test, marked executed or attested, with
    evidence for each attested one.
 3. **Structural surface** — the structural content of OC-003(c) the
-   implementation maintains: persona, skills, configuration including every value
-   the Profile leaves to configuration, and the Operator binding set.
+   implementation maintains: persona, instructions to the model, skills,
+   configuration including every value the Profile leaves to configuration, and
+   the Operator binding set.
 4. **Conformance adapter** — the adapter that makes the implementation drivable
    by the suite, so the claim can be reproduced by someone else.
 5. **Audit trail** — the integrity log of the run: the chain, the start gate

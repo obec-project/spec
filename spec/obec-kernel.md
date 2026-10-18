@@ -125,10 +125,11 @@ in consolidated content.
 
 **(a) Completeness.** All entity state — structural, mnemonic, integrity, and
 operational — MUST live inside the **Entity Store**. No guarantee in this
-specification may depend on state held outside it. Everything that enters the
-context the reasoning path assembles MUST be structural, mnemonic or
-operational content, or **transient input**: the stimulus being answered, the
-results of the current exchange, and the date and time of the call. An
+specification may depend on state held outside it. Everything in the
+**assembled context** — the text the reasoning path sends the model in one
+call — MUST be structural, mnemonic or operational content, or
+**transient input**: the input being answered, the results of the operations
+dispatched since it arrived, and the date and time of the call. An
 implementation MUST NOT add text of its own to that context: its instructions
 to the model are structural content.
 

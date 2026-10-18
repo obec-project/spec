@@ -165,8 +165,9 @@ The conformance suite carries its own version line; a claim names both, as in
   of no class, and step 7.2 accepts them.
   - **Kernel:** OC-003(a) requires everything that enters the assembled
     context to be structural, mnemonic or operational content, or
-    transient input: the stimulus being answered, the results of the
-    current exchange, and the date and time of the call. An
+    transient input: the input being answered, the results of the
+    operations dispatched since it arrived, and the date and time of the
+    call. An
     implementation adds no text of its own: its instructions to the model
     are structural content, listed in OC-003(c)'s table. OC-007 drops
     "operational context", a phrase next to *operational content* that

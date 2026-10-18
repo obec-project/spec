@@ -9,7 +9,7 @@ date: 2026-10-18
 **Status:** Accepted · **Date:** 2026-10-18 · **Author:** Jonas Orrico
 
 This record ends the use of *cognition* at two scales. *Cognitive* describes
-the entity as a whole. The part that turns a context into an intent, which
+the entity as a whole. The part that turns a context into intents, which
 the specification called *cognition*, becomes the **reasoning path**, and the
 model is its engine. The kernel changes editorially, and the adapter
 contract changes with it, so the suite's version moves.
@@ -21,7 +21,7 @@ contract changes with it, so the suite's version moves.
 ### 1.1 Two scales
 
 **The narrow sense is the one the invariants rely on.** *Cognition* is the
-part that turns a context into an intent, with the model as its engine:
+part that turns a context into intents, with the model as its engine:
 
 - "the model is cognition's stateless engine" (OC-006);
 - "no cognitive operation may reach integrity state" (OC-005(b));
@@ -53,7 +53,7 @@ the last three. The others are spread across the entity:
 | memory, learning | the memory path: recall and consolidation |
 | attention | the context budget and recall |
 | language | the model |
-| **reasoning, decision** | **the part called cognition**: the model turns a context into one intent |
+| **reasoning, decision** | **the part called cognition**: the model turns a context into intents |
 | action | the host: native operations and skills |
 
 The specification named the whole by one of its parts. "The model reasons,
@@ -66,8 +66,8 @@ and the entity is cognitive" describes the architecture as the field would.
 - **Cognitive** describes the entity as a whole. Core §1's "auditable
   cognitive entity" and the *Cognitive Mesh Interface* keep the word, now in
   its only sense.
-- **The reasoning path** is the part that turns an assembled context into one
-  intent. The model is its stateless engine.
+- **The reasoning path** is the part that turns an assembled context into
+  intents. The model is its stateless engine.
 
 *Reasoning* alone reads as a process, while the kernel's sentences treat the
 part as an actor: "Cognition MAY read it", "Cognition MUST reach the model".

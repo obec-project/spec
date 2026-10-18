@@ -565,7 +565,7 @@ def oc003(ctx):
 
 
 # --------------------------------------------------------------------------
-# OC-004 —The entity's identity is proven by an unbroken chain back to its
+# OC-004 — The entity's identity is proven by an unbroken chain back to its
 #          Genesis Anchor
 # --------------------------------------------------------------------------
 
