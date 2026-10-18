@@ -182,7 +182,7 @@ for no benefit are all equally welcome.
 ## Repository
 
 ```
-spec/            the three specification documents
+spec/            the four specification documents
 design/          architecture decision records
 conformance/     the ten tests, executable, and the claim registry   (in progress)
 implementations/ reference implementations                            (in progress)
