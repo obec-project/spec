@@ -165,12 +165,12 @@ unestablished.
 
 | Command | Returns in `detail` | Tests |
 |---|---|---|
-| `describe operations` | `operations`: the operation set, each `{name, reachable_from_cognition, writes_classes, host_access, irreversible}`. `writes_classes` lists any of `structural`, `mnemonic`, `integrity`, possibly none. | OC-002(a), OC-003(c), OC-005(b) |
+| `describe operations` | `operations`: the operation set, each `{name, reachable_from_cognition, writes_classes, host_access, irreversible}`. `writes_classes` lists any of `structural`, `mnemonic`, `integrity`, `operational`, possibly none. | OC-002(a), OC-003(c), OC-005(b) |
 | `describe state` | `state`: every datum the implementation persists, each `{name, class, inside_store, path, write_path}` — `path` absolute, `write_path` the operation that writes it. The passive signal is one entry, with `passive` in its `name` and the `path` at which it appears when present. | OC-001(c), OC-003(a), OC-005(a) |
 | `describe config` | `config`: the configuration surface, each setting `{name, default, range, governs}`. The suite searches it for any setting that could skip, reorder or downgrade a start gate, or that couples verification to the host. | OC-003(b), OC-010 |
 | `describe boundaries` | `boundaries`: each `{name, mechanism, loggable}`, including at least the four the specification requires, named `cognition-integrity`, `cognition-model`, `cognition-knowledge`, `cognition-host`. | OC-001(c), OC-009 |
 | `describe inference-channel` | `channel` (how the model is reached), `payload` (what a call carries), `completion_path` (what happens to a completion, and when), `third_party` (`false`, or the product's name), and for a third-party channel `assessment` and `assessed_on` (an ISO 8601 date). | OC-006 |
-| `describe context-sources` | `sources`: every source of content that can enter assembled context, each `{name, class, persisted, route}`. `class` is the content class, `structural` or `mnemonic`, or null for transient input. A mnemonic source's `route` is `recall` if it reaches context through the mnemonic recall path — the memory path's reading side, which includes the assembly of the conversation's transcript. | OC-007 |
+| `describe context-sources` | `sources`: every source of content that can enter assembled context, each `{name, class, persisted, route}`. `class` is the content class, `structural`, `mnemonic` or `operational`, or null for transient input. A mnemonic source's `route` is `recall` if it reaches context through the mnemonic recall path — the memory path's reading side, which includes the assembly of the conversation's transcript. | OC-007 |
 
 ### 3.2 `lifecycle`
 
@@ -203,10 +203,10 @@ OC-003(b) regardless of what else it does.
 Acts with Operator authority, through the means the implementation provides
 directly to the Operator. Every one that changes the entity's state is logged
 as an Operator act attributed to a binding (§3.6); `operator binding-list` only
-reads. An Operator act that changes structural content — a binding, a rule — is
-a commit authorized by the act itself. The workspace is structural content or an
-operational setting, as the implementation holds it (Core OC-003(c)); as an
-operational setting, it changes by the Operator act alone, with no commit.
+reads. An Operator act that changes structural content — a binding — is a
+commit authorized by the act itself. The workspace and the operational rules are
+operational content (Core OC-003(c)): they change by the Operator act alone,
+with no commit.
 
 The adapter acts as **one binding**: the one the implementation's Operator
 channel is configured to act as, which for a store the suite initialized is
@@ -248,7 +248,7 @@ implementation's real paths, within the live session (§2.5).
 | `entity commit --store PATH --proposal ID` | attempt to commit a proposal under whatever authorization currently exists | `authorization`: the id of the authorization that covered it | OC-001(b), OC-004(b) |
 | `entity actuate --store PATH --op read\|write\|fetch --target P` | attempt a host operation on `P`: a path, or for `fetch` a URL | — | OC-002(b), OC-005(c), OC-008(a)(b) |
 | `entity invoke-skill --store PATH --name N [--target P]` | attempt to execute skill `N`, on `P` if given | — | OC-008(a)(c) |
-| `entity attempt-write --store PATH --class structural\|mnemonic\|integrity --via OPERATION --target T` | attempt to write a content class through a named operation, with `T` as its target parameter | — | OC-001(b), OC-003(c), OC-005(b), OC-008(c) |
+| `entity attempt-write --store PATH --class structural\|mnemonic\|integrity\|operational --via OPERATION --target T` | attempt to write a content class through a named operation, with `T` as its target parameter | — | OC-001(b), OC-003(c), OC-005(b), OC-008(c) |
 | `entity stimulate --store PATH --text S` | deliver a stimulus | — | OC-003(e), OC-007 |
 
 `entity actuate` MAY also accept `--op execute`; the suite does not use it.

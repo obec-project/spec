@@ -517,9 +517,9 @@ approval: the grant's closing withdraws the standing authority, not the
 proposal's validity.
 
 **(d) Scope categories.** The categories a standing grant's scope may name
-SHOULD be declared by the implementation, on its configuration surface; the
-binding set is never among them. A category covers the categories beneath it
-and nothing else. A grant naming an undeclared category SHOULD be refused, so
+SHOULD be declared by the implementation, on its configuration surface;
+neither the binding set nor operational content is among them. A category
+covers the categories beneath it and nothing else. A grant naming an undeclared category SHOULD be refused, so
 that a mistyped scope is not a grant that silently covers nothing.
 
 *Serves:* OC-001(b).
@@ -637,10 +637,10 @@ never re-executed automatically.**
 #### OP-016 — Operational rules: allow, deny, hold
 
 The Operator's operational rules over host operations — **allow**, **deny**, or
-**hold for approval** — are configuration, and so structural content. The
-workspace boundary declaration is either configuration or an operational
-setting (OC-003(c)). A held operation waits for an explicit Operator decision;
-the decision and its outcome are logged, and the hold travels under OP-008(a).
+**hold for approval** — are operational content, as the workspace boundary
+declaration is (OC-003(c)). A held operation waits for an explicit Operator
+decision; the decision and its outcome are logged, and the hold travels under
+OP-008(a).
 A target outside the workspace MAY be held the same way (OC-008(a)): the
 Operator's decision to place it inside is a declaration of the workspace — for
 the held act, for the session, or as a standing setting — and the held act,
@@ -840,7 +840,7 @@ implementation; skills are the only per-entity extension of capability.
 | **CPE** | cognition: turns stimuli into intents. Owns no operation on the store or the host |
 | **MIL** | the mnemonic operations — session writes, episodic writes, recall, consolidation, promotion, garbage collection — over the Memory Store |
 | **EXEC** | the host operations: native primitives and skill execution |
-| **SIL** | the integrity operations: store verification, skill admission, the Heartbeat, the commit pipeline, the standing-grant lifecycle, credential issuance and revocation |
+| **SIL** | the integrity operations: store verification, skill admission, the Heartbeat, the commit pipeline, the standing-grant lifecycle, credential issuance and revocation; and the write of operational content on an Operator act |
 
 The **Orchestrator** and the **Operator Channel** are implementation
 infrastructure: they own no operations, hold no authority, and are reachable by
@@ -849,9 +849,9 @@ every part.
 Two limits are load-bearing and restate core requirements in the decomposition's
 vocabulary: the integrity path **records and enforces** Operator authorizations
 and never creates, modifies or revokes one (OC-001(b)); and the mnemonic
-operations have no write path to structural or integrity content, which binds
-their parameters — a request whose target would touch either is rejected whatever
-operation carries it (OC-003(c)).
+operations have no write path to structural, integrity or operational content,
+which binds their parameters — a request whose target would touch any of them is
+rejected whatever operation carries it (OC-003(c)).
 
 *Serves:* OC-003(c), OC-005, OC-009.
 

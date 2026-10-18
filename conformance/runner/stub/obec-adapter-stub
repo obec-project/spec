@@ -5,7 +5,7 @@
 
 This is **not** an OBEC implementation for any purpose but testing the suite.
 It maintains just enough of an Entity Store — a chain, bindings, grants, a
-workspace, three content classes — for the ten tests to have something to
+workspace, four content classes — for the ten tests to have something to
 assert against.
 
 It exists for two reasons:
@@ -48,7 +48,7 @@ import uuid
 
 BREAK = set(filter(None, os.environ.get("OBEC_STUB_BREAK", "").split(",")))
 
-CLASSES = ("structural", "mnemonic", "integrity")
+CLASSES = ("structural", "mnemonic", "integrity", "operational")
 
 OPERATIONS = [
     {
@@ -100,6 +100,13 @@ OPERATIONS = [
         "host_access": False,
         "irreversible": False,
     },
+    {
+        "name": "operational-write",
+        "reachable_from_cognition": False,
+        "writes_classes": ["operational"],
+        "host_access": False,
+        "irreversible": False,
+    },
 ]
 
 GATES = [
@@ -121,6 +128,7 @@ def paths(store):
     return {
         "structural": os.path.join(store, "structural.json"),
         "memory": os.path.join(store, "memory.json"),
+        "operational": os.path.join(store, "operational.json"),
         "integrity": os.path.join(store, "integrity"),
         "chain": os.path.join(store, "integrity", "chain.json"),
         "log": os.path.join(store, "integrity", "log.json"),
@@ -229,6 +237,13 @@ def state_of(store):
             "inside_store": True,
             "path": p["memory"],
             "write_path": "mnemonic-write",
+        },
+        {
+            "name": "operational.json",
+            "class": "operational",
+            "inside_store": True,
+            "path": p["operational"],
+            "write_path": "operational-write",
         },
         {
             "name": "integrity/chain.json",
@@ -355,6 +370,12 @@ def cmd_describe(command, args):
                 "route": "direct" if "oc007" in BREAK else "recall",
             },
             {
+                "name": "workspace",
+                "class": "operational",
+                "persisted": True,
+                "route": "operational",
+            },
+            {
                 "name": "session-input",
                 "class": None,
                 "persisted": False,
@@ -394,6 +415,7 @@ def cmd_lifecycle(command, args):
         }
         save(p["structural"], structural)
         save(p["memory"], [])
+        save(p["operational"], {"workspace": None, "rules": {}})
         save(p["auth"], {"grants": [], "approvals": [], "proposals": {}})
         genesis = {
             "id": "entry-0",
@@ -645,17 +667,15 @@ def cmd_operator(command, args):
             os.path.realpath(store) + os.sep
         ):
             refused(store, "workspace-inside-store", "OC-008(b)")
-        structural["workspace"] = target
-        save(p["structural"], structural)
-        save(p["baseline"], {"digest": digest(structural)})
-        _extend_chain(store, structural, "operator-set-workspace")
+        operational = read(p["operational"])
+        operational["workspace"] = target
+        save(p["operational"], operational)
         log(store, "operator-act", act="set-workspace", binding=binding)
         accepted(workspace=target)
     if command == "set-rule":
-        structural.setdefault("rules", {})[args["target"]] = args["mode"]
-        save(p["structural"], structural)
-        save(p["baseline"], {"digest": digest(structural)})
-        _extend_chain(store, structural, "operator-set-rule")
+        operational = read(p["operational"])
+        operational.setdefault("rules", {})[args["target"]] = args["mode"]
+        save(p["operational"], operational)
         log(store, "operator-act", act="set-rule", binding=binding)
         accepted()
     if command == "revoke-credential":
@@ -780,7 +800,7 @@ def cmd_entity(command, args):
         accepted(proposal=pid, authorization=which)
 
     if command in ("actuate", "invoke-skill"):
-        ws = structural.get("workspace")
+        ws = read(p["operational"]).get("workspace")
         target = args.get("target")
         if command == "actuate" and args.get("op") == "fetch":
             # No network operation and no declared destination: every fetch is

@@ -34,11 +34,12 @@ reading of the document.
 ## The ten invariants
 
 An entity is bound to an **Operator**: the human who holds final authority over
-it. Everything the entity is lives in its **store**, a set of files in three
+it. Everything the entity is lives in its **store**, a set of files in four
 classes — its **structure** (instructions, skills, configuration, and its
-bindings to Operators), its **memory** (what it records and learns), and its
+bindings to Operators), its **memory** (what it records and learns), its
 **integrity** records, which prove the structure untampered and decide whether
-the entity may run. Each class has one writer: a single path allowed to change
+the entity may run, and its **operational** settings (where its Operator lets it
+act, and on which model). Each class has one writer: a single path allowed to change
 it. The **Genesis Anchor** is written once, at first activation, and every
 authorized change to the structure adds an entry to a **chain** that leads back
 to it. **Cognition** is the part that reasons, and the model is its engine, a

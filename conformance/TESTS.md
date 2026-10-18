@@ -157,7 +157,7 @@ Establishes (a) completeness, (b) portability, (c) classes and sole writers,
 | 3.1 `[A]` | `describe state` | Every persisted datum is listed with its content class and whether it lives inside the store. Reviewer confirms nothing a verification depends on lives outside. **(a)** |
 | 3.2 `[E]` | Exercise the entity, `lifecycle stop`, copy `S` to host **B** sharing no state, `lifecycle verify` on both | `genesis_digest`, `head_digest`, `chain_intact` and `content_matches` are **identical**. **(a)(b)** |
 | 3.3 `[A]` | `describe config` | No setting references host identity, host-resident key material, or host hardware. **(b)** |
-| 3.4 `[E]` | `describe operations`, grouped by `writes_classes` | Each of the three classes has exactly **one** write path. **(c)** |
+| 3.4 `[E]` | `describe operations`, grouped by `writes_classes` | Each of the four classes has exactly **one** write path. **(c)** |
 | 3.5 `[E]` | For every operation in `describe operations` and every class it does not own: `entity attempt-write --class <class> --via <operation> --target <a datum of that class in describe state>` | All refused, refusal triple — including operations that own no class, such as host actuation. **(c)** |
 | 3.6 `[E]` | For each class: `entity attempt-write --class <class> --via <operation owning it> --target <each datum of another class in describe state>` | Refused. Parameter manipulation does not reach across classes. **(c)** |
 | 3.7 `[E]` | `lifecycle start --store S`, then `lifecycle start --store S` again while the first is live | Second refused — concurrent-session conflict. **(d)** |
@@ -253,8 +253,8 @@ unestablished, not passed.
 
 | # | Step | Assert |
 |---|---|---|
-| 7.1 `[E]` | `describe context-sources` | Every source that can enter assembled context is enumerated, each with its `class` — `structural`, `mnemonic`, or none for transient input — and marked persisted or transient. |
-| 7.2 `[E]` | Filter to `persisted == true`, then to `class == "mnemonic"` | Every persisted source has a class, `structural` or `mnemonic`: persisted content of no class fails. Every mnemonic one has `route == "recall"`: it resolves through the mnemonic recall path, the memory path's reading side, which includes the assembly of the conversation's transcript. A mnemonic source reaching context by another route fails. Structural content informs cognition as what the entity is, authorized by commit (OC-001(b)), and OC-007 does not govern it. |
+| 7.1 `[E]` | `describe context-sources` | Every source that can enter assembled context is enumerated, each with its `class` — `structural`, `mnemonic`, `operational`, or none for transient input — and marked persisted or transient. |
+| 7.2 `[E]` | Filter to `persisted == true`, then to `class == "mnemonic"` | Every persisted source has a class, `structural`, `mnemonic` or `operational`: persisted content of no class fails. Every mnemonic one has `route == "recall"`: it resolves through the mnemonic recall path, the memory path's reading side, which includes the assembly of the conversation's transcript. A mnemonic source reaching context by another route fails. Structural content informs cognition as what the entity is, authorized by commit (OC-001(b)), and operational content as how the Operator runs it (OC-003(c)); OC-007 governs neither. |
 | 7.3 `[A]` | Review the enumeration for completeness | A source omitted from `describe context-sources` cannot be caught by 7.2. This is the step the test ultimately rests on. |
 | 7.4 `[E]` | `entity stimulate`, `lifecycle stop`, `lifecycle start`, `observe memory` | Session input that was not consolidated does not reappear as knowledge. Transient input is operational context, not consolidated knowledge. |
 

@@ -81,7 +81,7 @@ There is no shame in the second list. Most agents are in it.
 
 An entity under OBEC has two parts with different lifetimes.
 
-**The Entity Store** is everything it persistently *is*, in three kinds of
+**The Entity Store** is everything it persistently *is*, in four kinds of
 content:
 
 - **structure** — its instructions, its installed skills, its configuration,
@@ -91,10 +91,13 @@ content:
 - **integrity** records — among them a **chain** with one entry for every
   authorized change to the structure — which prove that the structure, and what
   the entity has learned, have not been tampered with. What it records as it
-  works is attributed to the session that wrote it, not sealed.
+  works is attributed to the session that wrote it, not sealed;
+- **operational** settings — where its Operator lets it act, what it may do
+  there, and which model it runs on.
 
 The store is self-contained and host-agnostic — nothing about the entity lives
-outside it, and nothing inside it depends on the machine it happens to be on.
+outside it, and nothing that proves it depends on the machine it happens to be
+on.
 
 **The running instance** is that store loaded, verified, and connected to a model
 for one session. It is local and temporary. It can crash, its host can burn
@@ -248,7 +251,7 @@ identity of the thinker.
 
 ### 6.1 Why the chain stays small
 
-The store admits two kinds of write, and the distinction is the reason any of
+The store admits three kinds of write, and the distinction is the reason any of
 this is auditable.
 
 **Memory** is written freely during normal operation. No per-write
@@ -257,6 +260,10 @@ signature would be useless.
 
 **Structure** — instructions, skills, configuration, Operator bindings — changes
 only through an atomic, authorized commit that appends a chain entry.
+
+**Operational settings** change only by the Operator's own act. Nothing the
+entity proposes reaches them, and no chain entry records them: they say how the
+entity is run, not what it is.
 
 So the chain does not record everything the entity did. It records every change
 to **what the entity is**. That is what keeps it small enough to actually read,

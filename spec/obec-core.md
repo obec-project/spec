@@ -229,29 +229,31 @@ single completion, which no implementation controls.
 
 ### OC-003 — Everything the entity is resides in its store, travels with it, and has one writer per class
 
-**(a) Completeness.** All entity state — structural, mnemonic, and integrity —
-MUST live inside the **Entity Store**. No guarantee in this specification may
-depend on state held outside it.
+**(a) Completeness.** All entity state — structural, mnemonic, integrity, and
+operational — MUST live inside the **Entity Store**. No guarantee in this
+specification may depend on state held outside it.
 
 **(b) Portability.** Relocating the Entity Store to a different host MUST NOT
 change the result of any verification defined in this specification. No verification
 may depend on host identity, host-resident key material, host hardware, or any
 other datum that does not travel with the store.
 
-**(c) Classes and sole writers.** Store content divides into three classes, and
+**(c) Classes and sole writers.** Store content divides into four classes, and
 each MUST have exactly one authorized write path:
 
 | Class | Content | Write path |
 |---|---|---|
 | **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-001(b) and OC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
-| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, operational settings, drift digests | the single path of OC-005(a) — and no other |
+| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, drift digests | the single path of OC-005(a) — and no other |
+| **operational** | the workspace of OC-008(a), the Operator's operational rules, the model, operating limits | an Operator act — and no other |
 
-Configuration is structural content that shapes or bounds the entity.
-**Operational settings** — how an Operator runs the entity on a given host, such
-as the model it uses or the workspace it acts in — MAY instead be held as
-integrity content; they are then changed only by an Operator act, never by a
-commit, and are not part of the structural state the chain verifies.
+Configuration is structural content that shapes the entity. **Operational
+content** is how an Operator runs the entity: where it may act, what it may do
+there, the model it uses, and its operating limits. It is changed only by an
+Operator act: no proposal may originate a change to it, no standing grant may
+cover one, and it is not part of the structural state the chain verifies.
+Cognition MAY read it.
 
 No operation may exist whose parameters allow it to write outside its own class:
 a request that would reach another class MUST be rejected whatever operation
@@ -370,8 +372,8 @@ not survive is a weakening — see §4, which is where the distinction is drawn.
 ### OC-005 — Integrity guards the entity, and nothing in the entity can disarm it
 
 **(a) Single writer.** Integrity content — Genesis Anchor, baseline, log,
-credential, authorization state, operational settings where held there, drift
-digests — MUST have exactly one write path.
+credential, authorization state, drift digests — MUST have exactly one write
+path.
 
 **(b) Unreachable from cognition.** No cognitive operation may reach integrity
 state, by any operation and by any parameter of any operation.
@@ -436,7 +438,8 @@ is mnemonic content (OC-003(c)) that recall never returns and that reaches
 cognition only in the assembled context. Structural content — the persona above
 all — also informs cognition, as what the entity is, authorized by the Operator
 through commit (OC-001(b)), not as knowledge the entity acquired; OC-007 governs
-knowledge.
+knowledge. Operational content informs cognition the same way, as how the
+Operator runs the entity (OC-003(c)).
 
 *Note (non-normative).* Peer-sourced content under the Cognitive Mesh Interface
 (CMI) extension enters as a stimulus, never as knowledge: what an entity retains
@@ -471,8 +474,8 @@ them is bounded by its admission under (c), not by the path.
 **(b) Disjoint from the store.** The workspace and the Entity Store MUST be
 disjoint. A target inside the Entity Store MUST be rejected as outside the
 boundary however the Operator declared it, so that no host operation can reach
-structural, mnemonic, or integrity content by a path other than those OC-003(c)
-defines.
+structural, mnemonic, integrity, or operational content by a path other than
+those OC-003(c) defines.
 
 **(c) Admitted and valid.** A **skill** — a packaged operation installed into one
 specific entity — executes if and only if it is present in the **Skill Index**
@@ -886,9 +889,8 @@ together (OP-001).
 specification constrains what reaches it and what it reaches; it constrains
 nothing about how it works.
 
-**Configuration** — structural content that shapes or bounds the entity: its
-operational rules, its probes, the parameters that shape its memory. Distinct
-from operational settings.
+**Configuration** — structural content that shapes the entity: its probes, the
+parameters that shape its memory. Distinct from operational content.
 
 **Conversation** *(Profile)* — a sequence of sessions an Operator continues as
 one; episodic memory belongs to the conversation that wrote it (OP-009(a)).
@@ -907,8 +909,8 @@ phase. An Operator's own structural act goes through it too (OP-011, OP-012).
 boundaries are verifiable from its own portable state: its identity is its
 Entity Store and the chain in it (OC-003, OC-004), not the model it runs on.
 
-**Entity Store** — the entity's complete persistent state: structural, mnemonic
-and integrity content. Portable and host-agnostic (OC-003).
+**Entity Store** — the entity's complete persistent state: structural, mnemonic,
+integrity and operational content. Portable and host-agnostic (OC-003).
 
 **Evolution proposal** — an inert record of proposed structural change.
 Cognition may originate one at any time; originating one changes nothing, and a
@@ -929,7 +931,7 @@ Genesis Anchor, each referencing its predecessor, the resulting structural state
 and the authorization that covered it (OC-004(a)).
 
 **Integrity content** — Genesis Anchor, baseline, log, session credential,
-authorization state, operational settings where held there, and drift digests. One of the three content classes; written
+authorization state, and drift digests. One of the four content classes; written
 through the single path of OC-005(a).
 
 **Intent** — a request emitted by cognition naming one operation of one owner. An
@@ -939,17 +941,17 @@ intent has no effect until its owner accepts it.
 accumulated semantic knowledge; the sole origin of persisted knowledge that
 informs cognition (OC-007).
 
-**Mnemonic content** — session records and consolidated memory. One of the three
+**Mnemonic content** — session records and consolidated memory. One of the four
 content classes; written only through the mnemonic operations (OC-003(c)).
 
 **Normative kernel** — the MUST and MUST NOT sentences of §2 and the clause
 structure that addresses them: the version-bound layer, published as
 [obec-kernel.md](obec-kernel.md) (§4.1).
 
-**Operational settings** — how an Operator runs the entity on a given host: the
-model, the workspace, timeouts. An implementation MAY hold them as integrity
-content changed only by Operator acts, outside the verified structural state
-(OC-003(c)).
+**Operational content** — how an Operator runs the entity: the workspace, the
+Operator's operational rules, the model, operating limits such as timeouts. One
+of the four content classes; changed only by an Operator act, outside the
+verified structural state, and readable by cognition (OC-003(c)).
 
 **Operator** — a human holding final authority over the entity. Every entity is
 bound to at least one, and every authorization originates with one (OC-001).
@@ -994,7 +996,7 @@ Operator-authorized scheduled trigger, a component response, or a chain's
 internal result.
 
 **Structural content** — persona, skills, configuration and Operator bindings.
-One of the three content classes; changed only through the authorized atomic
+One of the four content classes; changed only through the authorized atomic
 commit (OC-003(c), OC-001(b), OC-004(b)).
 
 **Structural write** — a change to structural content. It happens only through

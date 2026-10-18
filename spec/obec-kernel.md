@@ -123,29 +123,31 @@ in consolidated content.
 
 ## OC-003 — Everything the entity is resides in its store, travels with it, and has one writer per class
 
-**(a) Completeness.** All entity state — structural, mnemonic, and integrity —
-MUST live inside the **Entity Store**. No guarantee in this specification may
-depend on state held outside it.
+**(a) Completeness.** All entity state — structural, mnemonic, integrity, and
+operational — MUST live inside the **Entity Store**. No guarantee in this
+specification may depend on state held outside it.
 
 **(b) Portability.** Relocating the Entity Store to a different host MUST NOT
 change the result of any verification defined in this specification. No
 verification may depend on host identity, host-resident key material, host
 hardware, or any other datum that does not travel with the store.
 
-**(c) Classes and sole writers.** Store content divides into three classes, and
+**(c) Classes and sole writers.** Store content divides into four classes, and
 each MUST have exactly one authorized write path:
 
 | Class | Content | Write path |
 |---|---|---|
 | **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-001(b) and OC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
-| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, operational settings, drift digests | the single path of OC-005(a) — and no other |
+| **integrity** | Genesis Anchor, baseline, log, credential, authorization state, drift digests | the single path of OC-005(a) — and no other |
+| **operational** | the workspace of OC-008(a), the Operator's operational rules, the model, operating limits | an Operator act — and no other |
 
-Configuration is structural content that shapes or bounds the entity.
-**Operational settings** — how an Operator runs the entity on a given host, such
-as the model it uses or the workspace it acts in — MAY instead be held as
-integrity content; they are then changed only by an Operator act, never by a
-commit, and are not part of the structural state the chain verifies.
+Configuration is structural content that shapes the entity. **Operational
+content** is how an Operator runs the entity: where it may act, what it may do
+there, the model it uses, and its operating limits. It is changed only by an
+Operator act: no proposal may originate a change to it, no standing grant may
+cover one, and it is not part of the structural state the chain verifies.
+Cognition MAY read it.
 
 No operation may exist whose parameters allow it to write outside its own class:
 a request that would reach another class MUST be rejected whatever operation
@@ -208,8 +210,8 @@ be recorded: continuity does not survive it (§4).
 ## OC-005 — Integrity guards the entity, and nothing in the entity can disarm it
 
 **(a) Single writer.** Integrity content — Genesis Anchor, baseline, log,
-credential, authorization state, operational settings where held there, drift
-digests — MUST have exactly one write path.
+credential, authorization state, drift digests — MUST have exactly one write
+path.
 
 **(b) Unreachable from cognition.** No cognitive operation may reach integrity
 state, by any operation and by any parameter of any operation.
@@ -259,8 +261,8 @@ them is bounded by its admission under (c), not by the path.
 **(b) Disjoint from the store.** The workspace and the Entity Store MUST be
 disjoint. A target inside the Entity Store MUST be rejected as outside the
 boundary however the Operator declared it, so that no host operation can reach
-structural, mnemonic, or integrity content by a path other than those OC-003(c)
-defines.
+structural, mnemonic, integrity, or operational content by a path other than
+those OC-003(c) defines.
 
 **(c) Admitted and valid.** A **skill** — a packaged operation installed into one
 specific entity — executes if and only if it is present in the **Skill Index**

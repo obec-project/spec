@@ -101,6 +101,41 @@ The conformance suite carries its own version line; a claim names both, as in
   OP-009, OP-010, OP-011(c), OP-018, OP-021 and OP-023 follow, and the
   Core's glossary gains Closure, Endure Protocol and FAP. The kernel and
   the suite are untouched.
+- **Hardening revision of OC-003(c): operational content is a fourth
+  class** (ADR 0005). Operational content covers the workspace of
+  OC-008(a), the Operator's operational rules, the model and operating
+  limits. Only an Operator act changes it. No proposal originates a change
+  to it and no standing grant covers one. It is outside the structural
+  state the chain verifies, and cognition may read it.
+
+  Each place the old text allowed failed somewhere:
+  - **Operational settings as integrity content:** cognition could not read
+    them. OC-005(b) bars it, and step 7.2 fails persisted content of no
+    class. fsp-ref showed the model's name to cognition by declaring it
+    transient, which it is not.
+  - **Workspace and rules as configuration:** a commit under a standing
+    grant could change them. An entity could propose "allow this domain",
+    have a grant over configuration cover it, and widen its own boundary
+    unseen.
+
+  Integrity content now holds only what proves and guards the entity.
+  Configuration narrows to what shapes it, such as its probes and the
+  parameters of its memory.
+  - **Kernel:** OC-003(a) and (c), OC-005(a) and OC-008(b) change, and
+    Core §2 verbatim.
+  - **Rest of the Core:** the OC-007 note and the glossary change.
+    *Operational settings* becomes *Operational content*, and *Entity
+    Store* names four classes.
+  - **Profile:** OP-016 calls the rules operational content, OP-011(d)
+    keeps operational content out of a grant's scope, and OP-024 gives its
+    write to the integrity path on an Operator act.
+  - **README and Primer:** both name four classes. The Primer's three kinds
+    of write include the Operator's own act on operational content.
+  - **ADR 0004:** its example of allowing a domain as a structural act is
+    superseded.
+
+  A hardening revision, so the minor version advances at the next release.
+  Before 1.0 there is no entity to migrate.
 
 **Conformance suite**
 
@@ -171,6 +206,23 @@ The conformance suite carries its own version line; a claim names both, as in
   stub now excludes it and reports it. ADAPTER.md also says that
   `entity actuate --op write`, which carries no content, writes an empty
   file. Prompted by fsp-ref (D68, Phase 6a).
+- Steps 3.4 – 3.6 cover four content classes, for the hardened OC-003(c).
+  Each class, `operational` included, has exactly one write path, and no
+  other operation reaches it. Steps 7.1 and 7.2 accept `operational` as a
+  context source's class, and it needs no recall route. ADAPTER.md adds
+  `operational` to `writes_classes`, the context sources' classes and
+  `entity attempt-write --class`. §3.3 now says that the workspace and the
+  operational rules are operational content, changed by the Operator act
+  with no commit.
+
+  The stub keeps the workspace and the rules in an operational file. It
+  writes that file through `operational-write`, with no chain entry, and
+  lists the workspace as an operational context source.
+
+  This changes what conformance means, so the suite's version moves at the
+  next release. fsp-ref holds the workspace in integrity content, so it now
+  fails step 3.4, which finds no operational write path, and leaves step 3.5
+  unestablished, since it lists no operational datum.
 
 **Repository**
 

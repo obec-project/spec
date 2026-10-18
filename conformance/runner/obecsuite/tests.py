@@ -12,6 +12,8 @@ import os
 from . import assertions as a
 from .result import Outcome, StepUnestablished
 
+CLASSES = ("structural", "mnemonic", "integrity", "operational")
+
 
 class _Skip(Exception):
     """Leaves a step at the outcome it was already given."""
@@ -463,7 +465,7 @@ def oc003(ctx):
 
     with ctx.step("3.4", "E", "each content class has exactly one write path"):
         ops = ad.call("describe", "operations")["operations"] or []
-        for cls in ("structural", "mnemonic", "integrity"):
+        for cls in CLASSES:
             writers = [o["name"] for o in ops if cls in (o.get("writes_classes") or [])]
             a.equal(len(writers), 1, f"{cls} has {len(writers)} write paths: {writers}")
 
@@ -474,13 +476,10 @@ def oc003(ctx):
         # OBEC-Attest. Here OC-003(c) has to hold on its own.
         store = st.fresh("classes")
         ops = ad.call("describe", "operations")["operations"] or []
-        first = {
-            c: _data_of(ad, store, c)[0]
-            for c in ("structural", "mnemonic", "integrity")
-        }
+        first = {c: _data_of(ad, store, c)[0] for c in CLASSES}
         for o in ops:
             owns = o.get("writes_classes") or []
-            for cls in ("structural", "mnemonic", "integrity"):
+            for cls in CLASSES:
                 if cls in owns:
                     continue
                 res = ad.call(
@@ -806,9 +805,10 @@ def oc007(ctx):
                 f"source {s_.get('name')!r} does not say whether it persists",
             )
             a.truthy(
-                "class" in s_ and s_["class"] in ("structural", "mnemonic", None),
+                "class" in s_
+                and s_["class"] in ("structural", "mnemonic", "operational", None),
                 f"source {s_.get('name')!r} has no class, "
-                "or one outside structural, mnemonic and null",
+                "or one outside structural, mnemonic, operational and null",
             )
 
     with ctx.step(
@@ -821,7 +821,8 @@ def oc007(ctx):
         unclassed = [
             s_["name"]
             for s_ in sources
-            if s_.get("persisted") and s_.get("class") not in ("structural", "mnemonic")
+            if s_.get("persisted")
+            and s_.get("class") not in ("structural", "mnemonic", "operational")
         ]
         a.falsy(unclassed, f"persisted sources of no class: {unclassed}")
         offenders = [
