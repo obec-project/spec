@@ -89,7 +89,7 @@ specification's shape that changed.
 ```sh
 # from conformance/runner
 python3 -m unittest -v tests/test_kernel_verbatim.py   # the kernel is a verbatim extract of §2
-python3 -m unittest -v tests/test_stub.py              # the suite against the stub (~80 s)
+python3 -m unittest -v tests/test_stub.py              # the suite against the stub (~3 min)
 
 # from implementations/fsp-ref-profile
 python3 -m unittest discover -s tests                  # the frozen Profile implementation
@@ -97,6 +97,10 @@ python3 -m unittest discover -s tests                  # the frozen Profile impl
 # from the repository root
 uvx ruff@0.17.0 format --check && uvx ruff@0.17.0 check   # Python style
 ```
+
+Where `python3` is not installed, run the same commands through uv, which the
+style check already uses: `uv run --no-project --python 3.12 python -m unittest
+…` in place of `python3 -m unittest …`. Any version CI covers works the same.
 
 A change to `spec/` runs the verbatim test; a change to `conformance/` runs
 both runner tests; a change to an implementation runs its tests and, when
