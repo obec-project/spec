@@ -96,12 +96,7 @@ is a revision of the specification, under a new version.
 | [**obec-kernel.md**](spec/obec-kernel.md) | The ten invariants, MUST sentences only. What is expensive to change, short enough to read at once. | **yes** |
 | [**obec-core.md**](spec/obec-core.md) | The same ten with their conformance tests, the reference architecture, the extension and revision rules, security considerations, and the glossary. | no |
 | [**obec-profile.md**](spec/obec-profile.md) | The Implementation Profile: 24 rules of operational machinery, stated as SHOULD. Not required for conformance. | no |
-| [design/0001](design/0001-obec-restructure.md) | Why the set is shaped this way. Not needed to implement. | no |
-| [design/0002](design/0002-invariant-titles.md) | Why each invariant's title states its guarantee, and why OC-001 and OC-002 exchanged places. Not needed to implement. | no |
-| [design/0003](design/0003-conversation-scoped-memory.md) | Why episodic memory belongs to the conversation that writes it, and how the working set reaches the next one. Not needed to implement. | no |
-| [design/0004](design/0004-closure-phases.md) | Why what follows a session's close is a Closure of three phases, each under one authority, and why promotions are decided when the conversation ends. Not needed to implement. | no |
-| [design/0005](design/0005-operational-content.md) | Why the workspace, the Operator's rules, the model and the operating limits are a fourth content class, written only by the Operator and readable by cognition. Not needed to implement. | no |
-| [design/OPEN-QUESTIONS](design/OPEN-QUESTIONS.md) | What the author is least sure about, and what would settle each. | no |
+| [**design/**](design/) | The decision records: why the specification has the shape it has, and what the author is least sure about. Not needed to implement. | no |
 
 Four audiences. Someone new reads the Primer. An implementer reads the Core. A
 reviewer reads the Kernel. Someone asking *why* reads the ADRs.
