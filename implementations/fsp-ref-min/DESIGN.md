@@ -119,7 +119,7 @@ S/
 ├── integrity/
 │   ├── HEAD                    the newest committed entry and its state digest (§4.3)
 │   ├── chain/000000.json, …    one entry per commit; 000000 is the Genesis Anchor
-│   ├── log.jsonl               the integrity log, append-only
+│   ├── log.jsonl               the integrity log, append-only (§11.2)
 │   └── lock                    empty; held while anything writes
 ├── memory/
 │   ├── sessions/s-0001.jsonl   everything that happened in a session
@@ -285,9 +285,12 @@ There are exactly two kinds:
 
 - **An approval**: the Operator approved this proposal.
 - **A grant**: a standing permission with an expiry, a commit budget and a
-  scope of categories (`skills` covers `skills.install` and `skills.remove`).
-  A grant missing any of the three is refused when it is opened, and so is a
-  grant whose scope covers the bindings.
+  scope. A scope names a category and covers it and every category beneath
+  it: `skills` covers `skills.install` and `skills.remove`. Any category name
+  is accepted, so a grant over `configuration`, which no proposal of
+  fsp-ref-min reaches, covers nothing. A grant missing any of the three is
+  refused when it is opened, and so is one whose scope is `binding-set` or
+  `instructions`, which no proposal may touch (§5.1).
 
 **Proposing, approving and committing are three separate operations** of the
 SIL. `propose` only originates. `approve` only records the Operator's
@@ -296,18 +299,17 @@ commits or refuses with the check `authorization`. Keeping them apart is what
 lets the authorization be judged at commit time: a grant that was open when a
 proposal was made may have expired by the time it commits.
 
-The tools put them together for convenience. When the Operator picks
-*Approve* in a menu, the REPL records the approval and then asks for the
-commit (§12.3). When the entity proposes, the Orchestrator first asks the SIL
-whether an open grant covers the proposal. The question only reads the
-authorization state, and nothing is written. If a grant covers it, the
-Orchestrator asks for the commit. If none does, it asks the Operator through
-the channel, *Approve*, *Reject* or *Later* (§12.1, §12.3). With no Operator
-attached, the answer is *Later*, and the proposal waits for `fsp review`. A
-commit is attempted only when an authorization exists, so the log holds no
-refusal for a question the Operator was never asked. In every case the
-change takes effect at the next start (§4.5). The Operator can also reject
-a proposal, which ends it.
+The tools put them together for convenience. When the Operator picks *Approve*
+in a menu, the REPL records the approval and then asks for the commit (§12.3).
+When the entity proposes, the Orchestrator first asks the SIL whether an open
+grant covers the proposal. The question only reads the authorization state, and
+nothing is written. If a grant covers it, the Orchestrator asks for the commit.
+If none does, it asks the Operator through the channel, *Approve*, *Reject* or
+*Later* (§12.1, §12.3). With no Operator attached, the answer is *Later*, and
+the proposal waits for `fsp review` (§12.2). A commit is attempted only when an
+authorization exists, so the log holds no refusal for a question the Operator
+was never asked. In every case the change takes effect at the next start (§4.5).
+The Operator can also reject a proposal, which ends it.
 
 There is no third kind of authorization. No part of the program creates,
 extends or revokes one; only an Operator act does.
@@ -518,7 +520,7 @@ Each source is content of the store, or transient input
 |---|---|---|
 | the persona, the instructions, the skills' descriptions | structural | from the session's generation |
 | the workspace's path, the domains | operational | from the settings |
-| semantic memory, recalled episodic records, the transcript | mnemonic | through the MIL's recall |
+| semantic memory, recalled episodic records, the transcript | mnemonic | through the MIL's recall (§9.3) |
 | the current line, the results of the current chain | none: transient input | as they happen |
 
 The program adds no text of its own. When the model receives an error, for
@@ -821,6 +823,9 @@ no path of its own:
   in the session file like any line. A test build sets the `fake` provider,
   whose script answers with a `reply`.
 - **`entity` commands need a live session.** Without one, they are refused.
+- **`describe config` reports the settings of §5.5**, each with its default
+  and range. No setting governs a gate (§6.1), and none names the host in
+  anything verification reads (§3.2).
 - **`lifecycle migrate` returns exit code `2`:** the specification has no
   version to migrate to yet.
 
