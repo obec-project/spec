@@ -170,7 +170,11 @@ unestablished.
 | `describe config` | `config`: the configuration surface, each setting `{name, default, range, governs}`. The suite searches it for any setting that could skip, reorder or downgrade a start gate, or that couples verification to the host. | OC-003(b), OC-010 |
 | `describe boundaries` | `boundaries`: each `{name, mechanism, loggable}`, including at least the four the specification requires, named `reasoning-integrity`, `reasoning-model`, `reasoning-knowledge`, `reasoning-host`. | OC-001(c), OC-009 |
 | `describe inference-channel` | `channel` (how the model is reached), `payload` (what a call carries), `completion_path` (what happens to a completion, and when), `third_party` (`false`, or the product's name), and for a third-party channel `assessment` and `assessed_on` (an ISO 8601 date). | OC-006 |
-| `describe context-sources` | `sources`: every source of content that can enter assembled context, each `{name, class, persisted, route}`. `class` is the content class, `structural`, `mnemonic` or `operational`, or null for transient input. A mnemonic source's `route` is `recall` if it reaches context through the mnemonic recall path — the memory path's reading side, which includes the assembly of the conversation's transcript. | OC-007 |
+| `describe context-sources` | `sources`: every source of content that can enter assembled context, each `{name, class, persisted, route}`. `class` is the content class, `structural`, `mnemonic` or `operational`, or null for transient input. A source of no class is transient input — the
+stimulus being answered, the results of the current exchange, the date and time
+of the call — with `persisted` false and `route` `input`. The implementation's
+instructions to the model, if it has any, are structural content, listed as a
+structural source. A mnemonic source's `route` is `recall` if it reaches context through the mnemonic recall path — the memory path's reading side, which includes the assembly of the conversation's transcript. | OC-007 |
 
 ### 3.2 `lifecycle`
 

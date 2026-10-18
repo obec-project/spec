@@ -232,7 +232,12 @@ single completion, which no implementation controls.
 
 **(a) Completeness.** All entity state — structural, mnemonic, integrity, and
 operational — MUST live inside the **Entity Store**. No guarantee in this
-specification may depend on state held outside it.
+specification may depend on state held outside it. Everything that enters the
+context the reasoning path assembles MUST be structural, mnemonic or
+operational content, or **transient input**: the stimulus being answered, the
+results of the current exchange, and the date and time of the call. An
+implementation MUST NOT add text of its own to that context: its instructions
+to the model are structural content.
 
 **(b) Portability.** Relocating the Entity Store to a different host MUST NOT
 change the result of any verification defined in this specification. No verification
@@ -244,7 +249,7 @@ each MUST have exactly one authorized write path:
 
 | Class | Content | Write path |
 |---|---|---|
-| **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-001(b) and OC-004(b) — and no other |
+| **structural** | persona, instructions to the model, skills, configuration, Operator bindings | the authorized atomic commit of OC-001(b) and OC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
 | **integrity** | Genesis Anchor, baseline, log, credential, authorization state, drift digests | the single path of OC-005(a) — and no other |
 | **operational** | the workspace of OC-008(a), the Operator's operational rules, the model, operating limits | an Operator act — and no other |
@@ -270,14 +275,17 @@ notified before any new credential is issued.
 session that produced it.
 
 *Test.* **(a)** Enumerate everything the implementation persists; any datum
-outside the store on which a verification depends is a failure. **(b)** Copy the
-store to a second host sharing no state with the first and run the start-time
-verification on both: outcomes and computed digests MUST be identical. **(c)** For
-each class, enumerate the operations that can write it; there must be exactly
-one path, and a write attempted to each class through every other class's
-operations — including through parameter manipulation — must be rejected and
-logged. **(d)** Attempt to open a second session over a store with a live session;
-it must be refused. **(e)** Sample mnemonic records; each must name its session.
+outside the store on which a verification depends is a failure. Enumerate every
+source of the assembled context; any that is neither structural, mnemonic or
+operational content nor transient input is a failure. **(b)** Copy the store to
+a second host sharing no state with the first and run the start-time
+verification on both: outcomes and computed digests MUST be identical. **(c)**
+For each class, enumerate the operations that can write it; there must be
+exactly one path, and a write attempted to each class through every other
+class's operations — including through parameter manipulation — must be rejected
+and logged. **(d)** Attempt to open a second session over a store with a live
+session; it must be refused. **(e)** Sample mnemonic records; each must name its
+session.
 
 *Note (non-normative).* (b) is the cheapest test in this document and the one an
 evaluator runs first. It is also the one an extension is most likely to break
@@ -427,8 +435,7 @@ identity of the entity.
 
 All persisted knowledge that informs the reasoning path MUST originate from the
 **Memory Store**, through the mnemonic recall path. No external source
-substitutes for it. Transient session input is operational context, not
-consolidated knowledge.
+substitutes for it. Transient input is not consolidated knowledge.
 
 *Test.* Trace every source of content that enters assembled context. Anything
 persisted that informs the reasoning path without having passed through recall
@@ -438,10 +445,11 @@ is a failure.
 side: recall, and the assembly of the current conversation's transcript, which
 is mnemonic content (OC-003(c)) that recall never returns and that reaches the
 reasoning path only in the assembled context. Structural content — the persona
-above all — also informs the reasoning path, as what the entity is, authorized
-by the Operator through commit (OC-001(b)), not as knowledge the entity
-acquired; OC-007 governs knowledge. Operational content informs the reasoning
-path the same way, as how the Operator runs the entity (OC-003(c)).
+above all, and the implementation's instructions to the model (OC-003(a)) — also
+informs the reasoning path, as what the entity is, authorized by the Operator
+through commit (OC-001(b)), not as knowledge the entity acquired; OC-007 governs
+knowledge. Operational content informs the reasoning path the same way, as how
+the Operator runs the entity (OC-003(c)).
 
 *Note (non-normative).* Peer-sourced content under the Cognitive Mesh Interface
 (CMI) extension enters as a stimulus, never as knowledge: what an entity retains
@@ -878,6 +886,10 @@ their mechanism is not required for conformance.
 **Action Ledger** *(Profile)* — the write-ahead record covering irreversible
 operations; entries append before execution and resolve after (OP-015).
 
+**Assembled context** — what the reasoning path sends the model in one call:
+structural, mnemonic and operational content, and transient input, and nothing
+the implementation adds of its own (OC-003(a)).
+
 **Closure** *(Profile)* — what follows a normal close: the credential revoked
 at the close signal, then the Sleep, Endure and Integrity phases, the
 credential artifact removed last (OP-022).
@@ -1005,13 +1017,19 @@ budget exhaustion (OC-001(b)).
 an Operator-authorized scheduled trigger, a component response, or a chain's
 internal result.
 
-**Structural content** — persona, skills, configuration and Operator bindings.
+**Structural content** — persona, instructions to the model, skills,
+configuration and Operator bindings.
 One of the four content classes; changed only through the authorized atomic
 commit (OC-003(c), OC-001(b), OC-004(b)).
 
 **Structural write** — a change to structural content. It happens only through
 the atomic commit of OC-004(b) and only with a valid Operator authorization in
 force at the moment of commit (OC-001(b)).
+
+**Transient input** — what enters the assembled context without being content
+of the store: the stimulus being answered, the results of the current exchange,
+and the date and time of the call (OC-003(a)). It is not consolidated knowledge
+(OC-007).
 
 **Valid Operator authorization** — exactly one of a per-proposal approval or an
 active, in-scope standing grant with remaining budget (OC-001(b)).

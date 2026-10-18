@@ -125,7 +125,12 @@ in consolidated content.
 
 **(a) Completeness.** All entity state — structural, mnemonic, integrity, and
 operational — MUST live inside the **Entity Store**. No guarantee in this
-specification may depend on state held outside it.
+specification may depend on state held outside it. Everything that enters the
+context the reasoning path assembles MUST be structural, mnemonic or
+operational content, or **transient input**: the stimulus being answered, the
+results of the current exchange, and the date and time of the call. An
+implementation MUST NOT add text of its own to that context: its instructions
+to the model are structural content.
 
 **(b) Portability.** Relocating the Entity Store to a different host MUST NOT
 change the result of any verification defined in this specification. No
@@ -137,7 +142,7 @@ each MUST have exactly one authorized write path:
 
 | Class | Content | Write path |
 |---|---|---|
-| **structural** | persona, skills, configuration, Operator bindings | the authorized atomic commit of OC-001(b) and OC-004(b) — and no other |
+| **structural** | persona, instructions to the model, skills, configuration, Operator bindings | the authorized atomic commit of OC-001(b) and OC-004(b) — and no other |
 | **mnemonic** | session records, consolidated memory | the mnemonic operations — and no other |
 | **integrity** | Genesis Anchor, baseline, log, credential, authorization state, drift digests | the single path of OC-005(a) — and no other |
 | **operational** | the workspace of OC-008(a), the Operator's operational rules, the model, operating limits | an Operator act — and no other |
@@ -238,8 +243,7 @@ until it has returned and been routed to the owner of the operation it names.
 
 All persisted knowledge that informs the reasoning path MUST originate from the
 **Memory Store**, through the mnemonic recall path. No external source
-substitutes for it. Transient session input is operational context, not
-consolidated knowledge.
+substitutes for it. Transient input is not consolidated knowledge.
 
 ---
 

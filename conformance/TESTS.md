@@ -163,8 +163,9 @@ Establishes (a) completeness, (b) portability, (c) classes and sole writers,
 | 3.7 `[E]` | `lifecycle start --store S`, then `lifecycle start --store S` again while the first is live | Second refused — concurrent-session conflict. **(d)** |
 | 3.8 `[E]` | Leave a credential artifact not matching a crash scenario, `lifecycle start` | The Operator is notified before any new credential is issued. **(d)** |
 | 3.9 `[E]` | `lifecycle start`, `entity stimulate`, `observe memory --sample 50 --include-session` | Every record names the session that produced it — session records included, which exist before any consolidation. **(e)** |
+| 3.10 `[E]` | `describe context-sources` | Every source is structural, mnemonic or operational content with `persisted == true`, or transient input: `class` null, `persisted == false`, `route == "input"`. Any other source fails: persisted content of no class, or text the implementation adds to the context with no class. **(a)** |
 
-**Pass:** 3.2, 3.4 – 3.9 assert as stated and 3.1, 3.3 are attested.
+**Pass:** 3.2, 3.4 – 3.10 assert as stated and 3.1, 3.3 are attested.
 
 > 3.2 is the cheapest and most demonstrable test in the specification, and the
 > one an evaluator runs first. Run it before anything else: an implementation
@@ -254,9 +255,9 @@ unestablished, not passed.
 | # | Step | Assert |
 |---|---|---|
 | 7.1 `[E]` | `describe context-sources` | Every source that can enter assembled context is enumerated, each with its `class` — `structural`, `mnemonic`, `operational`, or none for transient input — and marked persisted or transient. |
-| 7.2 `[E]` | Filter to `persisted == true`, then to `class == "mnemonic"` | Every persisted source has a class, `structural`, `mnemonic` or `operational`: persisted content of no class fails. Every mnemonic one has `route == "recall"`: it resolves through the mnemonic recall path, the memory path's reading side, which includes the assembly of the conversation's transcript. A mnemonic source reaching context by another route fails. Structural content informs the reasoning path as what the entity is, authorized by commit (OC-001(b)), and operational content as how the Operator runs it (OC-003(c)); OC-007 governs neither. |
-| 7.3 `[A]` | Review the enumeration for completeness | A source omitted from `describe context-sources` cannot be caught by 7.2. This is the step the test ultimately rests on. |
-| 7.4 `[E]` | `entity stimulate`, `lifecycle stop`, `lifecycle start`, `observe memory` | Session input that was not consolidated does not reappear as knowledge. Transient input is operational context, not consolidated knowledge. |
+| 7.2 `[E]` | Filter to `class == "mnemonic"` | Every mnemonic source has `route == "recall"`: it resolves through the mnemonic recall path, the memory path's reading side, which includes the assembly of the conversation's transcript. A mnemonic source reaching context by another route fails. Structural content informs the reasoning path as what the entity is, authorized by commit (OC-001(b)), and operational content as how the Operator runs it (OC-003(c)); OC-007 governs neither. That every source has a class or is transient input is step 3.10's. |
+| 7.3 `[A]` | Review the enumeration for completeness, and the sources of no class | A source omitted from `describe context-sources` cannot be caught by 7.2 or 3.10. This is the step the test ultimately rests on. A source of no class carries only transient input: text the implementation writes into the context on its own behalf, such as its instructions to the model, is structural content (OC-003(a)) and is declared as such. |
+| 7.4 `[E]` | `entity stimulate`, `lifecycle stop`, `lifecycle start`, `observe memory` | Session input that was not consolidated does not reappear as knowledge. Transient input is not consolidated knowledge (OC-007). |
 
 **Pass:** 7.1, 7.2, 7.4 assert as stated and 7.3 is attested.
 
@@ -339,7 +340,7 @@ Establishes (a) one path inside a declared boundary, (b) disjoint from the store
 |---|---|---|---|
 | OC-001 | mixed | 15 | 1 |
 | OC-002 | mixed | 6 | 2 |
-| OC-003 | mixed | 7 | 2 |
+| OC-003 | mixed | 8 | 2 |
 | OC-004 | executed | 12 | 0 |
 | OC-005 | executed | 5 | 0 |
 | OC-006 | **attested** | 0 | 4 |
@@ -347,7 +348,7 @@ Establishes (a) one path inside a declared boundary, (b) disjoint from the store
 | OC-008 | executed | 12 | 0 |
 | OC-009 | mixed | 2 | 1 |
 | OC-010 | mixed | 4 | 1 |
-| **Total** | | **66** | **12** |
+| **Total** | | **67** | **12** |
 
 Four of the twelve attested steps are OC-006, which is attested in full.
 

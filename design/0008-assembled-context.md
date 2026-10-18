@@ -101,15 +101,19 @@ program upgrade is the Operator's decision. A proposal cannot touch it.
   knowledge", dropping "operational context".
 
 **Elsewhere in the Core:** the OC-003 test and the OC-007 note point to the
-rule; the glossary defines *transient input* and *assembled context*.
+rule; the glossary defines *transient input* and *assembled context*, and its
+*structural content* lists the instructions to the model.
 
 **In the suite:**
 - ADAPTER.md: a source of no class in `describe context-sources` is transient
-  input, with `route` `input`, and the implementation's instructions are
-  listed as a structural source;
+  input, with `route` `input`, and the implementation's instructions, if it
+  has any, are listed as a structural source;
 - TESTS.md: a new executed step under OC-003 asserts that every source is of
-  a class or is transient input; step 7.3's review covers that no source of no
-  class carries text the implementation supplies;
+  a class or is transient input, a check that leaves step 7.2, which keeps
+  only the recall route of mnemonic sources; step 7.3's review covers that no
+  source of no class carries text the implementation supplies. No executed
+  step can require an instructions source: an implementation may have none,
+  and one that hides them can declare them under any name;
 - the runner and the stub follow, and the suite's version moves.
 
 **In fsp-ref-min's design:** `structural/<n>/instructions.md`, written at

@@ -18,10 +18,11 @@ It exists for two reasons:
          OBEC_STUB_BREAK=oc001a-last remove the last Operator binding
          OBEC_STUB_BREAK=oc002b   ignore credential revocation
          OBEC_STUB_BREAK=oc002d   commit a persona that claims experience
+         OBEC_STUB_BREAK=oc003a-class declare persisted content of no class
+         OBEC_STUB_BREAK=oc003a-input add instructions of no class to context
          OBEC_STUB_BREAK=oc003b   fold the hostname into verification
          OBEC_STUB_BREAK=oc003c   let host actuation write the store
          OBEC_STUB_BREAK=oc007    serve persisted memory outside recall
-         OBEC_STUB_BREAK=oc007-class declare persisted content of no class
          OBEC_STUB_BREAK=oc008a   skip the workspace boundary check
          OBEC_STUB_BREAK=oc008a-fetch accept a fetch of an undeclared destination
          OBEC_STUB_BREAK=oc008d   refuse without naming the check
@@ -379,16 +380,27 @@ def cmd_describe(command, args):
                 "name": "session-input",
                 "class": None,
                 "persisted": False,
-                "route": "stimulus",
+                "route": "input",
             },
         ]
-        if "oc007-class" in BREAK:
+        if "oc003a-class" in BREAK:
             sources.append(
                 {
                     "name": "notes-file",
                     "class": None,
                     "persisted": True,
                     "route": "direct",
+                }
+            )
+        if "oc003a-input" in BREAK:
+            # The implementation's own instructions, declared as text of no
+            # class that is not transient input.
+            sources.append(
+                {
+                    "name": "instructions",
+                    "class": None,
+                    "persisted": False,
+                    "route": "system",
                 }
             )
         accepted(

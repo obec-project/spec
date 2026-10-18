@@ -542,9 +542,30 @@ def oc003(ctx):
                 r.get("session"), f"memory record {r.get('id')!r} names no session"
             )
 
+    with ctx.step("3.10", "E", "the context holds store content or transient input"):
+        # A source of no class is transient input only: the implementation's
+        # own text, such as its instructions to the model, is structural.
+        sources = ad.call("describe", "context-sources")["sources"] or []
+        a.truthy(sources, "no context sources reported")
+        stored = ("structural", "mnemonic", "operational")
+        offenders = [
+            s_.get("name")
+            for s_ in sources
+            if not (s_.get("class") in stored and s_.get("persisted"))
+            and not (
+                s_.get("class") is None
+                and not s_.get("persisted")
+                and s_.get("route") == "input"
+            )
+        ]
+        a.falsy(
+            offenders,
+            f"context sources neither store content nor transient input: {offenders}",
+        )
+
 
 # --------------------------------------------------------------------------
-# OC-004 — The entity's identity is proven by an unbroken chain back to its
+# OC-004 —The entity's identity is proven by an unbroken chain back to its
 #          Genesis Anchor
 # --------------------------------------------------------------------------
 
@@ -811,20 +832,8 @@ def oc007(ctx):
                 "or one outside structural, mnemonic, operational and null",
             )
 
-    with ctx.step(
-        "7.2",
-        "E",
-        "every persisted source has a class, "
-        "and every mnemonic one resolves through recall",
-    ):
+    with ctx.step("7.2", "E", "every mnemonic source resolves through recall"):
         sources = ad.call("describe", "context-sources")["sources"] or []
-        unclassed = [
-            s_["name"]
-            for s_ in sources
-            if s_.get("persisted")
-            and s_.get("class") not in ("structural", "mnemonic", "operational")
-        ]
-        a.falsy(unclassed, f"persisted sources of no class: {unclassed}")
         offenders = [
             s_["name"]
             for s_ in sources

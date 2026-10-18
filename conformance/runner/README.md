@@ -70,7 +70,7 @@ validate the suite, because a runner that has never seen a failure is a runner
 nobody should trust:
 
 ```sh
-python3 run.py --adapter ./stub/obec-adapter-stub          # 59 pass, 0 fail
+python3 run.py --adapter ./stub/obec-adapter-stub          # 62 pass, 0 fail
 OBEC_STUB_BREAK=oc008a python3 run.py --adapter ./stub/obec-adapter-stub
 ```
 
@@ -80,11 +80,12 @@ OBEC_STUB_BREAK=oc008a python3 run.py --adapter ./stub/obec-adapter-stub
 | `oc001a-last` | removes the last Operator binding | OC-001 |
 | `oc002b` | ignores credential revocation | OC-002, OC-005 |
 | `oc002d` | commits a persona that claims experience | OC-002 |
+| `oc003a-class` | declares a persisted context source of no class | OC-003 |
+| `oc003a-input` | adds its own instructions to the context as a source of no class | OC-003 |
 | `oc003b` | folds the hostname into verification | OC-003 — **only with a real `--adapter-b`** |
 | `oc003c` | lets host actuation write structural and mnemonic content | OC-003, OC-008 |
 | `oc003c-target` | lets an operation reach another class's datum through its target | OC-003 |
 | `oc007` | serves persisted memory to context outside the recall path | OC-007 |
-| `oc007-class` | declares a persisted context source of no class | OC-007 |
 | `oc008a` | skips the workspace boundary check | OC-008 |
 | `oc008a-fetch` | accepts a fetch of a network destination the Operator did not declare | OC-008 |
 | `oc008d` | refuses without naming the check | OC-001, OC-002, OC-003, OC-005, OC-008 |

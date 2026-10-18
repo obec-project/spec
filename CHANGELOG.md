@@ -155,6 +155,29 @@ The conformance suite carries its own version line; a claim names both, as in
 
   No requirement changes.
 
+- **Hardening revision of OC-003(a): the assembled context holds store
+  content or transient input** (ADR 0008). Every implementation that calls
+  a model writes instructions into the context on its own behalf, and no
+  rule covered that text. It could contradict the persona with no
+  authorization, change with the program while the chain said nothing
+  changed, and direct the entity to act as if it were alive where the
+  probes do not look. fsp-ref-profile reports its instructions as a source
+  of no class, and step 7.2 accepts them.
+  - **Kernel:** OC-003(a) requires everything that enters the assembled
+    context to be structural, mnemonic or operational content, or
+    transient input: the stimulus being answered, the results of the
+    current exchange, and the date and time of the call. An
+    implementation adds no text of its own: its instructions to the model
+    are structural content, listed in OC-003(c)'s table. OC-007 drops
+    "operational context", a phrase next to *operational content* that
+    meant something else. Core §2 verbatim.
+  - **Rest of the Core:** the OC-003 test and the OC-007 note point to
+    the rule. The glossary adds *Assembled context* and *Transient input*,
+    and *Structural content* lists the instructions.
+
+  A hardening revision, so the minor version advances at the next
+  release, with ADR 0005's.
+
 **Conformance suite**
 
 - Steps 7.1 and 7.2 read each context source's class. Step 7.2 required
@@ -258,6 +281,20 @@ The conformance suite carries its own version line; a claim names both, as in
   reporting the old names fails steps 1.9, 5.1 to 5.3, 8.11, 9.1 and 9.2,
   so the suite's version moves at the next release. fsp-ref-profile,
   frozen, keeps the old names and its claim against 0.12.0.
+
+- **Step 3.10 checks the assembled context against OC-003(a).** Every
+  source in `describe context-sources` must be structural, mnemonic or
+  operational content, persisted, or transient input: no class, not
+  persisted, `route` `input`. The class check leaves step 7.2, which keeps
+  the recall route of mnemonic sources, and step 7.3's review covers that
+  no source of no class carries the implementation's own text. ADAPTER.md
+  says so, and lists the implementation's instructions, if it has any, as
+  a structural source. No executed step can require an instructions
+  source: an implementation may have none, and one that hides them can
+  declare them under any name. The stub's session input takes `route`
+  `input`; its break `oc007-class` becomes `oc003a-class`, now caught by
+  3.10, and `oc003a-input` adds instructions of no class, which 3.10
+  alone fails. A change to what conformance means: 67 executed steps.
 
 **Repository**
 
