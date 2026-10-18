@@ -80,6 +80,14 @@ steps go with evidence and review; step 3.2 requires a real second host;
   the runner and the stub take the new field and boundary names, and the
   suite's version moves. Done before fsp-ref-min's first phase, whose
   adapter answers `describe operations`.
+- **Apply [ADR 0008](design/0008-assembled-context.md):** a harden of
+  OC-003(a): everything in the assembled context is content of the store or
+  transient input, and an implementation's instructions are structural
+  content. The kernel and Core §2 together, the rest of the Core, a new step
+  under OC-003, step 7.3's review, the adapter's `describe
+  context-sources`, the runner and the stub. It joins ADR 0005 in 0.13.0.
+  Done before fsp-ref-min's first phase, whose `fsp init` writes the
+  instructions.
 - **Not verifiable from inside the repository:** whether the repository
   description (153 characters) reads well; whether the "proposal" framing is
   calibrated — it may be too modest, since the architecture has run twice and
