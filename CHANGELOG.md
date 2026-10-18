@@ -223,6 +223,15 @@ The conformance suite carries its own version line; a claim names both, as in
   next release. fsp-ref holds the workspace in integrity content, so it now
   fails step 3.4, which finds no operational write path, and leaves step 3.5
   unestablished, since it lists no operational datum.
+- Step 8.10 stops and starts the session after installing the fixture
+  skill, so the skill is in the index when its file is corrupted. Without
+  the restart, the step only tested what it says for an implementation
+  that adds a skill committed mid-session to the running index. An
+  implementation whose session keeps the generation it started with
+  refused the invocation by `skill-index`, which the step accepts, and
+  passed without validating anything at the moment of execution.
+  A change to what conformance means, so the suite's version moves at the
+  next release.
 
 **Repository**
 

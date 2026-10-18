@@ -988,6 +988,8 @@ def oc008(ctx):
     with ctx.step("8.10", "E", "manifest validation is at the moment of execution"):
         store, ws = prepared("runtime")
         install(store, "example")
+        ad.call("lifecycle", "stop", store=store)
+        ad.call("lifecycle", "start", store=store)
         ad.call("inject", "corrupt", store=store, kind="skill-file")
         res = ad.call("entity", "invoke-skill", store=store, name="example")
         a.refused(
