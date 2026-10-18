@@ -69,6 +69,11 @@ steps go with evidence and review; step 3.2 requires a real second host;
   - **"Commit" for a cycle.** OP-003(b) and OP-021(b) use it, where cycles
     dispatch intents. OP-005(a) also uses OP-009's terms with no pointer to
     them.
+- **Apply [ADR 0006](design/0006-vocabulary.md)** in the same pass as the
+  editorial revision: the rule in CONTRIBUTING §1; *Vital Check*,
+  *Heartbeat* and *Sleep* renamed in the Profile and the Core; the Primer's
+  passages rewritten. It touches no kernel sentence. Done before fsp-ref-min
+  writes the text it sends to the model, its Phase 3.
 - **Not verifiable from inside the repository:** whether the repository
   description (153 characters) reads well; whether the "proposal" framing is
   calibrated — it may be too modest, since the architecture has run twice and
