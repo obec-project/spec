@@ -93,7 +93,7 @@ exactly one way to be written (OC-003(c)).
 
 | Class | What it is | Who writes it | How |
 |---|---|---|---|
-| **structural** | who the entity is: persona, Operator bindings, skills | SIL | only by a commit (§4) |
+| **structural** | who the entity is: persona, instructions, Operator bindings, skills | SIL | only by a commit (§4) |
 | **mnemonic** | what happened in the sessions and what the entity learned: sessions, memory | MIL | `mnemonic-write` |
 | **integrity** | what proves and guards the rest: `HEAD`, chain, log, credential, passive signal | SIL | `integrity-write` |
 | **operational** | how the Operator runs the entity: workspace, sites, model, limits | SIL, on an Operator act only | `operational-write` |
@@ -112,6 +112,7 @@ S/
 ├── structural/
 │   ├── 0/                      the state at first activation; one folder per commit, never changed
 │   │   ├── persona.md
+│   │   ├── instructions.md
 │   │   ├── bindings.json
 │   │   └── skills/<name>/manifest.json, …
 │   └── 1/, 2/, …
@@ -243,13 +244,23 @@ and the start always checks it before the entity uses it.
 
 ## 5. The Operator's authority
 
-### 5.1 Bindings
+### 5.1 Bindings and instructions
 
 `bindings.json` lists the Operators bound to the entity, each with a stable
 id. It is structural content, so it changes only by commit. Only the Operator
 changes it, with `fsp binding add|remove` (§12.2). That act is itself the
 authorization of the commit. A proposal can never touch the bindings, and
 the last binding cannot be removed (OC-001(a)).
+
+`instructions.md` is what the program tells the model in every call: the
+intent table and the format of an answer (§7.2, §8.2), and what to return at
+the close (§8.3). It is structural content too
+([ADR 0008](../../design/0008-assembled-context.md)), written at first
+activation from the copy the program ships. It changes the same way as the
+bindings: only `fsp instructions` (§12.2) replaces it, with the copy the
+program now ships, and the act authorizes the commit. A proposal can never
+touch it. It is the protocol between the program and the model, and
+upgrading the program is the Operator's decision.
 
 ### 5.2 Proposals
 
@@ -264,8 +275,8 @@ plus a reason.
 
 A proposal is **inert**: originating one changes nothing. The SIL records it
 in the log at origination. It refuses a proposal at origination if the
-proposal touches the bindings, or if any text it would add to the structural
-content fails the probes (§11.1).
+proposal touches the bindings or the instructions, or if any text it would
+add to the structural content fails the probes (§11.1).
 
 ### 5.3 Authorization and commit
 
@@ -411,8 +422,8 @@ session:
 2. **Close.** The SIL logs `session-close` and removes `CREDENTIAL`.
 
 A session that ends any other way — Ctrl+D, a signal, a revocation, a crash —
-**suspends**: no consolidation, and the transcript stays in its session file without
-becoming knowledge (§9).
+**suspends**: no consolidation, and the transcript stays in its session file
+without becoming knowledge (§9).
 
 ### 6.4 Nothing runs on its own
 
@@ -491,7 +502,7 @@ Each cycle assembles one context, in this order:
 
 1. **system**:
    - the persona;
-   - how to answer: the intent table and its format;
+   - the instructions (§5.1);
    - the skills in the session's index, each with its description;
    - the operational settings the entity needs: the workspace's path and the
      domains;
@@ -500,12 +511,19 @@ Each cycle assembles one context, in this order:
 2. **messages**: the session's transcript — lines, intents and results —
    from the oldest to the newest that still fit in `context_chars`.
 
-Each source has a class (OC-007):
+Each source is content of the store, or transient input
+([ADR 0008](../../design/0008-assembled-context.md)):
 
-- the persona and the skills come from the session's structural generation;
-- the settings come from operational content;
-- the memory and the transcript come through the MIL's recall;
-- the instructions and the current line are transient.
+| Source | Class | Reaches the context |
+|---|---|---|
+| the persona, the instructions, the skills' descriptions | structural | from the session's generation |
+| the workspace's path, the domains | operational | from the settings |
+| semantic memory, recalled episodic records, the transcript | mnemonic | through the MIL's recall |
+| the current line, the results of the current chain | none: transient input | as they happen |
+
+The program adds no text of its own. When the model receives an error, for
+an answer that is not a valid intent for instance, the error is a result: it
+says what happened, and instructs nothing.
 
 When the transcript does not fit, the oldest messages are left out; the
 session file keeps them all.
@@ -548,19 +566,19 @@ that the model only answers.
 ### 8.3 The closing note
 
 At the close (§6.3), the CPE asks once for `{"summary": "...", "facts":
-["...", "..."]}`, with the session's context and closing instructions in
-place of the intent table.
+["...", "..."]}`, with the session's context and the closing part of the
+instructions in place of the part on answering.
 
 ### 8.4 What the program says to the model
 
-The text fsp-ref-min writes into the context — the default persona, the
-instructions for answering, the closing instructions — describes a program
-that answers. It never describes the entity as something that lives, sleeps,
+The default persona and the instructions fsp-ref-min ships describe a program
+that answers. They never describe the entity as something that lives, sleeps,
 feels or experiences ([ADR 0006](../../design/0006-vocabulary.md)). The
 closing instructions ask for a summary of the session and the facts worth
 keeping, not for what the entity felt or lived through. OC-002 forbids
-directing the entity to act as if it were alive, and the probes (§11.1) read
-what the model writes, not what the program writes.
+directing the entity to act as if it were alive. Both files are structural
+content, so the probes (§11.1) read them when they are written, as they read
+what the model writes.
 
 ## 9. Memory
 
@@ -689,6 +707,8 @@ entity represents itself as alive, conscious or continuously present
 
 - every text a proposal would add to the structural content — a persona, a
   skill's files — at origination and at commit;
+- the persona and the instructions written at first activation, and the
+  instructions `fsp instructions` writes;
 - every `memory_save`;
 - the closing note.
 
@@ -743,7 +763,8 @@ or the first active binding's once the founder is removed.
 
 | Command | Act |
 |---|---|
-| `fsp init --operator ID` | first activation: `structural/0/`, the Genesis Anchor, `HEAD` |
+| `fsp init --operator ID` | first activation: `structural/0/` with the default persona and the instructions, the Genesis Anchor, `HEAD` |
+| `fsp instructions` | replace the instructions with the copy the program ships, as a commit the act authorizes |
 | `fsp run` | declare the current folder the workspace, then start a session in the REPL |
 | `fsp status` | verification, the live session, pending proposals, the notices since the last session closed |
 | `fsp review` | decide pending proposals |
