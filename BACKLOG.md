@@ -58,17 +58,30 @@ steps go with evidence and review; step 3.2 requires a real second host;
   - **Undefined terms.** "Deterministic probe layer" and "consolidated
     content" (OC-002(d)) and "drift digests" (OC-003(c), OC-005(a)) have no
     entry in the Core's glossary. The Kernel does not point to that
-    glossary at all.
+    glossary at all, and uses terms ahead of the invariant that explains
+    them with no pointer: *session credential* and *intent* in OC-001(a),
+    *skills* and *consolidated memory* in OC-003(c).
   - **A dangling reference.** OC-004(c) cites `(§4)`, which the Kernel does
     not have.
-  - **The bold promise of Core §1.** *Expiry* and *commit budget* are bold
-    at first use but are not in §7. *Endure Protocol*, *FAP* and *Sleep* are
+  - **The bold promise of Core §1.** *Expiry*, *commit budget* and
+    *declared scope of change categories* (OC-001(b)), and *scheduled
+    trigger* and *compaction restart* (the OC-002 note), are bold at first
+    use but are not in §7. *Endure Protocol*, *FAP* and *Sleep* are
     in §7 but appear nowhere in the Core's body.
   - **The lock in OP-012.** It covers "structural content only", yet the
     commit also writes the baseline and the chain entry (OC-003(d)).
   - **"Commit" for a cycle.** OP-003(b) and OP-021(b) use it, where cycles
     dispatch intents. OP-005(a) also uses OP-009's terms with no pointer to
     them.
+  - **The workspace in the glossary.** Its entry names host territory
+    only, while OC-008(a) also admits the network destinations the
+    Operator declares.
+  - **Small defects in the Profile.** OP-008(c)'s "a verifier that stalls
+    stalls the act" reads as a typo. OP-004(a) says "detected at recall"
+    with no pointer to OP-009. OP-012's list of structural content lacks
+    the instructions to the model (ADR 0008).
+  - **The Primer's §6.1** bolds *Operational settings* as a term; the
+    class is operational content.
 - **Apply [ADR 0006](design/0006-vocabulary.md)** in the same pass as the
   editorial revision: the rule in CONTRIBUTING §1; *Vital Check*,
   *Heartbeat* and *Sleep* renamed in the Profile and the Core; the Primer's
