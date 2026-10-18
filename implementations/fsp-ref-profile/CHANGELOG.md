@@ -1,4 +1,6 @@
-# fsp-ref — changelog
+# fsp-ref-profile — changelog
+
+Named `fsp-ref` until 2026-10-17, which is the name the entries below use.
 
 What changed in fsp-ref, by phase, and why. fsp-ref has no release of its own
 yet; it targets the latest OBEC release, now OBEC-Core 0.12.0. Changes to the specification and the suite

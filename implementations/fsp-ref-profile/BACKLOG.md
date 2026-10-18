@@ -1,4 +1,4 @@
-# fsp-ref — backlog
+# fsp-ref-profile — backlog
 
 What is left to build, in order. Design is in [DESIGN.md](DESIGN.md); what is
 done is in [CHANGELOG.md](CHANGELOG.md).

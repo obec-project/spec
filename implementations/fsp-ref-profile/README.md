@@ -1,8 +1,13 @@
-# fsp-ref
+# fsp-ref-profile
 
-**Filesystem Substrate Platform** — a reference implementation of
-OBEC-Core 0.12.0 over a filesystem and POSIX primitives: atomic rename,
-append-only files, `fsync`, `flock`.
+**Filesystem Substrate Platform** — an implementation of OBEC-Core 0.12.0 and
+of the Implementation Profile over a filesystem and POSIX primitives: atomic
+rename, append-only files, `fsync`, `flock`.
+
+**Frozen.** It was named `fsp-ref` until 2026-10-17. The reference
+implementation is now [fsp-ref-min](../fsp-ref-min/DESIGN.md), the smallest
+program that keeps the ten invariants. fsp-ref-profile stays at OBEC-Core
+0.12.0 and may later be completed against the whole Profile.
 
 **Status: in progress. Not conformant, and not usable as an entity yet.**
 The store, the chain back to the Genesis Anchor, first activation, the gated
@@ -42,8 +47,8 @@ Python 3.10+, standard library only, Linux or macOS.
 python3 -m unittest discover -s tests          # the implementation's own tests
 ./obec-adapter lifecycle init --store /tmp/S --operator op-1
 ./obec-adapter lifecycle verify --store /tmp/S
-cd ~/project && /path/to/fsp-ref/bin/fsp run --store /tmp/S   # the chat; ~/project is the workspace
-/path/to/fsp-ref/bin/fsp review --store /tmp/S                # the review, from a shell
+cd ~/project && /path/to/fsp-ref-profile/bin/fsp run --store /tmp/S   # the chat; ~/project is the workspace
+/path/to/fsp-ref-profile/bin/fsp review --store /tmp/S                # the review, from a shell
 ```
 
 The adapter implements the [conformance adapter contract](../../conformance/ADAPTER.md)

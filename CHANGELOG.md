@@ -235,6 +235,21 @@ The conformance suite carries its own version line; a claim names both, as in
 
 **Repository**
 
+- **fsp-ref becomes fsp-ref-profile, and fsp-ref-min becomes the reference
+  implementation.** fsp-ref realizes most of the Profile's twenty-four rules,
+  in 12,700 lines and 101 decisions: too much to read as the answer to "what
+  does an entity need". fsp-ref-min is the smallest program that keeps the
+  ten invariants, designed to be read.
+
+  What changes with the rename:
+  - fsp-ref moves to `implementations/fsp-ref-profile/` and is frozen at
+    OBEC-Core 0.12.0. It may later be completed against the whole Profile.
+  - The name it writes into a new store's marker and Genesis Anchor, and its
+    `describe` evidence paths, follow the rename.
+  - The CI job and `ruff.toml` follow the rename.
+  - The announcement now waits on fsp-ref-min passing the suite.
+  - The entries below, and fsp-ref-profile's own CHANGELOG, keep the name
+    `fsp-ref`.
 - CI keeps every job alive past 2026-10-19, when `ubuntu-latest` moves to
   Ubuntu 26 ([runner-images#14748](https://github.com/actions/runner-images/issues/14748))
   and `setup-python` is unlikely to ship Python 3.9, end-of-life since October

@@ -1,8 +1,8 @@
 # Backlog
 
 What is left to do in this repository, by priority. What is done is in
-[CHANGELOG.md](CHANGELOG.md). The reference implementation keeps its own
-backlog in [implementations/fsp-ref/BACKLOG.md](implementations/fsp-ref/BACKLOG.md).
+[CHANGELOG.md](CHANGELOG.md). The frozen fsp-ref-profile keeps its own
+backlog in [implementations/fsp-ref-profile/BACKLOG.md](implementations/fsp-ref-profile/BACKLOG.md).
 
 The repository is public for early reading and is **announced when the
 reference implementation passes every executed step of the suite**. Attested
@@ -14,7 +14,9 @@ steps go with evidence and review; step 3.2 requires a real second host;
 ## 1. Before announcing
 
 - **The reference implementation passes the suite** — the trigger above.
-  Phases 8–9 of [fsp-ref's backlog](implementations/fsp-ref/BACKLOG.md).
+  The reference implementation is
+  [fsp-ref-min](implementations/fsp-ref-min/DESIGN.md), built phase by phase,
+  each phase accepted by the suite (its DESIGN §13.3).
 - **`.github/ISSUE_TEMPLATE/challenge-invariant.md`** — the most important
   template, because it turns [CONTRIBUTING §7](CONTRIBUTING.md#7-challenging-an-invariant)
   from an invitation into a process: fields for which of the ten invariants,
@@ -92,7 +94,7 @@ steps go with evidence and review; step 3.2 requires a real second host;
 ## 4. Specification — during or after the reference implementation
 
 - **Gaps found by the reference implementation**, to be decided and corrected
-  in the specification: [fsp-ref BACKLOG §3](implementations/fsp-ref/BACKLOG.md#3-gaps-in-the-specification-and-the-contract).
+  in the specification: [fsp-ref-profile BACKLOG §3](implementations/fsp-ref-profile/BACKLOG.md#3-gaps-in-the-specification-and-the-contract).
 - **Diagrams** — the OC-010 start sequence, and store vs. model in the Primer.
   No block diagram in Core §3 (open question 10).
 - **A taxonomy of standing-grant scopes** (open question 9) — the
@@ -132,7 +134,7 @@ from OBEC, without porting HACA-Security or HACA-CMI.
   under Operator authorization; the extension decides what more is required —
   detection beyond the deterministic probes, such as the similarity metrics
   ADR 0003 moved out of the Profile, and provenance that finds and withdraws
-  what one source promoted (fsp-ref D36).
+  what one source promoted (fsp-ref-profile D36).
 - **CMI** (Cognitive Mesh Interface) — needs at least two entities operating
   under the reference implementation.
 

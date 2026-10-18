@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Jonas Orrico
-"""fsp-ref command line: ``fsp run --store S``. See DESIGN.md D93."""
+"""fsp-ref-profile command line: ``fsp run --store S``. See DESIGN.md D93."""
 
 import os
 import sys

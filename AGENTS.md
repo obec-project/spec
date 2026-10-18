@@ -5,8 +5,11 @@ How to work on OBEC. What the project is and where each thing lives is in the
 [CONTRIBUTING.md](CONTRIBUTING.md), which governs everything here. This file
 lists what is easy to get wrong.
 
-The reference implementation has its own rules in
-[implementations/fsp-ref/AGENTS.md](implementations/fsp-ref/AGENTS.md).
+The reference implementation, fsp-ref-min, is designed in
+[implementations/fsp-ref-min/DESIGN.md](implementations/fsp-ref-min/DESIGN.md).
+The frozen implementation of the whole Profile, fsp-ref-profile, has its own
+rules in
+[implementations/fsp-ref-profile/AGENTS.md](implementations/fsp-ref-profile/AGENTS.md).
 
 ## Where things are recorded
 
@@ -70,13 +73,13 @@ specification's shape that changed.
   the README and `implementations/README.md` says so, and changes then.
 - **Releases are tags** (`vX.Y.Z`). The version fields — the spec documents'
   frontmatter, the suite version in TESTS.md, ADAPTER.md and `SUITE_VERSION`,
-  and fsp-ref's `OBEC_VERSION`, since the reference implementation always
+  and the reference implementation's `OBEC_VERSION`, since it always
   targets the latest release — change only in a release commit, which turns *Unreleased* in the CHANGELOG
   into that release's entry. Between releases, `main` keeps the last release's
   numbers and every change goes under *Unreleased*.
 - **A push to `main` runs CI**: the verbatim test, the Python style, the
-  suite against the stub on Python 3.8 – 3.14, and fsp-ref's unit tests on
-  3.10 – 3.14. It deploys nothing.
+  suite against the stub on Python 3.8 – 3.14, and fsp-ref-profile's unit
+  tests on 3.10 – 3.14. It deploys nothing.
 - The runner writes `claim.md` and `claim.json` to the working directory
   unless given `--out`. Both are git-ignored; submitted claims live in
   `conformance/claims/` under another name.
@@ -88,13 +91,13 @@ specification's shape that changed.
 python3 -m unittest -v tests/test_kernel_verbatim.py   # the kernel is a verbatim extract of §2
 python3 -m unittest -v tests/test_stub.py              # the suite against the stub (~80 s)
 
-# from implementations/fsp-ref
-python3 -m unittest discover -s tests                  # the reference implementation
+# from implementations/fsp-ref-profile
+python3 -m unittest discover -s tests                  # the frozen Profile implementation
 
 # from the repository root
 uvx ruff@0.17.0 format --check && uvx ruff@0.17.0 check   # Python style
 ```
 
 A change to `spec/` runs the verbatim test; a change to `conformance/` runs
-both runner tests; a change to `implementations/fsp-ref/` runs its tests and,
-when behaviour changes, the suite against its adapter.
+both runner tests; a change to an implementation runs its tests and, when
+behaviour changes, the suite against its adapter.

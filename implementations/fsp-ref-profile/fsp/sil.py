@@ -244,7 +244,7 @@ def scaffold_store(root: str, *, model=None) -> Store:
     marker = {
         "format": STORE_FORMAT,
         "format_version": STORE_FORMAT_VERSION,
-        "implementation": "fsp-ref",
+        "implementation": "fsp-ref-profile",
     }
     if model is not None:
         marker["model"] = model  # the init choice; the FAP logs it as an act
@@ -325,7 +325,7 @@ def first_activation(
             major=OBEC_MAJOR,
             nonce=secrets.token_hex(16),
             at=at,
-            implementation="fsp-ref " + __version__,
+            implementation="fsp-ref-profile " + __version__,
         )
         store.replace(
             INTEGRITY, chain.entry_relpath(0), canonical(anchor), writer=WRITER

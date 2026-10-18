@@ -1,12 +1,14 @@
-# fsp-ref — design
+# fsp-ref-profile — design
 
-The architecture of fsp-ref and the decisions in force, with the reason for
+The architecture of fsp-ref-profile and the decisions in force, with the reason for
 each. A decision that is replaced leaves this file and is recorded in
 [CHANGELOG.md](CHANGELOG.md). What is still to be built is in
 [BACKLOG.md](BACKLOG.md).
 
-**fsp-ref** — *Filesystem Substrate Platform*, the reference implementation of
-OBEC-Core 0.12.0 over a filesystem and POSIX primitives. A future `dbsp-ref`
+**fsp-ref-profile** — *Filesystem Substrate Platform*, an implementation of
+OBEC-Core 0.12.0 and of the Implementation Profile over a filesystem and POSIX
+primitives. It is frozen; the reference implementation is
+[fsp-ref-min](../fsp-ref-min/DESIGN.md). A future `dbsp-ref`
 would change the substrate (a database), not the architecture.
 
 Decisions are numbered `Dnn` and gaps in the specification or the adapter
@@ -26,8 +28,8 @@ not built yet; the [README](README.md) says what is.
 | D1 | **Python, standard library only**, POSIX (Linux/macOS). Floor 3.10. No Windows. |
 | D2 | **Skill confinement comes from admission and monitoring**: a commit authorized by the Operator, the Skill Index, manifest validation at execution time, typed arguments, declared targets checked against the workspace, execution logged and observed. No confinement by the OS. The revision of OC-008(a) this requires is **clarifying** (G1). |
 | D3 | **The model through the Ollama API** (local `gemma4` or Ollama Cloud) + a **deterministic fake model** for the suite and the tests. |
-| D4 | Name **`fsp-ref`**, in `implementations/fsp-ref/`. |
-| D5 | The runner and fsp-ref are both Python; **neither imports code from the other** (G3). |
+| D4 | Name **`fsp-ref-profile`**, in `implementations/fsp-ref-profile/`: the implementation that follows the Profile, beside the minimal reference implementation `fsp-ref-min`. Named `fsp-ref` until 2026-10-17. |
+| D5 | The runner and fsp-ref-profile are both Python; **neither imports code from the other** (G3). |
 | D6 | **`inject` exists only in the `fsp_testing/` package**; a production build is the package absent → exit 2. Nothing else. |
 | D7 | API keys live in `~/.fsp/credentials.json` (0600), never in the entity's folder (G7). |
 | D8 | **A conversation is not a session.** The conversation is what the Operator sees: one window, continuous, cleared only when they ask. An OBEC session is the life of one credential. A conversation spans sessions. (§6) |
@@ -615,7 +617,7 @@ revocation.
 
 ## 7. Adapter
 
-`implementations/fsp-ref/obec-adapter` — a thin executable over the **same
+`implementations/fsp-ref-profile/obec-adapter` — a thin executable over the **same
 functions** as the CLI (ADAPTER.md §1.1–1.2). `inject` only with `fsp_testing/`
 present (D6); the clock is injectable there, never a skew file in the store.
 What varies (ids, timestamps) goes in `detail` (§2.3).

@@ -54,8 +54,8 @@ jobs:
       - run: python3 -m unittest -v tests/test_stub.py
         working-directory: conformance/runner
 
-  fsp-ref:
-    name: fsp-ref unit tests (Python ${{ matrix.python }})
+  fsp-ref-profile:
+    name: fsp-ref-profile unit tests (Python ${{ matrix.python }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -67,4 +67,4 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: python3 -m unittest discover -v -s tests
-        working-directory: implementations/fsp-ref
+        working-directory: implementations/fsp-ref-profile

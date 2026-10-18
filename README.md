@@ -142,8 +142,10 @@ longevity and cost** — how an entity behaves after months of accumulated
 memory, what the guarantees cost per session and per year, and whether the
 mechanisms that look right on one week of operation still look right on one
 year of it. No implementation has yet passed the conformance suite, which is
-new; the [reference implementation](implementations/fsp-ref/) is partway
-through it.
+new. The reference implementation,
+[fsp-ref-min](implementations/fsp-ref-min/), is being designed, and
+[fsp-ref-profile](implementations/fsp-ref-profile/), which also follows the
+Implementation Profile, is partway through it and frozen.
 
 **0.12.0 — pre-release.** It is a release, not a draft: the set is the product
 of a full restructure, and [ADR 0001](design/0001-obec-restructure.md) records

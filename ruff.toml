@@ -9,7 +9,7 @@ target-version = "py38"
 include = ["*.py"]
 extend-include = [
     "conformance/runner/stub/obec-adapter-stub",
-    "implementations/fsp-ref/obec-adapter",
+    "implementations/fsp-ref-profile/obec-adapter",
 ]
 
 [lint]

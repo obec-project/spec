@@ -10,7 +10,7 @@ import os
 from . import context, operations
 from .store import LAYOUT, OWNER
 
-REPO_PREFIX = "implementations/fsp-ref/"
+REPO_PREFIX = "implementations/fsp-ref-profile/"
 
 
 def evidence(path: str, symbol: str) -> dict:

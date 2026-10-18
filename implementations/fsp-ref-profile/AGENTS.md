@@ -1,6 +1,6 @@
-# fsp-ref — working here
+# fsp-ref-profile — working here
 
-How to work on fsp-ref. What it is and how to run it is in the
+How to work on fsp-ref-profile. What it is and how to run it is in the
 [README](README.md); the architecture and the decisions in force are in
 [DESIGN.md](DESIGN.md); what is left is in [BACKLOG.md](BACKLOG.md). The
 repository's commit convention and change classification are in
@@ -25,9 +25,9 @@ repository's commit convention and change classification are in
    the phase's invariants. The trigger for announcing the repository: **every
    executed step passes** (3.2 with a real second host; 4.9–4.12 stay
    *unestablished* for everyone).
-6. **fsp-ref targets the latest OBEC release.** A release of the
-   specification moves `OBEC_VERSION` and the documents that name the version
-   in the same commit.
+6. **fsp-ref-profile is frozen at OBEC-Core 0.12.0.** It does not follow
+   later releases until it is revised to complete the Profile; until then,
+   `OBEC_VERSION` stays where it is.
 7. **No real entity before 1.0** (OC-004(a) records the version in the Genesis
    Anchor). Development stores are disposable.
 
@@ -48,7 +48,7 @@ repository's commit convention and change classification are in
 
 ## Verification
 
-From `implementations/fsp-ref/`:
+From `implementations/fsp-ref-profile/`:
 
 ```sh
 python3 -m unittest discover -s tests
@@ -57,7 +57,7 @@ python3 -m unittest discover -s tests
 The suite, from `conformance/runner/`:
 
 ```sh
-python3 run.py --adapter ../../implementations/fsp-ref/obec-adapter --only OC-010,OC-001,OC-002,OC-003
+python3 run.py --adapter ../../implementations/fsp-ref-profile/obec-adapter --only OC-010,OC-001,OC-002,OC-003
 ```
 
 CI runs the unit tests on every push and pull request.
